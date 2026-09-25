@@ -5,13 +5,19 @@
  * high-contrast text, compact chrome, and responsive content grids.
  *
  * @package Majestic Tube
- * @version 2.0.6
+ * @version 2.0.8
  */
 
 /*
  * Inter is bundled with the theme so the reading surface does not depend on a
  * third-party font request. Files are from the official Inter v4.1 release;
  * the accompanying OFL license is in assets/fonts/LICENSE.txt.
+ *
+ * The four families below are bundled for the logo font option so every
+ * selectable choice actually renders a different face. Each is the latin
+ * subset from the Google Fonts release of the family, under the SIL Open Font
+ * License 1.1; see assets/fonts/FONTS-LICENSES.txt. Lato publishes no 800
+ * weight, so its bold face backs the logo's 800 weight request.
  */
 @font-face {
 	font-family: "Inter";
@@ -48,6 +54,38 @@
 @font-face {
 	font-family: "Inter";
 	src: url("../fonts/inter-extrabold.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Open Sans";
+	src: url("../fonts/opensans-extrabold.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Roboto";
+	src: url("../fonts/roboto-extrabold.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Lato";
+	src: url("../fonts/lato-bold.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Montserrat";
+	src: url("../fonts/montserrat-extrabold.woff2") format("woff2");
 	font-style: normal;
 	font-weight: 800;
 	font-display: swap;

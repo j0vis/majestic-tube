@@ -373,6 +373,10 @@ This is the main section for listings, cards, video details, membership, footer 
 - Optionally place a logo watermark over the video player.
 - Set a favicon for browser tabs and bookmarks.
 
+#### Logo font choices
+
+Every font offered for the text logo is included with the theme, so the change is visible straight away. Choose from **Inter**, **Open Sans**, **Roboto**, **Lato**, and **Montserrat**, or pick a **system** stack: **System UI**, **System Serif**, or **System Monospace**. System choices use the fonts already installed on each visitor's device, so they look slightly different per operating system. The logo is drawn at a heavy weight; Lato publishes no ExtraBold face, so its Bold face is used.
+
 ### Majestic Tube - Sharing & Social
 
 Enable sharing as a whole, then enable or disable individual networks such as Facebook, X/Twitter, LinkedIn, Reddit, Tumblr, email, and the other available options. Remove unused buttons to keep the video page uncluttered.
@@ -687,7 +691,7 @@ A quick way to support ongoing maintenance and new features.
 #### Included third-party components
 
 - Video.js player — Apache License 2.0
-- Inter font — SIL Open Font License 1.1
+- Inter, Open Sans, Roboto, Lato, Montserrat — SIL Open Font License 1.1
 
 Their license notices are bundled with the theme in the assets folders.
 

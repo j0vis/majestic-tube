@@ -6,7 +6,7 @@
  * the shared `ajax-nonce` the original theme used.
  *
  * @package Majestic Tube
- * @version 2.0.7
+ * @version 2.0.8
  */
 
 ( function () {

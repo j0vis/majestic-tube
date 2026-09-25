@@ -1,0 +1,45 @@
+Bundled font licenses
+=====================
+
+Every font shipped in this directory is redistributed under its own license.
+The theme makes no third-party font request at runtime: each file below is
+served from the theme itself.
+
+Inter (used for all theme text)
+  License: SIL Open Font License 1.1
+  Copyright: The Inter Project Authors
+  Files:    inter-regular.woff2, inter-medium.woff2, inter-semibold.woff2,
+            inter-bold.woff2, inter-extrabold.woff2
+  License:  LICENSE.txt (full OFL text)
+  Source:   official Inter v4.1 release
+
+Additional logo font families (Appearance -> Customize -> Logo & Colours)
+  Each family is bundled in the latin subset only, at the weight listed below.
+
+  Open Sans
+    License: SIL Open Font License 1.1
+    Copyright: The Open Sans Project Authors
+    File:    opensans-extrabold.woff2 (weight 800)
+    Source:  https://fonts.google.com/specimen/Open+Sans
+
+  Roboto
+    License: SIL Open Font License 1.1
+    Copyright: The Roboto Project Authors
+    File:    roboto-extrabold.woff2 (weight 800)
+    Source:  https://fonts.google.com/specimen/Roboto
+
+  Lato
+    License: SIL Open Font License 1.1
+    Copyright: The Lato Project Authors
+    File:    lato-bold.woff2 (weight 700; Lato publishes no 800 weight)
+    Source:  https://fonts.google.com/specimen/Lato
+
+  Montserrat
+    License: SIL Open Font License 1.1
+    Copyright: The Montserrat Project Authors
+    File:    montserrat-extrabold.woff2 (weight 800)
+    Source:  https://fonts.google.com/specimen/Montserrat
+
+The SIL Open Font License 1.1 permits bundling and redistribution with the
+fonts, provided the fonts are not sold on their own and this notice travels
+with them. The full license text is in LICENSE.txt.
