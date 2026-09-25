@@ -4,6 +4,10 @@
 # Development-only tooling (not part of the distributed theme)
 tools/
 
+# Internal project notes (not part of the distributed theme)
+FEATURES.md
+knowledge.md
+
 # Release archives
 *.zip
 
