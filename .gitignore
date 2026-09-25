@@ -1,0 +1,14 @@
+# Local application state
+.freebuff/
+
+# Development-only tooling (not part of the distributed theme)
+tools/
+
+# Release archives
+*.zip
+
+# Editor and OS noise
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db

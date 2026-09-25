@@ -1,0 +1,37 @@
+/*
+ * Majestic Tube - base right-to-left styles.
+ *
+ * WordPress normally loads this file automatically when the site language is
+ * right-to-left. inc/assets.php enqueues it for deterministic ordering before
+ * assets/css/main-rtl.css and removes the core's duplicate output path.
+ *
+ * @package Majestic Tube
+ * @version 2.0.0
+ */
+
+body {
+	direction: rtl;
+	unicode-bidi: embed;
+}
+
+.skip-link.screen-reader-text:focus {
+	left: auto;
+	right: 0.5rem;
+}
+
+.site-branding {
+	text-align: right;
+}
+
+.main-navigation ul {
+	padding-right: 0;
+}
+
+.widget-area {
+	text-align: right;
+}
+
+.site-footer,
+.site-info {
+	text-align: right;
+}

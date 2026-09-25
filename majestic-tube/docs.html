@@ -1,0 +1,1360 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="User guide for the Majestic Tube WordPress video theme.">
+  <title>Majestic Tube — User Guide</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f4f7f9;
+      --surface: #ffffff;
+      --surface-alt: #edf3f6;
+      --text: #17232d;
+      --muted: #526372;
+      --border: #d3dee5;
+      --brand: #0f7187;
+      --brand-dark: #0a5364;
+      --accent: #e8f6f8;
+      --success-bg: #e8f6ed;
+      --success: #176a3a;
+      --warning-bg: #fff5dc;
+      --warning: #765200;
+      --code-bg: #13212b;
+      --code: #edf5f8;
+      --shadow: 0 12px 32px rgb(23 35 45 / 8%);
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #0f171d;
+        --surface: #182229;
+        --surface-alt: #202d35;
+        --text: #edf3f6;
+        --muted: #b4c2ca;
+        --border: #354650;
+        --brand: #76cbdf;
+        --brand-dark: #a9dfec;
+        --accent: #183b44;
+        --success-bg: #173726;
+        --success: #91d8a8;
+        --warning-bg: #3a2f16;
+        --warning: #f1cf7a;
+        --code-bg: #080e12;
+        --code: #edf5f8;
+        --shadow: 0 12px 32px rgb(0 0 0 / 24%);
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-size: 1rem;
+      line-height: 1.65;
+    }
+
+    a {
+      color: var(--brand);
+      text-underline-offset: 0.18em;
+    }
+
+    a:hover {
+      color: var(--brand-dark);
+    }
+
+    .shell {
+      width: min(1160px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2rem 0 4rem;
+    }
+
+    .hero {
+      padding: clamp(1.6rem, 5vw, 3.2rem);
+      border: 1px solid var(--border);
+      border-radius: 1.1rem;
+      background: linear-gradient(135deg, var(--surface), var(--surface-alt));
+      box-shadow: var(--shadow);
+    }
+
+    .eyebrow {
+      margin: 0 0 0.45rem;
+      color: var(--brand);
+      font-size: 0.78rem;
+      font-weight: 800;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4 {
+      line-height: 1.22;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: clamp(2.15rem, 6vw, 3.6rem);
+      letter-spacing: -0.04em;
+    }
+
+    h2 {
+      margin: 0 0 0.8rem;
+      font-size: clamp(1.55rem, 3vw, 2.15rem);
+      letter-spacing: -0.025em;
+    }
+
+    h3 {
+      margin: 1.7rem 0 0.6rem;
+      font-size: 1.25rem;
+    }
+
+    h4 {
+      margin: 1.2rem 0 0.4rem;
+      font-size: 1.05rem;
+    }
+
+    p:last-child,
+    ul:last-child,
+    ol:last-child {
+      margin-bottom: 0;
+    }
+
+    .lede {
+      max-width: 75ch;
+      margin: 1rem 0 0;
+      color: var(--muted);
+      font-size: 1.1rem;
+    }
+
+    .hero-grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 0.8rem;
+      margin-top: 1.6rem;
+    }
+
+    .hero-fact {
+      padding: 0.95rem;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+    }
+
+    .hero-fact strong {
+      display: block;
+      margin-bottom: 0.15rem;
+      font-size: 1.05rem;
+    }
+
+    .hero-fact span {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    .toc {
+      margin-top: 1.25rem;
+      padding: 1.1rem 1.25rem;
+      border: 1px solid var(--border);
+      border-radius: 0.85rem;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+    }
+
+    .toc strong {
+      display: block;
+      margin-bottom: 0.5rem;
+    }
+
+    .toc ul {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 0.35rem 1.4rem;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+
+    main {
+      display: grid;
+      gap: 1.25rem;
+      margin-top: 1.25rem;
+    }
+
+    section {
+      padding: clamp(1.3rem, 3vw, 2.2rem);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      background: var(--surface);
+      box-shadow: var(--shadow);
+      scroll-margin-top: 1rem;
+    }
+
+    .section-intro {
+      max-width: 80ch;
+      color: var(--muted);
+    }
+
+    .quick-grid,
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 0.9rem;
+      margin-top: 1.25rem;
+    }
+
+    .card {
+      padding: 1.1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.8rem;
+      background: var(--surface-alt);
+    }
+
+    .card h3,
+    .card h4 {
+      margin-top: 0;
+    }
+
+    .card p:last-child,
+    .card ul:last-child,
+    .card ol:last-child {
+      margin-bottom: 0;
+    }
+
+    .steps {
+      margin: 1rem 0 0;
+      padding-left: 1.35rem;
+    }
+
+    .steps li {
+      margin-bottom: 0.55rem;
+      padding-left: 0.2rem;
+    }
+
+    .steps li:last-child {
+      margin-bottom: 0;
+    }
+
+    .substeps {
+      margin-top: 0.5rem;
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      margin-top: 1.2rem;
+      border: 1px solid var(--border);
+      border-radius: 0.8rem;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.94rem;
+    }
+
+    th,
+    td {
+      padding: 0.8rem 0.9rem;
+      border-bottom: 1px solid var(--border);
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--surface-alt);
+      font-size: 0.76rem;
+      letter-spacing: 0.045em;
+      text-transform: uppercase;
+    }
+
+    tr:last-child td {
+      border-bottom: 0;
+    }
+
+    .note,
+    .warning,
+    .success {
+      margin-top: 1rem;
+      padding: 1rem 1.1rem;
+      border: 1px solid var(--border);
+      border-radius: 0.75rem;
+      background: var(--surface-alt);
+    }
+
+    .warning {
+      border-color: color-mix(in srgb, var(--warning) 45%, var(--border));
+      background: var(--warning-bg);
+      color: var(--warning);
+    }
+
+    .success {
+      border-color: color-mix(in srgb, var(--success) 42%, var(--border));
+      background: var(--success-bg);
+      color: var(--success);
+    }
+
+    .path {
+      font-weight: 750;
+    }
+
+    .setting {
+      color: var(--brand-dark);
+      font-weight: 700;
+    }
+
+    .checklist {
+      list-style: none;
+      padding: 0;
+    }
+
+    .checklist li {
+      position: relative;
+      margin-bottom: 0.55rem;
+      padding-left: 1.75rem;
+    }
+
+    .checklist li::before {
+      position: absolute;
+      top: 0.2rem;
+      left: 0;
+      width: 1.05rem;
+      height: 1.05rem;
+      border: 2px solid var(--brand);
+      border-radius: 0.25rem;
+      content: "";
+    }
+
+    details {
+      margin-top: 0.75rem;
+      border: 1px solid var(--border);
+      border-radius: 0.7rem;
+      background: var(--surface-alt);
+    }
+
+    summary {
+      padding: 0.85rem 1rem;
+      cursor: pointer;
+      font-weight: 750;
+    }
+
+    details > div {
+      padding: 0 1rem 1rem;
+    }
+
+    .tag {
+      display: inline-block;
+      margin-bottom: 0.35rem;
+      padding: 0.18rem 0.55rem;
+      border-radius: 999px;
+      background: var(--accent);
+      color: var(--brand-dark);
+      font-size: 0.78rem;
+      font-weight: 750;
+    }
+
+    footer {
+      padding-top: 1.5rem;
+      color: var(--muted);
+      font-size: 0.9rem;
+      text-align: center;
+    }
+
+    @media (max-width: 820px) {
+      .hero-grid,
+      .toc ul {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+    }
+
+    @media (max-width: 620px) {
+      .hero-grid,
+      .quick-grid,
+      .feature-grid,
+      .toc ul {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media print {
+      :root {
+        color-scheme: light;
+      }
+
+      body {
+        background: #fff;
+      }
+
+      .shell {
+        width: 100%;
+        padding: 0;
+      }
+
+      .hero,
+      section {
+        box-shadow: none;
+        break-inside: avoid;
+      }
+
+      .toc {
+        box-shadow: none;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <p class="eyebrow">WordPress theme user guide</p>
+      <h1>Majestic Tube</h1>
+      <p class="lede">
+        Everything you need to install, configure, populate, and manage a Majestic Tube video website. Follow the quick start first, then use the detailed sections as reference.
+      </p>
+
+      <div class="hero-grid" aria-label="Theme summary">
+        <div class="hero-fact">
+          <strong>Video-first</strong>
+          <span>Multi-quality player, thumbnails, trailers, ratings, and related videos</span>
+        </div>
+        <div class="hero-fact">
+          <strong>Member friendly</strong>
+          <span>Front-end login, registration, profiles, and video submissions</span>
+        </div>
+        <div class="hero-fact">
+          <strong>Easy to customize</strong>
+          <span>Settings, branding, menus, and content areas use standard WordPress screens</span>
+        </div>
+        <div class="hero-fact">
+          <strong>Responsive</strong>
+          <span>Desktop and mobile layouts, including right-to-left support</span>
+        </div>
+      </div>
+    </header>
+
+    <nav class="toc" aria-label="User guide contents">
+      <strong>Contents</strong>
+      <ul>
+        <li><a href="#requirements">Requirements</a></li>
+        <li><a href="#installation">Installation</a></li>
+        <li><a href="#quick-start">Quick start</a></li>
+        <li><a href="#dashboard">Dashboard guide</a></li>
+        <li><a href="#videos">Adding videos</a></li>
+        <li><a href="#thumbnails">Thumbnail rotation</a></li>
+        <li><a href="#taxonomy">Actors and categories</a></li>
+        <li><a href="#player">Player settings</a></li>
+        <li><a href="#membership">Members and submissions</a></li>
+        <li><a href="#customizer">Customizer settings</a></li>
+        <li><a href="#appearance">Menus, widgets, and content</a></li>
+        <li><a href="#reports">Reports and moderation</a></li>
+        <li><a href="#legal">Legal pages</a></li>
+        <li><a href="#maintenance">Routine maintenance</a></li>
+        <li><a href="#troubleshooting">Troubleshooting</a></li>
+        <li><a href="#faq">FAQ</a></li>
+        <li><a href="#credits">Credits, license &amp; support</a></li>
+      </ul>
+    </nav>
+
+    <main>
+      <section id="requirements">
+        <p class="eyebrow">Before you begin</p>
+        <h2>Requirements</h2>
+        <p class="section-intro">Majestic Tube runs inside a normal WordPress website. Use a current, supported hosting environment and keep WordPress, PHP, and browser software up to date.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Requirement</th>
+                <th scope="col">Recommended value</th>
+                <th scope="col">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>WordPress</td>
+                <td>6.5 or newer</td>
+                <td>An up-to-date WordPress installation is strongly recommended.</td>
+              </tr>
+              <tr>
+                <td>PHP</td>
+                <td>7.4 or newer</td>
+                <td>Your host should support current secure PHP releases.</td>
+              </tr>
+              <tr>
+                <td>Browser</td>
+                <td>Current Chrome, Edge, Firefox, or Safari</td>
+                <td>JavaScript must remain enabled for playback and interactive features.</td>
+              </tr>
+              <tr>
+                <td>HTTPS</td>
+                <td>Enabled</td>
+                <td>Use HTTPS on a live site, especially for member login and password reset emails.</td>
+              </tr>
+              <tr>
+                <td>Media</td>
+                <td>Direct MP4/WebM files or a supported embed</td>
+                <td>Optional trailer previews accept common video or image formats.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="installation">
+        <p class="eyebrow">Get the theme online</p>
+        <h2>Installation</h2>
+
+        <h3>Install from the WordPress dashboard</h3>
+        <ol class="steps">
+          <li>Sign in to your WordPress administration area.</li>
+          <li>Go to <span class="path">Appearance → Themes → Add New → Upload Theme</span>.</li>
+          <li>Select the Majestic Tube theme archive and choose <strong>Install Now</strong>.</li>
+          <li>Choose <strong>Activate</strong>.</li>
+          <li>Follow the welcome screen shown after activation.</li>
+        </ol>
+
+        <h3>What activation creates</h3>
+        <p>Activation sets up the basic site structure. Existing content is not overwritten.</p>
+        <ul>
+          <li>A main navigation menu, assigned to the theme’s main menu location.</li>
+          <li>Pages for <strong>Submit a Video</strong>, <strong>Profile</strong>, <strong>Actors</strong>, <strong>Categories</strong>, and <strong>Tags</strong>.</li>
+          <li>Starter pages for <strong>18 USC 2257</strong>, <strong>DMCA</strong>, and <strong>Privacy Policy</strong>.</li>
+          <li>A separate footer menu containing the built-in legal links when an appropriate menu location is available.</li>
+        </ul>
+
+        <div class="note">
+          If you are updating an already active theme, the setup routine is safe to run again. It will not intentionally create duplicate pages or duplicate footer links.
+        </div>
+
+        <h3>After installation</h3>
+        <ol class="steps">
+          <li>Visit <span class="path">Settings → Permalinks</span> and choose <strong>Save Changes</strong> once. This refreshes page and archive links after activation.</li>
+          <li>Open <span class="path">Appearance → Menus</span> and review the Main Menu.</li>
+          <li>Open <span class="path">Settings → Reading</span> if you want the latest videos on the homepage.</li>
+          <li>Open <span class="path">Appearance → Customize</span> and review the Majestic Tube sections.</li>
+        </ol>
+      </section>
+
+      <section id="quick-start">
+        <p class="eyebrow">Recommended first setup</p>
+        <h2>Quick Start Checklist</h2>
+        <p class="section-intro">Complete these tasks before announcing the website.</p>
+
+        <ul class="checklist">
+          <li>Activate Majestic Tube and visit the welcome screen.</li>
+          <li>Set the site title, tagline, logo, and main colour.</li>
+          <li>Choose the homepage video sort and the number of videos displayed.</li>
+          <li>Create video categories, tags, and actors.</li>
+          <li>Add images to important categories and actors.</li>
+          <li>Publish the first video and verify its player on desktop and mobile.</li>
+          <li>Review the Main Menu and footer links.</li>
+          <li>Configure member registration if you plan to accept submissions.</li>
+          <li>Review and customize the legal pages for your actual operation.</li>
+          <li>Test search, video reports, password reset, and email delivery.</li>
+        </ul>
+      </section>
+
+      <section id="dashboard">
+        <p class="eyebrow">Know where everything is</p>
+        <h2>Dashboard Guide</h2>
+        <p class="section-intro">Majestic Tube uses familiar WordPress menus. The most important areas are listed below.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">WordPress area</th>
+                <th scope="col">What to do there</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td><span class="path">Videos</span></td>
+                <td>Add, edit, publish, search, and review videos. Video Categories, Video Tags, and Reported Videos are available here.</td>
+              </tr>
+              <tr>
+                <td><span class="path">Actors</span></td>
+                <td>Create actor names and assign a portrait to each actor.</td>
+              </tr>
+              <tr>
+                <td><span class="path">Media</span></td>
+                <td>Upload images and other media used by videos and site content.</td>
+              </tr>
+              <tr>
+                <td><span class="path">Pages</span></td>
+                <td>Edit the automatically created submission, profile, directory, and legal pages.</td>
+              </tr>
+              <tr>
+                <td><span class="path">Appearance → Customize</span></td>
+                <td>Control listings, the player, branding, sharing, submission rules, SEO fields, custom code, and mobile presentation.</td>
+              </tr>
+              <tr>
+                <td><span class="path">Appearance → Menus</span></td>
+                <td>Manage the Main Menu and Footer Legal Menu.</td>
+              </tr>
+              <tr>
+                <td><span class="path">Appearance → Widgets</span></td>
+                <td>Place video lists and optional content blocks in theme areas.</td>
+              </tr>
+              <tr>
+                <td><span class="path">Settings → Reading</span></td>
+                <td>Choose what appears on the homepage.</td>
+              </tr>
+              <tr>
+                <td><span class="path">Settings → Discussion</span></td>
+                <td>Control comments and discussion settings for videos.</td>
+              </tr>
+              <tr>
+                <td><span class="path">Users</span></td>
+                <td>Manage members, authors, administrators, and user permissions.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <section id="videos">
+        <p class="eyebrow">Create the core content</p>
+        <h2>Adding and Managing Videos</h2>
+
+        <h3>Add a video</h3>
+        <ol class="steps">
+          <li>Go to <span class="path">Videos → Add Video</span>.</li>
+          <li>Enter a clear title.</li>
+          <li>Write the description in the main content editor.</li>
+          <li>Select one or more video categories.</li>
+          <li>Add relevant tags.</li>
+          <li>Select one or more actors when applicable.</li>
+          <li>Scroll to <strong>Video information</strong> and provide the playback source, duration, thumbnail, and optional details.</li>
+          <li>In <strong>Thumbnails (rotation)</strong>, add extra thumbnail URLs if you want a hover sequence.</li>
+          <li>Choose <strong>Publish</strong>, or save as Pending for review.</li>
+        </ol>
+
+        <h3>Video source options</h3>
+        <p>Use one of the following playback methods:</p>
+        <ul>
+          <li><strong>Self-hosted video:</strong> enter the main video URL and any available resolution URLs.</li>
+          <li><strong>Embedded video:</strong> paste a supported iframe or embed code into <strong>Video embed code</strong>.</li>
+          <li><strong>Shortcode-based video:</strong> paste the shortcode provided by your video service into <strong>Video shortcode</strong>.</li>
+        </ul>
+
+        <div class="warning">
+          Do not add both a direct video URL and a conflicting embed or shortcode. If more than one source is present, keep only the method you intend visitors to use.
+        </div>
+
+        <h3>Video information fields</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Field</th>
+                <th scope="col">Purpose</th>
+                <th scope="col">Recommended use</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Video URL</td><td>Default self-hosted video source</td><td>Use a direct, publicly reachable media URL.</td></tr>
+              <tr><td>Video URL 240p–4K</td><td>Alternative quality sources</td><td>Add only the resolutions you actually provide.</td></tr>
+              <tr><td>Video embed code</td><td>Third-party player</td><td>Paste the complete iframe or supported embed markup.</td></tr>
+              <tr><td>Video shortcode</td><td>Shortcode-driven player</td><td>Paste the exact shortcode supplied by your video service.</td></tr>
+              <tr><td>Duration (seconds)</td><td>Time shown on cards and video pages</td><td>Enter total seconds, such as 545 for 9:05.</td></tr>
+              <tr><td>Views</td><td>Existing view count</td><td>Usually left at zero for new videos.</td></tr>
+              <tr><td>Likes and Dislikes</td><td>Existing rating totals</td><td>Normally begin at zero.</td></tr>
+              <tr><td>Video trailer URL</td><td>Preview shown when a visitor hovers over a card</td><td>Use an MP4/WebM trailer or supported image preview.</td></tr>
+              <tr><td>Main thumbnail</td><td>Default card image</td><td>Use a clear 16:9 image when possible.</td></tr>
+              <tr><td>Tracking URL</td><td>Destination for the tracking/download button</td><td>Enter the complete destination URL.</td></tr>
+              <tr><td>HD video</td><td>Shows an HD badge on cards</td><td>Turn on only when the video should be presented as HD.</td></tr>
+              <tr><td>Advertising under the video player</td><td>Special content for this video only</td><td>Leave blank to use the general Below-player content area.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Recommended publishing workflow</h3>
+        <ol class="steps">
+          <li>Save new member submissions as <strong>Pending</strong>.</li>
+          <li>Open each pending video and verify the title, description, source, thumbnail, duration, category, tags, and actors.</li>
+          <li>Correct any missing or unsafe content.</li>
+          <li>Choose <strong>Publish</strong> when the video is ready for public display.</li>
+        </ol>
+
+        <h3>What visitors can do on a video page</h3>
+        <ul>
+          <li>Play the video and switch between available qualities.</li>
+          <li>View the current view count, duration, rating, likes, and dislikes.</li>
+          <li>Like or dislike the video when voting is available.</li>
+          <li>Share the video using the enabled sharing options.</li>
+          <li>Report a broken, incorrect, spam, or misleading video.</li>
+          <li>Browse related videos based on shared actors.</li>
+        </ul>
+      </section>
+
+      <section id="thumbnails">
+        <p class="eyebrow">Make cards more engaging</p>
+        <h2>Thumbnail Rotation and Trailers</h2>
+
+        <h3>Add rotating thumbnails</h3>
+        <ol class="steps">
+          <li>Edit the video in <span class="path">Videos</span>.</li>
+          <li>Find <strong>Thumbnails (rotation)</strong>.</li>
+          <li>Paste an image URL into the thumbnail field.</li>
+          <li>Choose <strong>Add thumbnail</strong>.</li>
+          <li>Repeat for each additional image.</li>
+          <li>Use <strong>Remove</strong> beside any thumbnail you want to delete.</li>
+          <li>Save or update the video.</li>
+        </ol>
+        <p>When enabled, visitors see the thumbnail sequence when hovering over a video card. The first available image is used when no featured image is set.</p>
+
+        <h3>Choose the main thumbnail</h3>
+        <p>Use the <strong>Main thumbnail</strong> field for the default card image. A featured image attached to the video can also be used. Keep all important images at the same aspect ratio to avoid cropping.</p>
+
+        <h3>Add a trailer preview</h3>
+        <ol class="steps">
+          <li>Edit the video.</li>
+          <li>Enter the trailer address in <strong>Video trailer URL</strong>.</li>
+          <li>Save the video.</li>
+          <li>Test the card on desktop and mobile.</li>
+        </ol>
+        <p>Video trailers play briefly on hover. Supported image previews appear as an overlay. A trailer takes priority over thumbnail rotation for that card.</p>
+      </section>
+
+      <section id="taxonomy">
+        <p class="eyebrow">Organize the library</p>
+        <h2>Actors, Categories, and Tags</h2>
+
+        <h3>Create an actor</h3>
+        <ol class="steps">
+          <li>Go to <span class="path">Actors</span>.</li>
+          <li>Choose <strong>Add Actor</strong>.</li>
+          <li>Enter the actor name.</li>
+          <li>Select an image from the Media Library.</li>
+          <li>Choose <strong>Add Actor</strong>.</li>
+        </ol>
+        <p>To change an image later, open the actor, choose <strong>Edit Actor</strong>, select a replacement image, and save.</p>
+
+        <h3>Create a video category</h3>
+        <ol class="steps">
+          <li>Go to <span class="path">Videos → Video Categories</span>.</li>
+          <li>Choose <strong>Add New Category</strong>.</li>
+          <li>Enter the name, optional description, and parent category if needed.</li>
+          <li>Select a category image.</li>
+          <li>Save the category.</li>
+        </ol>
+
+        <h3>Use tags</h3>
+        <p>Add short, descriptive tags in the Video editor. The Tags page template presents all site tags as a cloud with video counts.</p>
+
+        <h3>Directory pages</h3>
+        <p>The automatically created Actors, Categories, and Tags pages use portrait cards, images, and video counts. You can edit their introductory block editor content without changing the directory itself.</p>
+      </section>
+
+      <section id="player">
+        <p class="eyebrow">Playback preferences</p>
+        <h2>Player and Media Behavior</h2>
+
+        <h3>Multiple quality sources</h3>
+        <p>Add direct video URLs for 240p, 360p, 480p, 720p, 1080p, and 4K. When more than one source is available, visitors can use the quality control in the player.</p>
+
+        <h3>Player options</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Option</th>
+                <th scope="col">What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Autoplay video player</td><td>Starts playback automatically in a muted state, as required by modern browsers.</td></tr>
+              <tr><td>Use the native HTML5 player</td><td>Uses the browser’s built-in controls instead of the enhanced Majestic Tube player.</td></tr>
+              <tr><td>Enable the video quality selector</td><td>Shows available quality choices for direct video sources.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Recommended video delivery</h3>
+        <ul>
+          <li>Use properly encoded MP4 files for the broadest browser support.</li>
+          <li>Keep all resolution files accessible over HTTPS.</li>
+          <li>Use clear, correctly sized thumbnails.</li>
+          <li>Enter the real duration in seconds.</li>
+          <li>Check the player after switching themes, updating WordPress, or changing a caching plugin.</li>
+        </ul>
+      </section>
+
+      <section id="membership">
+        <p class="eyebrow">Accounts and community features</p>
+        <h2>Members and Video Submissions</h2>
+
+        <h3>Enable or disable membership</h3>
+        <ol class="steps">
+          <li>Go to <span class="path">Appearance → Customize → Majestic Tube Options</span>.</li>
+          <li>Find <span class="setting">Enable membership (login/register)</span>.</li>
+          <li>Choose <strong>On</strong> or <strong>Off</strong>.</li>
+          <li>Choose <strong>Publish</strong>.</li>
+        </ol>
+        <p>When enabled, visitors can log in, register, and request a password reset. Logged-in members receive the My Account menu.</p>
+
+        <h3>Allow or prevent registration</h3>
+        <p>WordPress controls whether registration is available. Go to <span class="path">Settings → General</span> and review <strong>Membership</strong> and <strong>New User Default Role</strong>. For a moderated video site, use a cautious default role and review new accounts.</p>
+
+        <h3>Member menu</h3>
+        <p>When membership is enabled, the Main Menu includes:</p>
+        <ul>
+          <li><strong>My Account</strong></li>
+          <li><strong>Submit a Video</strong></li>
+          <li><strong>My Channel</strong></li>
+          <li><strong>My Profile</strong></li>
+          <li><strong>Logout</strong></li>
+        </ul>
+        <p>Administrators can hide the Submit a Video, My Profile, and My Channel links in the Customizer.</p>
+
+        <h3>Edit a member profile</h3>
+        <ol class="steps">
+          <li>Sign in to the website.</li>
+          <li>Open <span class="path">My Account → My Profile</span>.</li>
+          <li>Update the display name, names, email, website, or biography.</li>
+          <li>To change the password, enter the new password twice.</li>
+          <li>Choose <strong>Save profile</strong>.</li>
+        </ol>
+
+        <h3>Submit a video from the front end</h3>
+        <ol class="steps">
+          <li>Sign in as a member.</li>
+          <li>Open <span class="path">My Account → Submit a Video</span>.</li>
+          <li>Complete the title, description, playback source, thumbnail, duration, category, tags, and actors as needed.</li>
+          <li>For duration, enter hours, minutes, and seconds using the three boxes.</li>
+          <li>Complete the verification when reCAPTCHA is enabled.</li>
+          <li>Choose <strong>Submit video</strong>.</li>
+        </ol>
+        <p>New submissions are saved for moderation and do not appear publicly until an administrator publishes them.</p>
+
+        <h3>Configure required submission fields</h3>
+        <p>Go to <span class="path">Appearance → Customize → Majestic Tube - Video Submission</span>. You can make the following fields required or optional:</p>
+        <ul class="checklist">
+          <li>Video title</li>
+          <li>Description</li>
+          <li>Video URL</li>
+          <li>Embed code</li>
+          <li>Thumbnail URL</li>
+          <li>Tags</li>
+          <li>Actors</li>
+          <li>Duration</li>
+        </ul>
+
+        <h3>Set up reCAPTCHA</h3>
+        <ol class="steps">
+          <li>Create a reCAPTCHA v2 site in the service’s administration area.</li>
+          <li>Copy the site key and secret key.</li>
+          <li>Open <span class="path">Appearance → Customize → Majestic Tube Options</span>.</li>
+          <li>Enable reCAPTCHA and enter both keys.</li>
+          <li>Publish the changes.</li>
+          <li>Test registration and video submission in a private browser window.</li>
+        </ol>
+        <div class="warning">Keep the secret key private. Never paste it into a public page, post, or widget.</div>
+      </section>
+
+      <section id="customizer">
+        <p class="eyebrow">Theme preferences</p>
+        <h2>Customizer Settings</h2>
+        <p class="section-intro">Open <span class="path">Appearance → Customize</span>. The Majestic Tube sections appear in the Customizer sidebar.</p>
+
+        <h3>Majestic Tube Options</h3>
+        <p>This is the main section for listings, cards, video details, membership, footer behavior, and reports.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Setting group</th>
+                <th scope="col">What you can control</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Homepage and listing</td><td>Homepage sort, videos per page, videos per row, category columns, and desktop/mobile counts.</td></tr>
+              <tr><td>Video cards</td><td>Thumbnail aspect ratio, image fit, thumbnail quality, hover rotation, views, durations, and rating display.</td></tr>
+              <tr><td>Single video</td><td>Related videos, comments, breadcrumbs, search bar, description block, categories, tags, actors, and video sidebar.</td></tr>
+              <tr><td>Homepage presentation</td><td>Homepage title, description position, search bar, and whether long descriptions are shortened.</td></tr>
+              <tr><td>Tracking button</td><td>Show or hide the button, choose its icon, text, and destination URL.</td></tr>
+              <tr><td>Directories</td><td>Categories and actors per page, plus description position for category and tag archives.</td></tr>
+              <tr><td>Membership</td><td>Enable member login and registration, reCAPTCHA, account links, and the admin bar.</td></tr>
+              <tr><td>Footer</td><td>Enable the copyright bar, edit copyright text, and choose one to four columns.</td></tr>
+              <tr><td>Reporting</td><td>Enable the front-end Report video button.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <details>
+          <summary>Homepage sort options</summary>
+          <div>
+            <ul>
+              <li><strong>Latest</strong> shows recently published videos first.</li>
+              <li><strong>Most viewed</strong> prioritizes view count.</li>
+              <li><strong>Longest</strong> prioritizes duration.</li>
+              <li><strong>Popular</strong> prioritizes the video rating percentage.</li>
+              <li><strong>Random</strong> changes the order on each visit.</li>
+            </ul>
+          </div>
+        </details>
+
+        <h3>Majestic Tube - Video Player</h3>
+        <ul>
+          <li>Enable or disable autoplay.</li>
+          <li>Choose the enhanced player or the browser’s native player.</li>
+          <li>Enable or disable the quality selector.</li>
+        </ul>
+
+        <h3>Majestic Tube - Logo &amp; Colours</h3>
+        <ul>
+          <li>Enable a custom background.</li>
+          <li>Choose the main accent colour.</li>
+          <li>Use an uploaded logo or a text logo with an icon.</li>
+          <li>Adjust logo font, size, dimensions, and spacing.</li>
+          <li>Optionally show the logo in the footer.</li>
+          <li>Optionally place a logo watermark over the video player.</li>
+          <li>Set a favicon for browser tabs and bookmarks.</li>
+        </ul>
+
+        <h3>Majestic Tube - Sharing &amp; Social</h3>
+        <p>Enable sharing as a whole, then enable or disable individual networks such as Facebook, X/Twitter, LinkedIn, Reddit, Tumblr, email, and the other available options. Remove unused buttons to keep the video page uncluttered.</p>
+
+        <h3>Majestic Tube - Video Submission</h3>
+        <p>Enable or disable the front-end submission form, its navigation links, and each required field. The duration and title are required by default.</p>
+
+        <h3>Majestic Tube - Content areas</h3>
+        <p>This section directs you to <span class="path">Appearance → Widgets</span>, where header, player, below-player, video-sidebar, and footer content is managed.</p>
+
+        <h3>Majestic Tube - SEO &amp; Social</h3>
+        <ul>
+          <li>Add an optional Facebook app ID.</li>
+          <li>Add an X/Twitter site handle.</li>
+          <li>Paste search engine verification tags.</li>
+          <li>Add optional SEO footer text.</li>
+        </ul>
+        <p>Majestic Tube also supplies social preview information and video structured data on individual video pages. If a major SEO plugin is active, the theme normally avoids duplicating its social output.</p>
+
+        <h3>Majestic Tube - Custom Code</h3>
+        <p>Administrators can add analytics code to the page header and extra scripts near the end of the page. Paste complete snippets exactly as supplied by the service. Incorrect code can affect the entire site.</p>
+
+        <h3>Majestic Tube - Mobile</h3>
+        <ul>
+          <li>Choose the number of videos per mobile page and per row.</li>
+          <li>Hide homepage widget areas on mobile if needed.</li>
+          <li>Add optional scripts for mobile visitors only.</li>
+        </ul>
+      </section>
+
+      <section id="appearance">
+        <p class="eyebrow">Navigation and optional content</p>
+        <h2>Menus, Widgets, and Content Areas</h2>
+
+        <h3>Main Menu</h3>
+        <ol class="steps">
+          <li>Go to <span class="path">Appearance → Menus</span>.</li>
+          <li>Select the Main Menu or create it if necessary.</li>
+          <li>Add pages, custom links, categories, or actor archives.</li>
+          <li>Arrange the menu using drag and drop.</li>
+          <li>Choose <strong>Save Menu</strong>.</li>
+        </ol>
+        <p>Keep legal pages in the footer rather than crowding the primary navigation.</p>
+
+        <h3>Video list widget</h3>
+        <ol class="steps">
+          <li>Open <span class="path">Appearance → Widgets</span>.</li>
+          <li>Find <strong>Majestic Tube Videos</strong>.</li>
+          <li>Drag it into a widget area.</li>
+          <li>Choose a title, sort order, and number of videos.</li>
+          <li>Choose <strong>Save</strong>.</li>
+        </ol>
+        <p>Available sorting choices are Latest, Most viewed, and Random.</p>
+
+        <h3>Content Block widget</h3>
+        <p>The <strong>Content Block</strong> widget is a general place for administrator-provided shortcodes and approved content markup. It can be targeted to all devices, desktop only, or mobile only.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Content area</th>
+                <th scope="col">Where it appears</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Header content</td><td>Below the site header.</td></tr>
+              <tr><td>Player content</td><td>Over the desktop video player where supported.</td></tr>
+              <tr><td>Below-player content</td><td>Below the individual video player unless the video has its own content.</td></tr>
+              <tr><td>Video sidebar</td><td>Beside an individual video when the sidebar setting is enabled and the area contains content.</td></tr>
+              <tr><td>Footer content</td><td>At the top of the site footer.</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <div class="warning">
+          Content Block markup is intended for trusted administrators. Review all third-party embed and tracking snippets before activating them, and comply with the service’s terms and your privacy obligations.
+        </div>
+      </section>
+
+      <section id="reports">
+        <p class="eyebrow">Visitor feedback</p>
+        <h2>Video Reports and Moderation</h2>
+
+        <h3>Enable reports</h3>
+        <ol class="steps">
+          <li>Open <span class="path">Appearance → Customize → Majestic Tube Options</span>.</li>
+          <li>Find <span class="setting">Enable “Report video” button</span>.</li>
+          <li>Choose <strong>On</strong>.</li>
+          <li>Publish the changes.</li>
+        </ol>
+
+        <h3>Report reasons</h3>
+        <ul>
+          <li>The video does not play</li>
+          <li>Wrong video or thumbnail</li>
+          <li>Spam or misleading</li>
+          <li>Something else</li>
+        </ul>
+        <p>Visitors may also include a short message. A visitor is asked not to report the same video again for 24 hours.</p>
+
+        <h3>Review reported videos</h3>
+      <ol class="steps">
+        <li>Go to <span class="path">Videos → Reported Videos</span>.</li>
+        <li>Review the video, report count, most recent reason, optional message, and date.</li>
+        <li>Open the video to inspect it and decide whether to edit, unpublish, or remove it.</li>
+        <li>After resolving a report, use <strong>Clear reports</strong> on the reported video row when appropriate.</li>
+      </ol>
+      <p>Editors may also see a reported-video summary on the WordPress dashboard.</p>
+      </section>
+
+      <section id="legal">
+        <p class="eyebrow">Policy and compliance</p>
+        <h2>Legal and Policy Pages</h2>
+        <p>Activation creates starter pages for:</p>
+        <ul>
+          <li>18 USC 2257</li>
+          <li>DMCA</li>
+          <li>Privacy Policy</li>
+        </ul>
+
+        <h3>Review before publishing</h3>
+        <ol class="steps">
+          <li>Open <span class="path">Pages</span>.</li>
+          <li>Open each legal page.</li>
+          <li>Replace every placeholder with accurate operator, contact, address, and policy information.</li>
+          <li>Review the page against your actual content, hosting, analytics, account, age-verification, and recordkeeping practices.</li>
+          <li>Ask qualified legal counsel to review the completed policies.</li>
+        </ol>
+
+        <div class="warning">
+          The included pages are starting templates, not legal advice. They do not by themselves establish compliance with every law that may apply to your website.
+        </div>
+
+        <h3>Contact email</h3>
+      <p>Built-in legal pages use the site’s WordPress administrative email. Keep that address current under <span class="path">Settings → General</span>.</p>
+
+        <h3>Footer legal menu</h3>
+        <p>The legal pages are normally kept separate from the Main Menu. Review the footer menu after editing page titles or slugs. If you intentionally use a different footer menu, make sure the legal links are still present.</p>
+      </section>
+
+      <section id="maintenance">
+        <p class="eyebrow">Keep the site healthy</p>
+        <h2>Routine Maintenance</h2>
+
+        <h3>Recommended schedule</h3>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Frequency</th>
+                <th scope="col">Tasks</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Weekly</td>
+                <td>Review new videos, pending submissions, reported videos, comments, and member accounts.</td>
+              </tr>
+              <tr>
+                <td>Monthly</td>
+                <td>Check menus, links, thumbnails, player sources, contact email, password resets, and important pages.</td>
+              </tr>
+              <tr>
+                <td>Quarterly</td>
+                <td>Review memberships, administrator accounts, privacy practices, legal pages, and unused content blocks.</td>
+              </tr>
+              <tr>
+                <td>Before a major update</td>
+                <td>Back up the site, update WordPress and trusted plugins, test a video, login, submission, report, search, and email flow.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Recommended backups</h3>
+        <p>Use a reliable WordPress backup solution or your hosting provider’s backup service. Protect both the database and the WordPress files. Confirm that backups can be restored before relying on them.</p>
+
+        <h3>Keep the admin area secure</h3>
+        <ul>
+          <li>Use unique administrator passwords and strong member passwords.</li>
+          <li>Keep WordPress, PHP, and trusted plugins updated.</li>
+          <li>Limit administrator accounts.</li>
+          <li>Require HTTPS.</li>
+          <li>Review new registrations and submitted content.</li>
+          <li>Do not share secret API keys, reCAPTCHA secrets, or tracking credentials.</li>
+        </ul>
+      </section>
+
+      <section id="troubleshooting">
+        <p class="eyebrow">Solve common problems</p>
+        <h2>Troubleshooting</h2>
+
+        <details open>
+          <summary>A video page shows no player</summary>
+          <div>
+            <ul>
+              <li>Confirm the video is published.</li>
+              <li>Open the video in the WordPress editor and inspect <strong>Video information</strong>.</li>
+              <li>Confirm there is one valid source: direct video URL, embed code, or shortcode.</li>
+              <li>Open the direct video URL in a new tab and confirm it plays.</li>
+              <li>Check that JavaScript is enabled and no security or caching plugin blocks the player.</li>
+              <li>Save the video again after changing the source.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>The quality selector is missing</summary>
+          <div>
+            <ul>
+              <li>Enable <span class="setting">Enable the video quality selector</span>.</li>
+              <li>Add more than one direct resolution URL.</li>
+              <li>Check that the URLs are publicly reachable and use supported formats.</li>
+              <li>Refresh the browser cache after changing the player option.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>Thumbnail rotation is not working</summary>
+          <div>
+            <ul>
+              <li>Enable <span class="setting">Enable thumbnails rotation on hover</span>.</li>
+              <li>Confirm the video has valid image URLs in <strong>Thumbnails (rotation)</strong>.</li>
+              <li>Check that the image host allows the browser to load the files.</li>
+              <li>Test on desktop; touch devices do not provide a true hover action.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>A trailer does not preview</summary>
+          <div>
+            <p>Confirm the trailer URL is complete and publicly reachable. MP4 and WebM video trailers are supported for inline preview; GIF and WebP image trailers appear as overlays. A trailer takes priority over rotation thumbnails.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>Registration is not available</summary>
+          <div>
+            <ul>
+              <li>Confirm membership is enabled in the Customizer.</li>
+              <li>Check <span class="path">Settings → General → Membership</span>.</li>
+              <li>Review any security, spam, or membership plugin restrictions.</li>
+              <li>If reCAPTCHA is enabled, confirm both keys are valid and the challenge appears.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>Password reset email is not received</summary>
+          <div>
+            <ul>
+              <li>Wait a few minutes and check spam or junk mail.</li>
+              <li>Confirm the site can send email.</li>
+              <li>Ask the hosting provider to check outbound email delivery.</li>
+              <li>Use a legitimate SMTP service if your host’s mail system is unreliable.</li>
+              <li>Confirm the site is using HTTPS.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>Submitted videos do not appear</summary>
+          <div>
+            <p>Front-end submissions are intentionally moderated. Open <span class="path">Videos</span>, select the pending video, review it, and choose <strong>Publish</strong>. Also confirm that video submission is enabled and the member is logged in.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>A directory or menu page returns not found</summary>
+          <div>
+            <ol class="steps">
+              <li>Confirm the page still exists under <span class="path">Pages</span>.</li>
+              <li>Confirm the correct Page Template is selected in its Page Attributes panel.</li>
+              <li>Go to <span class="path">Settings → Permalinks</span>.</li>
+              <li>Choose <strong>Save Changes</strong>.</li>
+              <li>Review the menu item and make sure it points to the current page.</li>
+            </ol>
+          </div>
+        </details>
+
+        <details>
+          <summary>The single-video sidebar is not visible</summary>
+          <div>
+            <ul>
+              <li>Confirm <span class="setting">Show the video sidebar</span> is On.</li>
+              <li>Open <span class="path">Appearance → Widgets → Video sidebar</span>.</li>
+              <li>Add at least one widget and save.</li>
+              <li>Remember that the sidebar belongs to individual video pages, not the homepage or normal archives.</li>
+            </ul>
+          </div>
+        </details>
+
+        <details>
+          <summary>Social previews are missing or duplicated</summary>
+          <div>
+            <p>Review your active SEO plugins. Majestic Tube normally steps aside when a supported SEO plugin already provides social metadata. If the preview looks wrong, update the image, clear the social platform’s cache, and re-save the video.</p>
+          </div>
+        </details>
+      </section>
+
+      <section id="faq">
+        <p class="eyebrow">Common questions</p>
+        <h2>Frequently Asked Questions</h2>
+
+        <h3>Can I use this on an existing WordPress site?</h3>
+        <p>Yes. Back up the site first, install the theme, activate it, and preview the main pages before switching menus or publishing new content. Existing posts remain in WordPress, but some existing theme-specific menu and content settings may need to be assigned again.</p>
+
+        <h3>Are videos a separate content type?</h3>
+        <p>No. They use WordPress’s normal Posts system, so familiar editing tools, revisions, search, categories, tags, comments, and scheduled publishing continue to work.</p>
+
+        <h3>Can a visitor submit a video without an account?</h3>
+        <p>No. Front-end video submission requires the visitor to sign in.</p>
+
+        <h3>Does a new submission publish immediately?</h3>
+        <p>No. It is submitted for moderation and remains pending until an administrator reviews and publishes it.</p>
+
+        <h3>Can I use a YouTube or Vimeo embed?</h3>
+        <p>Use the provider’s current iframe embed code in <strong>Video embed code</strong>. Keep only one playback method for a video. Availability can also depend on the provider’s embedding permissions.</p>
+
+        <h3>Why is the quality selector absent?</h3>
+        <p>The quality selector needs multiple direct video sources. Embed-based players use the controls provided by their external service.</p>
+
+        <h3>Why is autoplay silent?</h3>
+        <p>Modern browsers generally block audible autoplay. The theme starts autoplay muted to comply with browser requirements.</p>
+
+        <h3>Can I hide or disable the views, duration, or rating?</h3>
+        <p>Yes. Each display option is in the main Majestic Tube Customizer section.</p>
+
+        <h3>Can I show content below every video player?</h3>
+        <p>Yes. Add a <strong>Content Block</strong> widget to <strong>Below-player content</strong>. A video-specific value entered in the editor takes priority for that individual video.</p>
+
+        <h3>Can I target content to desktop or mobile?</h3>
+        <p>Yes. Each Content Block widget can display on all devices, desktop only, or mobile only.</p>
+
+        <h3>How often are view and rating numbers updated?</h3>
+        <p>They update as visitors use the site. A browser, server, or caching configuration can delay the visible refresh; refreshing the video page normally shows the latest stored values.</p>
+
+        <h3>Why is a password or report action unavailable?</h3>
+        <p>Sign in when required, disable conflicting caching or security restrictions, and confirm JavaScript is enabled. A visitor may also be prevented from voting or reporting the same item again within the applicable time window.</p>
+      </section>
+
+      <section id="credits">
+        <p class="eyebrow">Support the project</p>
+        <h2>Credits, License &amp; Support</h2>
+
+        <h3>Free theme license</h3>
+        <p>
+          Majestic Tube is a free theme. You may use, distribute, and modify it for your own or other websites, following the terms of the
+          <a href="https://www.gnu.org/licenses/old-licenses/gpl-2.0.html" rel="noopener">GNU General Public License (GPL)</a>.
+          The complete license text is included in the theme as the <strong>LICENSE</strong> file.
+        </p>
+
+        <h3>Support</h3>
+        <p>
+          Questions, bug reports, and feature requests are welcome at
+          <a href="mailto:prof@xxxpm.com">prof@xxxpm.com</a>.
+        </p>
+
+        <h3>Donate</h3>
+        <p>Donations are entirely voluntary. They help keep the theme free and actively maintained, and they are never required to use it.</p>
+
+        <div class="quick-grid">
+          <div class="card">
+            <span class="tag">USDC</span>
+            <h4>Donate with USDC</h4>
+            <p class="path" style="overflow-wrap: anywhere;">0x7a7118b7C0007705dc8e7fF0f02456a919130705</p>
+            <p class="description">Send on the USDC network. Please double-check the address before sending.</p>
+          </div>
+
+          <div class="card">
+            <span class="tag">Bitcoin</span>
+            <h4>Donate with Bitcoin</h4>
+            <p class="path" style="overflow-wrap: anywhere;">3K6yA17jLpDZutxxiNAY2a1SCtzXvHixH7</p>
+            <p class="description">Send on the Bitcoin network. Please double-check the address before sending.</p>
+          </div>
+
+          <div class="card">
+            <span class="tag">Buy Me a Coffee</span>
+            <h4>Buy the developer a coffee</h4>
+            <p><a href="https://buymeacoffee.com/abdallahjcw" rel="noopener">buymeacoffee.com/abdallahjcw</a></p>
+            <p class="description">A quick way to support ongoing maintenance and new features.</p>
+          </div>
+
+          <div class="card">
+            <span class="tag">Bundle credits</span>
+            <h4>Included third-party components</h4>
+            <ul>
+              <li>Video.js player — Apache License 2.0</li>
+              <li>Inter font — SIL Open Font License 1.1</li>
+            </ul>
+            <p class="description">Their license notices are bundled with the theme in the assets folders.</p>
+          </div>
+        </div>
+      </section>
+
+      <section id="quick-reference">
+        <p class="eyebrow">At a glance</p>
+        <h2>Quick Reference</h2>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Task</th>
+                <th scope="col">Go to</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Add a video</td><td>Videos → Add Video</td></tr>
+              <tr><td>Review submissions</td><td>Videos → All Videos → Pending</td></tr>
+              <tr><td>Add an actor</td><td>Actors → Add Actor</td></tr>
+              <tr><td>Add a category image</td><td>Videos → Video Categories → Edit Category</td></tr>
+              <tr><td>Review visitor reports</td><td>Videos → Reported Videos</td></tr>
+              <tr><td>Change theme settings</td><td>Appearance → Customize</td></tr>
+              <tr><td>Manage navigation</td><td>Appearance → Menus</td></tr>
+              <tr><td>Manage content areas</td><td>Appearance → Widgets</td></tr>
+              <tr><td>Edit the homepage</td><td>Settings → Reading</td></tr>
+              <tr><td>Control registration</td><td>Settings → General</td></tr>
+              <tr><td>Edit a member profile</td><td>My Account → My Profile</td></tr>
+              <tr><td>Submit a video</td><td>My Account → Submit a Video</td></tr>
+              <tr><td>Edit legal pages</td><td>Pages</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      Majestic Tube user guide · WordPress video theme ·
+      <a href="mailto:prof@xxxpm.com">prof@xxxpm.com</a>
+    </footer>
+  </div>
+</body>
+</html>

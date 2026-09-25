@@ -1,0 +1,140 @@
+/**
+ * Majestic Tube block editor styles.
+ *
+ * Keeps the editor visually close to the light front-end: the same surfaces,
+ * accent colour, link behaviour and media treatment defined by the --mt-*
+ * tokens in assets/css/main.css.
+ *
+ * @package Majestic Tube
+ * @version 2.0.6
+ */
+
+/* Keep the editor self-contained with the same local Inter files as the front end. */
+@font-face {
+	font-family: "Inter";
+	src: url("../fonts/inter-regular.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 400;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Inter";
+	src: url("../fonts/inter-medium.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 500;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Inter";
+	src: url("../fonts/inter-semibold.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 600;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Inter";
+	src: url("../fonts/inter-bold.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 700;
+	font-display: swap;
+}
+
+@font-face {
+	font-family: "Inter";
+	src: url("../fonts/inter-extrabold.woff2") format("woff2");
+	font-style: normal;
+	font-weight: 800;
+	font-display: swap;
+}
+
+:root {
+	--mt-bg: #f4f5f7;
+	--mt-surface: #ffffff;
+	--mt-surface-hover: #f0f2f5;
+	--mt-text: #202124;
+	--mt-text-muted: #6b7280;
+	--mt-accent: #0f8a99;
+	--mt-radius: 6px;
+}
+
+.editor-styles-wrapper {
+	background: var(--mt-bg);
+	color: var(--mt-text);
+	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+	line-height: 1.6;
+}
+
+.editor-styles-wrapper .wp-block {
+	max-width: 1200px;
+}
+
+.editor-styles-wrapper a {
+	color: var(--mt-accent);
+}
+
+.editor-styles-wrapper a:hover {
+	color: var(--mt-accent);
+}
+
+.editor-styles-wrapper h1,
+.editor-styles-wrapper h2,
+.editor-styles-wrapper h3,
+.editor-styles-wrapper h4 {
+	color: var(--mt-text);
+	font-weight: 700;
+	line-height: 1.25;
+}
+
+.editor-styles-wrapper blockquote {
+	border-left: 4px solid var(--mt-accent);
+	background: var(--mt-surface);
+	padding: 0.75rem 1rem;
+}
+
+.editor-styles-wrapper code,
+.editor-styles-wrapper pre,
+.editor-styles-wrapper .wp-block-code {
+	background: var(--mt-surface);
+	color: var(--mt-text);
+	border-radius: var(--mt-radius);
+}
+
+.editor-styles-wrapper table {
+	width: 100%;
+	background: var(--mt-surface);
+	border-collapse: collapse;
+}
+
+.editor-styles-wrapper th,
+.editor-styles-wrapper td {
+	border: 1px solid var(--mt-surface-hover);
+	padding: 0.5rem 0.75rem;
+}
+
+.editor-styles-wrapper img,
+.editor-styles-wrapper video,
+.editor-styles-wrapper iframe {
+	max-width: 100%;
+	height: auto;
+	border-radius: var(--mt-radius);
+}
+
+.editor-styles-wrapper .wp-block-image figcaption,
+.editor-styles-wrapper .wp-block-video figcaption {
+	color: var(--mt-text-muted);
+	font-size: 0.85rem;
+	text-align: center;
+}
+
+.editor-styles-wrapper .wp-block-button__link {
+	background: var(--mt-accent);
+	color: #fff;
+	border-radius: var(--mt-radius);
+}
+
+.editor-styles-wrapper .wp-block-separator {
+	border-color: var(--mt-surface-hover);
+}

@@ -1,0 +1,136 @@
+/**
+ * Majestic Tube - right-to-left overrides.
+ *
+ * Loaded after assets/css/main.css when the site language is RTL. Only the
+ * direction-sensitive rules of main.css and player.css are mirrored here.
+ *
+ * @package Majestic Tube
+ * @version 2.0.0
+ */
+
+/* Header & navigation */
+.header-search {
+	margin-right: auto;
+	margin-left: 0;
+}
+
+.main-navigation {
+	margin-right: clamp(0.5rem, 3vw, 2.5rem);
+	margin-left: 0;
+}
+
+.main-navigation .sub-menu {
+	right: 0;
+	left: auto;
+}
+
+.main-navigation .my-account > .sub-menu {
+	right: auto;
+	left: 0;
+}
+
+.main-navigation ul {
+	padding-right: 0;
+}
+
+.site-info,
+.site-footer {
+	text-align: right;
+}
+
+/* Cards */
+.duration,
+.video-card-duration {
+	left: 0.5rem;
+	right: auto;
+}
+
+.views,
+.video-card-views,
+.rating,
+.video-card-rating {
+	right: 0.5rem;
+	left: auto;
+}
+
+.hd-video,
+.video-card-hd {
+	right: 0.5rem;
+	left: auto;
+}
+
+.video-card-header,
+.video-card-title {
+	text-align: right;
+}
+
+/* Video sidebar and actions */
+.video-sidebar {
+	text-align: right;
+}
+
+.video-infos {
+	flex-direction: row-reverse;
+}
+
+.video-infos-left,
+.video-infos-right,
+.video-actions,
+.video-rating-actions,
+.video-utility-actions {
+	flex-direction: row-reverse;
+}
+
+.video-report-form {
+	left: 0;
+	right: auto;
+	text-align: right;
+}
+
+.video-report-submit {
+	align-self: flex-end;
+}
+
+.taxonomy-label {
+	margin-left: 0.35rem;
+	margin-right: 0;
+}
+
+.video-tags .tags-list {
+	flex-direction: row-reverse;
+}
+
+.entry-meta {
+	flex-direction: row-reverse;
+}
+
+/* Player quality selector */
+.mt-quality-menu {
+	left: 0;
+	right: auto;
+	text-align: right;
+}
+
+.mt-quality-native {
+	left: 0.6rem;
+	right: auto;
+}
+
+.mt-quality-item {
+	text-align: right;
+}
+
+@media (max-width: 600px) {
+	.main-navigation {
+		justify-content: flex-start;
+	}
+
+	.video-actions {
+		flex-direction: column;
+	}
+
+	.video-report-form {
+		right: 0;
+		left: auto;
+	}
+}
