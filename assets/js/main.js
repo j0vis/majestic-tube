@@ -6,7 +6,7 @@
  * the shared `ajax-nonce` the original theme used.
  *
  * @package Majestic Tube
- * @version 2.1.1
+ * @version 2.1.2
  */
 
 ( function () {
@@ -598,13 +598,29 @@
 
 	/**
 	 * Thumbnail rotation on hover (original `thumbs` meta, `data-thumbs`).
+	 *
+	 * The card template writes `data-thumbs` / `data-trailer` on the
+	 * `.video-card` article, not on the inner `.video-card-thumbnail` div, so
+	 * that is the element to bind to. The image and overlay lookups below go
+	 * through querySelector, so they still find the descendants they need.
 	 */
 	function initThumbRotation() {
 		if ( false === options.rotateThumbs || 'off' === options.rotateThumbs ) {
 			return;
 		}
 
-		findAll( '.video-card-thumbnail[data-thumbs]' ).forEach( function ( card ) {
+		findAll( '.video-card[data-thumbs]' ).forEach( function ( card ) {
+			/*
+			 * A trailer outranks rotation. The card template only ever emits
+			 * one of the two attributes, so this is belt-and-braces for a
+			 * child theme or plugin that sets both: without it the rotation
+			 * would start swapping the thumbnail on mouseenter while the
+			 * trailer was still inside its hover-intent delay.
+			 */
+			if ( card.hasAttribute( 'data-trailer' ) ) {
+				return;
+			}
+
 			// .video-main-thumb is the original class of the card image; the
 			// generic img lookup stays as a fallback for older child themes.
 			var img = getCardImage( card );
@@ -681,10 +697,12 @@
 	 * Trailer preview on hover (original behavior).
 	 *
 	 * Video trailers (.mp4/.webm) play inline, image trailers (.gif/.webp) are
-	 * shown as an overlay. Trailers take precedence over thumb rotation.
+	 * shown as an overlay. Trailers take precedence over thumb rotation: the
+	 * card template only emits `data-thumbs` when there is no trailer, so a
+	 * card never carries both and the two previews never fight.
 	 */
 	function initTrailerPreview() {
-		findAll( '.video-card-thumbnail[data-trailer]' ).forEach( function ( card ) {
+		findAll( '.video-card[data-trailer]' ).forEach( function ( card ) {
 			var trailerUrl = card.getAttribute( 'data-trailer' );
 
 			if ( ! trailerUrl ) {

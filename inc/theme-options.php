@@ -697,6 +697,12 @@ function majestic_tube_options_map() {
 
 		/* ---------------------------------------------------------------
 		 * Sharing / social (original per-network switches)
+		 *
+		 * Facebook, LinkedIn, Tumblr and Odnoklassniki (ok.ru) no longer
+		 * print a share button - see inc/share.php for why. Their keys stay
+		 * in the map so a stored value from the original theme is still
+		 * readable, but the toggles are hidden from the Customizer so no
+		 * switch is offered for a button that will never appear.
 		 * ------------------------------------------------------------- */
 		'enable-video-share'       => array(
 			'setting' => 'majestic_tube_enable_video_share',
@@ -711,6 +717,7 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Share on Facebook', 'majestic-tube' ),
 			'section' => $social,
+			'customizer' => false,
 		),
 		'twitter-video-share'      => array(
 			'setting' => 'majestic_tube_share_twitter',
@@ -725,6 +732,7 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Share on Google+', 'majestic-tube' ),
 			'section' => $social,
+			'customizer' => false,
 		),
 		'linkedin-video-share'     => array(
 			'setting' => 'majestic_tube_share_linkedin',
@@ -732,6 +740,7 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Share on LinkedIn', 'majestic-tube' ),
 			'section' => $social,
+			'customizer' => false,
 		),
 		'tumblr-video-share'       => array(
 			'setting' => 'majestic_tube_share_tumblr',
@@ -739,6 +748,7 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Share on Tumblr', 'majestic-tube' ),
 			'section' => $social,
+			'customizer' => false,
 		),
 		'reddit-video-share'       => array(
 			'setting' => 'majestic_tube_share_reddit',
@@ -753,6 +763,7 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Share on Odnoklassniki', 'majestic-tube' ),
 			'section' => $social,
+			'customizer' => false,
 		),
 		'email-video-share'        => array(
 			'setting' => 'majestic_tube_share_email',

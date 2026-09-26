@@ -5,13 +5,22 @@
  * The original theme printed a share block under the player, with one
  * wpst-options switch per network (facebook-video-share, twitter-video-share,
  * linkedin-video-share, ...). Those keys are part of the documented option
- * surface, so Majestic Tube renders the same set of links, with the same ids
- * on the icons (`#facebook`, `#twitter`, ...) because custom CSS targets them.
+ * surface and the icons keep their original ids (`#facebook`, `#twitter`, ...)
+ * because custom CSS written for the original theme targets them.
  *
- * Deliberate difference: the original also rendered a Google+ button. Google+
- * was shut down in 2019 and plus.google.com/share no longer resolves, so the
- * google-plus-video-share option is mapped (plugins and custom code can still
- * read it) but no dead link is printed.
+ * Deliberate differences: the original also rendered a Google+ button, and
+ * shipped Facebook, LinkedIn, Tumblr and Odnoklassniki. Google+ was shut down
+ * in 2019 and plus.google.com/share no longer resolves. Facebook, LinkedIn and
+ * Tumblr all remove or restrict adult content, so their share endpoints are
+ * useless to - at best a nuisance for - a site of this kind, and Odnoklassniki
+ * (ok.ru) is no longer reachable for an anonymous share. None of those five
+ * networks prints a button. Their wpst-options keys stay mapped, so plugins
+ * and custom code can still read a stored value, and their Customizer
+ * toggles are hidden rather than removed outright.
+ *
+ * What remains: X/Twitter, Reddit, and email. A plugin that still needs one of
+ * the retired networks can put it back through the majestic_tube_share_links
+ * filter, which receives the finished link list before it is printed.
  *
  * @package Majestic Tube
  * @version 2.0.0
@@ -29,13 +38,6 @@ defined( 'ABSPATH' ) || exit;
  */
 function majestic_tube_share_networks() {
 	return array(
-		'facebook-video-share'     => array(
-			'icon'  => 'facebook',
-			'label' => __( 'Share on Facebook', 'majestic-tube' ),
-			'url'   => function ( $context ) {
-				return 'https://www.facebook.com/sharer/sharer.php?u=' . rawurlencode( $context['url'] );
-			},
-		),
 		'twitter-video-share'      => array(
 			'icon'  => 'twitter',
 			'label' => __( 'Share on X', 'majestic-tube' ),
@@ -43,32 +45,11 @@ function majestic_tube_share_networks() {
 				return 'https://twitter.com/intent/tweet?url=' . rawurlencode( $context['url'] ) . '&text=' . rawurlencode( $context['title'] );
 			},
 		),
-		'linkedin-video-share'     => array(
-			'icon'  => 'linkedin',
-			'label' => __( 'Share on LinkedIn', 'majestic-tube' ),
-			'url'   => function ( $context ) {
-				return 'https://www.linkedin.com/shareArticle?mini=true&url=' . rawurlencode( $context['url'] ) . '&title=' . rawurlencode( $context['title'] ) . '&source=' . rawurlencode( home_url( '/' ) );
-			},
-		),
-		'tumblr-video-share'       => array(
-			'icon'  => 'tumblr-square',
-			'label' => __( 'Share on Tumblr', 'majestic-tube' ),
-			'url'   => function ( $context ) {
-				return 'https://tumblr.com/widgets/share/tool?canonicalUrl=' . rawurlencode( $context['url'] );
-			},
-		),
 		'reddit-video-share'       => array(
 			'icon'  => 'reddit-square',
 			'label' => __( 'Share on Reddit', 'majestic-tube' ),
 			'url'   => function ( $context ) {
 				return 'https://www.reddit.com/submit?url=' . rawurlencode( $context['url'] ) . '&title=' . rawurlencode( $context['title'] );
-			},
-		),
-		'odnoklassniki-video-share' => array(
-			'icon'  => 'odnoklassniki',
-			'label' => __( 'Share on Odnoklassniki', 'majestic-tube' ),
-			'url'   => function ( $context ) {
-				return 'https://www.odnoklassniki.ru/dk?st.cmd=addShare&st._surl=' . rawurlencode( $context['url'] ) . '&title=' . rawurlencode( $context['title'] );
 			},
 		),
 		'email-video-share'        => array(

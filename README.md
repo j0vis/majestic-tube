@@ -386,7 +386,9 @@ The text logo has its own choice: **Inter** (the default), **System UI**, **Syst
 
 ### Majestic Tube - Sharing & Social
 
-Enable sharing as a whole, then enable or disable individual networks such as Facebook, X/Twitter, LinkedIn, Reddit, Tumblr, email, and the other available options. Remove unused buttons to keep the video page uncluttered.
+Enable sharing as a whole, then enable or disable the individual networks. The theme ships **X/Twitter**, **Reddit**, and **email**. Switch off the ones you do not want so the video page stays uncluttered.
+
+Facebook, LinkedIn and Tumblr all restrict or remove adult content, and Odnoklassniki (ok.ru) is no longer reachable for an anonymous share, so none of the four prints a button here. Their settings are kept for compatibility but the toggles are hidden.
 
 ### Majestic Tube - Video Submission
 
