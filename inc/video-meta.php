@@ -67,6 +67,33 @@ function majestic_tube_video_meta_fields() {
 }
 
 /**
+ * Pull an iframe out of a value that was pasted into a direct-video URL field.
+ *
+ * The Video URL fields exist for self-hosted files, and an editor pasting a
+ * YouTube or Vimeo iframe into one is the most common mistake this layout
+ * invites. It is silently destructive rather than obvious: a non-empty
+ * video_url makes majestic_tube_get_video_sources() report the video as
+ * self-hosted, which suppresses the real embed and hands the player a page
+ * URL it cannot play, so the video renders as a broken box. Recognising the
+ * markup lets the save path move it to the embed key where it belongs, and
+ * lets the read path recover content saved before that move existed.
+ *
+ * @param string $raw Raw field value.
+ * @return string The iframe markup, or an empty string when there is none.
+ */
+function majestic_tube_extract_iframe( $raw ) {
+	if ( ! is_string( $raw ) || '' === trim( $raw ) ) {
+		return '';
+	}
+
+	if ( ! preg_match( '/<iframe\b[^>]*>.*?<\/iframe>/is', $raw, $match ) ) {
+		return '';
+	}
+
+	return trim( $match[0] );
+}
+
+/**
  * Map front-end submission fields to the original required-field options.
  *
  * @return array<string, string> Submission field => legacy option id.
@@ -318,6 +345,23 @@ function majestic_tube_save_video_meta( $post_id ) {
 		}
 
 		$raw = wp_unslash( $_POST[ $field_name ] );
+
+		/*
+		 * An iframe is not a file the player can load, so it does not belong
+		 * in a direct-video field. Move it to the embed key and leave the
+		 * URL field empty rather than storing markup esc_url_raw() would
+		 * mangle into an unplayable source.
+		 */
+		if ( 'url' === $type ) {
+			$iframe = majestic_tube_extract_iframe( $raw );
+
+			if ( '' !== $iframe ) {
+				update_post_meta( $post_id, 'embed', $iframe );
+				update_post_meta( $post_id, $key, '' );
+
+				continue;
+			}
+		}
 
 		switch ( $type ) {
 			case 'url':

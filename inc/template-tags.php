@@ -51,12 +51,36 @@ function majestic_tube_get_video_sources( $post_id = 0 ) {
 	}
 
 	$main_url = get_post_meta( $post_id, 'video_url', true );
+	$embed    = get_post_meta( $post_id, 'embed', true );
+
+	/*
+	 * An iframe saved into a URL field before the save path learned to move
+	 * it is still an embed, not a file. Counting it as a source would report
+	 * the video as self-hosted and suppress a perfectly good embed, so drop
+	 * it from the source list and fall back to the embed key.
+	 */
+	$sources = array_filter(
+		$sources,
+		static function ( $url ) {
+			return '' === majestic_tube_extract_iframe( $url );
+		}
+	);
+
+	$main_iframe = majestic_tube_extract_iframe( $main_url );
+
+	if ( '' !== $main_iframe ) {
+		$main_url = '';
+
+		if ( '' === trim( (string) $embed ) ) {
+			$embed = $main_iframe;
+		}
+	}
 
 	$data = array(
 		'type'      => 'none',
 		'sources'   => $sources,
 		'main'      => $main_url,
-		'embed'     => get_post_meta( $post_id, 'embed', true ),
+		'embed'     => $embed,
 		'shortcode' => get_post_meta( $post_id, 'shortcode', true ),
 	);
 

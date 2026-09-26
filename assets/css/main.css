@@ -5,7 +5,7 @@
  * high-contrast text, compact chrome, and responsive content grids.
  *
  * @package Majestic Tube
- * @version 2.1.0
+ * @version 2.1.1
  */
 
 /*
@@ -608,7 +608,12 @@ ol {
 	display: grid;
 	grid-template-columns: repeat(var(--mt-columns, 5), minmax(0, 1fr));
 	gap: var(--mt-grid-gap, 14px);
-	align-items: start;
+	/*
+	 * Stretch, not start. With `start` a card is exactly as tall as its own
+	 * content, so a one-line title leaves that card visibly shorter than the
+	 * rest of its row and the grid reads as a ragged edge.
+	 */
+	align-items: stretch;
 }
 
 .video-card {
@@ -779,6 +784,13 @@ ol {
 	letter-spacing: -0.005em;
 	-webkit-box-orient: vertical;
 	-webkit-line-clamp: 2;
+	/*
+	 * A line clamp caps the title at two lines but does not reserve them, so a
+	 * one-line title left the header a whole line-height short and the card
+	 * below it out of line with its neighbours. Two lines at line-height 1.4 are
+	 * 2.8em of this element's own font size, which is what is reserved here.
+	 */
+	min-height: 2.8em;
 }
 
 .video-card-link:hover .video-card-header span {
@@ -2318,6 +2330,7 @@ ol {
 
 	.video-card-header span {
 		-webkit-line-clamp: 3;
+		min-height: 4.2em;
 	}
 
 	.video-infos {
