@@ -7,8 +7,22 @@
  * widget instances on upgrade; the helpers below keep older integrations and
  * stored data available without making the templates option-backed again.
  *
+ * 2.1.0 adds three advertising capabilities that tube themes are expected to
+ * have, all funneling through majestic_tube_ads_allowed():
+ *
+ *  - In-feed: a card-sized code block repeated through the video grid
+ *    (majestic_tube_in_feed_ads()).
+ *  - Popunder / interstitial: a code blob printed once per page from the
+ *    footer (majestic_tube_output_popunder_ad()).
+ *  - Rotation: multiple code blobs for one slot, chosen by a stable daily
+ *    seed so a cached page stays self-consistent (majestic_tube_rotate_ad()).
+ *
+ * A consent gate closes the set: with the gate option on, every ad placement
+ * in this module prints nothing until a consent plugin flips the
+ * majestic_tube_ads_allowed filter.
+ *
  * @package Majestic Tube
- * @version 2.0.9
+ * @version 2.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -121,6 +135,159 @@ if ( ! function_exists( 'wpst_render_shortcodes' ) ) {
  */
 function majestic_tube_has_ad( $key ) {
 	return '' !== majestic_tube_get_ad( $key );
+}
+
+/*
+ * -------------------------------------------------------------------------
+ * 2.1.0 advertising capabilities
+ * ----------------------------------------------------------------------
+ */
+
+/**
+ * Whether advertising may print on this request.
+ *
+ * Two switches sit in front of every placement in this module:
+ *
+ *  1. The consent gate. Off by default (advertising behaves as before); on,
+ *     it defers to the majestic_tube_ads_allowed filter, which a consent
+ *     plugin or a snippet drives. Nothing here reads cookies itself - who
+ *     may see ads is a site policy, not a theme decision.
+ *  2. The Clean Tube Player check used by the placements below: the plugin
+ *     owns the player slots when installed.
+ *
+ * The filter is applied with the placement name so one integration can allow
+ * in-feed but hold the popunder, which is the split real consent setups ask
+ * for.
+ *
+ * @param string $placement Placement slug: in-feed, popunder, header, footer,
+ *                        under-player, video-sidebar, player.
+ * @return bool
+ */
+function majestic_tube_ads_allowed( $placement = '' ) {
+	$placement = sanitize_key( $placement );
+
+	if ( majestic_tube_option_is_on( 'gate-ads-on-consent' ) ) {
+		$allowed = false;
+	} else {
+		$allowed = true;
+	}
+
+	/**
+	 * Filter whether advertising may print for one placement.
+	 *
+	 * With the consent gate option enabled the default is false, and a consent
+	 * integration returns true once the visitor has opted in.
+	 *
+	 * @param bool   $allowed   Whether the placement may print.
+	 * @param string $placement Placement slug.
+	 */
+	return (bool) apply_filters( 'majestic_tube_ads_allowed', $allowed, $placement );
+}
+
+/**
+ * How often the in-feed block is inserted into the video grid.
+ *
+ * The frequency option is clamped to >= 3 so a typo cannot turn the grid into
+ * an ad wall (one ad after every card, or interleaved with the first card).
+ *
+ * @return int Number of video cards between two in-feed blocks.
+ */
+function majestic_tube_in_feed_frequency() {
+	$frequency = absint( majestic_tube_get_option( 'wpst-options', 'infeed-ad-frequency', 9 ) );
+
+	/**
+	 * Filter the in-feed insertion frequency.
+	 *
+	 * @param int $frequency Cards between two in-feed blocks, minimum 3.
+	 */
+	$frequency = (int) apply_filters( 'majestic_tube_in_feed_frequency', $frequency );
+
+	return max( 3, $frequency );
+}
+
+/**
+ * The in-feed code, or an empty string.
+ *
+ * @return string
+ */
+function majestic_tube_get_in_feed_ad() {
+	if ( ! majestic_tube_option_is_on( 'enable-infeed-ad' ) ) {
+		return '';
+	}
+
+	return majestic_tube_get_ad( 'infeed-ad-code' );
+}
+
+/**
+ * The popunder / interstitial code, or an empty string.
+ *
+ * @return string
+ */
+function majestic_tube_get_popunder_ad() {
+	if ( ! majestic_tube_option_is_on( 'enable-popunder-ad' ) ) {
+		return '';
+	}
+
+	return majestic_tube_get_ad( 'popunder-ad-code' );
+}
+
+/**
+ * Print the popunder / interstitial code once per page.
+ *
+ * Runs on wp_footer like the custom-scripts block, so the code executes after
+ * the document exists. The output is the administrator's markup, sanitized on
+ * input and passed through the same content filters as every other placement.
+ *
+ * @return void
+ */
+function majestic_tube_output_popunder_ad() {
+	if ( is_admin() || wp_doing_ajax() ) {
+		return;
+	}
+
+	$code = majestic_tube_get_popunder_ad();
+
+	if ( '' === $code || ! majestic_tube_ads_allowed( 'popunder' ) ) {
+		return;
+	}
+	majestic_tube_content_block( $code, array( 'majestic-tube-content-block--popunder' ), 'popunder-ad-code' );
+}
+add_action( 'wp_footer', 'majestic_tube_output_popunder_ad', 25 );
+
+/**
+ * Pick one entry from a newline-separated list of code blobs, repeatably.
+ *
+ * The seed is the UTC calendar day plus the placement name, so the choice is
+ * stable for the whole day: a page cached at 09:00 and served at 21:00 shows
+ * the creative that was chosen when it was rendered, and the network sees one
+ * coherent day per placement. Not cryptographically random on purpose - it is
+ * an ad-rotation scheduler, not a secret.
+ *
+ * @param string $codes     Newline-separated code blobs. An empty line is a
+ *                        weight: it skips a day in the rotation.
+ * @param string $placement Placement name, mixed into the seed.
+ * @return string One code blob, or '' when the list is empty.
+ */
+function majestic_tube_rotate_ad( $codes, $placement = '' ) {
+	$candidates = array_values( array_filter( array_map( 'trim', preg_split( '/\R+/', (string) $codes ) ) ) );
+
+	if ( ! $candidates ) {
+		return '';
+	}
+
+	if ( 1 === count( $candidates ) ) {
+		return $candidates[0];
+	}
+
+	$index = (int) ( ( time() + crc32( (string) $placement ) ) / DAY_IN_SECONDS ) % count( $candidates );
+	/**
+	 * Filter the rotation choice.
+	 *
+	 * @param string   $code      The selected code blob.
+	 * @param string[] $candidates All non-empty candidates.
+	 * @param string   $placement Placement name.
+	 */
+	return (string) apply_filters( 'majestic_tube_rotate_ad', $candidates[ $index ], $candidates, $placement );
 }
 
 /**

@@ -49,6 +49,25 @@ function majestic_tube_setup() {
 	add_image_size( 'majestic-tube-thumb-medium', 320, 180, true );
 	add_image_size( 'majestic-tube-thumb-small', 150, 84, true );
 
+	/*
+	 * Two sizes the original theme never had.
+	 *
+	 * `majestic-tube-thumb-card` is the middle step of the card srcset. Without
+	 * it a card had a choice of 320 or 640 pixels wide, so a card drawn between
+	 * those widths downloaded an image that was either soft or twice the size it
+	 * needed.
+	 *
+	 * `majestic-tube-poster` is what the <video> poster attribute asks for. The
+	 * largest 16:9 file the theme used to register is 640x360, which a player
+	 * column over 640 CSS pixels upscales - the picture is soft on every laptop
+	 * and on every phone with a high-density screen. Sizes are recorded in the
+	 * attachment metadata when an image is uploaded, so existing libraries keep
+	 * the old behaviour and new uploads get the sharp one; a site that wants the
+	 * new files for its old videos can regenerate the thumbnails.
+	 */
+	add_image_size( 'majestic-tube-thumb-card', 480, 270, true );
+	add_image_size( 'majestic-tube-poster', 1280, 720, true );
+
 	// Navigation menus.
 	register_nav_menus(
 		array(
@@ -77,9 +96,21 @@ function majestic_tube_setup() {
 	// Responsive embeds.
 	add_theme_support( 'responsive-embeds' );
 
-	// Editor styles matching the front-end tokens.
+	/*
+	 * Editor styles matching the front-end tokens.
+	 *
+	 * The font faces are listed first so the iframe parses the @font-face rules
+	 * before the editor stylesheet names the family; without that the editor
+	 * previews a fallback and the page keeps Inter, so the same heading wraps in
+	 * two different places.
+	 */
 	add_theme_support( 'editor-styles' );
-	add_editor_style( 'assets/css/editor.css' );
+	add_editor_style(
+		array(
+			'assets/css/fonts.css',
+			'assets/css/editor.css',
+		)
+	);
 
 	// Content width used by wide/full alignments.
 	$GLOBALS['content_width'] = isset( $GLOBALS['content_width'] ) ? $GLOBALS['content_width'] : 1200;

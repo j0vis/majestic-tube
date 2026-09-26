@@ -134,3 +134,42 @@
 		left: auto;
 	}
 }
+
+/* Metadata row */
+.video-infos-left > * + *::before {
+	margin-right: 0;
+	margin-left: 10px;
+}
+
+/* Search field: the square edge belongs to the button side. */
+.search-field {
+	border-radius: 0 7px 7px 0;
+}
+
+.search-submit {
+	border-radius: 7px 0 0 7px;
+}
+
+/* Compact header --------------------------------------------------------- */
+/*
+ * The rules the responsive layer of main.css adds that are direction-sensitive:
+ * the sub-menu indent, the menu button's bars, and the auto margin that pushes
+ * the search field towards the menu button.
+ */
+@media (max-width: 1024px) {
+	.header-inner .header-search .search-form {
+		margin-right: auto;
+		margin-left: 0;
+	}
+
+	#site-navigation ul ul,
+	#site-navigation .sub-menu {
+		padding: 4px 18px 8px 0;
+	}
+
+	#site-navigation .button-nav.menu-toggle::before,
+	#site-navigation .button-nav.menu-toggle::after {
+		right: auto;
+		left: 14px;
+	}
+}

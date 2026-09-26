@@ -81,8 +81,50 @@ function majestic_tube_get_video_schema( $post_id ) {
 		'isFamilyFriendly' => true,
 	);
 
+	/*
+	 * D5: the poster as a real ImageObject. A bare thumbnailUrl string carries
+	 * no dimensions, and Google Video indexing prefers knowing the image size
+	 * up front; the social-image helper already resolves the largest generated
+	 * crop and its width/height, so reuse it instead of a second lookup.
+	 * thumbnailUrl is printed as well because some consumers read only that
+	 * property.
+	 */
 	if ( $image['url'] ) {
 		$schema['thumbnailUrl'] = array( $image['url'] );
+
+		$thumbnail = array(
+			'@type' => 'ImageObject',
+			'url'   => $image['url'],
+		);
+
+		if ( $image['width'] && $image['height'] ) {
+			$thumbnail['width']  = (int) $image['width'];
+			$thumbnail['height'] = (int) $image['height'];
+		}
+
+		if ( $image['alt'] ) {
+			$thumbnail['name'] = $image['alt'];
+		}
+
+		$schema['thumbnail'] = $thumbnail;
+	}
+
+	/*
+	 * D4: genre and keywords. Google's VideoObject reference lists both as
+	 * recommended properties, and both are already on the post as terms -
+	 * categories for genre, tags for keywords. Nothing new is stored; this
+	 * only re-exposes what the WP-Script importer writes.
+	 */
+	$categories = wp_get_post_terms( $post_id, 'category', array( 'fields' => 'names' ) );
+
+	if ( $categories && ! is_wp_error( $categories ) ) {
+		$schema['genre'] = array_values( $categories );
+	}
+
+	$keywords = wp_get_post_terms( $post_id, 'post_tag', array( 'fields' => 'names' ) );
+
+	if ( $keywords && ! is_wp_error( $keywords ) ) {
+		$schema['keywords'] = implode( ', ', $keywords );
 	}
 
 	$duration = majestic_tube_get_duration_seconds( $post_id );
@@ -162,7 +204,7 @@ function majestic_tube_get_video_schema( $post_id ) {
  * @return void
  */
 function majestic_tube_output_video_schema() {
-	if ( ! is_singular( 'post' ) ) {
+	if ( ! is_singular( 'post' ) || ! majestic_tube_should_output_schema() ) {
 		return;
 	}
 

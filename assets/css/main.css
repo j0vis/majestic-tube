@@ -5,15 +5,27 @@
  * high-contrast text, compact chrome, and responsive content grids.
  *
  * @package Majestic Tube
- * @version 2.0.9
+ * @version 2.1.0
  */
 
 /*
- * No webfonts ship with the theme. Every rule below uses the operating
- * system's own interface font through --mt-font-family: Segoe UI on Windows,
- * San Francisco on macOS and iOS, Cantarell or Ubuntu on Linux, with the
- * classic vendor stacks behind it for older browsers. Nothing is downloaded,
- * so text paints on the first frame in the font the reader already reads.
+ * One type system, in three parts.
+ *
+ * The family comes from --mt-font-family, which inc/custom-code.php fills in
+ * from the "Site font" option: Inter by default, or the visitor's own system
+ * interface font. Inter is self-hosted in assets/fonts and declared in
+ * assets/css/fonts.css, so the same stylesheet renders the same letterforms on
+ * Windows, macOS, Linux, iOS and Android instead of four different ones. The
+ * stack still ends in the platform fonts, so a visitor whose font request fails
+ * reads a designed page rather than a serif default.
+ *
+ * The scale below is a small, deliberate set of sizes rather than one-off pixel
+ * values, so related pieces of chrome (badges, counters, labels, links) keep
+ * their relative proportions when the base size changes.
+ *
+ * font-synthesis is switched off because the bundled file is a variable font
+ * with a real 100-900 axis: there is no weight the browser would have to fake,
+ * and letting it fake one produced smeared bold on systems that lacked a face.
  */
 :root {
 	--mt-bg: #f4f5f7;
@@ -31,7 +43,22 @@
 	--mt-radius: 8px;
 	--mt-shadow: 0 2px 10px rgba(20, 24, 31, 0.07);
 	--mt-shadow-hover: 0 10px 28px rgba(20, 24, 31, 0.13);
-	--mt-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+
+	/* Type. */
+	--mt-font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+	--mt-font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "DejaVu Sans Mono", "Liberation Mono", monospace;
+	--mt-text-xs: 0.76rem;
+	--mt-text-sm: 0.84rem;
+	--mt-text-md: 0.94rem;
+	--mt-text-lg: 1.06rem;
+	--mt-leading: 1.6;
+	--mt-weight-normal: 400;
+	--mt-weight-medium: 500;
+	--mt-weight-semibold: 600;
+	--mt-weight-bold: 700;
+
+	/* Video card grid. */
+	--mt-grid-gap: 14px;
 }
 
 *,
@@ -50,8 +77,13 @@ body {
 	color: var(--mt-text);
 	font-family: var(--mt-font-family);
 	font-size: 16px;
-	line-height: 1.65;
+	line-height: var(--mt-leading);
+	font-synthesis: none;
+	font-kerning: normal;
+	font-variant-numeric: proportional-nums;
+	text-rendering: optimizeLegibility;
 	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 /*
@@ -64,6 +96,20 @@ input,
 select,
 textarea {
 	font-family: inherit;
+	font-synthesis: none;
+}
+
+/*
+ * Code and preformatted text keep a monospace face. The bundled font has none,
+ * so these fall back to the platform monospace stack rather than being stretched
+ * to Inter's proportions.
+ */
+code,
+kbd,
+pre,
+samp {
+	font-family: var(--mt-font-mono);
+	font-size: 0.9em;
 }
 
 a {
@@ -108,12 +154,17 @@ h5,
 h6 {
 	margin: 0 0 0.6em;
 	color: var(--mt-text);
-	font-weight: 700;
-	line-height: 1.25;
+	font-weight: var(--mt-weight-bold);
+	line-height: 1.22;
+	letter-spacing: -0.018em;
+	/* Balances a heading over its lines where supported; ignored elsewhere. */
+	text-wrap: balance;
 }
 
 p {
 	margin: 0 0 1em;
+	/* Avoids a single trailing word on a paragraph's last line. */
+	text-wrap: pretty;
 }
 
 ul,
@@ -435,18 +486,43 @@ ol {
 
 /* Page headings and filters ------------------------------------------- */
 
+/*
+ * Laid out with flex and a gap rather than as one inline run of text. The trail
+ * is a sequence of separate pieces - link, separator, link, current page - and
+ * running them together left the separator flush against both neighbours, which
+ * read as "Home/Videos/Title". A flex row puts equal air around each piece and
+ * keeps the whole trail wrap-safe on narrow screens.
+ */
 .breadcrumbs {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 0.3rem 0.5rem;
 	margin: 0 0 16px;
 	color: var(--mt-text-muted);
-	font-size: 0.84rem;
+	font-size: var(--mt-text-sm);
+	line-height: 1.4;
 }
 
 .breadcrumbs a {
 	color: var(--mt-text-muted);
+	overflow-wrap: anywhere;
 }
 
 .breadcrumbs a:hover {
 	color: var(--mt-accent);
+}
+
+.breadcrumbs .breadcrumb-separator {
+	color: var(--mt-border-strong);
+	font-size: 0.9em;
+	user-select: none;
+}
+
+.breadcrumbs .breadcrumb-current {
+	min-width: 0;
+	color: var(--mt-text);
+	overflow-wrap: anywhere;
 }
 
 .page-header {
@@ -522,10 +598,17 @@ ol {
 
 /* Video grid and cards -------------------------------------------------- */
 
+/*
+ * The gap is a token so the responsive steps below can tighten it without
+ * restating the whole grid, and it is deliberately smaller than the card
+ * radius: a 20px gutter on a five-column grid read as five separate blocks
+ * instead of one wall of videos.
+ */
 .video-grid {
 	display: grid;
 	grid-template-columns: repeat(var(--mt-columns, 5), minmax(0, 1fr));
-	gap: 20px;
+	gap: var(--mt-grid-gap, 14px);
+	align-items: start;
 }
 
 .video-card {
@@ -542,6 +625,12 @@ ol {
 	border-color: var(--mt-border-strong);
 	box-shadow: var(--mt-shadow-hover);
 	transform: translateY(-2px);
+}
+
+/* The whole card is one link, so remove the tap highlight that paints over the
+ * rounded corners on touch devices. */
+.video-card-link {
+	-webkit-tap-highlight-color: transparent;
 }
 
 .video-card-link {
@@ -667,9 +756,15 @@ ol {
 	background: var(--mt-accent);
 }
 
+/*
+ * Grid titles are medium, not bold. At five columns the card is around 230px
+ * wide, and a bold title at that measure filled the card with ink and competed
+ * with the thumbnail for attention - the opposite of what a browsing grid is
+ * for. Medium keeps the title legible and lets the image lead.
+ */
 .video-card-header,
 .entry-header.video-card-header {
-	padding: 11px 12px 13px;
+	padding: 10px 11px 12px;
 }
 
 .video-card-header span,
@@ -678,9 +773,10 @@ ol {
 	display: -webkit-box;
 	overflow: hidden;
 	color: var(--mt-text);
-	font-size: 0.94rem;
-	font-weight: 700;
-	line-height: 1.38;
+	font-size: var(--mt-text-md);
+	font-weight: var(--mt-weight-medium);
+	line-height: 1.4;
+	letter-spacing: -0.005em;
 	-webkit-box-orient: vertical;
 	-webkit-line-clamp: 2;
 }
@@ -748,12 +844,20 @@ ol {
 	box-shadow: var(--mt-shadow);
 }
 
+/*
+ * The header sits below the player, not above it. Leading with the video is
+ * what a tube page is for: the title, date, views and likes are confirmation
+ * after the fact, and pushing them below also means the player is fully in view
+ * on a phone without scrolling past a headline first.
+ */
 .single-video .entry-header {
-	margin-bottom: 20px;
+	margin: 0 0 12px;
 }
 
 .single-video .entry-title {
-	font-size: clamp(1.65rem, 3.5vw, 2.35rem);
+	font-size: clamp(1.25rem, 2.4vw, 1.65rem);
+	font-weight: var(--mt-weight-semibold);
+	line-height: 1.28;
 }
 
 .single-video .entry-meta {
@@ -763,23 +867,38 @@ ol {
 	gap: 8px;
 	margin-top: 10px;
 	color: var(--mt-text-muted);
-	font-size: 0.84rem;
+	font-size: var(--mt-text-sm);
 }
 
-.entry-hd {
+/*
+ * Badges on the single view. They are inline chips rather than block elements,
+ * so they can sit in the metadata row next to the date, the view count and the
+ * like count without breaking the line rhythm.
+ */
+.entry-hd,
+.video-hd {
+	display: inline-block;
 	padding: 0.12rem 0.42rem;
 	background: var(--mt-accent);
 	border-radius: 4px;
 	color: #fff;
-	font-weight: 800;
+	font-size: var(--mt-text-xs);
+	font-weight: var(--mt-weight-semibold);
+	line-height: 1.5;
 }
 
-.entry-duration {
+.entry-duration,
+.video-duration {
+	display: inline-block;
 	padding: 0.15rem 0.45rem;
 	background: var(--mt-surface-hover);
+	border: 1px solid var(--mt-border);
 	border-radius: 4px;
 	color: var(--mt-text-muted);
-	font-weight: 700;
+	font-size: var(--mt-text-xs);
+	font-weight: var(--mt-weight-medium);
+	font-variant-numeric: tabular-nums;
+	line-height: 1.5;
 }
 
 .single-video .video-player {
@@ -798,6 +917,17 @@ ol {
 	height: auto;
 }
 
+/*
+ * Embed player box.
+ *
+ * The rules apply to any iframe, video, embed or object anywhere inside the
+ * box, not just to a direct child. Provider embed codes are not consistent:
+ * some are a bare <iframe>, others wrap it in a paragraph, a figure or a div
+ * of their own, and a wrapper meant the player kept its 560x315 attributes,
+ * overflowed the 16:9 box and got clipped by the parent's overflow - which
+ * looks exactly like a broken video. `inset: 0` sizes every one of them
+ * against the nearest positioned ancestor, which is this box.
+ */
 .video-embed {
 	position: relative;
 	overflow: hidden;
@@ -805,13 +935,36 @@ ol {
 	background: #000;
 }
 
+@supports not (aspect-ratio: 16 / 9) {
+	.video-embed::before {
+		display: block;
+		content: "";
+		padding-bottom: var(--mt-thumb-ratio, 56.25%);
+	}
+}
+
 .video-embed iframe,
-.video-embed video {
+.video-embed video,
+.video-embed embed,
+.video-embed object {
 	position: absolute;
 	inset: 0;
+	display: block;
 	width: 100%;
 	height: 100%;
+	max-width: 100%;
+	max-height: 100%;
 	border: 0;
+}
+
+/* A shortcode or embed that renders plain text (a bare URL, a caption-only
+ * player) should still be readable instead of white-on-black at 100% height. */
+.video-embed > p {
+	position: absolute;
+	inset: auto 0 0;
+	margin: 0;
+	padding: 12px 14px;
+	color: #fff;
 }
 
 #logo-watermark {
@@ -861,9 +1014,10 @@ ol {
 	border: 1px solid var(--mt-border);
 	border-radius: 7px;
 	color: var(--mt-text-muted);
-	font-size: 0.9rem;	}
+	font-size: var(--mt-text-sm);
+}
 
-	.video-infos-left,
+.video-infos-left,
 .video-infos-right,
 .video-rating-actions,
 .video-utility-actions {
@@ -873,26 +1027,42 @@ ol {
 	gap: 10px;
 }
 
-.video-infos-left > span + span::before {
+/*
+ * Separator between metadata items. Matched with a child combinator on `*`
+ * rather than on `span` so the publication date - which is printed as a <time>
+ * element - is spaced like the view and like counters, and so an element a
+ * plugin adds to the row is spaced too.
+ */
+.video-infos-left > * + *::before {
 	margin-right: 10px;
 	color: var(--mt-border-strong);
 	content: "·";
+}
+
+.video-date,
+.video-views,
+.video-likes {
+	font-variant-numeric: tabular-nums;
+}
+
+.video-date {
+	color: var(--mt-text-muted);
 }
 
 .video-infos-left .entry-hd {
 	padding: 0.12rem 0.42rem;
 	border-radius: 4px;
 	color: #fff;
-	font-size: 0.7rem;
-	font-weight: 800;
+	font-size: var(--mt-text-xs);
+	font-weight: var(--mt-weight-semibold);
 	line-height: 1.35;
 }
 
 .video-duration,
 .video-rate-label {
 	color: var(--mt-text-muted);
-	font-size: 0.84rem;
-	font-weight: 700;
+	font-size: var(--mt-text-sm);
+	font-weight: var(--mt-weight-semibold);
 }
 
 .video-actions {
@@ -917,7 +1087,7 @@ ol {
 
 .video-views span {
 	color: var(--mt-text);
-	font-weight: 800;
+	font-weight: var(--mt-weight-semibold);
 }
 
 #rating {
@@ -1830,6 +2000,27 @@ ol {
 	overflow: hidden;
 }
 
+/*
+ * In-feed advertising (2.1.0). The block is printed inside .video-grid as a
+ * grid item after every Nth card, so it inherits the column track and needs
+ * nothing but an aspect-ratio guard and a full-row span on the phone layout,
+ * where a squeezed ad cell would be unreadable.
+ */
+.majestic-tube-content-block--in-feed {
+	min-width: 0;
+	min-height: 84px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	overflow: hidden;
+}
+
+@media (max-width: 600px) {
+	.majestic-tube-content-block--in-feed {
+		grid-column: 1 / -1;
+	}
+}
+
 .majestic-tube-content-block img,
 .majestic-tube-content-block iframe {
 	max-width: 100%;
@@ -2073,7 +2264,9 @@ ol {
 	.page-content {
 		padding-top: 18px;
 		padding-bottom: 20px;
-	}	.video-infos-left,
+	}
+
+	.video-infos-left,
 	.video-infos-right,
 	.video-rating-actions,
 	.video-utility-actions {
@@ -2847,42 +3040,41 @@ body.custom-background {
 	box-shadow: none;
 }
 
-.single-video .entry-header {
-	margin-bottom: 1em;
-	text-align: center;
-}
-
-.single-video .entry-title {
-	font-size: clamp(1.5rem, 3vw, 2rem);
-	font-weight: 400;
-}
-
+/*
+ * The player is the first thing on the page, so it owns the top spacing and the
+ * title block that follows it is a caption, not a page header.
+ */
 .single-video .video-player {
-	margin-bottom: 0.75em;
+	margin: 0 0 14px;
+}
+
+.single-video .entry-header {
+	margin: 0 0 10px;
 }
 
 .single-video .video-infos {
-	margin-top: 0.75em;
-	padding: 0;
+	margin: 0 0 14px;
+	padding: 0 0 12px;
 	border: 0;
+	border-bottom: 1px solid var(--mt-border);
 	background: transparent;
 }
 
 .single-video .video-actions {
 	margin-top: 0;
-	padding-top: 0.75em;
+	padding-top: 0;
+	border-top: 0;
 }
 
 .single-video .video-description {
-	margin-top: 1em;
-	text-align: justify;
+	margin-top: 1.25em;
+	text-align: left;
 }
 
-@media screen and (max-width: 600px) {
-	.single-video .entry-header,
-	.single-video .video-description {
-		text-align: left;
-	}
+/* A long description is easier to scan in shorter lines than the full 1200px
+ * content column. */
+.single-video .video-description .entry-content > * {
+	max-width: 78ch;
 }
 
 /* Single-video widget sidebar ----------------------------------------- */
@@ -2927,5 +3119,464 @@ body.custom-background {
 @media screen and (max-width: 600px) {
 	.video-sidebar {
 		padding: 14px;
+	}
+}
+
+/* Responsive guarantees --------------------------------------------------- */
+/*
+ * The ladder, from wide to narrow. Every step is written in pixels.
+ *
+ *   1100px  the grid gives up columns; the footer drops from four to two
+ *   1024px  the header collapses to a compact bar with a menu button
+ *    783px  phones: the mobile column count, the stacked header, stacked
+ *           action rows, scrollable tables
+ *    600px  the tightest spacing step
+ *
+ * Pixels, not em. This stylesheet used to mix 64em and 48em with pixel values
+ * elsewhere, and an em inside a media query resolves against the browser's
+ * *default* font size rather than the page's: a visitor who sets a 20px default
+ * in Chrome got the mobile header at 1280px and 960px instead of 1024px and
+ * 768px, so the bar - and the menu button that belongs to it - appeared at a
+ * different width for that visitor alone. Pixels behave the same everywhere.
+ */
+
+html {
+	/* Stops iOS Safari from inflating text after a rotation to landscape. */
+	-webkit-text-size-adjust: 100%;
+}
+
+/*
+ * Long unbroken strings.
+ *
+ * A pasted URL, a release name or a hashtag is one "word" to the line breaker
+ * and wider than a phone, so the text box kept its own width and painted the
+ * line past the page - which is what put a horizontal scrollbar on any
+ * single-video page that quoted a URL. `break-word` only breaks a word that
+ * cannot fit, so ordinary prose is untouched.
+ */
+body {
+	overflow-wrap: break-word;
+}
+
+.entry-title,
+.page-title,
+.homepage-title,
+.video-description-title,
+.related-title,
+.widget-title,
+.video-card-header span,
+.site-info,
+.tags-list,
+.comment-content,
+.entry-content {
+	/*
+	 * `anywhere` also lowers the min-content width, which is what lets these
+	 * boxes shrink inside a grid or a flex row instead of pushing it wider.
+	 */
+	overflow-wrap: anywhere;
+}
+
+/*
+ * Raw media.
+ *
+ * A width/height attribute on a <video>, <embed> or <object> is a
+ * presentational hint, and `max-width: 100%` only clamps the width: the
+ * attribute height stayed, so the picture was stretched rather than scaled.
+ */
+video,
+embed,
+object {
+	max-width: 100%;
+	height: auto;
+}
+
+/*
+ * Shortcode player.
+ *
+ * The embed branch renders inside a 16:9 box, but the shortcode branch had no
+ * rule at all: a provider iframe kept the 560x315 attributes the shortcode
+ * printed, so it was wider than its column on a laptop and much wider than a
+ * phone, where the sidebar simply cut it off. Filling the column and deriving
+ * the height from the width is the shape every provider player assumes.
+ */
+.video-shortcode {
+	position: relative;
+	width: 100%;
+}
+
+.video-shortcode > iframe,
+.video-shortcode > video,
+.video-shortcode > embed,
+.video-shortcode > object {
+	display: block;
+	width: 100%;
+	max-width: 100%;
+	height: auto;
+	border: 0;
+	aspect-ratio: 16 / 9;
+}
+
+/*
+ * A logo wider than the space left beside the menu button used to push the
+ * button off the screen: the image was capped at the logo option's width (300px
+ * by default) rather than at the box it sits in.
+ */
+.header-inner .logo,
+.site-logo {
+	min-width: 0;
+}
+
+.site-logo img {
+	max-width: min(100%, var(--mt-logo-max-width, 300px));
+}
+
+.logo-footer img {
+	max-width: min(100%, var(--mt-logo-max-width, 260px));
+}
+
+/*
+ * One gutter scale for the whole page. The content area was padded by a fixed
+ * 1em (0.75em under 600px) on top of everything else, which cost a phone 60 of
+ * its 320 pixels before a single video card was drawn.
+ */
+#page.site > .content-area {
+	padding: clamp(12px, 3vw, 20px);
+}
+
+/* Tablet ------------------------------------------------------------------ */
+
+/*
+ * The wide header keeps its original single row, but a long menu could always
+ * push the search field and the logo off the right edge - the header had no way
+ * to give the row a second line. Wrapping turns that into a taller header
+ * instead of a clipped one.
+ */
+@media (min-width: 1025px) {
+	.header-inner.site-branding.row {
+		flex-wrap: wrap;
+	}
+
+	.header-inner .main-navigation {
+		min-width: 0;
+	}
+}
+
+@media (max-width: 1100px) {
+	/*
+	 * repeat() takes an integer, so a column count cannot be clamped from one
+	 * custom property: inc/custom-code.php emits one token per step and this
+	 * rule consumes it. The previous rule hardcoded three columns here, which
+	 * made the "videos per row" option meaningless between 783px and 1100px.
+	 */
+	.video-grid {
+		grid-template-columns: repeat(var(--mt-columns-tablet, 3), minmax(0, 1fr));
+	}
+
+	.footer-widgets.three-columns-footer,
+	.footer-widgets.four-columns-footer {
+		grid-template-columns: repeat(2, minmax(0, 1fr));
+	}
+}
+
+/*
+ * Compact header.
+ *
+ * Below 1024px the header is one row: logo, search field, menu button. The
+ * menu opens as a panel across the header.
+ *
+ * The original implementation pinned the navigation and the panel it opens to
+ * hard-coded offsets (`top: 20px`, `top: 100px`) inside a header of fixed 135px
+ * height. A taller logo, a longer site title or a wrapped menu label pushed the
+ * real content out of that box while the panel stayed at 100px, so it floated
+ * over the search field, and a logo image never fit at all. The header is a grid
+ * that sizes itself now, and the panel is anchored to its bottom edge.
+ */
+@media (max-width: 1024px) {
+	.header-inner.site-branding.row {
+		position: relative;
+		display: grid;
+		grid-template-columns: auto minmax(0, 1fr) auto;
+		align-items: center;
+		gap: 10px 14px;
+		height: auto;
+		max-height: none;
+		min-height: 0;
+		padding: 10px 16px;
+	}
+
+	.header-inner .logo {
+		grid-area: 1 / 1;
+		display: flex;
+		align-items: center;
+		min-width: 0;
+		line-height: 1.1;
+	}
+
+	.header-inner .header-search {
+		grid-area: 1 / 2;
+		display: block;
+		width: 100%;
+		min-width: 0;
+		margin: 0 !important;
+	}
+
+	.header-inner .header-search .search-form,
+	.header-inner .header-search .search-form label,
+	.header-inner .header-search .search-field {
+		width: 100%;
+	}
+
+	/*
+	 * The field fills the middle track of the bar, but a 1000px-wide box for a
+	 * seven-word query is not a search bar, it is a banner: cap it and let it sit
+	 * beside the menu button instead.
+	 */
+	.header-inner .header-search .search-form {
+		max-width: 420px;
+		margin-left: auto;
+	}
+
+	.header-inner #site-navigation {
+		position: static;
+		grid-area: 1 / 3;
+		justify-self: end;
+		display: flex;
+		align-items: center;
+		justify-content: flex-end;
+		float: none;
+		clear: none;
+		width: auto;
+		margin: 0;
+	}
+
+	#site-navigation > ul {
+		position: absolute;
+		top: 100%;
+		right: 0;
+		left: 0;
+		z-index: 80;
+		display: none;
+		width: auto;
+		max-width: none;
+		max-height: 72vh;
+		overflow-y: auto;
+		margin: 0;
+		padding: 6px 0;
+		background: var(--mt-surface);
+		border: 1px solid var(--mt-border);
+		border-top-width: 0;
+		border-radius: 0 0 var(--mt-radius) var(--mt-radius);
+		box-shadow: 0 16px 32px rgba(20, 24, 31, 0.16);
+	}
+
+	#site-navigation > ul.is-open,
+	#site-navigation > ul.open {
+		display: block;
+	}
+
+	#site-navigation > ul > li {
+		float: none;
+		width: 100%;
+		border-bottom: 1px solid var(--mt-border);
+	}
+
+	#site-navigation > ul > li:last-child {
+		border-bottom: 0;
+	}
+
+	#site-navigation > ul > li > a {
+		width: 100%;
+		padding: 14px 18px;
+		border-radius: 0;
+		color: var(--mt-text);
+		font-size: 1rem;
+		font-weight: 600;
+	}
+
+	#site-navigation ul ul,
+	#site-navigation .sub-menu {
+		position: static;
+		left: auto;
+		display: none;
+		width: 100%;
+		min-width: 0;
+		margin: 0;
+		padding: 4px 0 8px 18px;
+		background: var(--mt-surface-hover);
+		border: 0;
+		box-shadow: none;
+	}
+
+	#site-navigation ul ul li a,
+	#site-navigation .sub-menu a {
+		width: 100%;
+		padding: 12px 18px;
+		color: var(--mt-text-muted);
+	}
+
+	#site-navigation li:hover > ul,
+	#site-navigation li:focus-within > ul,
+	#site-navigation li.focus > ul {
+		left: auto;
+		display: block;
+	}
+
+	/*
+	 * A real control, not a transparent hotspot pinned to the top-right corner:
+	 * the button is in the flow of the header row and keeps a 48px target, which
+	 * matters most on the one device where it is the only way into the menu. Its
+	 * two bars are drawn with pseudo-elements, so they follow `currentColor`.
+	 */
+	#site-navigation .button-nav.menu-toggle {
+		position: relative;
+		top: auto;
+		right: auto;
+		display: inline-flex;
+		width: 48px;
+		height: 48px;
+		margin: 0;
+		padding: 0;
+		background: var(--mt-surface);
+		border: 1px solid var(--mt-border-strong);
+		border-radius: var(--mt-radius);
+		color: var(--mt-text-muted);
+		cursor: pointer;
+	}
+
+	#site-navigation .button-nav.menu-toggle::before,
+	#site-navigation .button-nav.menu-toggle::after {
+		background: currentColor;
+	}
+}
+
+/*
+ * A related grid sits in a column beside the sidebar, so it never wants the
+ * full desktop column count.
+ */
+@media (min-width: 783px) {
+	.related-videos .video-grid {
+		grid-template-columns: repeat(var(--mt-columns-tablet, 3), minmax(0, 1fr));
+	}
+}
+
+/* Phone ------------------------------------------------------------------- */
+
+@media (max-width: 782px) {
+	/*
+	 * Two rows: logo and menu button, then the search field across the full
+	 * width.
+	 */
+	.header-inner.site-branding.row {
+		grid-template-columns: minmax(0, 1fr) auto;
+		padding: 10px 14px;
+	}
+
+	.header-inner .header-search {
+		grid-area: 2 / 1 / auto / -1;
+	}
+
+	.header-inner #site-navigation {
+		grid-area: 1 / 2;
+	}
+
+	/*
+	 * The column counts are restated here, after the tablet rule, on purpose: a
+	 * media block does not narrow the one above it, the rules that win are the
+	 * ones that come last.
+	 */
+	.video-grid,
+	.related-videos .video-grid {
+		grid-template-columns: repeat(var(--mt-columns-mobile, 2), minmax(0, 1fr));
+	}
+
+	.video-preview-item.full-width {
+		grid-column: 1 / -1;
+	}
+
+	/*
+	 * A squeezed row is worse than a stacked one. Both halves of the metadata
+	 * row could shrink, so instead of wrapping the rating block was pressed to
+	 * 84px and its bar painted across its own label.
+	 */
+	.video-infos {
+		flex-direction: column;
+		align-items: stretch;
+		gap: 10px;
+	}
+
+	.video-infos-right {
+		justify-content: flex-start;
+	}
+
+	.rating-result {
+		flex-wrap: wrap;
+	}
+
+	.video-rate {
+		flex: 1 1 90px;
+		min-width: 60px;
+		max-width: 150px;
+	}
+
+	/* Touch targets: 44px is the smallest comfortable one. */
+	.search-field,
+	.search-submit,
+	#site-navigation .button-nav.menu-toggle {
+		min-height: 44px;
+	}
+
+	.post-like a.button,
+	.post-like .button,
+	.post-dislike,
+	.video-share-toggle,
+	.video-report-toggle,
+	#tracking-url {
+		min-height: 44px;
+	}
+
+	#site-navigation > ul > li > a {
+		min-height: 46px;
+	}
+
+	.pagination ul li a,
+	.pagination ul li span {
+		min-width: 44px;
+		height: 44px;
+	}
+
+	/*
+	 * A table is never narrower than its own content, so a wide table in a
+	 * three-column article stretched the page. A scrollable block keeps the page
+	 * width intact and lets the reader pan the table instead.
+	 */
+	.entry-content table {
+		display: block;
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+}
+
+@media (max-width: 600px) {
+	:root {
+		--mt-grid-gap: 10px;
+	}
+
+	.video-grid,
+	.related-videos .video-grid {
+		grid-template-columns: repeat(var(--mt-columns-mobile, 2), minmax(0, 1fr));
+		gap: var(--mt-grid-gap);
+	}
+}
+
+/*
+ * iOS Safari zooms the whole page when a control smaller than 16px takes
+ * focus. The theme's type scale is deliberately smaller than that, so pin just
+ * the controls on WebKit touch builds and leave the rest alone.
+ */
+@supports (-webkit-touch-callout: none) {
+	input:not([type="checkbox"]):not([type="radio"]):not([type="submit"]):not([type="button"]):not([type="reset"]),
+	select,
+	textarea {
+		font-size: 16px;
 	}
 }

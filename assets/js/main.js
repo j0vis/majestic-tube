@@ -6,7 +6,7 @@
  * the shared `ajax-nonce` the original theme used.
  *
  * @package Majestic Tube
- * @version 2.0.9
+ * @version 2.1.0
  */
 
 ( function () {
@@ -246,6 +246,27 @@
 			return;
 		}
 
+		// A6: play-anchored counting. When the option is on, the view is only
+		// recorded after three seconds of actual playback, so a bounce that
+		// never presses play does not register. The default (off) keeps the
+		// original load-time behavior.
+		if ( options.countViewsOnPlay ) {
+			initPlayAnchoredView( postId );
+			return;
+		}
+
+		sendView( postId );
+	}
+
+	/**
+	 * Send the post-views request for one post.
+	 *
+	 * Split out of countView() so both the load-time path and the play-anchored
+	 * path share the sessionStorage guard and the response handling.
+	 *
+	 * @param {string|number} postId Post id.
+	 */
+	function sendView( postId ) {
 		var storageKey = 'majesticTubeViewed_' + postId;
 
 		try {
@@ -277,6 +298,34 @@
 			} catch ( e ) {
 				// Ignore.
 			}
+		} );
+	}
+
+	/**
+	 * Count the view once playback has actually started.
+	 *
+	 * Listens for the first timeupdate past three seconds on the native
+		 * <video> element (Video.js drives the same element, so both players are
+		 * covered by one listener), then removes itself and posts the view. If
+		 * the video never plays, the listener is discarded with the page.
+	 *
+	 * @param {string|number} postId Post id.
+	 */
+	function initPlayAnchoredView( postId ) {
+		var video = document.getElementById( 'wpst-video' );
+
+		if ( ! video ) {
+			return;
+		}
+
+		video.addEventListener( 'timeupdate', function onTimeUpdate() {
+			if ( video.currentTime < 3 ) {
+				return;
+			}
+
+			video.removeEventListener( 'timeupdate', onTimeUpdate );
+
+			sendView( postId );
 		} );
 	}
 

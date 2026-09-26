@@ -8,7 +8,7 @@
  * escaped links and the same `wpst_page_navi` contract.
  *
  * @package Majestic Tube
- * @version 2.0.9
+ * @version 2.1.0
  */
 
 defined( 'ABSPATH' ) || exit;

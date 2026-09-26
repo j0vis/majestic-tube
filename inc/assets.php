@@ -3,7 +3,7 @@
  * Script and style enqueuing.
  *
  * @package Majestic Tube
- * @version 2.0.9
+ * @version 2.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -107,12 +107,30 @@ function majestic_tube_enqueue_assets() {
 	// prevent a browser/CDN from continuing to serve the previous dark pass.
 	wp_enqueue_style( 'majestic-tube-style', get_stylesheet_uri(), array(), majestic_tube_asset_version( 'style.css' ) );
 
-	// main.css also carries the theme's design tokens; the type is the
-	// operating system's own interface font, so nothing extra is enqueued.
+	/*
+	 * The bundled webfont. Enqueued first so its @font-face rules are declared
+	 * before anything that selects the family, and only when an option actually
+	 * picks it: choosing the system stack must mean no font request at all.
+	 *
+	 * This is the theme's own copy of Inter, not a third-party font host, so a
+	 * page makes no extra DNS lookup and leaks no Referer - and because it is a
+	 * normal enqueued stylesheet the URL honours the asset-version cache buster.
+	 */
+	if ( majestic_tube_uses_bundled_font() ) {
+		wp_enqueue_style(
+			'majestic-tube-fonts',
+			MAJESTIC_TUBE_URI . '/assets/css/fonts.css',
+			array(),
+			majestic_tube_asset_version( 'assets/css/fonts.css' )
+		);
+	}
+
+	// main.css also carries the theme's design tokens, and it depends on the
+	// @font-face declarations above when the bundled family is in use.
 	wp_enqueue_style(
 		'majestic-tube-main',
 		MAJESTIC_TUBE_URI . '/assets/css/main.css',
-		array( 'majestic-tube-style' ),
+		majestic_tube_uses_bundled_font() ? array( 'majestic-tube-style', 'majestic-tube-fonts' ) : array( 'majestic-tube-style' ),
 		majestic_tube_asset_version( 'assets/css/main.css' )
 	);
 
@@ -234,6 +252,14 @@ function majestic_tube_enqueue_assets() {
 				'qualitySelector'  => majestic_tube_option_is_on( 'videojs-quality-selector' ),
 				'nativePlayer'     => majestic_tube_option_is_on( 'use-native-player' ),
 				'autoplay'         => majestic_tube_option_is_on( 'autoplay-video-player' ),
+
+				/*
+				 * A6: play-anchored view counting. When on, main.js waits for
+				 * three seconds of playback before posting the view; when off
+				 * (the default) the view is counted on page load exactly like
+				 * the original theme.
+				 */
+				'countViewsOnPlay' => majestic_tube_option_is_on( 'count-views-on-play' ),
 			),
 			'i18n'           => array(
 				'likeError'     => __( 'Could not record your vote. Please try again.', 'majestic-tube' ),
@@ -344,3 +370,76 @@ function majestic_tube_resource_hints( $urls, $relation_type ) {
 	return $urls;
 }
 add_filter( 'wp_resource_hints', 'majestic_tube_resource_hints', 10, 2 );
+
+/**
+ * Preload the Latin subset of the bundled webfont.
+ *
+ * The stylesheet is a render-blocking request that has to arrive before the
+ * browser learns about the font file, so without this the first text on the
+ * page always paints in the fallback and swaps once the font lands. Preloading
+ * the one subset that almost every page needs lets both requests run at the
+ * same time; the Latin Extended subset is deliberately left out so a page with
+ * no accented characters never pays for it.
+ *
+ * Only the subset declared for the Latin range is preloaded, and only while an
+ * option still selects the bundled family, so the hint can never point at a
+ * file the page does not use.
+ *
+ * @param array $resources Resource descriptors for wp_preload_resources().
+ * @return array
+ */
+function majestic_tube_preload_font( $resources ) {
+	if ( ! majestic_tube_uses_bundled_font() ) {
+		return $resources;
+	}
+
+	$resources[] = array(
+		'href'        => MAJESTIC_TUBE_URI . '/assets/fonts/inter-latin-wght-normal.woff2',
+		'as'          => 'font',
+		'type'        => 'font/woff2',
+		'crossorigin' => 'anonymous',
+	);
+
+	return $resources;
+}
+add_filter( 'wp_preload_resources', 'majestic_tube_preload_font' );
+
+/**
+ * Opt in to the Speculative Loading API (WordPress 6.8+).
+ *
+ * Tube navigation is link-heavy and mostly idempotent - archives, taxonomy
+ * pages and video pages are safe to prefetch on hover, and a prerender on
+ * hover makes the next view feel instant. Forms, the membership modal and the
+ * like/report endpoints are POSTs, which the API never prefetches, so there
+ * is no correctness risk in the default conservative pair.
+ *
+ * WordPress ignores this filter entirely before 6.8, so the setting is
+ * versionless: on older cores nothing is emitted and nothing breaks.
+ *
+ * @param array $speculation_mode {
+ *     @type string $mode  Either 'hover' (default) or 'eager'.
+ *     @type string $eagerness 'conservative', 'moderate' or 'immediate'.
+ * }
+ * @return array
+ */
+function majestic_tube_speculation_rules( $speculation_mode ) {
+	if ( ! is_array( $speculation_mode ) ) {
+		$speculation_mode = array();
+	}
+
+	/**
+	 * Filter whether the theme opts in to speculative loading.
+	 *
+	 * @param bool $enabled Default true; a heavily ad-personalized site may
+	 *                      want the prefetch budget for its ad network instead.
+	 */
+	if ( ! apply_filters( 'majestic_tube_speculative_loading', true ) ) {
+		return $speculation_mode;
+	}
+
+	$speculation_mode['mode']      = 'hover';
+	$speculation_mode['eagerness'] = 'conservative';
+
+	return $speculation_mode;
+}
+add_filter( 'wp_speculation_rules_configuration', 'majestic_tube_speculation_rules' );

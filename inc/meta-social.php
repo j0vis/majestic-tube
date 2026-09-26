@@ -7,8 +7,14 @@
  * defects: the original hardcoded a third-party Facebook app ID, and declared
  * every og:image as 200x200 regardless of the real file.
  *
+ * 2.1.0: og:video:width/height now come from the poster file actually
+ * generated for the video instead of the hardcoded 640x360, and a
+ * twitter:player card is emitted when the administrator configures a player
+ * URL base (D3 of the feature audit). Both are skipped entirely when an SEO
+ * plugin owns the social tags.
+ *
  * @package Majestic Tube
- * @version 2.0.0
+ * @version 2.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -192,6 +198,40 @@ function majestic_tube_get_social_video( $post_id ) {
 }
 
 /**
+ * Pixel dimensions to advertise for a video's poster.
+ *
+ * The featured image's largest generated crop is the truthful answer; the
+ * hardcoded 640x360 from the original theme is the fallback when the picture
+ * is a remote thumb with no attachment metadata.
+ *
+ * @param int $post_id Post ID.
+ * @return array{width:int,height:int}
+ */
+function majestic_tube_get_social_video_dimensions( $post_id ) {
+	$dimensions = array(
+		'width'  => 640,
+		'height' => 360,
+	);
+
+	if ( $post_id && has_post_thumbnail( $post_id ) ) {
+		$data = wp_get_attachment_image_src( (int) get_post_thumbnail_id( $post_id ), 'majestic-tube-poster' );
+
+		if ( $data && ! empty( $data[1] ) && ! empty( $data[2] ) ) {
+			$dimensions['width']  = (int) $data[1];
+			$dimensions['height'] = (int) $data[2];
+		}
+	}
+
+	/**
+	 * Filter the dimensions advertised for a video poster.
+	 *
+	 * @param array $dimensions width/height in CSS pixels.
+	 * @param int   $post_id    Post ID.
+	 */
+	return (array) apply_filters( 'majestic_tube_social_video_dimensions', $dimensions, $post_id );
+}
+
+/**
  * Print Open Graph and Twitter Card meta tags.
  *
  * @return void
@@ -243,10 +283,19 @@ function majestic_tube_output_social_meta() {
 	}
 
 	if ( $video['file'] ) {
+		/*
+		 * D2: dimensions of the file actually generated, not a hardcoded
+		 * 640x360. The poster size (1280x720) is the file a modern library
+		 * has, so scrapers letterboxing a 16:9 file against wrong dimensions
+		 * stop being a thing. The fallback keeps the original value for a
+		 * video whose picture is a remote thumb with unknown size.
+		 */
+		$video_dimensions = majestic_tube_get_social_video_dimensions( $post_id );
+
 		$tags['og:video']        = $video['file'];
 		$tags['og:video:type']   = $video['mime'];
-		$tags['og:video:width']  = '640';
-		$tags['og:video:height'] = '360';
+		$tags['og:video:width']  = (string) $video_dimensions['width'];
+		$tags['og:video:height'] = (string) $video_dimensions['height'];
 	} elseif ( $video['embed'] ) {
 		$tags['og:video']      = $video['embed'];
 		$tags['og:video:type'] = 'text/html';
@@ -290,6 +339,27 @@ function majestic_tube_output_social_meta() {
 
 	$twitter['twitter:title']       = $title;
 	$twitter['twitter:description'] = $description;
+
+	/*
+	 * D3: the player card. X/Twitter renders twitter:player as a live embed
+	 * inside a ~435px-wide iframe, so it needs an HTTPS URL that returns a
+	 * bare page with the video on it. The theme cannot guarantee such a page
+	 * for every permalink structure, so the base URL is an option and the post
+	 * id is appended. Everything the card requires (name, dimensions) comes
+	 * from the same poster data the OG tags just used.
+	 */
+	$player_base = trim( (string) majestic_tube_get_option( 'wpst-options', 'twitter-player-url', '' ) );
+
+	if ( $post_id && $video['file'] && $player_base && 0 === strpos( $player_base, 'https://' ) ) {
+		$player_url = esc_url_raw( add_query_arg( 'post', (int) $post_id, $player_base ) );
+
+		if ( $player_url ) {
+			$twitter['twitter:card']   = 'player';
+			$twitter['twitter:player'] = $player_url;
+			$twitter['twitter:player:width']  = '640';
+			$twitter['twitter:player:height'] = '360';
+		}
+	}
 
 	/**
 	 * Filter the Open Graph tags before they are printed.

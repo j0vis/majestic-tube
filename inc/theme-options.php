@@ -506,15 +506,28 @@ function majestic_tube_options_map() {
 			'label'   => __( 'Text logo', 'majestic-tube' ),
 			'section' => $branding,
 		),
+		'site-font-family'         => array(
+			'setting'     => 'majestic_tube_site_font_family',
+			'default'     => 'Inter',
+			'type'        => 'select',
+			'label'       => __( 'Site font', 'majestic-tube' ),
+			'section'     => $branding,
+			'description' => __( 'Inter is bundled with the theme, so every visitor - Windows, macOS, Android, iOS - sees the same letterforms. The system option renders in whatever interface font the visitor already has, which costs no download but looks different on each platform.', 'majestic-tube' ),
+			'choices'     => array(
+				'Inter'     => __( 'Inter (bundled with the theme)', 'majestic-tube' ),
+				'System UI' => __( 'System UI (the visitor\'s own font)', 'majestic-tube' ),
+			),
+		),
 		'logo-font-family'         => array(
 			'setting'     => 'majestic_tube_logo_font_family',
-			'default'     => 'System UI',
+			'default'     => 'Inter',
 			'type'        => 'select',
 			'label'       => __( 'Logo font family', 'majestic-tube' ),
 			'section'     => $branding,
-			'description' => __( 'The theme bundles no fonts, so these are the fonts already installed on each visitor device. "System UI" matches the rest of the site; the other two give a text logo its own voice.', 'majestic-tube' ),
+			'description' => __( 'A text logo can use its own voice here. "Inter" and "System UI" match the rest of the site; the serif and monospace choices are fonts already installed on each visitor device and are never downloaded.', 'majestic-tube' ),
 			'choices'     => array(
-				'System UI'        => __( 'System UI (same as the site)', 'majestic-tube' ),
+				'Inter'            => __( 'Inter (same as the site)', 'majestic-tube' ),
+				'System UI'        => __( 'System UI', 'majestic-tube' ),
 				'System Serif'     => __( 'System serif', 'majestic-tube' ),
 				'System Monospace' => __( 'System monospace', 'majestic-tube' ),
 			),
@@ -658,6 +671,21 @@ function majestic_tube_options_map() {
 			'label'       => __( 'Use the native HTML5 player instead of Video.js', 'majestic-tube' ),
 			'section'     => $player,
 			'description' => __( 'Removes the Video.js dependency entirely. Quality switcher, keyboard shortcuts and skinning are then handled by the browser.', 'majestic-tube' ),
+		),
+		/*
+		 * Play-anchored view counting. The original counted a view the moment
+		 * the page loaded; this switch keeps that default but lets a site count
+		 * only plays that actually reach three seconds. Off by default so the
+		 * stored counters keep their historical meaning until the operator opts
+		 * in.
+		 */
+		'count-views-on-play'      => array(
+			'setting'     => 'majestic_tube_count_views_on_play',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'Count a view only after playback starts', 'majestic-tube' ),
+			'section'     => $player,
+			'description' => __( 'The view is recorded once the video has played for three seconds instead of on page load. Applies to new views only.', 'majestic-tube' ),
 		),
 		'videojs-quality-selector' => array(
 			'setting' => 'majestic_tube_enable_quality_selector',
@@ -906,6 +934,67 @@ function majestic_tube_options_map() {
 			'section'    => $advertising,
 			'customizer' => false,
 		),
+		/*
+		 * In-feed advertising (2.1.0). One code blob repeated through the video
+		 * grid after every Nth card. The zone reuses the ad sanitizer and the
+		 * same content-output filters as every other placement.
+		 */
+		'enable-infeed-ad'         => array(
+			'setting' => 'majestic_tube_enable_infeed_ad',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Enable in-feed advertising', 'majestic-tube' ),
+			'section'    => $advertising,
+		),
+		'infeed-ad-frequency'      => array(
+			'setting'     => 'majestic_tube_infeed_ad_frequency',
+			'default'     => 9,
+			'type'        => 'number',
+			'label'       => __( 'In-feed ad every N videos', 'majestic-tube' ),
+			'description' => __( 'A card-sized content block is inserted after this many video cards. A value below 3 behaves like 3.', 'majestic-tube' ),
+			'section'    => $advertising,
+		),
+		'infeed-ad-code'           => array(
+			'setting' => 'majestic_tube_infeed_ad_code',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'In-feed ad code', 'majestic-tube' ),
+			'section'    => $advertising,
+			'customizer' => false,
+		),
+		/*
+		 * Popunder / interstitial zone (2.1.0). The code is the administrator's,
+		 * sanitized on input like every other ad field and printed once per
+		 * page load from wp_footer.
+		 */
+		'enable-popunder-ad'       => array(
+			'setting' => 'majestic_tube_enable_popunder_ad',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Enable popunder / interstitial code', 'majestic-tube' ),
+			'section'    => $advertising,
+		),
+		'popunder-ad-code'         => array(
+			'setting' => 'majestic_tube_popunder_ad_code',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'Popunder / interstitial code', 'majestic-tube' ),
+			'section'    => $advertising,
+			'customizer' => false,
+		),
+		/*
+		 * Consent gate (2.1.0). Off by default: advertising prints as before.
+		 * When switched on, every theme ad placement waits for the consent
+		 * filter below to be driven by a cookie banner or CMP plugin.
+		 */
+		'gate-ads-on-consent'      => array(
+			'setting'     => 'majestic_tube_gate_ads_on_consent',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'Only load advertising after consent', 'majestic-tube' ),
+			'description' => __( 'Requires a consent solution that sets the majestic_tube_ads_allowed filter (a cookie banner plugin or a small snippet). While no consent is recorded, every ad placement prints nothing.', 'majestic-tube' ),
+			'section'    => $advertising,
+		),
 		'footer-ad-desktop'        => array(
 			'setting' => 'majestic_tube_ad_footer_desktop',
 			'default' => '',
@@ -940,6 +1029,21 @@ function majestic_tube_options_map() {
 			'type'    => 'text',
 			'label'   => __( 'Twitter/x @handle for twitter:site', 'majestic-tube' ),
 			'section' => $seo,
+		),
+		/*
+		 * twitter:player card (2.1.0). A player card needs an HTTPS URL that
+		 * returns a bare HTML page with the video embedded, because the card
+		 * iframe is only ~435px wide. The theme cannot render one on its own
+		 * template reliably for every permalink structure, so the administrator
+		 * provides the base URL and the theme appends ?post={id}.
+		 */
+		'twitter-player-url'       => array(
+			'setting'     => 'majestic_tube_twitter_player_url',
+			'default'     => '',
+			'type'        => 'url',
+			'label'       => __( 'Twitter player URL base (optional)', 'majestic-tube' ),
+			'description' => __( 'HTTPS URL of a page that embeds a video when given ?post={id}. Leave empty to keep the summary_large_image card.', 'majestic-tube' ),
+			'section'     => $seo,
 		),
 		'meta-verification'        => array(
 			'setting'     => 'majestic_tube_meta_verification',

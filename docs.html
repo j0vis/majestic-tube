@@ -777,6 +777,7 @@
               <tr><td>Autoplay video player</td><td>Starts playback automatically in a muted state, as required by modern browsers.</td></tr>
               <tr><td>Use the native HTML5 player</td><td>Uses the browser’s built-in controls instead of the enhanced Majestic Tube player.</td></tr>
               <tr><td>Enable the video quality selector</td><td>Shows available quality choices for direct video sources.</td></tr>
+              <tr><td>Count a view only after playback starts</td><td>Records a view once the video has played for three seconds rather than the moment the page loads, so refreshes and accidental clicks stop inflating the counter. Off by default, and it applies to new views only, so enabling it never rewrites history.</td></tr>
             </tbody>
           </table>
         </div>
@@ -910,12 +911,14 @@
           <li>Enable or disable autoplay.</li>
           <li>Choose the enhanced player or the browser’s native player.</li>
           <li>Enable or disable the quality selector.</li>
+          <li>Count a view only after playback starts, so a visit is only counted as a view once the video has actually played for three seconds.</li>
         </ul>
 
         <h3>Majestic Tube - Logo &amp; Colours</h3>
         <ul>
           <li>Enable a custom background.</li>
           <li>Choose the main accent colour.</li>
+          <li>Pick the site font: the bundled Inter, or the visitor's own system font.</li>
           <li>Use an uploaded logo or a text logo with an icon.</li>
           <li>Adjust logo font, size, dimensions, and spacing.</li>
           <li>Optionally show the logo in the footer.</li>
@@ -924,8 +927,9 @@
         </ul>
 
         <h4>Typography</h4>
-        <p>The theme ships no font files and makes no font request: the whole site is drawn in the font your operating system already uses for interfaces — Segoe UI on Windows, San Francisco on macOS and iOS, Cantarell or Ubuntu on Linux. That means the page is readable the instant it appears, and it looks native to each visitor's device instead of forcing one look on everyone.</p>
-        <p>The text logo is the one place you can pick a different voice, and the choices are the fonts your device already has: <strong>System UI</strong> (the same font as the rest of the site, the default), <strong>System serif</strong> (Georgia, Times New Roman, Noto Serif), and <strong>System monospace</strong> (Menlo, Consolas, DejaVu Sans Mono). Because these are installed fonts rather than downloaded ones, each choice looks slightly different per operating system — that is expected, not a glitch.</p>
+        <p>The theme ships one font of its own: <strong>Inter</strong>, self-hosted in two subset files that weigh about 130 KB together. A page therefore makes no request to a third-party font host — no extra DNS lookup, no referrer leak, no cookie-consent question — and every visitor sees the same letterforms instead of Segoe UI on Windows, San Francisco on macOS and Roboto on Android. The variable file covers the whole regular-to-bold range in one download, and the Latin Extended subset is only fetched once a page really renders a character from it.</p>
+        <p>If the font file cannot be loaded — an offline reader, a blocked asset — the stack falls back to the operating system's own interface font, so the page is still readable. The <strong>Site font</strong> setting under <em>Appearance &rarr; Customize</em> switches the whole site to that operating-system font on purpose.</p>
+        <p>The text logo has its own choice: <strong>Inter</strong> (the default), <strong>System UI</strong>, <strong>System serif</strong> (Georgia, Times New Roman, Noto Serif), and <strong>System monospace</strong> (Menlo, Consolas, DejaVu Sans Mono). The three system voices are installed fonts rather than downloaded ones, so each looks slightly different per operating system — that is expected, not a glitch.</p>
 
         <h3>Majestic Tube - Sharing &amp; Social</h3>
         <p>Enable sharing as a whole, then enable or disable individual networks such as Facebook, X/Twitter, LinkedIn, Reddit, Tumblr, email, and the other available options. Remove unused buttons to keep the video page uncluttered.</p>
@@ -934,16 +938,43 @@
         <p>Enable or disable the front-end submission form, its navigation links, and each required field. The duration and title are required by default.</p>
 
         <h3>Majestic Tube - Content areas</h3>
-        <p>This section directs you to <span class="path">Appearance → Widgets</span>, where header, player, below-player, video-sidebar, and footer content is managed.</p>
+        <p>This section directs you to <span class="path">Appearance → Widgets</span>, where header, player, below-player, video-sidebar, and footer content is managed. It also carries the advertising placements that the theme controls for you and that need no widget at all.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Setting</th>
+                <th scope="col">What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Enable in-feed advertising</td><td>Inserts a card-sized content block into the video grid, between the video cards, instead of only in the areas you filled with widgets.</td></tr>
+              <tr><td>In-feed ad every N videos</td><td>How many video cards pass between two ad blocks. The default is 9 and a value below 3 is treated as 3, so short runs of videos never turn into a wall of ads.</td></tr>
+              <tr><td>In-feed ad code</td><td>The ad snippet placed in that block. Accepts a complete script, or several snippets separated by a blank line: one is picked per page and stays the same for the rest of the day, so a caching or SEO plugin never sees a different ad on every visit.</td></tr>
+              <tr><td>Enable popunder / interstitial code</td><td>Prints a snippet once per page from the end of the page, which is where a popunder or interstitial script belongs.</td></tr>
+              <tr><td>Popunder / interstitial code</td><td>The snippet itself, pasted exactly as your network supplies it.</td></tr>
+              <tr><td>Only load advertising after consent</td><td>Holds every advertising placement back until your consent solution reports that the visitor has accepted.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <h4>Advertising and cookie consent</h4>
+        <p>Advertising is unchanged by default. Turning on <span class="setting">Only load advertising after consent</span> makes the theme print nothing at all for any of its placements, in-feed, popunder, header, footer, under-player, video-sidebar, and player, until a cookie banner or consent management platform says the visitor has agreed. The theme never records or asks for consent itself, so the switch stays off until you connect a solution that does.</p>
+        <div class="note">
+          Connecting a consent plugin is a one-line filter in a small snippet or a site-specific plugin. Let the consent plugin return <span class="setting">true</span> once advertising is allowed, and the theme will print its placements as normal. The filter is <span class="setting">majestic_tube_ads_allowed</span> and it receives the placement name as its second argument: in-feed, popunder, header, footer, under-player, video-sidebar, or player. It also works the other way round for a single placement, which is useful if one area should always be shown.
+        </div>
 
         <h3>Majestic Tube - SEO &amp; Social</h3>
         <ul>
           <li>Add an optional Facebook app ID.</li>
           <li>Add an X/Twitter site handle.</li>
+          <li>Add an optional Twitter player URL, which upgrades the video preview card to the playable player card.</li>
           <li>Paste search engine verification tags.</li>
           <li>Add optional SEO footer text.</li>
         </ul>
         <p>Majestic Tube also supplies social preview information and video structured data on individual video pages. If a major SEO plugin is active, the theme normally avoids duplicating its social output.</p>
+        <h4>Playable cards on X and Twitter</h4>
+        <p>By default a shared video link produces the large image card. To get the playable card, fill in <span class="setting">Twitter player URL base</span> with the HTTPS address of a small, bare page of your own that embeds a video and reads the <span class="setting">?post=</span> query argument. The theme appends the video ID for you, so a base of <span class="path">https://example.com/player/</span> points that page at <span class="path">https://example.com/player/?post=123</span> for video 123, and the card becomes playable on the timeline.</p>
+        <p>Leave the field empty to keep the large image card. The page you point at must be served over HTTPS, must return nothing but the player, and should stay under a few hundred kilobytes: X loads it in a card of roughly 435 pixels wide, so a full site template with a header, sidebar, and footer would look wrong inside the card.</p>
 
         <h3>Majestic Tube - Custom Code</h3>
         <p>Administrators can add analytics code to the page header and extra scripts near the end of the page. Paste complete snippets exactly as supplied by the service. Incorrect code can affect the entire site.</p>
@@ -1262,6 +1293,21 @@
 
         <h3>Can I target content to desktop or mobile?</h3>
         <p>Yes. Each Content Block widget can display on all devices, desktop only, or mobile only.</p>
+
+        <h3>Why is my in-feed ad not showing?</h3>
+        <p>Check, in this order: <span class="setting">Enable in-feed advertising</span> is On, the <span class="setting">In-feed ad code</span> field holds the complete snippet, and the grid is long enough for the frequency to trigger, since a block is only inserted after a full run of videos. Also confirm that <span class="setting">Only load advertising after consent</span> is Off, or that your consent plugin allows the <span class="setting">in-feed</span> placement.</p>
+
+        <h3>My popunder opens on every page or not at all</h3>
+        <p>The theme prints that snippet once per page from the end of the page, which is where such a script expects to be. Frequent opening is usually the network's own frequency or click limit rather than a theme setting. No popunder at all points to an empty field, the enable switch being Off, or a consent plugin that is withholding the <span class="setting">popunder</span> placement.</p>
+
+        <h3>How do I make my ads wait for a cookie banner?</h3>
+        <p>Turn on <span class="setting">Only load advertising after consent</span>, then let your consent plugin return <span class="setting">true</span> through the <span class="setting">majestic_tube_ads_allowed</span> filter once the visitor has accepted. Until then, every placement prints nothing. Remember to clear any page cache afterwards, since cached HTML may still contain the earlier ad markup.</p>
+
+        <h3>My shared link shows an image card, not a playable one</h3>
+        <p>Fill in <span class="setting">Twitter player URL base</span> with the HTTPS address of your own bare player page, and make sure that page really does embed a video when given <span class="setting">?post=</span>. Social networks cache their previews for a long time, so expect an existing post to keep its old card for a while.</p>
+
+        <h3>Should I count a view when someone only opens the page?</h3>
+        <p>That is the default, and it matches the original theme. Turn on <span class="setting">Count a view only after playback starts</span> to record the view after three seconds of playback instead, which gives a much truer number. The switch affects new views only, so existing totals stay as they are.</p>
 
         <h3>How often are view and rating numbers updated?</h3>
         <p>They update as visitors use the site. A browser, server, or caching configuration can delay the visible refresh; refreshing the video page normally shows the latest stored values.</p>

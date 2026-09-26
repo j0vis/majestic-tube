@@ -1,0 +1,74 @@
+/**
+ * Bundled webfont faces.
+ *
+ * Inter is self-hosted so every visitor renders the same type: the previous
+ * release relied on the operating system's interface font, which meant Windows
+ * showed Segoe UI, macOS showed San Francisco, and Android showed Roboto - three
+ * different widths, x-heights and weight renderings for the same stylesheet.
+ * Nothing here talks to a third-party font host, so there is no extra DNS
+ * lookup, no Referer leak, and no cookie-consent question.
+ *
+ * One variable file covers the whole 100-900 weight axis, so the browser makes
+ * a single request per subset instead of one per weight. The two subsets are
+ * declared separately with unicode-range, so a page of plain English never
+ * downloads the Latin Extended file at all; the browser only fetches a subset
+ * once a character from its range is actually rendered.
+ *
+ * font-display: swap keeps the first paint immediate (system fallback) while
+ * the file arrives - the local fallback stack in --mt-font-family is metric
+ * close to Inter, so the swap is quiet rather than a visible reflow.
+ *
+ * Inter is licensed under the SIL Open Font License 1.1; the license text ships
+ * alongside the font files in assets/fonts/OFL.txt. Inter is a trademark of the
+ * Inter Project Authors.
+ *
+ * @package Majestic Tube
+ * @version 2.1.0
+ */
+
+/* Latin Extended - Western European, Central European, Turkish, Baltic. */
+@font-face {
+	font-family: "Inter";
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url("../fonts/inter-latin-ext-wght-normal.woff2") format("woff2");
+	unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+
+/* Latin - the subset almost every page needs. This one is preloaded. */
+@font-face {
+	font-family: "Inter";
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: url("../fonts/inter-latin-wght-normal.woff2") format("woff2");
+	unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/*
+ * Metric-compatible fallback (E4 of the feature audit).
+ *
+ * While the real file downloads, font-display: swap paints the system
+ * fallback, whose widths differ from Inter's - so headings reflow once the
+ * swap lands. This face is a same-named local copy of the system stack with
+ * its metrics scaled to Inter's (Inter needs roughly 1.07x the x-height room
+ * of Segoe UI / SF / Roboto at the same em size), so the fallback now occupies
+ * the same box the real face will. The reflow it prevents is exactly the one
+ * the swap comment above used to describe as "quiet".
+ *
+ * The descriptors are ignored by engines without size-adjust support, and no
+ * network request is made: src: local() only names fonts the visitor already
+ * has.
+ */
+@font-face {
+	font-family: "Inter";
+	font-style: normal;
+	font-weight: 100 900;
+	font-display: swap;
+	src: local("Segoe UI"), local("SF Pro Text"), local("Roboto"), local("Helvetica Neue"), local("Arial");
+	ascent-override: 96.88%;
+	descent-override: 24.15%;
+	line-gap-override: 0%;
+	size-adjust: 107.06%;
+}

@@ -244,6 +244,7 @@ Add direct video URLs for 240p, 360p, 480p, 720p, 1080p, and 4K. When more than 
 | Autoplay video player | Starts playback automatically in a muted state, as required by modern browsers. |
 | Use the native HTML5 player | Uses the browser’s built-in controls instead of the enhanced Majestic Tube player. |
 | Enable the video quality selector | Shows available quality choices for direct video sources. |
+| Count a view only after playback starts | Records a view once the video has played for three seconds rather than the moment the page loads, so refreshes and accidental clicks stop inflating the counter. Off by default, and it applies to new views only, so enabling it never rewrites history. |
 
 ### Recommended video delivery
 
@@ -362,11 +363,13 @@ This is the main section for listings, cards, video details, membership, footer 
 - Enable or disable autoplay.
 - Choose the enhanced player or the browser’s native player.
 - Enable or disable the quality selector.
+- Count a view only after playback starts, so a visit is only counted as a view once the video has actually played for three seconds.
 
 ### Majestic Tube - Logo & Colours
 
 - Enable a custom background.
 - Choose the main accent colour.
+- Pick the site font: the bundled Inter, or the visitor's own system font.
 - Use an uploaded logo or a text logo with an icon.
 - Adjust logo font, size, dimensions, and spacing.
 - Optionally show the logo in the footer.
@@ -375,9 +378,11 @@ This is the main section for listings, cards, video details, membership, footer 
 
 #### Typography
 
-The theme ships no font files and makes no font request: the whole site is drawn in the font your operating system already uses for interfaces — Segoe UI on Windows, San Francisco on macOS and iOS, Cantarell or Ubuntu on Linux. That means the page is readable the instant it appears, and it looks native to each visitor's device instead of forcing one look on everyone.
+The theme ships one font of its own: **Inter**, self-hosted in two subset files that weigh about 130 KB together. A page therefore makes no request to a third-party font host — no extra DNS lookup, no referrer leak, no cookie-consent question — and every visitor sees the same letterforms instead of Segoe UI on Windows, San Francisco on macOS and Roboto on Android. The variable file covers the whole regular-to-bold range in one download, and the Latin Extended subset is only fetched once a page really renders a character from it.
 
-The text logo is the one place you can pick a different voice, and the choices are the fonts your device already has: **System UI** (the same font as the rest of the site, the default), **System serif** (Georgia, Times New Roman, Noto Serif), and **System monospace** (Menlo, Consolas, DejaVu Sans Mono). Because these are installed fonts rather than downloaded ones, each choice looks slightly different per operating system — that is expected, not a glitch.
+If the font file cannot be loaded — an offline reader, a blocked asset — the stack falls back to the operating system's own interface font, so the page is still readable. The **Site font** setting under *Appearance → Customize* switches the whole site to that operating-system font on purpose.
+
+The text logo has its own choice: **Inter** (the default), **System UI**, **System serif** (Georgia, Times New Roman, Noto Serif), and **System monospace** (Menlo, Consolas, DejaVu Sans Mono). The three system voices are installed fonts rather than downloaded ones, so each looks slightly different per operating system — that is expected, not a glitch.
 
 ### Majestic Tube - Sharing & Social
 
@@ -389,16 +394,40 @@ Enable or disable the front-end submission form, its navigation links, and each 
 
 ### Majestic Tube - Content areas
 
-This section directs you to `Appearance → Widgets`, where header, player, below-player, video-sidebar, and footer content is managed.
+This section directs you to `Appearance → Widgets`, where header, player, below-player, video-sidebar, and footer content is managed. It also carries the advertising placements that the theme controls for you and that need no widget at all.
+
+| Setting | What it does |
+| --- | --- |
+| Enable in-feed advertising | Inserts a card-sized content block into the video grid, between the video cards, instead of only in the areas you filled with widgets. |
+| In-feed ad every N videos | How many video cards pass between two ad blocks. The default is 9 and a value below 3 is treated as 3, so short runs of videos never turn into a wall of ads. |
+| In-feed ad code | The ad snippet placed in that block. Accepts a complete script, or several snippets separated by a blank line: one is picked per page and stays the same for the rest of the day, so a caching or SEO plugin never sees a different ad on every visit. |
+| Enable popunder / interstitial code | Prints a snippet once per page from the end of the page, which is where a popunder or interstitial script belongs. |
+| Popunder / interstitial code | The snippet itself, pasted exactly as your network supplies it. |
+| Only load advertising after consent | Holds every advertising placement back until your consent solution reports that the visitor has accepted. |
+
+#### Advertising and cookie consent
+
+Advertising is unchanged by default. Turning on `Only load advertising after consent` makes the theme print nothing at all for any of its placements, in-feed, popunder, header, footer, under-player, video-sidebar, and player, until a cookie banner or consent management platform says the visitor has agreed. The theme never records or asks for consent itself, so the switch stays off until you connect a solution that does.
+
+> **Note**
+>
+> Connecting a consent plugin is a one-line filter in a small snippet or a site-specific plugin. Let the consent plugin return `true` once advertising is allowed, and the theme will print its placements as normal. The filter is `majestic_tube_ads_allowed` and it receives the placement name as its second argument: in-feed, popunder, header, footer, under-player, video-sidebar, or player. It also works the other way round for a single placement, which is useful if one area should always be shown.
 
 ### Majestic Tube - SEO & Social
 
 - Add an optional Facebook app ID.
 - Add an X/Twitter site handle.
+- Add an optional Twitter player URL, which upgrades the video preview card to the playable player card.
 - Paste search engine verification tags.
 - Add optional SEO footer text.
 
 Majestic Tube also supplies social preview information and video structured data on individual video pages. If a major SEO plugin is active, the theme normally avoids duplicating its social output.
+
+#### Playable cards on X and Twitter
+
+By default a shared video link produces the large image card. To get the playable card, fill in `Twitter player URL base` with the HTTPS address of a small, bare page of your own that embeds a video and reads the `?post=` query argument. The theme appends the video ID for you, so a base of `https://example.com/player/` points that page at `https://example.com/player/?post=123` for video 123, and the card becomes playable on the timeline.
+
+Leave the field empty to keep the large image card. The page you point at must be served over HTTPS, must return nothing but the player, and should stay under a few hundred kilobytes: X loads it in a card of roughly 435 pixels wide, so a full site template with a header, sidebar, and footer would look wrong inside the card.
 
 ### Majestic Tube - Custom Code
 
@@ -647,6 +676,26 @@ Yes. Add a **Content Block** widget to **Below-player content**. A video-specifi
 ### Can I target content to desktop or mobile?
 
 Yes. Each Content Block widget can display on all devices, desktop only, or mobile only.
+
+### Why is my in-feed ad not showing?
+
+Check, in this order: `Enable in-feed advertising` is On, the `In-feed ad code` field holds the complete snippet, and the grid is long enough for the frequency to trigger, since a block is only inserted after a full run of videos. Also confirm that `Only load advertising after consent` is Off, or that your consent plugin allows the `in-feed` placement.
+
+### My popunder opens on every page or not at all
+
+The theme prints that snippet once per page from the end of the page, which is where such a script expects to be. Frequent opening is usually the network's own frequency or click limit rather than a theme setting. No popunder at all points to an empty field, the enable switch being Off, or a consent plugin that is withholding the `popunder` placement.
+
+### How do I make my ads wait for a cookie banner?
+
+Turn on `Only load advertising after consent`, then let your consent plugin return `true` through the `majestic_tube_ads_allowed` filter once the visitor has accepted. Until then, every placement prints nothing. Remember to clear any page cache afterwards, since cached HTML may still contain the earlier ad markup.
+
+### My shared link shows an image card, not a playable one
+
+Fill in `Twitter player URL base` with the HTTPS address of your own bare player page, and make sure that page really does embed a video when given `?post=`. Social networks cache their previews for a long time, so expect an existing post to keep its old card for a while.
+
+### Should I count a view when someone only opens the page?
+
+That is the default, and it matches the original theme. Turn on `Count a view only after playback starts` to record the view after three seconds of playback instead, which gives a much truer number. The switch affects new views only, so existing totals stay as they are.
 
 ### How often are view and rating numbers updated?
 

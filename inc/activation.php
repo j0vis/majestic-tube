@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.0.9
+ * @version 2.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -465,6 +465,18 @@ function majestic_tube_create_page( $title, $template = '', $content = '', $slug
 	if ( $existing && isset( $existing->ID ) ) {
 		$page_id = (int) $existing->ID;
 	} else {
+		/*
+		 * `page` is registered by core on init priority 0, and wp_insert_post()
+		 * refuses any post type that is not registered yet - it answers with a
+		 * WP_Error and inserts nothing. Callers must therefore run after init.
+		 * Checking it here keeps this function from reporting a page WordPress
+		 * never created, which is what made the whole activation routine look
+		 * like it had succeeded while the site had no pages at all.
+		 */
+		if ( ! post_type_exists( 'page' ) ) {
+			return 0;
+		}
+
 		$page_id = wp_insert_post(
 			array(
 				'post_title'   => $title,
@@ -473,7 +485,8 @@ function majestic_tube_create_page( $title, $template = '', $content = '', $slug
 				'post_status'  => 'publish',
 				'post_type'    => 'page',
 				'post_author'  => get_current_user_id(),
-			)
+			),
+			true
 		);
 
 		if ( is_wp_error( $page_id ) || ! $page_id ) {
@@ -489,17 +502,23 @@ function majestic_tube_create_page( $title, $template = '', $content = '', $slug
 }
 
 /**
- * Create missing pages and assign page templates on activation.
+ * Create missing pages and assign page templates.
+ *
  * Existing pages are reused without overwriting administrator-edited content.
+ *
+ * @return string[] Titles that could not be created, empty when nothing failed.
  */
 function majestic_tube_create_initial_pages() {
 	$created = array();
+	$failed  = array();
 
 	foreach ( majestic_tube_activation_pages() as $title => $template ) {
 		$page_id = majestic_tube_create_page( $title, $template );
 
 		if ( $page_id ) {
 			$created[ $title ] = $page_id;
+		} else {
+			$failed[] = $title;
 		}
 	}
 
@@ -508,32 +527,133 @@ function majestic_tube_create_initial_pages() {
 
 		if ( $page_id ) {
 			$created[ $title ] = $page_id;
+		} else {
+			$failed[] = $title;
 		}
 	}
 
 	update_option( 'majestic_tube_created_pages', array_keys( $created ) );
+
+	return $failed;
 }
-add_action( 'after_switch_theme', 'majestic_tube_create_initial_pages' );
 
 /**
- * Run the built-in page/menu setup once for new installs and theme updates.
+ * Revision of the automatic site setup.
  *
- * This covers an existing active site receiving an updated theme package,
- * where WordPress does not fire after_switch_theme. All operations are
- * idempotent, so the normal activation callbacks remain safe to run too.
+ * Bumping this number makes every existing installation run the setup once
+ * more. It is the release-time switch; the retry counter below is separate so
+ * a site that genuinely cannot create pages stops retrying.
+ *
+ * @return int
+ */
+function majestic_tube_setup_revision() {
+	/**
+	 * Filter the revision of the automatic site setup.
+	 *
+	 * @param int $revision Current revision.
+	 */
+	return (int) apply_filters( 'majestic_tube_setup_revision', 3 );
+}
+
+/**
+ * How many times the setup may be retried before it stops trying.
+ *
+ * @return int
+ */
+function majestic_tube_setup_attempt_limit() {
+	return 5;
+}
+
+/**
+ * Whether the setup already finished for the current revision.
+ *
+ * @return bool
+ */
+function majestic_tube_setup_is_complete() {
+	return (int) get_option( 'majestic_tube_setup_revision', 0 ) >= majestic_tube_setup_revision();
+}
+
+/**
+ * Create the pages, menus and rewrite rules the theme needs.
+ *
+ * Every step is idempotent, so this is safe to call more than once - on the
+ * request that activates the theme and again on the next one - and safe to
+ * call again after a failure. Nothing here overwrites administrator edits:
+ * existing pages are only re-used, never rewritten.
+ *
+ * The full set of steps is only recorded as done when every page was created.
+ * A site where one insert fails keeps retrying up to
+ * majestic_tube_setup_attempt_limit(), then stops and reports what is missing
+ * on the welcome screen instead of looping forever.
+ *
+ * @return bool Whether the setup is now complete.
+ */
+function majestic_tube_run_site_setup() {
+	$failed_pages = majestic_tube_create_initial_pages();
+	$menu_created = majestic_tube_create_default_menu();
+
+	majestic_tube_migrate_widgets();
+	flush_rewrite_rules();
+
+	/*
+	 * The single option the previous release used to gate the legal-page setup.
+	 * It is still written so an installation that downgrades reads the value it
+	 * expects, but it no longer decides anything here.
+	 */
+	update_option( 'majestic_tube_legal_setup_version', 2 );
+
+	$failed = $failed_pages;
+
+	if ( ! $menu_created ) {
+		$failed[] = __( 'Main Menu', 'majestic-tube' );
+	}
+
+	if ( $failed ) {
+		update_option( 'majestic_tube_setup_missing', $failed );
+		update_option( 'majestic_tube_setup_attempts', (int) get_option( 'majestic_tube_setup_attempts', 0 ) + 1 );
+
+		return false;
+	}
+
+	delete_option( 'majestic_tube_setup_missing' );
+	update_option( 'majestic_tube_setup_attempts', 0 );
+	update_option( 'majestic_tube_setup_revision', majestic_tube_setup_revision() );
+
+	return true;
+}
+
+/**
+ * Run the setup when the theme is switched, and once per setup revision.
+ *
+ * This used to live on after_setup_theme, which runs before init. Core
+ * registers the built-in `page` post type and the `nav_menu` taxonomy on init
+ * priority 0, so every wp_insert_post() and wp_create_nav_menu() call on that
+ * hook failed - and the handler then stored its one-time "already done" marker
+ * anyway, which meant the pages and menus were never created on any request
+ * that did not go through after_switch_theme. That is why a theme update, a
+ * restored database, or a site whose switched-theme transient was gone ended
+ * up with no pages at all and no way to recover short of deleting the option.
+ *
+ * after_switch_theme is dispatched by core's check_theme_switched() on init
+ * priority 99, so the switch request itself is a valid place to work; the
+ * revision check on init covers everything that never fires it.
  *
  * @return void
  */
-function majestic_tube_maybe_setup_legal_pages() {
-	if ( 2 <= (int) get_option( 'majestic_tube_legal_setup_version', 0 ) ) {
+function majestic_tube_maybe_setup_site() {
+	if ( majestic_tube_setup_is_complete() ) {
 		return;
 	}
 
-	majestic_tube_create_initial_pages();
-	majestic_tube_create_default_menu();
-	update_option( 'majestic_tube_legal_setup_version', 2 );
+	if ( (int) get_option( 'majestic_tube_setup_attempts', 0 ) >= majestic_tube_setup_attempt_limit() ) {
+		return;
+	}
+
+	majestic_tube_run_site_setup();
 }
-add_action( 'after_setup_theme', 'majestic_tube_maybe_setup_legal_pages', 15 );
+add_action( 'init', 'majestic_tube_maybe_setup_site', 20 );
+add_action( 'admin_init', 'majestic_tube_maybe_setup_site', 5 );
+add_action( 'after_switch_theme', 'majestic_tube_maybe_setup_site', 40 );
 
 /**
  * Get a menu by name, creating it when necessary.
@@ -713,12 +833,16 @@ function majestic_tube_prepare_footer_legal_menu( $main_menu_id, $locations ) {
 
 /**
  * Create the default main menu, populate it, and assign locations.
+ *
+ * @return bool Whether the menu exists and its locations were assigned.
  */
 function majestic_tube_create_default_menu() {
 	$menu_id = majestic_tube_get_or_create_nav_menu( 'Main Menu' );
 
 	if ( ! $menu_id ) {
-		return;
+		// wp_create_nav_menu() fails with WP_Error( 'invalid_taxonomy' ) until
+		// the nav_menu taxonomy is registered on init priority 0.
+		return false;
 	}
 
 	// Existing menu items, so re-activating the theme never duplicates links.
@@ -777,8 +901,9 @@ function majestic_tube_create_default_menu() {
 	set_theme_mod( 'nav_menu_locations', $locations );
 
 	update_option( 'majestic_tube_menu_created', true );
+
+	return true;
 }
-add_action( 'after_switch_theme', 'majestic_tube_create_default_menu', 20 );
 
 /**
  * Carry the original footer widget assignment over to this theme.
@@ -801,15 +926,14 @@ function majestic_tube_migrate_widgets() {
 	$sidebars['footer']               = array();
 	update_option( 'sidebars_widgets', $sidebars );
 }
-add_action( 'after_switch_theme', 'majestic_tube_migrate_widgets', 25 );
 
-/**
- * Flush rewrite rules after pages/CPT setup on activation.
+/*
+ * The page, menu, widget and rewrite-rule steps used to be separate
+ * after_switch_theme callbacks at priorities 20, 25 and 30. They are now the
+ * body of majestic_tube_run_site_setup() so that the switch request, a theme
+ * update and a manual retry all take exactly the same path - and so that the
+ * rewrite rules are only ever flushed once the actors taxonomy is registered.
  */
-function majestic_tube_activation_flush() {
-	flush_rewrite_rules();
-}
-add_action( 'after_switch_theme', 'majestic_tube_activation_flush', 30 );
 
 /**
  * Redirect to the welcome screen after activation.
@@ -823,6 +947,81 @@ function majestic_tube_activation_redirect() {
 	}
 }
 add_action( 'admin_init', 'majestic_tube_activation_redirect' );
+
+/**
+ * Run the site setup again from the welcome screen.
+ *
+ * A site whose automatic setup failed would otherwise stay broken forever:
+ * the one-time marker stopped it from retrying. The link below is the escape
+ * hatch, and it resets the attempt counter first so a manual run always tries.
+ *
+ * @return void
+ */
+function majestic_tube_handle_setup_retry() {
+	if ( ! isset( $_GET['majestic-tube-setup'] ) || 'retry' !== $_GET['majestic-tube-setup'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the nonce is verified on the next line.
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		return;
+	}
+
+	check_admin_referer( 'majestic_tube_setup_retry' );
+
+	update_option( 'majestic_tube_setup_attempts', 0 );
+	$complete = majestic_tube_run_site_setup();
+
+	wp_safe_redirect(
+		add_query_arg(
+			'majestic-tube-setup',
+			$complete ? 'done' : 'failed',
+			admin_url( 'themes.php?page=majestic-tube-welcome' )
+		)
+	);
+	exit;
+}
+add_action( 'admin_init', 'majestic_tube_handle_setup_retry', 4 );
+
+/**
+ * Tell an administrator when the automatic setup did not finish.
+ *
+ * @return void
+ */
+function majestic_tube_setup_notice() {
+	if ( majestic_tube_setup_is_complete() ) {
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		return;
+	}
+
+	$missing = get_option( 'majestic_tube_setup_missing', array() );
+	$missing = is_array( $missing ) ? $missing : array();
+	?>
+	<div class="notice notice-warning">
+		<p>
+			<strong><?php esc_html_e( 'Majestic Tube setup is incomplete.', 'majestic-tube' ); ?></strong>
+			<?php esc_html_e( 'The theme could not create every page and menu it ships with.', 'majestic-tube' ); ?>
+			<?php if ( $missing ) : ?>
+				<?php
+				printf(
+					/* translators: %s: comma-separated list of page titles. */
+					esc_html__( 'Still missing: %s.', 'majestic-tube' ),
+					esc_html( implode( ', ', $missing ) )
+				);
+				?>
+			<?php endif; ?>
+		</p>
+		<p>
+			<a class="button button-primary" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'majestic-tube-setup', 'retry', admin_url( 'themes.php?page=majestic-tube-welcome' ) ), 'majestic_tube_setup_retry' ) ); ?>">
+				<?php esc_html_e( 'Run the setup again', 'majestic-tube' ); ?>
+			</a>
+		</p>
+	</div>
+	<?php
+}
+add_action( 'admin_notices', 'majestic_tube_setup_notice' );
 
 /**
  * Register the welcome screen (informational only, no data changes).
@@ -842,13 +1041,29 @@ add_action( 'admin_menu', 'majestic_tube_welcome_page' );
  * Render the welcome screen.
  */
 function majestic_tube_render_welcome_page() {
-	$created = get_option( 'majestic_tube_created_pages', array() );
-	$menu    = get_option( 'majestic_tube_menu_created', false );
+	$created        = get_option( 'majestic_tube_created_pages', array() );
+	$menu           = get_option( 'majestic_tube_menu_created', false );
+	$setup_complete = majestic_tube_setup_is_complete();
+	$retry_state    = isset( $_GET['majestic-tube-setup'] ) ? sanitize_key( wp_unslash( $_GET['majestic-tube-setup'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display state.
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Welcome to Majestic Tube', 'majestic-tube' ); ?></h1>
 
-		<p><?php esc_html_e( 'Thanks for activating Majestic Tube. The following setup steps ran automatically:', 'majestic-tube' ); ?></p>
+		<?php if ( 'done' === $retry_state ) : ?>
+			<div class="notice notice-success inline"><p><?php esc_html_e( 'Setup finished. Every page and menu the theme ships with now exists.', 'majestic-tube' ); ?></p></div>
+		<?php elseif ( 'failed' === $retry_state ) : ?>
+			<div class="notice notice-error inline"><p><?php esc_html_e( 'Setup still could not create everything. Check that your database user may create pages, then try again.', 'majestic-tube' ); ?></p></div>
+		<?php endif; ?>
+
+		<p>
+			<?php
+			if ( $setup_complete ) {
+				esc_html_e( 'Thanks for activating Majestic Tube. The following setup steps ran:', 'majestic-tube' );
+			} else {
+				esc_html_e( 'Thanks for activating Majestic Tube. Setup has not finished yet, so the site may be missing pages or menus:', 'majestic-tube' );
+			}
+			?>
+		</p>
 
 		<ul style="list-style: disc; padding-left: 1.5em;">
 			<?php foreach ( $created as $title ) : ?>
@@ -867,6 +1082,14 @@ function majestic_tube_render_welcome_page() {
 				<li><?php esc_html_e( 'Created the Main Menu and assigned the legal footer links', 'majestic-tube' ); ?></li>
 			<?php endif; ?>
 		</ul>
+
+		<?php if ( ! $setup_complete ) : ?>
+			<p>
+				<a class="button button-primary" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'majestic-tube-setup', 'retry', admin_url( 'themes.php?page=majestic-tube-welcome' ) ), 'majestic_tube_setup_retry' ) ); ?>">
+					<?php esc_html_e( 'Run the setup again', 'majestic-tube' ); ?>
+				</a>
+			</p>
+		<?php endif; ?>
 
 		<h2><?php esc_html_e( 'Next steps', 'majestic-tube' ); ?></h2>
 		<ul style="list-style: disc; padding-left: 1.5em;">

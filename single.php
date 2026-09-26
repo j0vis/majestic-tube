@@ -7,7 +7,7 @@
  * "report video" action.
  *
  * @package Majestic Tube
- * @version 2.0.9
+ * @version 2.1.0
  */
 
 get_header();
@@ -45,10 +45,14 @@ while ( have_posts() ) :
 
 			<article id="post-<?php the_ID(); ?>" <?php post_class( 'single-video' ); ?>>
 
-				<header class="entry-header">
-					<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
-				</header>
-
+				<?php
+				/*
+				 * Title, publication date, views and likes are printed below the
+				 * player (see the .video-infos block further down). Keeping the
+				 * headline above it pushed the video itself past the fold on a
+				 * phone, which is the opposite of what a tube page is for.
+				 */
+				?>
 				<div class="video-player" data-post-id="<?php echo esc_attr( get_the_ID() ); ?>" data-views="<?php echo esc_attr( $views ); ?>">
 					<?php
 					if ( 'self-hosted' === $sources['type'] ) :
@@ -56,7 +60,7 @@ while ( have_posts() ) :
 						<video id="wpst-video" class="<?php echo esc_attr( $source_classes ); ?>" controls preload="auto" playsinline
 							<?php echo $autoplay ? 'autoplay muted' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static attributes. ?>
 							width="640" height="360"
-							poster="<?php echo esc_url( majestic_tube_get_thumb_url( get_the_ID(), 'majestic-tube-thumb-large' ) ); ?>">
+							poster="<?php echo esc_url( majestic_tube_get_poster_url( get_the_ID() ) ); ?>">
 							<?php foreach ( $player_sources as $source ) : ?>
 								<source src="<?php echo esc_url( $source['url'] ); ?>" type="<?php echo esc_attr( $source['type'] ); ?>"
 									<?php echo $source['label'] ? 'label="' . esc_attr( $source['label'] ) . '" data-res="' . esc_attr( $source['label'] ) . '"' : ''; ?>>
@@ -142,6 +146,10 @@ while ( have_posts() ) :
 					majestic_tube_under_player_content( get_the_ID() );
 					?>
 
+				<header class="entry-header">
+					<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
+				</header>
+
 
 				<?php
 				/*
@@ -156,11 +164,23 @@ while ( have_posts() ) :
 				$show_rating  = majestic_tube_option_is_on( 'enable-rating-system' );
 				$show_share   = majestic_tube_option_is_on( 'enable-video-share' );
 				$show_report  = majestic_tube_option_is_on( 'enable-video-report' );
-				$has_summary  = $show_views || $show_rating;
+				/*
+				 * The panel is not option-gated: the publication date always prints,
+				 * while the counters inside it keep their own switches.
+				 */
 				?>
-				<?php if ( $has_summary ) : ?>
 				<div class="video-infos">
 					<div class="video-infos-left">
+						<?php
+						/*
+						 * Publication date. It is a <time> element with a machine
+						 * readable datetime attribute, and the metadata row styles its
+						 * separator with a child combinator, so it sits in the same
+						 * rhythm as the counters whether or not either is enabled.
+						 */
+						?>
+						<time class="video-date" datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time>
+
 						<?php if ( $show_views ) : ?>
 							<span class="video-views"><span><?php echo esc_html( majestic_tube_get_human_number( $views ) ); ?></span> <?php esc_html_e( 'views', 'majestic-tube' ); ?></span>
 						<?php endif; ?>
@@ -182,7 +202,6 @@ while ( have_posts() ) :
 						</div>
 					<?php endif; ?>
 				</div>
-				<?php endif; ?>
 
 				<?php if ( $show_rating || $show_share || $show_report ) : ?>
 					<div class="video-actions">

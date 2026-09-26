@@ -103,9 +103,19 @@ if ( 1 === (int) majestic_tube_get_option( 'wpst-options', 'videos-per-row-mobil
 
 			<div class="video-overlay"></div>
 
-			<?php if ( $thumb_url ) : ?>
+			<?php
+			/*
+			 * The picture is built by majestic_tube_get_card_image(): a featured image
+			 * gets the srcset WordPress generates for it plus the sizes attribute that
+			 * matches the grid, and a video whose thumbnail is the remote `thumb` meta
+			 * key gets the single-file markup this card used to print on its own.
+			 */
+			$card_image = majestic_tube_get_card_image( $post_id );
+			?>
+
+			<?php if ( '' !== $card_image ) : ?>
 				<div class="post-thumbnail-container">
-					<img class="video-main-thumb" src="<?php echo esc_url( $thumb_url ); ?>" alt="<?php echo esc_attr( the_title_attribute( array( 'echo' => false ) ) ); ?>" loading="lazy" width="320" height="180" />
+					<?php echo $card_image; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped inside the helper. ?>
 				</div>
 			<?php else : ?>
 				<div class="post-thumbnail-container no-thumb">

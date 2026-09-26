@@ -11,7 +11,7 @@
  * exactly like the original theme and like the ad zones.
  *
  * @package Majestic Tube
- * @version 2.0.9
+ * @version 2.1.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -69,51 +69,133 @@ function majestic_tube_output_footer_code() {
 add_action( 'wp_footer', 'majestic_tube_output_footer_code' );
 
 /**
+ * Font family bundled with the theme.
+ *
+ * Kept in one place so the enqueue, the preload and the option values all
+ * agree on the name: if the bundled file is ever swapped for another family,
+ * this is the only string that has to change alongside assets/css/fonts.css.
+ *
+ * @return string
+ */
+function majestic_tube_bundled_font_family() {
+	return 'Inter';
+}
+
+/**
+ * Font stacks the site font option can emit.
+ *
+ * The bundled family comes first and always ends in a real system stack, so a
+ * visitor whose browser never downloads the file (or whose request fails)
+ * still reads a designed page instead of a serif default.
+ *
+ * @return array<string, string> Choice label => CSS font stack.
+ */
+function majestic_tube_site_font_stacks() {
+	$stacks = array(
+		'Inter'     => '"' . majestic_tube_bundled_font_family() . '",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif',
+		'System UI' => 'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif',
+	);
+
+	/**
+	 * Filter the font stacks offered for the site font option.
+	 *
+	 * @param array<string, string> $stacks Choice label => CSS font stack.
+	 */
+	return apply_filters( 'majestic_tube_site_font_stacks', $stacks );
+}
+
+/**
  * Font stacks the logo font option can emit.
  *
- * The theme bundles no font files, so every choice names a family the operating
- * system already provides and ends in a generic keyword. That is the only kind
- * of choice that works here: a family nothing provides renders exactly like the
- * fallback, which is what made the old webfont picker look broken. What varies
- * between visitors is their own installed font, which is the point.
+ * Unlike the site font, a text logo may deliberately use a serif or monospace
+ * face. Every choice is a family the operating system already provides - apart
+ * from the bundled one - and ends in a generic keyword, so no choice can render
+ * as an invisible no-change.
  *
- * The map is the single source of truth - the Customizer choices and the
- * emitted --mt-logo-font-family value both come from here, so a choice can
- * never name a stack the theme does not know.
+ * The map is the single source of truth: the Customizer choices and the emitted
+ * --mt-logo-font-family value both come from here, so a choice can never name a
+ * stack the theme does not know.
  *
  * @return array<string, string> Choice label => CSS font stack.
  */
 function majestic_tube_logo_font_stacks() {
-	return array(
+	$stacks = array(
 		'System UI'        => 'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif',
 		'System Serif'     => 'Georgia,"Times New Roman","Noto Serif",Cambria,serif',
 		'System Monospace' => 'ui-monospace,SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono","Liberation Mono",monospace',
 	);
+
+	$bundled = majestic_tube_bundled_font_family();
+
+	// Prepended so the bundled family stays the first entry in the list, which is
+	// the value the Customizer shows as selected for a fresh install.
+	$stacks = array_merge(
+		array( $bundled => '"' . $bundled . '",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif' ),
+		$stacks
+	);
+
+	/**
+	 * Filter the font stacks offered for the logo font option.
+	 *
+	 * @param array<string, string> $stacks Choice label => CSS font stack.
+	 */
+	return apply_filters( 'majestic_tube_logo_font_stacks', $stacks );
 }
 
 /**
- * Resolve a stored logo font-family value to a safe CSS font stack.
+ * Resolve a stored font-family value to a safe CSS font stack.
  *
- * A known label resolves through majestic_tube_logo_font_stacks(). Anything
- * else - a family saved by a site that used the removed webfont bundle
- * (Inter, Open Sans, Roboto, Lato, Montserrat), a stale value from an older
- * release, or a hand-edited one - resolves to the system stack instead of
- * being echoed into the declaration. The unknown path therefore interpolates
- * nothing at all, so no stored value can break out of the style block, and a
- * removed family can never come back as a silent no-change.
+ * A known label resolves through the matching map. Anything else - a family
+ * saved by a release that bundled other webfonts (Open Sans, Roboto, Lato,
+ * Montserrat), a stale value, or a hand-edited one - resolves to the system
+ * stack instead of being echoed into the declaration. The unknown path
+ * therefore interpolates nothing at all, so no stored value can break out of
+ * the style block, and a removed family can never come back as a silent
+ * no-change.
  *
- * @param string $font_family Stored font family.
+ * @param string      $font_family Stored font family.
+ * @param array|null  $stacks      Optional map to resolve against.
  * @return string CSS font stack.
  */
-function majestic_tube_css_font_stack( $font_family ) {
-	$stacks = majestic_tube_logo_font_stacks();
+function majestic_tube_css_font_stack( $font_family, $stacks = null ) {
+	$stacks = is_array( $stacks ) ? $stacks : majestic_tube_logo_font_stacks();
 	$label  = trim( preg_replace( '/\s+/', ' ', (string) $font_family ) );
 
 	if ( isset( $stacks[ $label ] ) ) {
 		return $stacks[ $label ];
 	}
 
-	return $stacks['System UI'];
+	/*
+	 * The maps are filterable, so the system entry is not guaranteed to exist.
+	 * Falling back to the first registered stack keeps the declaration valid
+	 * even for a filter that replaces the whole list.
+	 */
+	$fallback = isset( $stacks['System UI'] ) ? $stacks['System UI'] : reset( $stacks );
+
+	return is_string( $fallback ) ? $fallback : 'sans-serif';
+}
+
+/**
+ * Whether any current option asks for the bundled webfont.
+ *
+ * The font file is only enqueued when it will actually be used, so a site that
+ * picks the system stack makes no font request at all - the choice is real, not
+ * cosmetic.
+ *
+ * @return bool
+ */
+function majestic_tube_uses_bundled_font() {
+	$bundled = majestic_tube_bundled_font_family();
+
+	$site_font = (string) majestic_tube_get_option( 'wpst-options', 'site-font-family', $bundled );
+	$logo_font = (string) majestic_tube_get_option( 'wpst-options', 'logo-font-family', $bundled );
+
+	/**
+	 * Filter whether the bundled webfont is loaded on this request.
+	 *
+	 * @param bool $uses Whether any option selects the bundled family.
+	 */
+	return (bool) apply_filters( 'majestic_tube_uses_bundled_font', $bundled === $site_font || $bundled === $logo_font );
 }
 
 /**
@@ -170,14 +252,29 @@ function majestic_tube_output_brand_css() {
 	$per_row = absint( majestic_tube_get_option( 'wpst-options', 'videos-per-row', 5 ) );
 
 	if ( $per_row > 0 ) {
+		$per_row = min( max( $per_row, 2 ), 8 );
+
 		$declarations[] = '--mt-columns:' . $per_row;
+
+		/*
+		 * The grid has to give up columns as the viewport narrows, but the
+		 * stylesheet cannot compute a clamped column count from a custom
+		 * property: repeat() only accepts an <integer>, and min() is not one.
+		 * Emitting the two reduced counts here keeps the videos-per-row option
+		 * meaningful on tablets instead of silently forcing three columns over
+		 * whatever the administrator chose.
+		 */
+		$declarations[] = '--mt-columns-tablet:' . min( $per_row, 3 );
 	}
 
 	$per_row_mobile = absint( majestic_tube_get_option( 'wpst-options', 'videos-per-row-mobile', 2 ) );
 
 	if ( $per_row_mobile > 0 ) {
-		$declarations[] = '--mt-columns-mobile:' . $per_row_mobile;
+		$declarations[] = '--mt-columns-mobile:' . min( max( $per_row_mobile, 1 ), 3 );
 	}
+
+	$site_font  = (string) majestic_tube_get_option( 'wpst-options', 'site-font-family', majestic_tube_bundled_font_family() );
+	$declarations[] = '--mt-font-family:' . majestic_tube_css_font_stack( $site_font, majestic_tube_site_font_stacks() );
 
 	$font_size = absint( majestic_tube_get_option( 'wpst-options', 'logo-font-size', 36 ) );
 
@@ -211,7 +308,7 @@ function majestic_tube_output_brand_css() {
 		$declarations[] = '--mt-logo-margin-left:' . $margin_left . 'px';
 	}
 
-	$font_family = (string) majestic_tube_get_option( 'wpst-options', 'logo-font-family', 'System UI' );
+	$font_family = (string) majestic_tube_get_option( 'wpst-options', 'logo-font-family', majestic_tube_bundled_font_family() );
 
 	if ( $font_family ) {
 		$declarations[] = '--mt-logo-font-family:' . majestic_tube_css_font_stack( $font_family );
@@ -248,7 +345,15 @@ function majestic_tube_output_brand_css() {
 		wp_strip_all_tags( implode( ';', $declarations ) )
 	);
 }
-add_action( 'wp_head', 'majestic_tube_output_brand_css', 7 );
+/*
+ * Printed at priority 10 on purpose. wp_print_styles() runs on wp_head
+ * priority 8 and prints every enqueued stylesheet, so a :root block emitted
+ * earlier loses the cascade to main.css for every token the stylesheet also
+ * declares - which is all of them. At priority 7 that silently disabled the
+ * main-color option as well as the font and column tokens, because main.css
+ * re-declared --mt-accent and --mt-font-family afterwards.
+ */
+add_action( 'wp_head', 'majestic_tube_output_brand_css', 10 );
 
 /**
  * Logo markup: the original theme supports an image logo, an icon+text logo

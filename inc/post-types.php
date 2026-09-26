@@ -98,10 +98,20 @@ function majestic_tube_relabel_post_type() {
 add_action( 'admin_menu', 'majestic_tube_relabel_post_type' );
 
 /**
- * Flush rewrite rules on activation.
+ * Prepare the rewrite rules on activation.
+ *
+ * The rules are generated, not flushed: flush_rewrite_rules() writes the set
+ * that is currently registered, so calling it before the `page`, `post` and
+ * `nav_menu` registrations that core performs on init priority 0 would store
+ * an incomplete rule set and leave permalinks 404ing until something else
+ * flushed them again. majestic_tube_run_site_setup() does the real flush from
+ * init priority 20, once the actors taxonomy below is registered too.
+ *
+ * The taxonomy is registered directly here as well so that a site switching
+ * to this theme has `actor` ready even if a plugin stops the setup routine
+ * from ever reaching its own registration on init.
  */
 function majestic_tube_activate() {
 	majestic_tube_create_actors_taxonomy();
-	flush_rewrite_rules();
 }
 add_action( 'after_switch_theme', 'majestic_tube_activate' );
