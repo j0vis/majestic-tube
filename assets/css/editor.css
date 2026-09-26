@@ -6,50 +6,12 @@
  * tokens in assets/css/main.css.
  *
  * @package Majestic Tube
- * @version 2.0.8
+ * @version 2.0.9
  */
 
-/* Keep the editor self-contained with the same local Inter files as the front end. */
-@font-face {
-	font-family: "Inter";
-	src: url("../fonts/inter-regular.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Inter";
-	src: url("../fonts/inter-medium.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 500;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Inter";
-	src: url("../fonts/inter-semibold.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 600;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Inter";
-	src: url("../fonts/inter-bold.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 700;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Inter";
-	src: url("../fonts/inter-extrabold.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 800;
-	font-display: swap;
-}
-
+/* Same reason as the front end: the editor uses the operating system's own
+ * interface font, so there is no font file to load and no download to wait
+ * for. Keep this stack in step with --mt-font-family in assets/css/main.css. */
 :root {
 	--mt-bg: #f4f5f7;
 	--mt-surface: #ffffff;
@@ -58,12 +20,13 @@
 	--mt-text-muted: #6b7280;
 	--mt-accent: #0f8a99;
 	--mt-radius: 6px;
+	--mt-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 
 .editor-styles-wrapper {
 	background: var(--mt-bg);
 	color: var(--mt-text);
-	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif;
+	font-family: var(--mt-font-family);
 	line-height: 1.6;
 }
 

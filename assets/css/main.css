@@ -5,92 +5,16 @@
  * high-contrast text, compact chrome, and responsive content grids.
  *
  * @package Majestic Tube
- * @version 2.0.8
+ * @version 2.0.9
  */
 
 /*
- * Inter is bundled with the theme so the reading surface does not depend on a
- * third-party font request. Files are from the official Inter v4.1 release;
- * the accompanying OFL license is in assets/fonts/LICENSE.txt.
- *
- * The four families below are bundled for the logo font option so every
- * selectable choice actually renders a different face. Each is the latin
- * subset from the Google Fonts release of the family, under the SIL Open Font
- * License 1.1; see assets/fonts/FONTS-LICENSES.txt. Lato publishes no 800
- * weight, so its bold face backs the logo's 800 weight request.
+ * No webfonts ship with the theme. Every rule below uses the operating
+ * system's own interface font through --mt-font-family: Segoe UI on Windows,
+ * San Francisco on macOS and iOS, Cantarell or Ubuntu on Linux, with the
+ * classic vendor stacks behind it for older browsers. Nothing is downloaded,
+ * so text paints on the first frame in the font the reader already reads.
  */
-@font-face {
-	font-family: "Inter";
-	src: url("../fonts/inter-regular.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 400;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Inter";
-	src: url("../fonts/inter-medium.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 500;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Inter";
-	src: url("../fonts/inter-semibold.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 600;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Inter";
-	src: url("../fonts/inter-bold.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 700;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Inter";
-	src: url("../fonts/inter-extrabold.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 800;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Open Sans";
-	src: url("../fonts/opensans-extrabold.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 800;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Roboto";
-	src: url("../fonts/roboto-extrabold.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 800;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Lato";
-	src: url("../fonts/lato-bold.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 700;
-	font-display: swap;
-}
-
-@font-face {
-	font-family: "Montserrat";
-	src: url("../fonts/montserrat-extrabold.woff2") format("woff2");
-	font-style: normal;
-	font-weight: 800;
-	font-display: swap;
-}
-
 :root {
 	--mt-bg: #f4f5f7;
 	--mt-surface: #ffffff;
@@ -107,6 +31,7 @@
 	--mt-radius: 8px;
 	--mt-shadow: 0 2px 10px rgba(20, 24, 31, 0.07);
 	--mt-shadow-hover: 0 10px 28px rgba(20, 24, 31, 0.13);
+	--mt-font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
 
 *,
@@ -123,13 +48,17 @@ body {
 	margin: 0;
 	background: var(--mt-bg);
 	color: var(--mt-text);
-	font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+	font-family: var(--mt-font-family);
 	font-size: 16px;
 	line-height: 1.65;
 	-webkit-font-smoothing: antialiased;
 }
 
-body,
+/*
+ * Form controls only. `body` must NOT be in this group: an equal-specificity
+ * `body { font-family: inherit }` would win over the declaration above and
+ * leave the page with the browser's default font instead of ours.
+ */
 button,
 input,
 select,
@@ -225,7 +154,7 @@ ol {
 	max-width: 100%;
 	margin: var(--mt-logo-margin-top, 0) 0 0 var(--mt-logo-margin-left, 0);
 	color: var(--mt-text);
-	font-family: var(--mt-logo-font-family, inherit);
+	font-family: var(--mt-logo-font-family, var(--mt-font-family));
 	font-size: var(--mt-logo-size, 1.75rem);
 	font-weight: 800;
 	line-height: 1.05;

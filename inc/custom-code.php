@@ -11,7 +11,7 @@
  * exactly like the original theme and like the ad zones.
  *
  * @package Majestic Tube
- * @version 2.0.8
+ * @version 2.0.9
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -69,40 +69,38 @@ function majestic_tube_output_footer_code() {
 add_action( 'wp_footer', 'majestic_tube_output_footer_code' );
 
 /**
- * Font families offered by the logo font option, mapped to real CSS stacks.
+ * Font stacks the logo font option can emit.
  *
- * Every bundled family is served from assets/fonts with an @font-face rule, and
- * every system choice ends in a generic keyword, so each entry renders a face
- * that actually differs. The map is the single source of truth: the Customizer
- * choices and the emitted --mt-logo-font-family value both come from here, which
- * is what stops a selectable family from silently falling back to the browser
- * default because nothing provides it.
+ * The theme bundles no font files, so every choice names a family the operating
+ * system already provides and ends in a generic keyword. That is the only kind
+ * of choice that works here: a family nothing provides renders exactly like the
+ * fallback, which is what made the old webfont picker look broken. What varies
+ * between visitors is their own installed font, which is the point.
  *
- * @return array<string, string> Family label => CSS font stack.
+ * The map is the single source of truth - the Customizer choices and the
+ * emitted --mt-logo-font-family value both come from here, so a choice can
+ * never name a stack the theme does not know.
+ *
+ * @return array<string, string> Choice label => CSS font stack.
  */
 function majestic_tube_logo_font_stacks() {
 	return array(
-		'Inter'           => '"Inter",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif',
-		'Open Sans'       => '"Open Sans","Segoe UI",system-ui,sans-serif',
-		'Roboto'          => 'Roboto,"Segoe UI",system-ui,sans-serif',
-		'Lato'            => 'Lato,"Segoe UI",system-ui,sans-serif',
-		'Montserrat'      => 'Montserrat,"Segoe UI",system-ui,sans-serif',
-		'System UI'       => 'system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif',
-		'System Serif'    => 'Georgia,"Times New Roman","Noto Serif",serif',
-		'System Monospace' => 'ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace',
+		'System UI'        => 'system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,"Noto Sans",sans-serif',
+		'System Serif'     => 'Georgia,"Times New Roman","Noto Serif",Cambria,serif',
+		'System Monospace' => 'ui-monospace,SFMono-Regular,Menlo,Consolas,"DejaVu Sans Mono","Liberation Mono",monospace',
 	);
 }
 
 /**
- * Build a safe CSS font stack from a stored font-family option.
+ * Resolve a stored logo font-family value to a safe CSS font stack.
  *
- * A known label resolves through majestic_tube_logo_font_stacks() so the value
- * always names a family the theme actually provides, plus a generic fallback.
- * Any other stored value keeps the original behavior: every character that is
- * not a letter, digit, space, hyphen or underscore is dropped, which removes
- * quotes, semicolons, braces and comment markers alike, and the result is
- * wrapped in double quotes with `sans-serif` appended so the declaration stays
- * valid. That path also keeps a value saved by an older site renderable.
+ * A known label resolves through majestic_tube_logo_font_stacks(). Anything
+ * else - a family saved by a site that used the removed webfont bundle
+ * (Inter, Open Sans, Roboto, Lato, Montserrat), a stale value from an older
+ * release, or a hand-edited one - resolves to the system stack instead of
+ * being echoed into the declaration. The unknown path therefore interpolates
+ * nothing at all, so no stored value can break out of the style block, and a
+ * removed family can never come back as a silent no-change.
  *
  * @param string $font_family Stored font family.
  * @return string CSS font stack.
@@ -115,13 +113,7 @@ function majestic_tube_css_font_stack( $font_family ) {
 		return $stacks[ $label ];
 	}
 
-	$family = preg_replace( '/[^A-Za-z0-9 _-]/', '', $label );
-
-	if ( '' === trim( $family ) ) {
-		return 'sans-serif';
-	}
-
-	return '"' . $family . '",sans-serif';
+	return $stacks['System UI'];
 }
 
 /**
@@ -219,11 +211,9 @@ function majestic_tube_output_brand_css() {
 		$declarations[] = '--mt-logo-margin-left:' . $margin_left . 'px';
 	}
 
-	$font_family = (string) majestic_tube_get_option( 'wpst-options', 'logo-font-family', 'Inter' );
+	$font_family = (string) majestic_tube_get_option( 'wpst-options', 'logo-font-family', 'System UI' );
 
-	// 'System default' is the original inherit sentinel: no variable is emitted,
-	// so .site-logo keeps the surrounding body font.
-	if ( $font_family && 'System default' !== $font_family ) {
+	if ( $font_family ) {
 		$declarations[] = '--mt-logo-font-family:' . majestic_tube_css_font_stack( $font_family );
 	}
 
@@ -247,7 +237,7 @@ function majestic_tube_output_brand_css() {
 	/*
 	 * The values are assembled from sanitize_hex_color(), absint() and
 	 * majestic_tube_css_font_stack() above, so they are already safe to print
-	 * raw. esc_html() must not be used here: it would turn the font family's
+	 * raw. esc_html() must not be used here: it would turn the font stack's
 	 * double quotes into &quot;, which CSS does not decode, silently breaking
 	 * --mt-logo-font-family. wp_strip_all_tags() is kept as a guard so a value
 	 * injected through the majestic_tube_brand_css filter cannot close the

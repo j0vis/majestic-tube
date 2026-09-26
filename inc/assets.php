@@ -3,7 +3,7 @@
  * Script and style enqueuing.
  *
  * @package Majestic Tube
- * @version 2.0.8
+ * @version 2.0.9
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -107,8 +107,8 @@ function majestic_tube_enqueue_assets() {
 	// prevent a browser/CDN from continuing to serve the previous dark pass.
 	wp_enqueue_style( 'majestic-tube-style', get_stylesheet_uri(), array(), majestic_tube_asset_version( 'style.css' ) );
 
-	// Inter is bundled under assets/fonts and declared in main.css, keeping
-	// the theme self-contained and avoiding a third-party font request.
+	// main.css also carries the theme's design tokens; the type is the
+	// operating system's own interface font, so nothing extra is enqueued.
 	wp_enqueue_style(
 		'majestic-tube-main',
 		MAJESTIC_TUBE_URI . '/assets/css/main.css',

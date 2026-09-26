@@ -373,9 +373,11 @@ This is the main section for listings, cards, video details, membership, footer 
 - Optionally place a logo watermark over the video player.
 - Set a favicon for browser tabs and bookmarks.
 
-#### Logo font choices
+#### Typography
 
-Every font offered for the text logo is included with the theme, so the change is visible straight away. Choose from **Inter**, **Open Sans**, **Roboto**, **Lato**, and **Montserrat**, or pick a **system** stack: **System UI**, **System Serif**, or **System Monospace**. System choices use the fonts already installed on each visitor's device, so they look slightly different per operating system. The logo is drawn at a heavy weight; Lato publishes no ExtraBold face, so its Bold face is used.
+The theme ships no font files and makes no font request: the whole site is drawn in the font your operating system already uses for interfaces — Segoe UI on Windows, San Francisco on macOS and iOS, Cantarell or Ubuntu on Linux. That means the page is readable the instant it appears, and it looks native to each visitor's device instead of forcing one look on everyone.
+
+The text logo is the one place you can pick a different voice, and the choices are the fonts your device already has: **System UI** (the same font as the rest of the site, the default), **System serif** (Georgia, Times New Roman, Noto Serif), and **System monospace** (Menlo, Consolas, DejaVu Sans Mono). Because these are installed fonts rather than downloaded ones, each choice looks slightly different per operating system — that is expected, not a glitch.
 
 ### Majestic Tube - Sharing & Social
 
@@ -691,9 +693,8 @@ A quick way to support ongoing maintenance and new features.
 #### Included third-party components
 
 - Video.js player — Apache License 2.0
-- Inter, Open Sans, Roboto, Lato, Montserrat — SIL Open Font License 1.1
 
-Their license notices are bundled with the theme in the assets folders.
+Its license notice is bundled with the theme in the assets folder. No fonts are bundled: the theme uses the ones already installed on the visitor's device.
 
 **At a glance**
 

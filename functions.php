@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAJESTIC_TUBE_VERSION', '2.0.8' );
+define( 'MAJESTIC_TUBE_VERSION', '2.0.9' );
 define( 'MAJESTIC_TUBE_DIR', get_template_directory() );
 define( 'MAJESTIC_TUBE_URI', get_template_directory_uri() );
 
