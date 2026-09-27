@@ -120,6 +120,28 @@
 	text-align: right;
 }
 
+/* Player speed control and resume offer (2.1.7) */
+.mt-speed-menu {
+	left: 0;
+	right: auto;
+	text-align: right;
+}
+
+.mt-speed-native {
+	left: 4.6rem;
+	right: auto;
+}
+
+.mt-speed-item {
+	text-align: right;
+}
+
+/* The theater toggle sits in the same corner as the other overlays. */
+.mt-theater-toggle {
+	left: 0.6rem;
+	right: auto;
+}
+
 @media (max-width: 600px) {
 	.main-navigation {
 		justify-content: flex-start;

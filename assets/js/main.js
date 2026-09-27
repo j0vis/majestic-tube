@@ -6,7 +6,7 @@
  * the shared `ajax-nonce` the original theme used.
  *
  * @package Majestic Tube
- * @version 2.1.6
+ * @version 2.1.7
  */
 
 ( function () {
@@ -1235,8 +1235,660 @@
 	}
 
 	/**
+	 * Local storage that cannot throw.
+	 *
+	 * Private browsing, a blocked cookie policy and a partitioned frame all
+	 * make `localStorage` raise on access rather than return null, and a
+	 * player feature is never worth an exception. Every call is guarded, so a
+	 * site where storage is unavailable simply loses the conveniences.
+	 *
+	 * @param {string}   key     Storage key.
+	 * @param {*}        defaultValue Value to return when absent.
+	 * @return {*} Stored value or the default.
+	 */
+	function readStore( key, defaultValue ) {
+		try {
+			var value = window.localStorage.getItem( key );
+
+			return null === value ? defaultValue : value;
+		} catch ( e ) {
+			return defaultValue;
+		}
+	}
+
+	/**
+	 * Write to local storage, swallowing a refusal.
+	 *
+	 * @param {string} key   Storage key.
+	 * @param {string} value Value to store.
+	 * @return {void}
+	 */
+	function writeStore( key, value ) {
+		try {
+			window.localStorage.setItem( key, value );
+		} catch ( e ) {
+			// Storage unavailable: the feature degrades, nothing breaks.
+		}
+	}
+
+	/**
+	 * The underlying media element behind a player or a video tag.
+	 *
+	 * Video.js wraps the element and exposes most of the same API, but the
+	 * element is needed for events and for `playbackRate`, which Video.js
+	 * spells `playbackRate()`.
+	 *
+	 * @param {Object} player Video.js player or media element.
+	 * @return {HTMLMediaElement} The media element.
+	 */
+	function mediaElement( player ) {
+		return player && typeof player.el === 'function' ? player.el() : player;
+	}
+
+	/**
+	 * Read a playback rate from either kind of player.
+	 *
+	 * @param {Object} player Video.js player or media element.
+	 * @return {number} Current rate.
+	 */
+	function currentRate( player ) {
+		if ( player && typeof player.playbackRate === 'function' ) {
+			return parseFloat( player.playbackRate() ) || 1;
+		}
+
+		var element = mediaElement( player );
+
+		return element ? parseFloat( element.playbackRate ) || 1 : 1;
+	}
+
+	/**
+	 * Set a playback rate on either kind of player.
+	 *
+	 * @param {Object} player Video.js player or media element.
+	 * @param {number} rate   Target rate.
+	 * @return {void}
+	 */
+	function setRate( player, rate ) {
+		if ( player && typeof player.playbackRate === 'function' ) {
+			player.playbackRate( rate );
+
+			return;
+		}
+
+		var element = mediaElement( player );
+
+		if ( element ) {
+			element.playbackRate = rate;
+		}
+	}
+
+	/**
+	 * Whether playback is paused.
+	 *
+	 * Video.js spells this as a method and the element as a property, so
+	 * `player.paused()` throws a TypeError on the native player. Every call
+	 * goes through here instead.
+	 *
+	 * @param {Object} player Video.js player or media element.
+	 * @return {boolean} True when paused.
+	 */
+	function isPaused( player ) {
+		if ( player && typeof player.paused === 'function' ) {
+			return !! player.paused();
+		}
+
+		return ! player || true === player.paused;
+	}
+
+	/**
+	 * Read the current playback position.
+	 *
+	 * @param {Object} player Video.js player or media element.
+	 * @return {number} Seconds.
+	 */
+	function getTime( player ) {
+		if ( player && typeof player.currentTime === 'function' ) {
+			return parseFloat( player.currentTime() ) || 0;
+		}
+
+		return player ? parseFloat( player.currentTime ) || 0 : 0;
+	}
+
+	/**
+	 * Seek, clamped to the media so a keypress can never park the playhead
+	 * past the end or before the start.
+	 *
+	 * @param {Object} player Video.js player or media element.
+	 * @param {number} time   Target position in seconds.
+	 * @return {void}
+	 */
+	function setTime( player, time ) {
+		if ( ! player ) {
+			return;
+		}
+
+		var target = Math.max( 0, time );
+
+		var total = durationOf( mediaElement( player ) );
+
+		if ( total > 0 ) {
+			target = Math.min( target, total );
+		}
+
+		if ( typeof player.currentTime === 'function' ) {
+			player.currentTime( target );
+
+			return;
+		}
+
+		player.currentTime = target;
+	}
+
+	/**
+	 * Seek by a signed number of seconds.
+	 *
+	 * @param {Object} player Video.js player or media element.
+	 * @param {number} delta  Seconds to add, may be negative.
+	 * @return {void}
+	 */
+	function seekBy( player, delta ) {
+		setTime( player, getTime( player ) + delta );
+	}
+
+	/**
+	 * Play or pause, whichever is the opposite of what is happening now.
+	 *
+	 * @param {Object} player Video.js player or media element.
+	 * @return {void}
+	 */
+	function togglePlay( player ) {
+		if ( isPaused( player ) ) {
+			player.play();
+		} else {
+			player.pause();
+		}
+	}
+
+	/**
+	 * Format a number of seconds as m:ss, the way a player does.
+	 *
+	 * @param {number} seconds Seconds.
+	 * @return {string} Formatted time.
+	 */
+	function formatTime( seconds ) {
+		seconds = Math.max( 0, Math.floor( seconds ) || 0 );
+
+		var hours = Math.floor( seconds / 3600 );
+		var minutes = Math.floor( ( seconds % 3600 ) / 60 );
+		var rest = seconds % 60;
+
+		if ( hours > 0 ) {
+			return hours + ':' + ( minutes < 10 ? '0' : '' ) + minutes + ':' + ( rest < 10 ? '0' : '' ) + rest;
+		}
+
+		return minutes + ':' + ( rest < 10 ? '0' : '' ) + rest;
+	}
+
+	/**
+	 * Speed control: a button and menu, styled like the quality selector and
+	 * deliberately built the same way rather than as a native <select>, so it
+	 * matches the rest of the player chrome in both skins.
+	 *
+	 * @param {Object} player  Video.js player or media element.
+	 * @param {Element} container Element the control is appended to.
+	 * @param {boolean} isVjs  Whether the control sits in the Video.js bar.
+	 * @return {void}
+	 */
+	function buildSpeedControl( player, container, isVjs ) {
+		var speeds = Array.isArray( options.speeds ) && options.speeds.length ? options.speeds : [ 1 ];
+		var stored = parseFloat( readStore( 'majestic_tube_speed', '' ) );
+		var index = speeds.indexOf( stored );
+
+		if ( -1 === index ) {
+			index = speeds.indexOf( 1 );
+		}
+
+		if ( -1 === index ) {
+			index = 0;
+		}
+
+		// Apply the remembered rate immediately, so the first frame a returning
+		// visitor sees is already at the speed they chose.
+		setRate( player, speeds[ index ] );
+
+		var wrapper = document.createElement( 'div' );
+		var button = document.createElement( 'button' );
+		var menu = document.createElement( 'div' );
+
+		wrapper.className = 'mt-speed' + ( isVjs ? ' mt-speed-vjs' : ' mt-speed-native' );
+		button.type = 'button';
+		button.className = 'mt-speed-toggle';
+		button.setAttribute( 'aria-expanded', 'false' );
+		button.setAttribute( 'aria-label', i18n.speed || 'Speed' );
+		button.textContent = speeds[ index ] + 'x';
+
+		menu.className = 'mt-speed-menu';
+		menu.setAttribute( 'hidden', '' );
+
+		function closeMenu() {
+			menu.setAttribute( 'hidden', '' );
+			button.setAttribute( 'aria-expanded', 'false' );
+		}
+
+		speeds.forEach( function ( speed, speedIndex ) {
+			var item = document.createElement( 'button' );
+
+			item.type = 'button';
+			item.className = 'mt-speed-item';
+			item.textContent = speed + 'x';
+			item.setAttribute( 'data-speed', speed );
+
+			if ( speedIndex === index ) {
+				item.classList.add( 'is-active' );
+				item.setAttribute( 'aria-current', 'true' );
+			}
+
+			item.addEventListener( 'click', function () {
+				setRate( player, speed );
+				button.textContent = speed + 'x';
+				writeStore( 'majestic_tube_speed', String( speed ) );
+
+				findAll( '.mt-speed-item', menu ).forEach( function ( other ) {
+					other.classList.toggle( 'is-active', other === item );
+					other.removeAttribute( 'aria-current' );
+				} );
+
+				item.setAttribute( 'aria-current', 'true' );
+				closeMenu();
+			} );
+
+			menu.appendChild( item );
+		} );
+
+		button.addEventListener( 'click', function () {
+			var open = ! menu.hasAttribute( 'hidden' );
+
+			if ( open ) {
+				closeMenu();
+			} else {
+				menu.removeAttribute( 'hidden' );
+				button.setAttribute( 'aria-expanded', 'true' );
+			}
+		} );
+
+		document.addEventListener( 'click', function ( e ) {
+			if ( ! wrapper.contains( e.target ) ) {
+				closeMenu();
+			}
+		} );
+
+		wrapper.appendChild( button );
+		wrapper.appendChild( menu );
+		container.appendChild( wrapper );
+	}
+
+	/**
+	 * Theater mode: widen the player across the page and dim everything else.
+	 *
+	 * A class on the body rather than a scroll lock, so the visitor can still
+	 * scroll to the description or the comments. The state is remembered, since
+	 * a visitor who prefers watching this way prefers it everywhere.
+	 *
+	 * @param {Element} wrapper The .video-player element.
+	 * @return {void}
+	 */
+	function initTheaterMode( wrapper ) {
+		var button = document.createElement( 'button' );
+
+		button.type = 'button';
+		button.className = 'mt-theater-toggle';
+		button.setAttribute( 'aria-pressed', 'false' );
+
+		function label( on ) {
+			button.setAttribute( 'aria-pressed', on ? 'true' : 'false' );
+			button.setAttribute( 'aria-label', ( on ? i18n.exitTheater : i18n.theater ) || 'Theater mode' );
+			button.setAttribute( 'title', ( on ? i18n.exitTheater : i18n.theater ) || 'Theater mode' );
+			button.classList.toggle( 'is-active', on );
+		}
+
+		function set( on, remember ) {
+			// Both, not just the body: the legacy parity layer paints the
+			// html element as well, and its background is what shows at the
+			// page edges. The class also has to be on an ancestor for the
+			// layout rules to reach the content column.
+			document.body.classList.toggle( 'mt-theater', on );
+			document.documentElement.classList.toggle( 'mt-theater', on );
+			label( on );
+
+			if ( remember ) {
+				writeStore( 'majestic_tube_theater', on ? '1' : '0' );
+			}
+		}
+
+		if ( '1' === readStore( 'majestic_tube_theater', '0' ) ) {
+			set( true, false );
+		}
+
+		button.addEventListener( 'click', function () {
+			set( ! document.documentElement.classList.contains( 'mt-theater' ), true );
+		} );
+
+		wrapper.appendChild( button );
+
+		// The keyboard shortcut is handled here rather than in the hotkey
+		// table so that the T key works with the shortcuts off too.
+		document.addEventListener( 'keydown', function ( event ) {
+			if ( 't' !== event.key && 'T' !== event.key ) {
+				return;
+			}
+
+			if ( isTypingTarget( event.target ) || event.metaKey || event.ctrlKey || event.altKey ) {
+				return;
+			}
+
+			event.preventDefault();
+			set( ! document.documentElement.classList.contains( 'mt-theater' ), true );
+		} );
+	}
+
+	/**
+	 * Whether a key event came from somewhere the visitor is typing.
+	 *
+	 * Shortcuts must never eat a keystroke destined for a form field, a
+	 * contenteditable region or anything with a role that takes text. This is
+	 * the single guard every keyboard feature in the player consults.
+	 *
+	 * @param {Element} target Event target.
+	 * @return {boolean} True when the keystroke belongs to the visitor.
+	 */
+	function isTypingTarget( target ) {
+		if ( ! target || ! target.tagName ) {
+			return false;
+		}
+
+		var tag = target.tagName.toLowerCase();
+
+		if ( 'input' === tag || 'textarea' === tag || 'select' === tag ) {
+			return true;
+		}
+
+		if ( target.isContentEditable ) {
+			return true;
+		}
+
+		return false;
+	}
+
+	/**
+	 * Keyboard shortcuts.
+	 *
+	 * Video.js already binds space, the arrows, M and F when the player has
+	 * focus, so this handler deliberately stays out of their way: it ignores
+	 * any event that carries a modifier, comes from a text field, or was
+	 * already handled. Only the keys Video.js does not cover on its own -
+	 * the digits, J/L, and K for play/pause when focus is outside the player -
+	 * are handled here, which is what makes the set feel identical whether
+	 * the site runs Video.js or the native player.
+	 *
+	 * @param {Object} player  Video.js player or media element.
+	 * @return {void}
+	 */
+	function initPlayerHotkeys( player ) {
+		var element = mediaElement( player );
+
+		if ( ! element ) {
+			return;
+		}
+
+		// Video.js duplicates the document-level key only when focus is
+		// outside its own element; inside, its own binding wins and pressing
+		// the key would otherwise seek twice.
+		var vjsOwnsFocus = !! player && typeof player.el === 'function';
+
+		document.addEventListener( 'keydown', function ( event ) {
+			if ( event.metaKey || event.ctrlKey || event.altKey || event.defaultPrevented ) {
+				return;
+			}
+
+			if ( isTypingTarget( event.target ) ) {
+				return;
+			}
+
+			// A key that reaches a button or a link belongs to that control:
+			// space and enter activate it, and stealing them breaks the page.
+			if ( ' ' === event.key && event.target && event.target.closest ) {
+				var control = event.target.closest( 'button, a[href], [role="button"]' );
+
+				if ( control ) {
+					return;
+				}
+			}
+
+			var key = event.key;
+			var handled = true;
+
+			switch ( key ) {
+				case ' ':
+				case 'k':
+				case 'K':
+					togglePlay( player );
+					break;
+
+				case 'ArrowRight':
+					if ( vjsOwnsFocus ) {
+						return;
+					}
+
+					seekBy( player, 5 );
+					break;
+
+				case 'ArrowLeft':
+					if ( vjsOwnsFocus ) {
+						return;
+					}
+
+					seekBy( player, -5 );
+					break;
+
+				case 'l':
+				case 'L':
+					seekBy( player, 10 );
+					break;
+
+				case 'j':
+				case 'J':
+					seekBy( player, -10 );
+					break;
+
+				case '0':
+				case '1':
+				case '2':
+				case '3':
+				case '4':
+				case '5':
+				case '6':
+				case '7':
+				case '8':
+				case '9':
+					var total = durationOf( element );
+
+					if ( total > 0 ) {
+						setTime( player, total * ( parseInt( key, 10 ) / 10 ) );
+					}
+					break;
+
+				default:
+					handled = false;
+			}
+
+			if ( handled ) {
+				event.preventDefault();
+			}
+		} );
+	}
+
+	/**
+	 * The media duration, guarding against the live NaN and Infinity a
+	 * not-yet-loaded media element reports.
+	 *
+	 * @param {HTMLMediaElement} element Media element.
+	 * @return {number} Duration in seconds, or 0.
+	 */
+	function durationOf( element ) {
+		var duration = element && element.duration;
+
+		return isFinite( duration ) && duration > 0 ? duration : 0;
+	}
+
+	/**
+	 * Offer to resume where this visitor stopped.
+	 *
+	 * Two thresholds, both deliberate. Anything under 30 seconds is not worth
+	 * interrupting someone for - they have barely started, and the bar would
+	 * cover the very controls they are reaching for. And a position within the
+	 * last 15 seconds of the video is no resume at all, it is the end.
+	 *
+	 * The position is written on a timer and on the way out of the page, not
+	 * on every timeupdate, because a write per tick is a lot of storage
+	 * traffic for a number that changes visibly only every few seconds.
+	 *
+	 * @param {Object} player Video.js player or media element.
+	 * @param {Element} wrapper The .video-player element.
+	 * @return {void}
+	 */
+	function initResumeOffer( player, wrapper ) {
+		var container = document.querySelector( '.video-player' );
+		var postId = container ? container.getAttribute( 'data-post-id' ) : '';
+
+		if ( ! postId ) {
+			return;
+		}
+
+		var key = 'majestic_tube_pos_' + postId;
+		var element = mediaElement( player );
+		var offer = null;
+		var lastSaved = -1;
+
+		// 15 seconds is a long video; 15 percent is a short one. Either is far
+		// enough in that the visitor has a real reason to come back.
+		function isWorthResuming( time, total ) {
+			if ( ! isFinite( time ) || time < 30 ) {
+				return false;
+			}
+
+			return total > 0 && time < total - 15 && time / total < 0.95;
+		}
+
+		function hideOffer() {
+			if ( offer && offer.parentNode ) {
+				offer.parentNode.removeChild( offer );
+			}
+
+			offer = null;
+		}
+
+		function showOffer( time ) {
+			if ( offer ) {
+				return;
+			}
+
+			offer = document.createElement( 'div' );
+			offer.className = 'mt-resume';
+
+			var resume = document.createElement( 'button' );
+			var dismiss = document.createElement( 'button' );
+
+			offer.setAttribute( 'role', 'group' );
+			offer.setAttribute( 'aria-label', i18n.resume || 'Resume' );
+
+			resume.type = 'button';
+			resume.className = 'mt-resume-play';
+			resume.textContent = ( i18n.resume || 'Resume' ) + ' ' + formatTime( time );
+
+			dismiss.type = 'button';
+			dismiss.className = 'mt-resume-dismiss';
+			dismiss.setAttribute( 'aria-label', i18n.dismiss || 'Dismiss' );
+			dismiss.textContent = '×';
+
+			resume.addEventListener( 'click', function () {
+				setTime( player, time );
+				player.play();
+				hideOffer();
+			} );
+
+			// Declining clears the stored position, so the offer does not come
+			// back on every visit to a video they chose to start again.
+			dismiss.addEventListener( 'click', function () {
+				writeStore( key, '0' );
+				hideOffer();
+			} );
+
+			offer.appendChild( resume );
+			offer.appendChild( dismiss );
+			wrapper.appendChild( offer );
+		}
+
+		element.addEventListener( 'loadedmetadata', function () {
+			var stored = parseFloat( readStore( key, '0' ) ) || 0;
+			var total = durationOf( element );
+
+			if ( isWorthResuming( stored, total ) ) {
+				showOffer( stored );
+			}
+		} );
+
+		function savePosition( force ) {
+			var total = durationOf( element );
+			var time = element.currentTime;
+
+			// Never write past the end: a finished video should not resume into
+			// its last frame.
+			if ( ! isWorthResuming( time, total ) ) {
+				if ( lastSaved > 0 ) {
+					writeStore( key, '0' );
+					lastSaved = -1;
+				}
+
+				return;
+			}
+
+			if ( ! force && Math.abs( time - lastSaved ) < 5 ) {
+				return;
+			}
+
+			writeStore( key, String( Math.floor( time ) ) );
+			lastSaved = time;
+		}
+
+		element.addEventListener( 'timeupdate', function () {
+			savePosition( false );
+		} );
+
+		element.addEventListener( 'pause', function () {
+			savePosition( true );
+		} );
+
+		element.addEventListener( 'ended', function () {
+			writeStore( key, '0' );
+			lastSaved = -1;
+		} );
+
+		// Leaving the page by closing the tab is the one case no media event
+		// covers, and it is exactly when the position is most likely to be
+		// wanted on the next visit.
+		window.addEventListener( 'pagehide', function () {
+			savePosition( true );
+		} );
+	}
+
+	/**
 	 * Initialise the player: Video.js when available, native video otherwise,
-	 * plus the quality selector.
+	 * plus whichever extras the site has switched on.
+	 *
+	 * The extras are set up before the quality selector's early return, which
+	 * is keyed on there being at least two sources. A single-source video is
+	 * still a video, and hotkeys or a speed control on it are exactly as
+	 * useful as on a multi-quality one - so that return must stay last.
 	 */
 	function initPlayer() {
 		var video = document.getElementById( 'wpst-video' );
@@ -1274,20 +1926,51 @@
 			}
 		}
 
+		var bar = controlBar && controlBar.el() ? controlBar.el() : null;
+		var wrapper = video.closest( '.video-player' ) || video.parentNode;
+
+		/*
+		 * Where a control goes depends on the player: inside the Video.js
+		 * control bar when there is one, over the video itself otherwise. The
+		 * native path also needs a class so the overlay is positioned, which
+		 * the quality selector already sets.
+		 */
+		function mount( builder, vjs ) {
+			if ( bar ) {
+				builder( player, bar, vjs );
+
+				return;
+			}
+
+			if ( wrapper ) {
+				wrapper.classList.add( 'has-native-quality' );
+				builder( player, wrapper, false );
+			}
+		}
+
+		if ( options.playerTheater && wrapper ) {
+			initTheaterMode( wrapper );
+		}
+
+		if ( options.playerHotkeys ) {
+			initPlayerHotkeys( player );
+		}
+
+		if ( options.playerResume ) {
+			initResumeOffer( player, wrapper );
+		}
+
+		if ( options.playerSpeed ) {
+			mount( buildSpeedControl, true );
+		}
+
 		if ( sources.length < 2 || false === options.qualitySelector || 'off' === options.qualitySelector ) {
 			return;
 		}
 
-		if ( controlBar && controlBar.el() ) {
-			buildQualityControl( player, controlBar.el(), sources, true );
-		} else {
-			var wrapper = video.closest( '.video-player' ) || video.parentNode;
-
-			if ( wrapper ) {
-				wrapper.classList.add( 'has-native-quality' );
-				buildQualityControl( video, wrapper, sources, false );
-			}
-		}
+		mount( function ( target, container, vjs ) {
+			buildQualityControl( target, container, sources, vjs );
+		}, true );
 	}
 
 	/**

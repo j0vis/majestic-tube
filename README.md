@@ -284,6 +284,55 @@ Add direct video URLs for 240p, 360p, 480p, 720p, 1080p, and 4K. When more than 
 | Use the native HTML5 player | Uses the browser’s built-in controls instead of the enhanced Majestic Tube player. |
 | Enable the video quality selector | Shows available quality choices for direct video sources. |
 | Count a view only after playback starts | Records a view once the video has played for three seconds rather than the moment the page loads, so refreshes and accidental clicks stop inflating the counter. Off by default, and it applies to new views only, so enabling it never rewrites history. |
+| Keyboard shortcuts, playback speed, resume, and theater mode | Four optional player extras, all off by default and described in detail below. |
+
+### Playback speed, keyboard shortcuts, resume, and theater mode
+
+Four optional extras, all under `Appearance → Customize → Majestic Tube - Video Player` and all **off by default**, so updating the theme changes nothing a visitor can see until you switch one on. Each is independent: you can offer the speed control without the keyboard shortcuts, or theater mode on its own.
+
+| Option | What it does |
+| --- | --- |
+| Keyboard shortcuts on the video page | Adds the keys people already expect from a video site. Shortcuts never fire while a visitor is typing in a form field, and never take a keystroke away from a button or a link. |
+| Playback speed control | Adds a speed button to the player, from 0.5× to 2×. The chosen speed is remembered in that visitor’s own browser and applied to every video they open. |
+| Offer to resume where the visitor stopped | After someone has watched a little of a video, a bar offers to continue from where they left off on their next visit. |
+| Theater mode | Widens the player across the page and dims everything around it, for watching without distractions. Also on the **T** key, and the choice is remembered. |
+
+#### Keyboard shortcuts
+
+| Key | Action |
+| --- | --- |
+| `Space` or `K` | Play and pause |
+| `Left` / `Right` | Back or forward 5 seconds |
+| `J` / `L` | Back or forward 10 seconds |
+| `0` to `9` | Jump to that point in the video, so `5` is the halfway mark |
+| `T` | Theater mode, which works whether or not the rest of the shortcuts are on |
+
+> **Note**
+>
+> Shortcuts step aside completely while a visitor is typing in a search box, the comment form, or anywhere else that takes text, and they ignore `Ctrl` , `Cmd` , and `Alt` combinations so browser shortcuts keep working. A key pressed on a focused button still activates that button, because that is what someone pressing space on a focused button means.
+
+Where the site runs the enhanced player, the arrow keys are left to it while it has focus, so one press never seeks twice. Where the site uses the native HTML5 player, the theme handles them itself and the set behaves identically either way.
+
+#### Resume where you left off
+
+The position is kept in the visitor’s own browser and is never sent to your server: no cookie, no database row, nothing added to any report. A few deliberate rules keep the offer from becoming an irritation.
+
+- Under **30 seconds** in, there is no offer. Someone that early has barely started, and the bar would cover the very controls they are reaching for.
+- Within the last **15 seconds** of the video there is no offer either, because that is the end, not somewhere to return to.
+- **Finishing** a video clears the stored position, so it never offers to resume into the last frame.
+- **Dismissing** the bar clears it too, so a visitor who chose to start again is not asked on their next visit.
+
+Positions are stored per video, so watching three videos and coming back to each of them behaves the way you would expect.
+
+#### Theater mode
+
+Theater mode dims the page around the player rather than hiding it, and it deliberately does *not* lock scrolling: the description and comments below the video stay reachable, because a visitor who came to read the page as well as watch the video has been trapped rather than helped. The choice is remembered in that visitor’s browser, like the colour scheme in 2.1.6, and nothing is stored on your server.
+
+The player controls keep the same dark chrome in both colour schemes, on purpose. A control that changed colour with the site would flicker the moment someone switched skins mid-video, and the player is a black box either way.
+
+> **Note**
+>
+> **For developers:** each of the four has a filter — `majestic_tube_player_hotkeys_enabled` , `majestic_tube_player_speed_enabled` , `majestic_tube_player_resume_enabled` , and `majestic_tube_player_theater_enabled` — plus `majestic_tube_player_speeds` to change the speed list. All are documented in the theme’s `inc/theme-options.php` .
 
 ### Recommended video delivery
 
@@ -770,6 +819,14 @@ That is the default, and it matches the original theme. Turn on `Count a view on
 ### How often are view and rating numbers updated?
 
 They update as visitors use the site. A browser, server, or caching configuration can delay the visible refresh; refreshing the video page normally shows the latest stored values.
+
+### Why are there no keyboard shortcuts or speed control?
+
+They are off until you turn them on, under `Appearance → Customize → Majestic Tube - Video Player`. That is deliberate: a theme update should not start intercepting a visitor’s keystrokes or add buttons to a page they already got used to. Turn on the ones you want, one at a time or together.
+
+### Do the resume position and theater mode store anything about my visitors?
+
+No. The playback position, the chosen speed, and whether theater mode is on are all kept in the visitor’s own browser, exactly like the colour scheme choice in 2.1.6. Nothing is sent to your server, no cookie is set, and nothing is written to the database or any report. Clearing site data, or opening a private window, simply returns a visitor to your defaults.
 
 ### Why is a password or report action unavailable?
 

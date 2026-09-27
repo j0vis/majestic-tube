@@ -714,6 +714,45 @@ function majestic_tube_options_map() {
 			'label'   => __( 'Enable the video quality selector', 'majestic-tube' ),
 			'section' => $player,
 		),
+		/*
+		 * Player UX, added in 2.1.7. All four are off by default so an upgrade
+		 * changes nothing a visitor can see, and each is independent: a site
+		 * can offer the speed control without the keyboard shortcuts, and so
+		 * on. None of them store anything on the server, so they work on a
+		 * site with no accounts at all.
+		 */
+		'player-hotkeys'            => array(
+			'setting'     => 'majestic_tube_player_hotkeys',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'Keyboard shortcuts on the video page', 'majestic-tube' ),
+			'section'     => $player,
+			'description' => __( 'Adds the usual player keys: space to play and pause, the arrow keys to seek and change volume, M to mute, F for full screen, 0-9 to jump to a point, and T for theater mode. Shortcuts never fire while a visitor is typing in a form field.', 'majestic-tube' ),
+		),
+		'player-speed'              => array(
+			'setting'     => 'majestic_tube_player_speed',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'Playback speed control', 'majestic-tube' ),
+			'section'     => $player,
+			'description' => __( 'Adds a speed button to the player with the usual range from 0.5x to 2x. The chosen speed is remembered in that visitor\'s own browser and applied to every video they open.', 'majestic-tube' ),
+		),
+		'player-resume'             => array(
+			'setting'     => 'majestic_tube_player_resume',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'Offer to resume where the visitor stopped', 'majestic-tube' ),
+			'section'     => $player,
+			'description' => __( 'After a visitor watches a few seconds of a video, a bar offers to continue from where they left off on their next visit. The position is kept in that visitor\'s own browser, never on your server, and finishing a video clears it.', 'majestic-tube' ),
+		),
+		'player-theater'            => array(
+			'setting'     => 'majestic_tube_player_theater',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'Theater mode', 'majestic-tube' ),
+			'section'     => $player,
+			'description' => __( 'Adds a button that widens the player across the page and dims the surrounding content, for watching without distractions. Also available on the keyboard with T while the shortcuts are on.', 'majestic-tube' ),
+		),
 
 		/* ---------------------------------------------------------------
 		 * Sharing / social (original per-network switches)
@@ -1518,4 +1557,105 @@ function majestic_tube_theme_toggle() {
 		<span class="screen-reader-text"><?php echo esc_html( $labels[ majestic_tube_color_scheme() ] ); ?></span>
 	</button>
 	<?php
+}
+
+/**
+ * The playback speeds offered by the speed control.
+ *
+ * A fixed, ordered list. The values are deliberately plain numbers rather than
+ * strings so the script can hand them straight to `playbackRate` without
+ * parsing, and the list is filterable so a site can drop 0.5x (which is slow
+ * enough to be a mistake) or add a 2.5x.
+ *
+ * @return float[]
+ */
+function majestic_tube_player_speeds() {
+	$speeds = array( 0.5, 0.75, 1, 1.25, 1.5, 1.75, 2 );
+
+	/**
+	 * Filters the playback speeds offered by the player speed control.
+	 *
+	 * @param float[] $speeds Ordered list of playback rates.
+	 */
+	$speeds = apply_filters( 'majestic_tube_player_speeds', $speeds );
+
+	if ( ! is_array( $speeds ) || array() === $speeds ) {
+		return array( 1 );
+	}
+
+	$clean = array();
+
+	foreach ( $speeds as $speed ) {
+		$value = (float) $speed;
+
+		// A rate of zero or below is not a speed; anything absurd is clamped
+		// to the range browsers actually implement.
+		if ( $value <= 0 ) {
+			continue;
+		}
+
+		$clean[] = min( 4, $value );
+	}
+
+	return array() === $clean ? array( 1 ) : array_values( array_unique( $clean ) );
+}
+
+/**
+ * Whether each player-UX feature is enabled.
+ *
+ * One helper per feature rather than a shared lookup, so each has a
+ * same-named filter and a caller never has to remember a key string. All four
+ * default to off, which is what an upgrade should do.
+ *
+ * @return bool
+ */
+function majestic_tube_player_hotkeys_enabled() {
+	/**
+	 * Filters whether the player's keyboard shortcuts are active.
+	 *
+	 * @param bool $enabled Whether to bind the player hotkeys.
+	 */
+	return (bool) apply_filters( 'majestic_tube_player_hotkeys_enabled', majestic_tube_option_is_on( 'player-hotkeys' ) );
+}
+
+/**
+ * Whether the playback speed control is shown.
+ *
+ * @return bool
+ */
+function majestic_tube_player_speed_enabled() {
+	/**
+	 * Filters whether the playback speed control is rendered.
+	 *
+	 * @param bool $enabled Whether to render the speed control.
+	 */
+	return (bool) apply_filters( 'majestic_tube_player_speed_enabled', majestic_tube_option_is_on( 'player-speed' ) );
+}
+
+/**
+ * Whether the resume-where-you-left-off offer is shown.
+ *
+ * @return bool
+ */
+function majestic_tube_player_resume_enabled() {
+	/**
+	 * Filters whether the resume offer is rendered.
+	 *
+	 * @param bool $enabled Whether to offer to resume.
+	 */
+	return (bool) apply_filters( 'majestic_tube_player_resume_enabled', majestic_tube_option_is_on( 'player-resume' ) );
+}
+
+/**
+ * Whether the theater-mode button is shown.
+ *
+ * @return bool
+ */
+function majestic_tube_player_theater_enabled() {
+	/**
+	 * Filters whether the theater-mode button is rendered.
+	 *
+	 * @param bool $enabled Whether to render the theater button.
+	 */
+	return (bool) apply_filters( 'majestic_tube_player_theater_enabled', majestic_tube_option_is_on( 'player-theater' ) );
 }

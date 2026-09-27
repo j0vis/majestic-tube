@@ -3,7 +3,7 @@
  * Script and style enqueuing.
  *
  * @package Majestic Tube
- * @version 2.1.6
+ * @version 2.1.7
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -260,6 +260,18 @@ function majestic_tube_enqueue_assets() {
 				 * the original theme.
 				 */
 				'countViewsOnPlay' => majestic_tube_option_is_on( 'count-views-on-play' ),
+
+				/*
+				 * Player UX, added in 2.1.7. Each is independent and all four
+				 * are off by default; the script sets up only what is on, so a
+				 * site that wants the speed control does not also inherit the
+				 * keyboard shortcuts.
+				 */
+				'playerHotkeys'  => majestic_tube_player_hotkeys_enabled(),
+				'playerSpeed'    => majestic_tube_player_speed_enabled(),
+				'playerResume'   => majestic_tube_player_resume_enabled(),
+				'playerTheater'  => majestic_tube_player_theater_enabled(),
+				'speeds'         => majestic_tube_player_speeds(),
 			),
 			'i18n'           => array(
 				'likeError'     => __( 'Could not record your vote. Please try again.', 'majestic-tube' ),
@@ -276,6 +288,11 @@ function majestic_tube_enqueue_assets() {
 				'themeLight'    => __( 'Light', 'majestic-tube' ),
 				'themeDark'     => __( 'Dark', 'majestic-tube' ),
 				'themeSystem'   => __( 'Follow system', 'majestic-tube' ),
+				'theater'       => __( 'Theater mode', 'majestic-tube' ),
+				'exitTheater'   => __( 'Exit theater mode', 'majestic-tube' ),
+				'speed'         => __( 'Playback speed', 'majestic-tube' ),
+				'resume'        => __( 'Resume from', 'majestic-tube' ),
+				'dismiss'       => __( 'Dismiss', 'majestic-tube' ),
 			),
 		),
 		'wpst_ajax_var'    => array(

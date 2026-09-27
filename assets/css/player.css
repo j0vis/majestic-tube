@@ -214,3 +214,285 @@
 .has-native-quality.video-player {
 	position: relative;
 }
+/* ------------------------------------------- Player UX (2.1.7) */
+/*
+ * Speed control, resume bar and theater toggle.
+ *
+ * These sit on top of the video, so their colours are the same chrome the
+ * quality selector already uses and are deliberately scheme-independent: the
+ * player is a black box in both skins, and a control that changed colour with
+ * the site would flicker when the visitor switched skins mid-video.
+ */
+
+.mt-speed {
+	position: relative;
+	display: inline-flex;
+	align-items: center;
+}
+
+.mt-speed-toggle {
+	background: transparent;
+	border: 0;
+	color: #fff;
+	font: inherit;
+	font-size: 0.85rem;
+	font-variant-numeric: tabular-nums;
+	padding: 0.4em 0.8em;
+	border-radius: 4px;
+	cursor: pointer;
+	white-space: nowrap;
+}
+
+.mt-speed-toggle:hover,
+.mt-speed-toggle:focus {
+	color: var(--mt-accent);
+	outline: 0;
+}
+
+.mt-speed-menu {
+	position: absolute;
+	bottom: 100%;
+	right: 0;
+	min-width: 5.5rem;
+	margin-bottom: 0.5rem;
+	background: rgba(20, 20, 20, 0.96);
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 6px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+	overflow: hidden;
+	z-index: 5;
+}
+
+.mt-speed-menu[hidden] {
+	display: none;
+}
+
+.mt-speed-item {
+	display: block;
+	width: 100%;
+	background: transparent;
+	border: 0;
+	color: #eee;
+	font: inherit;
+	font-size: 0.85rem;
+	font-variant-numeric: tabular-nums;
+	text-align: left;
+	padding: 0.45rem 0.9rem;
+	cursor: pointer;
+}
+
+.mt-speed-item:hover,
+.mt-speed-item:focus {
+	background: rgba(255, 255, 255, 0.08);
+	color: var(--mt-accent);
+	outline: 0;
+}
+
+.mt-speed-item.is-active {
+	color: var(--mt-accent);
+	font-weight: 600;
+}
+
+/* Native player: the speed button floats over the video, clear of the
+   quality selector so the two never overlap. */
+.mt-speed-native {
+	position: absolute;
+	top: 0.6rem;
+	right: 4.6rem;
+	z-index: 4;
+}
+
+.mt-speed-native .mt-speed-toggle {
+	background: rgba(0, 0, 0, 0.55);
+	backdrop-filter: blur(2px);
+}
+
+/* Resume offer -------------------------------------------------------- */
+
+.mt-resume {
+	position: absolute;
+	left: 50%;
+	bottom: 3.4rem;
+	transform: translateX(-50%);
+	display: flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.4rem 0.4rem 0.4rem 0.9rem;
+	background: rgba(20, 20, 20, 0.94);
+	border: 1px solid rgba(255, 255, 255, 0.14);
+	border-radius: 999px;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+	z-index: 6;
+	white-space: nowrap;
+	font-size: 0.85rem;
+}
+
+.mt-resume-play {
+	background: transparent;
+	border: 0;
+	color: #fff;
+	font: inherit;
+	font-size: 0.85rem;
+	padding: 0.25rem 0.2rem;
+	cursor: pointer;
+}
+
+.mt-resume-play:hover,
+.mt-resume-play:focus {
+	color: var(--mt-accent);
+	outline: 0;
+}
+
+.mt-resume-dismiss {
+	background: transparent;
+	border: 0;
+	color: rgba(255, 255, 255, 0.6);
+	font: inherit;
+	font-size: 1.1rem;
+	line-height: 1;
+	padding: 0.15rem 0.5rem;
+	border-radius: 999px;
+	cursor: pointer;
+}
+
+.mt-resume-dismiss:hover,
+.mt-resume-dismiss:focus {
+	color: #fff;
+	background: rgba(255, 255, 255, 0.12);
+	outline: 0;
+}
+
+/* Theater toggle ------------------------------------------------------ */
+
+.mt-theater-toggle {
+	position: absolute;
+	top: 0.6rem;
+	right: 0.6rem;
+	width: 2rem;
+	height: 2rem;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	background: rgba(0, 0, 0, 0.55);
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	border-radius: 6px;
+	color: #fff;
+	cursor: pointer;
+	padding: 0;
+	z-index: 4;
+}
+
+.mt-theater-toggle::before {
+	content: '';
+	display: block;
+	width: 0.95rem;
+	height: 0.7rem;
+	border: 2px solid currentColor;
+	border-radius: 2px;
+}
+
+.mt-theater-toggle:hover,
+.mt-theater-toggle:focus {
+	color: var(--mt-accent);
+	outline: 0;
+}
+
+.mt-theater-toggle.is-active {
+	color: var(--mt-accent);
+	border-color: currentColor;
+}
+
+/*
+ * Theater mode itself.
+ *
+ * The whole point is that the video is the only thing on screen, so the
+ * layout drops to a single column, the page chrome fades back, and the player
+ * is allowed to grow past the content column. The description and comments
+ * stay reachable by scrolling - this is a presentation change, not a modal,
+ * and a visitor who cannot get back to the text below the video has been
+ * trapped rather than helped.
+ */
+/*
+ * The tokens are redone rather than the background painted directly. The
+ * legacy parity layer finishes with
+ *
+ *     html, body { background-color: var(--mt-bg) !important; }
+ *
+ * so a plain background rule here loses to it no matter which file loads
+ * last. Redefining --mt-bg on the same element makes that very declaration
+ * resolve to black on its own, and the rest of the palette follows instead of
+ * being a set of overrides stacked on top of it.
+ */
+html.mt-theater,
+body.mt-theater {
+	--mt-bg: #000;
+	--mt-surface: #0d1014;
+	--mt-surface-hover: #171b21;
+	--mt-border: #1f242b;
+	--mt-border-subtle: #191d23;
+	--mt-border-strong: #2c333c;
+	--mt-text: #e7eaed;
+	--mt-text-body: #d8dce1;
+	--mt-text-muted: #98a1ab;
+	--mt-thumb-bg: #14181e;
+	--mt-thumb-bg-2: #1a1f26;
+	--mt-rate-track: #22272e;
+	color: var(--mt-text-body);
+	background-color: #000;
+}
+
+html.mt-theater .single-video-layout,
+html.mt-theater .single-video-layout.has-video-sidebar {
+	grid-template-columns: minmax(0, 1fr);
+	gap: 0;
+}
+
+html.mt-theater .video-sidebar {
+	display: none;
+}
+
+html.mt-theater .single-content-area {
+	max-width: 100%;
+	padding: 0;
+}
+
+html.mt-theater .single-video {
+	max-width: 100%;
+	padding: 0;
+}
+
+html.mt-theater .video-player {
+	border-radius: 0;
+	margin: 0;
+	box-shadow: none;
+}
+
+html.mt-theater .site-header,
+html.mt-theater .site-footer,
+html.mt-theater .video-infos,
+html.mt-theater .video-actions,
+html.mt-theater .single-video .entry-content,
+html.mt-theater .single-video .video-tags {
+	opacity: 0.35;
+	transition: opacity 0.2s ease;
+}
+
+html.mt-theater .site-header:hover,
+html.mt-theater .site-footer:hover,
+html.mt-theater .video-infos:hover,
+html.mt-theater .video-actions:hover,
+html.mt-theater .single-video .entry-content:hover,
+html.mt-theater .single-video .video-tags:hover {
+	opacity: 1;
+}
+
+@media (prefers-reduced-motion: reduce) {
+	html.mt-theater .site-header,
+	html.mt-theater .site-footer,
+	html.mt-theater .video-infos,
+	html.mt-theater .video-actions,
+	html.mt-theater .single-video .entry-content,
+	html.mt-theater .single-video .video-tags {
+		transition: none;
+	}
+}
