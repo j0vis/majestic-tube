@@ -753,6 +753,15 @@
         <h3>Use tags</h3>
         <p>Add short, descriptive tags in the Video editor. The Tags page template presents all site tags as a cloud with video counts.</p>
 
+        <h3>Browse tags and actors by letter</h3>
+        <p>The Tags and Actors pages carry an alphabet bar above the listing. <strong>All</strong> shows the complete directory; each letter shows only the terms starting with it, along with how many there are. Only letters that actually have terms appear, so the bar never offers a letter that leads to an empty page.</p>
+        <p>Terms are filed under the first letter of their first word, so <em>AnnaBelle</em> appears under A. Names beginning with a digit are grouped under that digit, and a name beginning with punctuation is left out of the bar but still appears under <strong>All</strong>.</p>
+        <p>The letter is a query argument, so it survives pagination: <span class="path">/tags/?letter=A</span> can be bookmarked and shared, and moving to page 2 keeps the filter. Choosing a letter resets to page 1.</p>
+        <p>Terms with no videos attached are left off the directory pages, and out of the alphabet bar's counts, so the two always agree. This is a change from the original theme, which listed them. It matters after a bulk import, which can leave a large number of unused terms behind; they made every directory page longer and linked to archives with nothing in them.</p>
+        <p>To go back to listing them, add this to a small plugin:</p>
+        <pre><code>add_filter( 'majestic_tube_term_directory_hide_empty', '__return_false' );</code></pre>
+        <p>Unused actors and tags are still reachable directly, and still appear in wp-admin under <span class="path">Actors</span> and <span class="path">Videos &rarr; Video Tags</span>, where you can delete them in bulk. Filtering by <strong>Empty</strong> finds them all at once.</p>
+
         <h3>Directory pages</h3>
         <p>The automatically created Actors, Categories, and Tags pages use portrait cards, images, and video counts. You can edit their introductory block editor content without changing the directory itself.</p>
       </section>

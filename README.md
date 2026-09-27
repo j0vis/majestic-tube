@@ -225,6 +225,22 @@ To change an image later, open the actor, choose **Edit Actor**, select a replac
 
 Add short, descriptive tags in the Video editor. The Tags page template presents all site tags as a cloud with video counts.
 
+### Browse tags and actors by letter
+
+The Tags and Actors pages carry an alphabet bar above the listing. **All** shows the complete directory; each letter shows only the terms starting with it, along with how many there are. Only letters that actually have terms appear, so the bar never offers a letter that leads to an empty page.
+
+Terms are filed under the first letter of their first word, so *AnnaBelle* appears under A. Names beginning with a digit are grouped under that digit, and a name beginning with punctuation is left out of the bar but still appears under **All**.
+
+The letter is a query argument, so it survives pagination: `/tags/?letter=A` can be bookmarked and shared, and moving to page 2 keeps the filter. Choosing a letter resets to page 1.
+
+Terms with no videos attached are left off the directory pages, and out of the alphabet bar's counts, so the two always agree. This is a change from the original theme, which listed them. It matters after a bulk import, which can leave a large number of unused terms behind; they made every directory page longer and linked to archives with nothing in them.
+
+To go back to listing them, add this to a small plugin:
+
+`add_filter( 'majestic_tube_term_directory_hide_empty', '__return_false' );`
+
+Unused actors and tags are still reachable directly, and still appear in wp-admin under `Actors` and `Videos → Video Tags`, where you can delete them in bulk. Filtering by **Empty** finds them all at once.
+
 ### Directory pages
 
 The automatically created Actors, Categories, and Tags pages use portrait cards, images, and video counts. You can edit their introductory block editor content without changing the directory itself.

@@ -5,7 +5,7 @@
  * high-contrast text, compact chrome, and responsive content grids.
  *
  * @package Majestic Tube
- * @version 2.1.2
+ * @version 2.1.3
  */
 
 /*
@@ -1973,6 +1973,69 @@ ol {
 
 .tag-count {
 	opacity: 0.7;
+}
+
+/* Term alphabet bar ------------------------------------------------------ */
+
+.term-letter-nav {
+	margin: 0 0 1.25em;
+}
+
+.term-letter-nav ul {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 0.3rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.term-letter {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: 0.2rem;
+	min-width: 2.1rem;
+	padding: 0.34rem 0.5rem;
+	background: var(--mt-surface-hover);
+	border-radius: var(--mt-radius, 4px);
+	color: var(--mt-text-muted);
+	font-size: 0.82rem;
+	font-weight: 600;
+	text-decoration: none;
+	transition: background 0.15s ease, color 0.15s ease;
+}
+
+.term-letter:hover,
+.term-letter:focus-visible {
+	background: var(--mt-accent);
+	color: #fff;
+}
+
+.term-letter.is-active {
+	background: var(--mt-accent);
+	color: #fff;
+}
+
+/* The count is secondary: it should not compete with the letter itself, and
+   it must not push a single letter off the fixed-width box. */
+.term-letter-count {
+	font-size: 0.7rem;
+	font-weight: 500;
+	opacity: 0.75;
+}
+
+@media screen and (max-width: 480px) {
+	.term-letter-nav {
+		/* Let the letters wrap on two rows rather than forcing a horizontal
+		   scrollbar, which is easy to trigger on a phone. */
+		overflow-x: auto;
+		-webkit-overflow-scrolling: touch;
+	}
+
+	.term-letter-nav ul {
+		flex-wrap: nowrap;
+	}
 }
 
 /* Content blocks ------------------------------------------------------- */

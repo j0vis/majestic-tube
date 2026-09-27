@@ -13,9 +13,10 @@ get_header();
 // Tags per page reuses the categories-per-page option, like the original.
 $per_page  = majestic_tube_terms_per_page( 'categories-per-page', 20 );
 $tags_page = majestic_tube_get_paged();
+$letter    = majestic_tube_get_requested_letter();
 
 // One cached call for both the page of terms and the total count.
-$directory = majestic_tube_get_term_directory( 'post_tag', $per_page, $tags_page );
+$directory = majestic_tube_get_term_directory( 'post_tag', $per_page, $tags_page, $letter );
 $tags      = $directory['terms'];
 $tags_total = $directory['total'];
 ?>
@@ -28,6 +29,8 @@ $tags_total = $directory['total'];
 		<header class="page-header">
 			<?php the_title( '<h1 class="page-title">', '</h1>' ); ?>
 		</header>
+
+		<?php majestic_tube_term_letter_nav( 'post_tag' ); ?>
 
 		<?php if ( ! is_wp_error( $tags ) && $tags ) : ?>
 

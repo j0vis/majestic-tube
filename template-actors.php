@@ -13,9 +13,10 @@ get_header();
 // Actors per page comes from the original actors-per-page option.
 $per_page    = majestic_tube_terms_per_page( 'actors-per-page', 20 );
 $actors_page = majestic_tube_get_paged();
+$letter      = majestic_tube_get_requested_letter();
 
 // One cached call for both the page of terms and the total count.
-$directory   = majestic_tube_get_term_directory( 'actors', $per_page, $actors_page );
+$directory   = majestic_tube_get_term_directory( 'actors', $per_page, $actors_page, $letter );
 $actors      = $directory['terms'];
 $actors_total = $directory['total'];
 ?>
@@ -28,6 +29,8 @@ $actors_total = $directory['total'];
 		<header class="page-header">
 			<?php the_title( '<h1 class="page-title">', '</h1>' ); ?>
 		</header>
+
+		<?php majestic_tube_term_letter_nav( 'actors' ); ?>
 
 		<?php if ( ! is_wp_error( $actors ) && $actors ) : ?>
 

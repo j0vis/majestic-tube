@@ -8,7 +8,7 @@
  * escaped links and the same `wpst_page_navi` contract.
  *
  * @package Majestic Tube
- * @version 2.1.2
+ * @version 2.1.3
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -181,13 +181,15 @@ const MAJESTIC_TUBE_TERM_CACHE_TTL = 6 * HOUR_IN_SECONDS;
  * @param string $taxonomy Taxonomy name.
  * @param int    $per_page Terms per page.
  * @param int    $page     1-based page number.
+ * @param string $letter   Optional A-Z or 0-9 to list only that letter.
  * @return array{terms: array, total: int, error: mixed} Terms, the total term
  *         count, and any WP_Error from the underlying call.
  */
-function majestic_tube_get_term_directory( $taxonomy, $per_page, $page = 1 ) {
+function majestic_tube_get_term_directory( $taxonomy, $per_page, $page = 1, $letter = '' ) {
 	$taxonomy = sanitize_key( $taxonomy );
 	$per_page = max( 1, absint( $per_page ) );
 	$page     = max( 1, absint( $page ) );
+	$letter   = preg_match( '/^[A-Z0-9]$/', strtoupper( (string) $letter ) ) ? strtoupper( (string) $letter ) : '';
 
 	if ( ! taxonomy_exists( $taxonomy ) ) {
 		return array(
@@ -199,11 +201,12 @@ function majestic_tube_get_term_directory( $taxonomy, $per_page, $page = 1 ) {
 
 	$last_changed = wp_cache_get( 'last_changed', 'terms' );
 	$cache_key    = sprintf(
-		'%s_%d_%d_%s',
+		'%s_%d_%d_%s%s',
 		$taxonomy,
 		$per_page,
 		$page,
-		preg_replace( '/[^A-Za-z0-9_.:-]/', '', (string) $last_changed )
+		preg_replace( '/[^A-Za-z0-9_.:-]/', '', (string) $last_changed ),
+		$letter ? '_letter_' . $letter : ''
 	);
 
 	$cached = wp_cache_get( $cache_key, MAJESTIC_TUBE_TERM_CACHE_GROUP );
@@ -212,14 +215,43 @@ function majestic_tube_get_term_directory( $taxonomy, $per_page, $page = 1 ) {
 		return $cached;
 	}
 
+	// Resolving the letter to concrete IDs, rather than filtering in SQL, keeps
+	// the alphabet filter working on every supported WordPress version without a
+	// custom WHERE clause, and reuses the bucket the alphabet bar already built.
+	$letter_ids = array();
+
+	if ( $letter ) {
+		$map        = majestic_tube_get_term_letter_map( $taxonomy );
+		$letter_ids = isset( $map[ $letter ] ) ? $map[ $letter ] : array();
+	}
+
+	$hide_empty = majestic_tube_term_directory_hide_empty( $taxonomy, $letter );
+
 	$args = array(
 		'taxonomy'   => $taxonomy,
-		'hide_empty' => false,
+		'hide_empty' => $hide_empty,
 		'number'     => $per_page,
 		'offset'     => ( $page - 1 ) * $per_page,
 		'orderby'    => 'name',
 		'order'      => 'ASC',
 	);
+
+	if ( $letter ) {
+		// A letter with no terms is an empty result, not the unfiltered
+		// directory - passing an empty include would list everything.
+		$args['include'] = $letter_ids ? $letter_ids : array( 0 );
+	}
+
+	/**
+	 * Filter the arguments used to list a term directory.
+	 *
+	 * @param array  $args     Arguments passed to get_terms().
+	 * @param string $taxonomy Taxonomy being listed.
+	 * @param int    $per_page Terms per page.
+	 * @param int    $page     Current page.
+	 * @param string $letter   Active letter filter, or an empty string.
+	 */
+	$args = apply_filters( 'majestic_tube_term_directory_args', $args, $taxonomy, $per_page, $page, $letter );
 
 	$terms = get_terms( $args );
 
@@ -234,8 +266,12 @@ function majestic_tube_get_term_directory( $taxonomy, $per_page, $page = 1 ) {
 	if ( ! is_wp_error( $terms ) && $terms ) {
 		$count_args = array(
 			'taxonomy'   => $taxonomy,
-			'hide_empty' => false,
+			'hide_empty' => $hide_empty,
 		);
+
+		if ( $letter ) {
+			$count_args['include'] = $letter_ids ? $letter_ids : array( 0 );
+		}
 
 		/**
 		 * Filter the arguments used to count a term directory.
@@ -244,8 +280,9 @@ function majestic_tube_get_term_directory( $taxonomy, $per_page, $page = 1 ) {
 		 * @param string $taxonomy   Taxonomy being listed.
 		 * @param int    $per_page   Terms per page.
 		 * @param int    $page       Current page.
+		 * @param string $letter     Active letter filter, or an empty string.
 		 */
-		$count_args = apply_filters( 'majestic_tube_term_directory_count_args', $count_args, $taxonomy, $per_page, $page );
+		$count_args = apply_filters( 'majestic_tube_term_directory_count_args', $count_args, $taxonomy, $per_page, $page, $letter );
 
 		$total = wp_count_terms( $count_args );
 
@@ -285,4 +322,249 @@ function majestic_tube_term_pagination( $total_terms, $per_page ) {
 	if ( $markup ) {
 		echo wp_kses_post( $markup );
 	}
+}
+
+/**
+ * Read the requested alphabet letter for a term directory.
+ *
+ * The Tags and Actors pages accept a `letter` query argument so a visitor can
+ * jump straight to one letter instead of paging through the whole directory.
+ * Only a single alphanumeric character is accepted; anything else - including
+ * an array, which `?letter[]=a` produces - is discarded and the full
+ * alphabetical listing is shown.
+ *
+ * @return string Uppercase A-Z or 0-9, or an empty string for "all".
+ */
+function majestic_tube_get_requested_letter() {
+	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- a read-only browse filter on a public directory, and the value is sanitised to one alphanumeric character below.
+	if ( empty( $_GET['letter'] ) || ! is_string( $_GET['letter'] ) ) {
+		return '';
+	}
+
+	$letter = strtoupper( sanitize_text_field( wp_unslash( $_GET['letter'] ) ) );
+
+	return preg_match( '/^[A-Z0-9]$/', $letter ) ? $letter : '';
+}
+
+/**
+ * Whether term directories should skip terms that have no posts.
+ *
+ * Shared by the listing and the alphabet bar on purpose. If the two resolved
+ * this separately the bar could advertise a letter with a count of 12 and then
+ * link to a page listing 3 terms, because the bar counted empty terms the
+ * listing had hidden.
+ *
+ * Empty terms are hidden by default. The original theme listed them, but a
+ * directory of terms with nothing behind them is dead weight on every page that
+ * links to it, and bulk imports leave a lot of them behind. The filter stays so
+ * a site that wants the original behaviour can return false.
+ *
+ * @param string $taxonomy Taxonomy name.
+ * @param string $letter   Active letter filter, or an empty string.
+ * @return bool
+ */
+function majestic_tube_term_directory_hide_empty( $taxonomy, $letter = '' ) {
+	/**
+	 * Filter whether a term directory hides terms that have no posts.
+	 *
+	 * @param bool   $hide_empty Whether to hide terms with no posts.
+	 * @param string $taxonomy   Taxonomy being listed.
+	 * @param string $letter     Active letter filter, or an empty string.
+	 */
+	return (bool) apply_filters( 'majestic_tube_term_directory_hide_empty', true, $taxonomy, $letter );
+}
+
+/**
+ * Map each starting letter to the term IDs filed under it, cached.
+ *
+ * This backs both the alphabet bar and the letter filter, and it is the reason
+ * neither needs a query the other cannot serve.
+ *
+ * The lookup is one get_terms() of the taxonomy's term names. The naive
+ * alternative - asking the database how many terms start with each letter -
+ * costs 36 queries for A-Z plus 0-9, and "how many" is not even the number the
+ * bar shows, because the bar should only offer letters that lead somewhere.
+ * Reading the names once and bucketing them in PHP gives the exact IDs the
+ * filter needs as well as the counts the bar needs.
+ *
+ * Results are cached under the same `last_changed` marker the term directory
+ * itself uses, so creating, renaming or deleting a term invalidates this
+ * exactly as it invalidates the listing.
+ *
+ * Terms whose name does not begin with a letter or digit are omitted: there is
+ * no honest letter to file them under, and they remain reachable through the
+ * unfiltered listing.
+ *
+ * @param string $taxonomy Taxonomy name.
+ * @return array<string, int[]> Letter => term IDs, keys in alphabetical order.
+ */
+function majestic_tube_get_term_letter_map( $taxonomy ) {
+	$taxonomy = sanitize_key( $taxonomy );
+
+	if ( ! taxonomy_exists( $taxonomy ) ) {
+		return array();
+	}
+
+	$last_changed = wp_cache_get( 'last_changed', 'terms' );
+	$cache_key    = sprintf(
+		'letters_%s_%s',
+		$taxonomy,
+		preg_replace( '/[^A-Za-z0-9_.:-]/', '', (string) $last_changed )
+	);
+
+	$cached = wp_cache_get( $cache_key, MAJESTIC_TUBE_TERM_CACHE_GROUP );
+
+	if ( is_array( $cached ) ) {
+		return $cached;
+	}
+
+	$terms = get_terms(
+		array(
+			'taxonomy'   => $taxonomy,
+			// Must match what the listing will show, or the bar's counts lie.
+			'hide_empty' => majestic_tube_term_directory_hide_empty( $taxonomy ),
+			// Only the name is needed to bucket terms by letter, so this stays a
+			// cheap id=>name lookup rather than a full term object per row.
+			'fields'     => 'id=>name',
+		)
+	);
+
+	$map = array();
+
+	if ( ! is_wp_error( $terms ) ) {
+		foreach ( $terms as $term ) {
+			$letter = majestic_tube_term_initial( $term->name );
+
+			if ( '' === $letter ) {
+				continue;
+			}
+
+			if ( ! isset( $map[ $letter ] ) ) {
+				$map[ $letter ] = array();
+			}
+
+			$map[ $letter ][] = (int) $term->term_id;
+		}
+	}
+
+	ksort( $map );
+
+	wp_cache_set( $cache_key, $map, MAJESTIC_TUBE_TERM_CACHE_GROUP, MAJESTIC_TUBE_TERM_CACHE_TTL );
+
+	return $map;
+}
+
+/**
+ * The letters that actually have terms, for rendering an alphabet bar.
+ *
+ * Counts only, so a template can print the bar without caring about IDs.
+ *
+ * @param string $taxonomy Taxonomy name.
+ * @return array<string, int> Letter => number of terms, in alphabetical order.
+ */
+function majestic_tube_get_term_letters( $taxonomy ) {
+	$counts = array();
+
+	foreach ( majestic_tube_get_term_letter_map( $taxonomy ) as $letter => $ids ) {
+		$counts[ $letter ] = count( $ids );
+	}
+
+	return $counts;
+}
+
+/**
+ * The single character a term name files under in the alphabet bar.
+ *
+ * A name counts under the first letter of its first word, so "AnnaBelle" files
+ * under A rather than being split. Names that do not start with a letter or a
+ * digit - a term that is only punctuation, say - return an empty string and are
+ * left out of the bar, because there is no honest letter to file them under.
+ *
+ * @param string $name Term name.
+ * @return string Uppercase A-Z or 0-9, or an empty string.
+ */
+function majestic_tube_term_initial( $name ) {
+	$name = trim( wp_strip_all_tags( (string) $name ) );
+
+	if ( '' === $name ) {
+		return '';
+	}
+
+	// Take the first character of the first word.
+	if ( function_exists( 'mb_substr' ) ) {
+		$first = mb_substr( $name, 0, 1, 'UTF-8' );
+	} else {
+		$first = substr( $name, 0, 1 );
+	}
+
+	$first = function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $first, 'UTF-8' ) : strtoupper( $first );
+
+	return preg_match( '/^[A-Z0-9]$/', $first ) ? $first : '';
+}
+
+/**
+ * Print the A-Z bar for a term directory.
+ *
+ * Renders "All" followed by one link per letter that actually has terms, with
+ * the active letter marked. Each link carries the letter as a query argument
+ * rather than as a path segment, because these directories are page templates:
+ * the page segment is already carrying `/page/N/`, and a second rewrite rule
+ * would collide with it. Pagination links keep the argument, so moving between
+ * pages does not silently drop the filter.
+ *
+ * @param string $taxonomy Taxonomy name.
+ * @return void
+ */
+function majestic_tube_term_letter_nav( $taxonomy ) {
+	$letters = majestic_tube_get_term_letters( $taxonomy );
+
+	// Nothing to navigate between on a directory with no terms at all.
+	if ( ! $letters ) {
+		return;
+	}
+
+	$current = majestic_tube_get_requested_letter();
+	$base    = majestic_tube_term_directory_base_url();
+	?>
+	<nav class="term-letter-nav" aria-label="<?php esc_attr_e( 'Browse by letter', 'majestic-tube' ); ?>">
+		<ul>
+			<li>
+				<a class="term-letter<?php echo '' === $current ? ' is-active' : ''; ?>"
+					href="<?php echo esc_url( $base ); ?>"
+					<?php echo '' === $current ? ' aria-current="true"' : ''; ?>><?php esc_html_e( 'All', 'majestic-tube' ); ?></a>
+			</li>
+			<?php foreach ( $letters as $letter => $count ) : ?>
+				<li>
+					<a class="term-letter<?php echo $current === $letter ? ' is-active' : ''; ?>"
+						href="<?php echo esc_url( add_query_arg( 'letter', rawurlencode( $letter ), $base ) ); ?>"
+						<?php echo $current === $letter ? ' aria-current="true"' : ''; ?>>
+						<?php echo esc_html( $letter ); ?>
+						<span class="term-letter-count"><?php echo esc_html( number_format_i18n( $count ) ); ?></span>
+					</a>
+				</li>
+			<?php endforeach; ?>
+		</ul>
+	</nav>
+	<?php
+}
+
+/**
+ * The directory URL that letter links are built from.
+ *
+ * Must be the unfiltered page-one URL, with any existing `letter` and page
+ * segment removed, so that "All" really does return to the full directory and
+ * picking a letter does not inherit the page number from the link that was
+ * followed to get here.
+ *
+ * @return string
+ */
+function majestic_tube_term_directory_base_url() {
+	$url = remove_query_arg( array( 'letter', 'paged', 'page' ) );
+
+	/**
+	 * Filter the base URL the term directory alphabet bar links from.
+	 *
+	 * @param string $url Base directory URL.
+	 */
+	return apply_filters( 'majestic_tube_term_directory_base_url', $url );
 }
