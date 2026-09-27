@@ -13,9 +13,10 @@ get_header();
 // Categories per page comes from the original categories-per-page option.
 $per_page        = majestic_tube_terms_per_page( 'categories-per-page', 20 );
 $categories_page = majestic_tube_get_paged();
+$letter          = majestic_tube_get_requested_letter();
 
 // One cached call for both the page of terms and the total count.
-$directory       = majestic_tube_get_term_directory( 'category', $per_page, $categories_page );
+$directory       = majestic_tube_get_term_directory( 'category', $per_page, $categories_page, $letter );
 $categories      = $directory['terms'];
 $categories_total = $directory['total'];
 ?>
@@ -28,6 +29,8 @@ $categories_total = $directory['total'];
 		<header class="page-header">
 			<?php the_title( '<h1 class="page-title">', '</h1>' ); ?>
 		</header>
+
+		<?php majestic_tube_term_letter_nav( 'category' ); ?>
 
 		<?php if ( ! is_wp_error( $categories ) && $categories ) : ?>
 

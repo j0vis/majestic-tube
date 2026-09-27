@@ -3,7 +3,7 @@
  * Script and style enqueuing.
  *
  * @package Majestic Tube
- * @version 2.1.3
+ * @version 2.1.4
  */
 
 defined( 'ABSPATH' ) || exit;

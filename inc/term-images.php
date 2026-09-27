@@ -168,14 +168,138 @@ add_action( 'created_term', 'majestic_tube_term_image_save', 10, 1 );
 add_action( 'edited_term', 'majestic_tube_term_image_save', 10, 1 );
 
 /**
+ * How a term directory should pick a stand-in image from its own posts.
+ *
+ * An actor term stands for one person, so the most recent video is the honest
+ * choice: it is the same video a visitor would land on, and it is stable. A
+ * category term stands for a shelf of unrelated videos, where any single one is
+ * arbitrary, so a random member video gives each card its own character.
+ *
+ * @param string $taxonomy Taxonomy slug.
+ * @return string `recent` or `random`.
+ */
+function majestic_tube_term_fallback_mode( $taxonomy ) {
+	$mode = 'category' === $taxonomy ? 'random' : 'recent';
+
+	/**
+	 * Filter how a term with no image of its own borrows one from its posts.
+	 *
+	 * @param string $mode     Either `recent` or `random`.
+	 * @param string $taxonomy Taxonomy slug.
+	 */
+	$mode = apply_filters( 'majestic_tube_term_fallback_mode', $mode, $taxonomy );
+
+	return 'random' === $mode ? 'random' : 'recent';
+}
+
+/**
+ * Pick a post from a term to borrow a thumbnail from.
+ *
+ * Only posts that actually have a featured image are considered, because a post
+ * without one would send the caller back to the placeholder it was trying to
+ * avoid.
+ *
+ * The chosen post ID is cached rather than the query result, which is what makes
+ * `random` usable: without a cache the card would show a different image on every
+ * page load, and the directory would run one extra query per card per request.
+ * Caching it means each term keeps its pick until the cache lapses or a term or
+ * post changes, both of which are already tracked by the `last_changed` markers
+ * baked into the key.
+ *
+ * @param int    $term_id  Term ID.
+ * @param string $taxonomy Taxonomy slug.
+ * @return int Post ID, or 0 when the term has no post with a thumbnail.
+ */
+function majestic_tube_get_term_fallback_post_id( $term_id, $taxonomy ) {
+	$term_id = (int) $term_id;
+
+	if ( $term_id <= 0 ) {
+		return 0;
+	}
+
+	$taxonomies = majestic_tube_term_image_taxonomies();
+
+	if ( ! isset( $taxonomies[ $taxonomy ] ) ) {
+		return 0;
+	}
+
+	$mode = majestic_tube_term_fallback_mode( $taxonomy );
+
+	$cache_key = sprintf(
+		'fallbackpost_%s_%d_%s_%s_%s',
+		$taxonomy,
+		$term_id,
+		$mode,
+		preg_replace( '/[^A-Za-z0-9_.:-]/', '', (string) wp_cache_get( 'last_changed', 'terms' ) ),
+		preg_replace( '/[^A-Za-z0-9_.:-]/', '', (string) wp_cache_get( 'last_changed', 'posts' ) )
+	);
+
+	$cached = wp_cache_get( $cache_key, MAJESTIC_TUBE_TERM_CACHE_GROUP );
+
+	if ( false !== $cached ) {
+		return (int) $cached;
+	}
+
+	$args = array(
+		'post_type'           => 'post',
+		'post_status'         => 'publish',
+		'posts_per_page'      => 1,
+		'fields'              => 'ids',
+		'no_found_rows'       => true,
+		'ignore_sticky_posts' => true,
+		'orderby'             => 'random' === $mode ? 'rand' : 'date',
+		'order'               => 'DESC',
+		'tax_query'           => array(
+			array(
+				'taxonomy' => $taxonomy,
+				'field'    => 'term_id',
+				'terms'    => $term_id,
+			),
+		),
+		// Without this the query can return a post that has no thumbnail, and the
+		// caller ends up back at the placeholder it was trying to replace.
+		'meta_query'          => array(
+			array(
+				'key'     => '_thumbnail_id',
+				'compare' => 'EXISTS',
+			),
+		),
+	);
+
+	/**
+	 * Filter the query used to borrow a thumbnail from a term's posts.
+	 *
+	 * @param array  $args     Arguments passed to get_posts().
+	 * @param int    $term_id  Term ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 * @param string $mode     Either `recent` or `random`.
+	 */
+	$args = apply_filters( 'majestic_tube_term_fallback_post_args', $args, $term_id, $taxonomy, $mode );
+
+	$post_ids = get_posts( $args );
+	$post_id  = ! empty( $post_ids ) ? (int) $post_ids[0] : 0;
+
+	// A term with no usable post is a legitimate answer, so the negative result is
+	// cached too. Otherwise every page load would repeat the query to learn nothing.
+	wp_cache_set( $cache_key, $post_id, MAJESTIC_TUBE_TERM_CACHE_GROUP, MAJESTIC_TUBE_TERM_CACHE_TTL );
+
+	return $post_id;
+}
+
+/**
  * Get a term image URL.
  *
- * @param int    $term_id Term ID.
- * @param string $taxonomy Taxonomy slug.
- * @param string $size    Image size.
+ * Falls back to a thumbnail from one of the term's own posts when no image was
+ * uploaded for the term, so a directory of never-customised terms still looks
+ * like a directory rather than a wall of placeholders.
+ *
+ * @param int    $term_id       Term ID.
+ * @param string $taxonomy      Taxonomy slug.
+ * @param string $size          Image size.
+ * @param bool   $allow_fallback Whether to borrow an image from a post. Default true.
  * @return string URL or empty string.
  */
-function majestic_tube_get_term_image_url( $term_id, $taxonomy, $size = 'majestic-tube-thumb-medium' ) {
+function majestic_tube_get_term_image_url( $term_id, $taxonomy, $size = 'majestic-tube-thumb-medium', $allow_fallback = true ) {
 	$taxonomies = majestic_tube_term_image_taxonomies();
 
 	if ( ! isset( $taxonomies[ $taxonomy ] ) ) {
@@ -184,11 +308,46 @@ function majestic_tube_get_term_image_url( $term_id, $taxonomy, $size = 'majesti
 
 	$image_id = (int) get_term_meta( $term_id, $taxonomies[ $taxonomy ], true );
 
-	if ( ! $image_id ) {
+	if ( $image_id ) {
+		$url = wp_get_attachment_image_url( $image_id, $size );
+
+		if ( $url ) {
+			return $url;
+		}
+	}
+
+	// No usable image of the term's own, so borrow one from its posts. This also
+	// covers the case where the meta points at an attachment that has since been
+	// deleted, which would otherwise render as a broken image.
+	if ( ! $allow_fallback ) {
 		return '';
 	}
 
-	$url = wp_get_attachment_image_url( $image_id, $size );
+	$post_id = majestic_tube_get_term_fallback_post_id( $term_id, $taxonomy );
 
-	return $url ? $url : '';
+	if ( ! $post_id ) {
+		return '';
+	}
+
+	$thumb_id = (int) get_post_thumbnail_id( $post_id );
+
+	if ( ! $thumb_id ) {
+		return '';
+	}
+
+	$url = wp_get_attachment_image_url( $thumb_id, $size );
+
+	/**
+	 * Filter the image borrowed from a term's posts.
+	 *
+	 * Returning an empty string here suppresses the fallback and restores the
+	 * placeholder, without having to unhook anything.
+	 *
+	 * @param string $url      Image URL, or an empty string.
+	 * @param int    $term_id  Term ID.
+	 * @param string $taxonomy Taxonomy slug.
+	 * @param int    $post_id  Post the image was taken from.
+	 * @param string $size     Image size.
+	 */
+	return (string) apply_filters( 'majestic_tube_term_fallback_image_url', (string) $url, $term_id, $taxonomy, $post_id, $size );
 }

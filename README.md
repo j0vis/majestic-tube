@@ -225,9 +225,9 @@ To change an image later, open the actor, choose **Edit Actor**, select a replac
 
 Add short, descriptive tags in the Video editor. The Tags page template presents all site tags as a cloud with video counts.
 
-### Browse tags and actors by letter
+### Browse categories, tags, and actors by letter
 
-The Tags and Actors pages carry an alphabet bar above the listing. **All** shows the complete directory; each letter shows only the terms starting with it, along with how many there are. Only letters that actually have terms appear, so the bar never offers a letter that leads to an empty page.
+The Categories, Tags, and Actors pages all carry an alphabet bar above the listing. **All** shows the complete directory; each letter shows only the terms starting with it, along with how many there are. Only letters that actually have terms appear, so the bar never offers a letter that leads to an empty page.
 
 Terms are filed under the first letter of their first word, so *AnnaBelle* appears under A. Names beginning with a digit are grouped under that digit, and a name beginning with punctuation is left out of the bar but still appears under **All**.
 
@@ -240,6 +240,23 @@ To go back to listing them, add this to a small plugin:
 `add_filter( 'majestic_tube_term_directory_hide_empty', '__return_false' );`
 
 Unused actors and tags are still reachable directly, and still appear in wp-admin under `Actors` and `Videos → Video Tags`, where you can delete them in bulk. Filtering by **Empty** finds them all at once.
+
+### Card images when a term has none
+
+Categories and actors can each have an image of their own, set from the term's edit screen. When one has not been set, the card borrows a thumbnail from one of its own videos rather than showing an empty placeholder:
+
+- An **actor** card uses the thumbnail of that actor's most recent video, since a person is best represented by their latest work.
+- A **category** card uses the thumbnail of a randomly chosen video from that category, so each category card looks different instead of every card in the grid showing the same picture.
+
+Only videos that actually have a featured image are considered, so a borrowed card is never blank. The choice is remembered for a while and then remade, which keeps a card from changing its picture on every page load while still giving the grid variety over time. Setting an image on the term always wins, and an image that was deleted from the media library falls through to a borrowed one rather than showing a broken picture.
+
+To go back to empty placeholders, add this to a small plugin:
+
+`add_filter( 'majestic_tube_term_fallback_image_url', '__return_empty_string' );`
+
+To make actor cards random too, or categories use the most recent video, use the mode filter:
+
+`add_filter( 'majestic_tube_term_fallback_mode', function ( $mode, $taxonomy ) { return 'actors' === $taxonomy ? 'random' : $mode; }, 10, 2 );`
 
 ### Directory pages
 
