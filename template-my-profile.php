@@ -106,7 +106,11 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['majestic-tube-profi
 		if ( ! $errors ) {
 			// Action hook for plugins and extra field saving, like the original.
 			do_action( 'edit_user_profile_update', $current_user->ID );
-			wp_safe_redirect( get_permalink() . '?updated=true' );
+			// add_query_arg(), not string concatenation: under plain or query
+			// permalinks get_permalink() already ends in a query string
+			// (?page_id=45), so appending '?updated=true' built a URL with two
+			// question marks and WordPress dropped the flag.
+			wp_safe_redirect( add_query_arg( 'updated', 'true', get_permalink() ) );
 			exit;
 		}
 	}

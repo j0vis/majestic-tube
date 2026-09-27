@@ -6,7 +6,7 @@
  * the shared `ajax-nonce` the original theme used.
  *
  * @package Majestic Tube
- * @version 2.1.4
+ * @version 2.1.5
  */
 
 ( function () {
@@ -515,10 +515,19 @@
 			}
 		}
 
-		findAll( 'a[href="#wpst-user-modal"]' ).forEach( function ( opener ) {
+		/*
+		 * The modal markup is printed in wp_footer on every page, but a few
+		 * guest-only templates (the video submit form) link at a specific
+		 * panel from outside it, with href="#wpst-login" / "#wpst-register".
+		 * The delegated handler on the modal below never sees those clicks, so
+		 * they only changed the URL hash. Bind them here as well and open the
+		 * panel the hash actually names.
+		 */
+		findAll( 'a[href="#wpst-user-modal"], a[href="#wpst-login"], a[href="#wpst-register"]' ).forEach( function ( opener ) {
 			opener.addEventListener( 'click', function ( e ) {
 				e.preventDefault();
-				showTab( '.wpst-login' );
+
+				showTab( '#wpst-register' === opener.getAttribute( 'href' ) ? '.wpst-register' : '.wpst-login' );
 			} );
 		} );
 

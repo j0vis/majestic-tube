@@ -114,6 +114,19 @@ function majestic_tube_setup() {
 
 	// Content width used by wide/full alignments.
 	$GLOBALS['content_width'] = isset( $GLOBALS['content_width'] ) ? $GLOBALS['content_width'] : 1200;
+
+	/*
+	 * Translations.
+	 *
+	 * Every string in the theme already passes the 'majestic-tube' text
+	 * domain, but the domain was never bound to a folder, so a .mo/.l10n
+	 * file placed in languages/ would have been ignored. WordPress.org
+	 * language packs carry the domain's translations through their own
+	 * delivery mechanism, which is why the omission went unnoticed; a site
+	 * translating the theme itself, or a child theme shipping its own
+	 * overrides, had no way in.
+	 */
+	load_theme_textdomain( 'majestic-tube', MAJESTIC_TUBE_DIR . '/languages' );
 }
 add_action( 'after_setup_theme', 'majestic_tube_setup' );
 

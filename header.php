@@ -3,7 +3,7 @@
  * The header template.
  *
  * @package Majestic Tube
- * @version 2.1.4
+ * @version 2.1.5
  */
 ?>
 <!doctype html>

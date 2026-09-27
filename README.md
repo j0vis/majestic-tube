@@ -599,6 +599,10 @@ Use a reliable WordPress backup solution or your hosting provider’s backup ser
 - Review new registrations and submitted content.
 - Do not share secret API keys, reCAPTCHA secrets, or tracking credentials.
 
+### Translate the theme
+
+Every visible string uses the `majestic-tube` text domain, and the theme loads that domain from the `languages` folder automatically. To add or update a translation, place the compiled `.mo` file for your locale in that folder; WordPress then serves it based on the site language set under `Settings → General`. Regenerate the `.pot` template from the theme source whenever the wording changes, so translators work from a current file. See the `languages/README.md` file shipped with the theme for the exact commands.
+
 **Solve common problems**
 
 ## Troubleshooting
