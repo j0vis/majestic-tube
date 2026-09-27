@@ -1,11 +1,12 @@
 /**
  * Majestic Tube main styles.
  *
- * A light, flat video-tube presentation with a restrained teal accent,
- * high-contrast text, compact chrome, and responsive content grids.
+ * A flat video-tube presentation with a restrained teal accent, high-contrast
+ * text, compact chrome, and responsive content grids, in a light and a dark
+ * skin.
  *
  * @package Majestic Tube
- * @version 2.1.5
+ * @version 2.1.6
  */
 
 /*
@@ -26,23 +27,101 @@
  * font-synthesis is switched off because the bundled file is a variable font
  * with a real 100-900 axis: there is no weight the browser would have to fake,
  * and letting it fake one produced smeared bold on systems that lacked a face.
+ *
+ * Colour is a two-scheme system. Every colour token below is declared twice: a
+ * plain value first, then a light-dark() pair. An engine that does not
+ * understand light-dark() keeps the plain declaration and simply renders the
+ * light skin, which is exactly what it did before dark mode existed. An engine
+ * that does understand it resolves the pair against the element's
+ * `color-scheme`, which is what makes "Follow system" work with no JavaScript
+ * at all: the browser already knows the visitor's operating-system preference,
+ * so nothing has to ask it over the wire and nothing flashes on the way in.
+ * Declaring color-scheme also darkens the native scrollbar, form controls and
+ * focus rings, which is the part a hand-rolled filter usually misses.
  */
 :root {
+	color-scheme: light;
+
 	--mt-bg: #f4f5f7;
+	--mt-bg: light-dark( #f4f5f7, #0f1216 );
 	--mt-surface: #ffffff;
+	--mt-surface: light-dark( #ffffff, #171b21 );
 	--mt-surface-hover: #f0f2f5;
+	--mt-surface-hover: light-dark( #f0f2f5, #1f242b );
 	--mt-text: #202124;
+	--mt-text: light-dark( #202124, #e7eaed );
+	--mt-text-body: #303238;
+	--mt-text-body: light-dark( #303238, #d8dce1 );
 	--mt-text-muted: #6b7280;
+	--mt-text-muted: light-dark( #6b7280, #98a1ab );
 	--mt-border: #e3e6ea;
+	--mt-border: light-dark( #e3e6ea, #272d35 );
+	--mt-border-subtle: #e5e5e5;
+	--mt-border-subtle: light-dark( #e5e5e5, #232830 );
 	--mt-border-strong: #cfd4da;
+	--mt-border-strong: light-dark( #cfd4da, #384049 );
 	--mt-accent: #0f8a99;
 	--mt-accent-rgb: 15, 138, 153;
 	--mt-accent-dark: #096b78;
+	--mt-accent-dark: light-dark( #096b78, #5ccfe0 );
+
+	/*
+	 * Accent used as text rather than as a button fill.
+	 *
+	 * The teal is dark enough to sit under white button text but too dark to
+	 * read as a link on a near-black surface, so link and heading accents get
+	 * their own token instead of the whole theme being re-tinted. Button fills
+	 * are unchanged in both skins.
+	 */
+	--mt-accent-text: #0f8a99;
+	--mt-accent-text: light-dark( #0f8a99, #4ec9db );
+
 	--mt-success: #16834b;
+	--mt-success: light-dark( #16834b, #45c97e );
 	--mt-danger: #c5222b;
+	--mt-danger: light-dark( #c5222b, #f4707a );
+
+	/* Tinted alert surfaces and button hover states. */
+	--mt-success-bg: #edf8f2;
+	--mt-success-bg: light-dark( #edf8f2, #132a1f );
+	--mt-success-border: #9bd2b4;
+	--mt-success-border: light-dark( #9bd2b4, #2c6b47 );
+	--mt-success-text: #0d6b3b;
+	--mt-success-text: light-dark( #0d6b3b, #7ddba6 );
+	--mt-danger-bg: #fff1f2;
+	--mt-danger-bg: light-dark( #fff1f2, #2e1618 );
+	--mt-danger-border: #efadb3;
+	--mt-danger-border: light-dark( #efadb3, #7a3438 );
+
+	/* Thumbnail placeholder, shown before or instead of a real image. */
+	--mt-thumb-bg: #dfe3e8;
+	--mt-thumb-bg: light-dark( #dfe3e8, #1c2128 );
+	--mt-thumb-bg-2: #d8dde5;
+	--mt-thumb-bg-2: light-dark( #d8dde5, #232a32 );
+
+	/* Unfilled rating track. */
+	--mt-rate-track: #e1e5ea;
+	--mt-rate-track: light-dark( #e1e5ea, #2b323a );
+
+	/* Preformatted code blocks, which stay dark in both skins. */
+	--mt-code-bg: #202124;
+	--mt-code-bg: light-dark( #202124, #10141a );
+	--mt-code-fg: #f5f5f5;
+	--mt-code-fg: light-dark( #f5f5f5, #e7eaed );
+
 	--mt-radius: 8px;
 	--mt-shadow: 0 2px 10px rgba(20, 24, 31, 0.07);
+	--mt-shadow: light-dark( 0 2px 10px rgba(20, 24, 31, 0.07), 0 2px 10px rgba(0, 0, 0, 0.45) );
 	--mt-shadow-hover: 0 10px 28px rgba(20, 24, 31, 0.13);
+	--mt-shadow-hover: light-dark( 0 10px 28px rgba(20, 24, 31, 0.13), 0 10px 28px rgba(0, 0, 0, 0.6) );
+	--mt-shadow-header: 0 1px 3px rgba(20, 24, 31, 0.04);
+	--mt-shadow-header: light-dark( 0 1px 3px rgba(20, 24, 31, 0.04), 0 1px 3px rgba(0, 0, 0, 0.5) );
+	--mt-shadow-menu: 0 12px 30px rgba(20, 24, 31, 0.15);
+	--mt-shadow-menu: light-dark( 0 12px 30px rgba(20, 24, 31, 0.15), 0 12px 30px rgba(0, 0, 0, 0.65) );
+	--mt-shadow-card: 0 10px 28px rgba(20, 24, 31, 0.15);
+	--mt-shadow-card: light-dark( 0 10px 28px rgba(20, 24, 31, 0.15), 0 10px 28px rgba(0, 0, 0, 0.6) );
+	--mt-shadow-raised: 0 14px 36px rgba(20, 24, 31, 0.18);
+	--mt-shadow-raised: light-dark( 0 14px 36px rgba(20, 24, 31, 0.18), 0 14px 36px rgba(0, 0, 0, 0.7) );
 
 	/* Type. */
 	--mt-font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
@@ -59,6 +138,83 @@
 
 	/* Video card grid. */
 	--mt-grid-gap: 14px;
+}
+
+/*
+ * The two skins, and the switch between them.
+ *
+ * Only color-scheme changes here. Because every colour token is a light-dark()
+ * pair, that single property is the whole difference between the light and the
+ * dark rendering, and the switch costs nothing at paint time.
+ *
+ * "system" is declared as `light dark` rather than being resolved in script:
+ * the browser already knows the operating-system preference, so a visitor whose
+ * machine is set to dark gets the dark skin on the very first paint with no
+ * flash and no JavaScript. The small inline script in the head only runs to
+ * honour a visitor's explicit override, which is stored locally and never sent
+ * to the server.
+ */
+[data-theme="light"] {
+	color-scheme: light;
+}
+
+[data-theme="dark"] {
+	color-scheme: dark;
+}
+
+[data-theme="system"] {
+	color-scheme: light dark;
+}
+
+/*
+ * Keep the toggle itself readable in either skin, and make the current choice
+ * obvious to assistive technology as well as to the eye. It is the last flex
+ * item in the header row, so the menu keeps its place and only the toggle
+ * moves to the far end.
+ */
+.header-inner > .majestic-tube-theme-toggle {
+	order: 4;
+	margin-left: auto;
+}
+
+.majestic-tube-theme-toggle {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 36px;
+	height: 36px;
+	padding: 0;
+	background: transparent;
+	border: 1px solid var(--mt-border);
+	border-radius: 50%;
+	color: var(--mt-text-muted);
+	cursor: pointer;
+	line-height: 1;
+}
+
+.majestic-tube-theme-toggle:hover,
+.majestic-tube-theme-toggle:focus-visible {
+	background: var(--mt-surface-hover);
+	border-color: var(--mt-border-strong);
+	color: var(--mt-accent-text);
+}
+
+/*
+ * The button shows the skin currently in use, and its accessible name says
+ * what pressing it will do. All three glyphs ship in the markup and the script
+ * reveals one of them by setting data-state, so the control still renders
+ * correctly before, or entirely without, JavaScript.
+ */
+.majestic-tube-theme-toggle .mt-theme-icon {
+	display: none;
+	font-size: 1.05rem;
+	line-height: 1;
+}
+
+.majestic-tube-theme-toggle[data-state="light"] .mt-theme-icon-light,
+.majestic-tube-theme-toggle[data-state="dark"] .mt-theme-icon-dark,
+.majestic-tube-theme-toggle[data-state="system"] .mt-theme-icon-system {
+	display: inline;
 }
 
 *,
@@ -113,7 +269,7 @@ samp {
 }
 
 a {
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 	text-decoration: none;
 	transition: color 0.15s ease;
 }
@@ -179,7 +335,7 @@ ol {
 	z-index: 50;
 	background: var(--mt-surface);
 	border-bottom: 1px solid var(--mt-border);
-	box-shadow: 0 1px 3px rgba(20, 24, 31, 0.04);
+	box-shadow: var(--mt-shadow-header);
 }
 
 .header-inner {
@@ -338,7 +494,7 @@ ol {
 .main-navigation .current-menu-item > a,
 .main-navigation .current_page_item > a {
 	background: var(--mt-surface-hover);
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 }
 
 .main-navigation .sub-menu {
@@ -354,7 +510,7 @@ ol {
 	background: var(--mt-surface);
 	border: 1px solid var(--mt-border);
 	border-radius: var(--mt-radius);
-	box-shadow: 0 12px 30px rgba(20, 24, 31, 0.15);
+	box-shadow: var(--mt-shadow-menu);
 }
 
 .main-navigation .sub-menu::before {
@@ -430,7 +586,7 @@ ol {
 
 .search-field:focus {
 	background: var(--mt-surface);
-	border-color: var(--mt-accent);
+	border-color: var(--mt-accent-text);
 	box-shadow: 0 0 0 3px rgba(var(--mt-accent-rgb), 0.12);
 }
 
@@ -510,7 +666,7 @@ ol {
 }
 
 .breadcrumbs a:hover {
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 }
 
 .breadcrumbs .breadcrumb-separator {
@@ -592,7 +748,7 @@ ol {
 
 .filter-nav a.active {
 	background: var(--mt-accent);
-	border-color: var(--mt-accent);
+	border-color: var(--mt-accent-text);
 	color: #fff;
 }
 
@@ -653,7 +809,7 @@ ol {
 	display: block;
 	overflow: hidden;
 	aspect-ratio: 16 / 9;
-	background: #dfe3e8;
+	background: var(--mt-thumb-bg);
 }
 
 @supports not (aspect-ratio: 16 / 9) {
@@ -686,7 +842,7 @@ ol {
 	justify-content: center;
 	width: 100%;
 	height: 100%;
-	background: linear-gradient(135deg, #e9edf2, #d8dde5);
+	background: linear-gradient(135deg, var(--mt-thumb-bg), var(--mt-thumb-bg-2));
 	color: var(--mt-text-muted);
 	font-size: 0.82rem;
 	font-weight: 600;
@@ -794,7 +950,7 @@ ol {
 }
 
 .video-card-link:hover .video-card-header span {
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 }
 
 .video-card-meta {
@@ -830,7 +986,7 @@ ol {
 	display: block;
 	padding: 0.5em 1em;
 	margin-bottom: 0.5em;
-	border: 1px solid #e5e5e5;
+	border: 1px solid var(--mt-border-subtle);
 	color: var(--mt-text-muted);
 	line-height: 1.25;
 }
@@ -1132,8 +1288,8 @@ ol {
 .post-dislike:hover,
 .video-share-toggle:hover,
 .video-report-toggle:hover {
-	border-color: var(--mt-accent);
-	color: var(--mt-accent);
+	border-color: var(--mt-accent-text);
+	color: var(--mt-accent-text);
 }
 
 .post-like a.button,
@@ -1143,14 +1299,14 @@ ol {
 
 .post-like a.button:hover,
 .post-like .button:hover {
-	background: #edf8f2;
-	border-color: #9bd2b4;
-	color: #0d6b3b;
+	background: var(--mt-success-bg);
+	border-color: var(--mt-success-border);
+	color: var(--mt-success-text);
 }
 
 .post-dislike:hover {
-	background: #fff1f2;
-	border-color: #efadb3;
+	background: var(--mt-danger-bg);
+	border-color: var(--mt-danger-border);
 	color: var(--mt-danger);
 }
 
@@ -1186,7 +1342,7 @@ ol {
 	flex: 0 0 120px;
 	height: 7px;
 	overflow: hidden;
-	background: #e1e5ea;
+	background: var(--mt-rate-track);
 	border-radius: 999px;
 }
 
@@ -1219,7 +1375,7 @@ ol {
 	background: var(--mt-surface);
 	border: 1px solid var(--mt-border);
 	border-radius: 7px;
-	box-shadow: 0 10px 28px rgba(20, 24, 31, 0.15);
+	box-shadow: var(--mt-shadow-card);
 }
 
 .video-share:hover .sharing-buttons,
@@ -1309,7 +1465,7 @@ ol {
 	background: var(--mt-surface);
 	border: 1px solid var(--mt-border);
 	border-radius: var(--mt-radius);
-	box-shadow: 0 14px 36px rgba(20, 24, 31, 0.18);
+	box-shadow: var(--mt-shadow-raised);
 }
 
 .video-report-form[hidden] {
@@ -1376,7 +1532,7 @@ ol {
 .page-content,
 .entry-content,
 .post-list .entry-content {
-	color: #303238;
+	color: var(--mt-text-body);
 }
 
 .video-description {
@@ -1410,7 +1566,7 @@ ol {
 	padding: 0;
 	background: transparent;
 	border: 0;
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 	font-weight: 700;
 	cursor: pointer;
 }
@@ -1469,9 +1625,9 @@ ol {
 	max-width: 100%;
 	overflow: auto;
 	padding: 16px;
-	background: #202124;
+	background: var(--mt-code-bg);
 	border-radius: 7px;
-	color: #f5f5f5;
+	color: var(--mt-code-fg);
 }
 
 .single-video .entry-content code,
@@ -1720,7 +1876,7 @@ ol {
 .footer-menu-container a:focus,
 .footer-nav a:hover,
 .footer-nav a:focus {
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 }
 
 .site-info {
@@ -1799,7 +1955,7 @@ ol {
 .majestic-tube-profile-form input:focus,
 .majestic-tube-profile-form textarea:focus,
 .majestic-tube-user-modal input:focus {
-	border-color: var(--mt-accent);
+	border-color: var(--mt-accent-text);
 	box-shadow: 0 0 0 3px rgba(var(--mt-accent-rgb), 0.1);
 	outline: 0;
 }
@@ -1845,8 +2001,8 @@ ol {
 }
 
 .majestic-tube-alert.success {
-	background: #edf8f2;
-	border-color: #a8d8be;
+	background: var(--mt-success-bg);
+	border-color: var(--mt-success-border);
 	color: var(--mt-success);
 }
 
@@ -2499,7 +2655,7 @@ ol {
 .main-navigation > ul > li.current-menu-item > a,
 .main-navigation > ul > li.current_page_item > a {
 	background: transparent;
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 }
 
 .main-navigation .my-account > .sub-menu {
@@ -2662,19 +2818,29 @@ ol {
  */
 :root {
 	--mt-bg: #fafafa;
+	--mt-bg: light-dark( #fafafa, #0f1216 );
 	--mt-surface: #ffffff;
+	--mt-surface: light-dark( #ffffff, #171b21 );
 	--mt-surface-hover: #eeeeee;
+	--mt-surface-hover: light-dark( #eeeeee, #1f242b );
 	--mt-text: #404040;
+	--mt-text: light-dark( #404040, #e7eaed );
 	--mt-text-muted: #646c79;
+	--mt-text-muted: light-dark( #646c79, #98a1ab );
 	--mt-border: #e5e5e5;
+	--mt-border: light-dark( #e5e5e5, #272d35 );
 	--mt-border-strong: #d8d8d8;
+	--mt-border-strong: light-dark( #d8d8d8, #384049 );
+
+	/* Footer strip, a shade lighter than the page in the legacy skin. */
+	--mt-strip-bg: #f5f5f5;
+	--mt-strip-bg: light-dark( #f5f5f5, #12161a );
 }
 
 html,
 body {
-	background-color: #fafafa !important;
-	color: #646c79;
-	color-scheme: light;
+	background-color: var(--mt-bg) !important;
+	color: var(--mt-text-muted);
 }
 
 body.custom-background {
@@ -2687,7 +2853,7 @@ body.custom-background {
 	min-height: 0;
 	margin: 0;
 	padding: 0;
-	background: #fafafa;
+	background: var(--mt-bg);
 }
 
 #page.site > .content-area {
@@ -2698,8 +2864,8 @@ body.custom-background {
 }
 
 .site-header {
-	background: #eeeeee !important;
-	border-bottom: 1px solid #e5e5e5;
+	background: var(--mt-surface-hover) !important;
+	border-bottom: 1px solid var(--mt-border);
 	box-shadow: none;
 }
 
@@ -2785,7 +2951,7 @@ body.custom-background {
 	border: 0;
 	border-radius: 0;
 	background: transparent;
-	color: #646c79;
+	color: var(--mt-text-muted);
 	font-size: 1rem;
 	font-weight: 700;
 	line-height: 1;
@@ -2797,7 +2963,7 @@ body.custom-background {
 #site-navigation > ul > li.current_page_item > a,
 #site-navigation > ul > li.current-menu-ancestor > a {
 	background: transparent;
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 }
 
 #site-navigation ul ul,
@@ -2809,8 +2975,8 @@ body.custom-background {
 	min-width: 170px;
 	margin: 0;
 	padding: 0 0 10px;
-	border: 1px solid #e5e5e5;
-	background: #eeeeee;
+	border: 1px solid var(--mt-border);
+	background: var(--mt-surface-hover);
 	box-shadow: none;
 	z-index: 9999;
 }
@@ -2830,7 +2996,7 @@ body.custom-background {
 	border: 0;
 	border-radius: 0;
 	background: transparent;
-	color: #646c79;
+	color: var(--mt-text-muted);
 	font-size: 1rem;
 	font-weight: 400;
 	text-align: left;
@@ -2878,18 +3044,18 @@ body.custom-background {
 	display: block;
 	margin: 0 0 0.5em;
 	padding: 0.5em 1em;
-	border: 1px solid #e5e5e5;
+	border: 1px solid var(--mt-border);
 	border-radius: 0;
 	background: transparent;
-	color: #646c79;
+	color: var(--mt-text-muted);
 	line-height: 1.25;
 }
 
 .pagination ul li a.current,
 .pagination ul li a:hover,
 .pagination ul li a:focus {
-	border-color: #646c79;
-	color: #646c79;
+	border-color: var(--mt-text-muted);
+	color: var(--mt-text-muted);
 }
 
 .pagination ul li a.current {
@@ -2901,9 +3067,9 @@ body.custom-background {
 	width: 100%;
 	margin-top: 1em;
 	padding: 40px 0;
-	border-top: 1px solid #e5e5e5;
-	background: #f5f5f5;
-	color: #646c79;
+	border-top: 1px solid var(--mt-border);
+	background: var(--mt-strip-bg);
+	color: var(--mt-text-muted);
 }
 
 .site-footer .row {
@@ -2948,8 +3114,8 @@ body.custom-background {
 		display: none;
 		width: 100%;
 		padding: 0;
-		border: 1px solid #e5e5e5;
-		background: #eeeeee;
+		border: 1px solid var(--mt-border);
+		background: var(--mt-surface-hover);
 		box-shadow: 0 2px 5px rgba(0, 0, 0, 0.08);
 	}
 
@@ -2961,7 +3127,7 @@ body.custom-background {
 	#site-navigation > ul > li {
 		float: none;
 		width: 100%;
-		border-bottom: 1px solid #e5e5e5;
+		border-bottom: 1px solid var(--mt-border);
 	}
 
 	#site-navigation > ul > li:last-child {
@@ -2982,7 +3148,7 @@ body.custom-background {
 		margin: 0;
 		padding: 0 0 0 18px;
 		border: 0;
-		background: #eeeeee;
+		background: var(--mt-surface-hover);
 	}
 
 	#site-navigation ul ul li a,
@@ -3006,7 +3172,7 @@ body.custom-background {
 		padding: 0;
 		border: 0;
 		background: transparent;
-		color: #646c79;
+		color: var(--mt-text-muted);
 		cursor: pointer;
 	}
 
@@ -3018,7 +3184,7 @@ body.custom-background {
 		display: block;
 		width: 20px;
 		height: 2px;
-		background: #646c79;
+		background: var(--mt-text-muted);
 		content: "";
 	}
 

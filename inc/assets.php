@@ -3,7 +3,7 @@
  * Script and style enqueuing.
  *
  * @package Majestic Tube
- * @version 2.1.5
+ * @version 2.1.6
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -273,6 +273,9 @@ function majestic_tube_enqueue_assets() {
 				'readLess'      => __( 'Read less', 'majestic-tube' ),
 				'openMenu'      => __( 'Menu', 'majestic-tube' ),
 				'closeMenu'     => __( 'Close', 'majestic-tube' ),
+				'themeLight'    => __( 'Light', 'majestic-tube' ),
+				'themeDark'     => __( 'Dark', 'majestic-tube' ),
+				'themeSystem'   => __( 'Follow system', 'majestic-tube' ),
 			),
 		),
 		'wpst_ajax_var'    => array(

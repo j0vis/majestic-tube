@@ -3,11 +3,17 @@
  * The header template.
  *
  * @package Majestic Tube
- * @version 2.1.5
+ * @version 2.1.6
  */
 ?>
+<?php
+// The colour scheme sits on the root element rather than the body, so that
+// color-scheme covers the canvas, the scrollbar and native form controls and
+// not just the painted content. A small script in the head may replace it with
+// this visitor's own stored choice before the first paint.
+?>
 <!doctype html>
-<html <?php language_attributes(); ?>>
+<html <?php language_attributes(); ?> data-theme="<?php echo esc_attr( majestic_tube_color_scheme() ); ?>">
 <head>
 	<meta charset="<?php bloginfo( 'charset' ); ?>">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
@@ -58,6 +64,8 @@
 			);
 			?>
 		</nav>
+
+		<?php majestic_tube_theme_toggle(); ?>
 
 		<div class="clear"></div>
 	</div>

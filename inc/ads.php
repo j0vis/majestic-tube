@@ -22,7 +22,7 @@
  * majestic_tube_ads_allowed filter.
  *
  * @package Majestic Tube
- * @version 2.1.5
+ * @version 2.1.6
  */
 
 defined( 'ABSPATH' ) || exit;

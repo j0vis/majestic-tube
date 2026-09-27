@@ -466,6 +466,26 @@ function majestic_tube_options_map() {
 			'label'   => __( 'Main colour', 'majestic-tube' ),
 			'section' => $branding,
 		),
+		'color-scheme'             => array(
+			'setting'     => 'majestic_tube_color_scheme',
+			'default'     => 'light',
+			'type'        => 'select',
+			'label'       => __( 'Colour scheme', 'majestic-tube' ),
+			'section'     => $branding,
+			'description' => __( 'The skin the site uses by default. "Follow system" follows each visitor\'s operating-system setting and needs no script. Visitors can still override this with the header toggle, and that choice is stored only in their own browser.', 'majestic-tube' ),
+			'choices'     => array(
+				'light'  => __( 'Light', 'majestic-tube' ),
+				'dark'   => __( 'Dark', 'majestic-tube' ),
+				'system' => __( 'Follow system', 'majestic-tube' ),
+			),
+		),
+		'show-theme-toggle'        => array(
+			'setting' => 'majestic_tube_show_theme_toggle',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Show the light/dark toggle in the header', 'majestic-tube' ),
+			'section' => $branding,
+		),
 
 		/* ---------------------------------------------------------------
 		 * Branding / logo (original keys, including the video watermark
@@ -1381,4 +1401,121 @@ function majestic_tube_sanitize_code_option( $value ) {
  */
 function majestic_tube_sanitize_ad_code( $value ) {
 	return majestic_tube_sanitize_code_option( $value );
+}
+
+/**
+ * The colour scheme the site renders in by default.
+ *
+ * One of "light", "dark" or "system". Anything else - a hand-edited option
+ * row, a filter returning nonsense - falls back to "light" so a bad value can
+ * never leave the page with no usable colours.
+ *
+ * @return string
+ */
+function majestic_tube_color_scheme() {
+	$scheme = majestic_tube_get_option( 'wpst-options', 'color-scheme', 'light' );
+
+	if ( ! in_array( $scheme, array( 'light', 'dark', 'system' ), true ) ) {
+		$scheme = 'light';
+	}
+
+	/**
+	 * Filters the default colour scheme.
+	 *
+	 * @param string $scheme One of light, dark, system.
+	 */
+	$scheme = apply_filters( 'majestic_tube_color_scheme', $scheme );
+
+	return in_array( $scheme, array( 'light', 'dark', 'system' ), true ) ? $scheme : 'light';
+}
+
+/**
+ * Whether the header light/dark toggle is shown.
+ *
+ * @return bool
+ */
+function majestic_tube_theme_toggle_enabled() {
+	/**
+	 * Filters whether the header colour-scheme toggle is rendered.
+	 *
+	 * @param bool $enabled Whether to render the toggle.
+	 */
+	return (bool) apply_filters( 'majestic_tube_theme_toggle_enabled', majestic_tube_option_is_on( 'show-theme-toggle' ) );
+}
+
+/**
+ * Apply the visitor's stored skin before the first paint.
+ *
+ * The server can only know the site's default, and the browser can only know
+ * the operating-system preference. Neither is the same thing as what this
+ * visitor last chose, so a few lines run in the head - before the body is
+ * painted - to put the stored value on the root element. Without them a
+ * visitor who chose dark would see one light frame on every page load.
+ *
+ * The stored value never leaves the visitor's browser, and the script is
+ * skipped entirely on a site that neither offers the toggle nor differs from
+ * the default, so it costs nothing there.
+ *
+ * @return void
+ */
+function majestic_tube_color_scheme_script() {
+	if ( 'light' === majestic_tube_color_scheme() && ! majestic_tube_theme_toggle_enabled() ) {
+		return;
+	}
+	?>
+	<script>
+	( function () {
+		var key = 'majestic_tube_theme';
+		var valid = { light: 1, dark: 1, system: 1 };
+
+		try {
+			var stored = window.localStorage.getItem( key );
+
+			if ( stored && valid[ stored ] ) {
+				document.documentElement.setAttribute( 'data-theme', stored );
+			}
+		} catch ( e ) {
+			// Private browsing or a blocked storage partition. The site's
+			// default scheme, already on the element, stands.
+		}
+	}() );
+	</script>
+	<?php
+}
+add_action( 'wp_head', 'majestic_tube_color_scheme_script', 1 );
+
+/**
+ * Render the header light/dark toggle.
+ *
+ * All three glyphs are printed and CSS reveals the one matching data-state, so
+ * the button is legible before the script runs. The initial state matches the
+ * site default, which the head script may already have overridden.
+ *
+ * @return void
+ */
+function majestic_tube_theme_toggle() {
+	if ( ! majestic_tube_theme_toggle_enabled() ) {
+		return;
+	}
+
+	$labels = array(
+		'light'  => __( 'Light', 'majestic-tube' ),
+		'dark'   => __( 'Dark', 'majestic-tube' ),
+		'system' => __( 'Follow system', 'majestic-tube' ),
+	);
+	?>
+	<button
+		type="button"
+		class="majestic-tube-theme-toggle"
+		data-majestic-tube-theme-toggle
+		data-state="<?php echo esc_attr( majestic_tube_color_scheme() ); ?>"
+		aria-label="<?php esc_attr_e( 'Switch colour scheme', 'majestic-tube' ); ?>"
+		title="<?php esc_attr_e( 'Switch colour scheme', 'majestic-tube' ); ?>"
+	>
+		<span class="mt-theme-icon mt-theme-icon-light" aria-hidden="true">&#9788;</span>
+		<span class="mt-theme-icon mt-theme-icon-dark" aria-hidden="true">&#9789;</span>
+		<span class="mt-theme-icon mt-theme-icon-system" aria-hidden="true">&#9686;</span>
+		<span class="screen-reader-text"><?php echo esc_html( $labels[ majestic_tube_color_scheme() ] ); ?></span>
+	</button>
+	<?php
 }

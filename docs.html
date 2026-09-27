@@ -725,6 +725,10 @@
           <li>Test the card on desktop and mobile.</li>
         </ol>
         <p>Video trailers play briefly on hover. Supported image previews appear as an overlay. A trailer takes priority over thumbnail rotation for that card.</p>
+        <p>Neither effect is wired up when the page loads. A card starts listening for hover only once it has scrolled close to the screen, and lets go again when it scrolls away, so a long category page with sixty cards does not sit on sixty dormant timers and listeners. Cards far below the fold are not prepared at all until they are nearly in view, which is also why a page of trailers no longer costs anything on the reader's data until they actually scroll to it.</p>
+        <div class="note">
+          This needs no setting and cannot be switched off. A browser without <code>IntersectionObserver</code> &mdash; which in practice means no current browser &mdash; falls back to preparing every card on load, exactly as the theme behaved before.
+        </div>
       </section>
 
       <section id="taxonomy">
@@ -941,6 +945,8 @@
         <ul>
           <li>Enable a custom background.</li>
           <li>Choose the main accent colour.</li>
+          <li>Set the site's default colour scheme: Light, Dark, or Follow system.</li>
+          <li>Optionally show a light/dark toggle in the header so visitors can switch.</li>
           <li>Pick the site font: the bundled Inter, or the visitor's own system font.</li>
           <li>Use an uploaded logo or a text logo with an icon.</li>
           <li>Adjust logo font, size, dimensions, and spacing.</li>
@@ -953,6 +959,24 @@
         <p>The theme ships one font of its own: <strong>Inter</strong>, self-hosted in two subset files that weigh about 130 KB together. A page therefore makes no request to a third-party font host — no extra DNS lookup, no referrer leak, no cookie-consent question — and every visitor sees the same letterforms instead of Segoe UI on Windows, San Francisco on macOS and Roboto on Android. The variable file covers the whole regular-to-bold range in one download, and the Latin Extended subset is only fetched once a page really renders a character from it.</p>
         <p>If the font file cannot be loaded — an offline reader, a blocked asset — the stack falls back to the operating system's own interface font, so the page is still readable. The <strong>Site font</strong> setting under <em>Appearance &rarr; Customize</em> switches the whole site to that operating-system font on purpose.</p>
         <p>The text logo has its own choice: <strong>Inter</strong> (the default), <strong>System UI</strong>, <strong>System serif</strong> (Georgia, Times New Roman, Noto Serif), and <strong>System monospace</strong> (Menlo, Consolas, DejaVu Sans Mono). The three system voices are installed fonts rather than downloaded ones, so each looks slightly different per operating system — that is expected, not a glitch.</p>
+
+
+        <h4>Colour scheme and dark mode</h4>
+        <p>Go to <span class="path">Appearance &rarr; Customize &rarr; Majestic Tube - Logo &amp; Colours</span>. Two settings control the skin.</p>
+        <ul>
+          <li><strong>Colour scheme</strong> chooses what the site uses by default.</li>
+          <li><strong>Show the light/dark toggle in the header</strong> adds a small round button to the header so visitors can switch for themselves. It is off by default.</li>
+        </ul>
+        <p><strong>Light</strong> is the classic Majestic Tube surface. <strong>Dark</strong> is a near-black companion built for evening viewing: the same layout, the same accent, retuned borders and text colours so nothing turns into unreadable grey-on-black. <strong>Follow system</strong> renders whatever the visitor's own operating system asks for and needs no script and no stored value &mdash; the browser decides, and the page is correct before any of the theme's JavaScript runs.</p>
+        <p>The accent colour, background, and every other <span class="setting">Majestic Tube - Logo &amp; Colours</span> control apply to both skins, so a dark site is the same site rather than a separate design.</p>
+        <div class="note">
+          A visitor's choice is stored in their own browser and is never sent to the server. No cookie is set, nothing is written to the database, and a visitor who has never chosen anything simply gets the site default. Clearing site data, or opening a private window, returns them to the default &mdash; which is usually the right behaviour.
+        </div>
+        <p>With the toggle on, the button cycles <strong>Light</strong> and <strong>Dark</strong>. If the site default is <strong>Follow system</strong>, it cycles all three, so a visitor can leave it back on automatic. The button's label, tooltip, and screen-reader text all name the scheme it will switch to, so it stays usable without relying on the glyph.</p>
+        <p>A short script in the page head applies the stored choice before the first paint, so a dark-mode visitor never sees a flash of the light skin on the way in. On a site set to Light with the toggle switched off, the theme prints nothing for any of this. Where a browser refuses local storage &mdash; private browsing, a strict cookie policy, a partitioned frame &mdash; the script steps aside quietly and the site default stands, so the page is still readable.</p>
+        <div class="note">
+          <strong>For developers:</strong> the <span class="setting">majestic_tube_color_scheme</span> filter changes the default scheme, and <span class="setting">majestic_tube_theme_toggle_enabled</span> decides whether the toggle is rendered. Both live in <code>inc/theme-options.php</code>.
+        </div>
 
         <h3>Majestic Tube - Sharing &amp; Social</h3>
         <p>Enable sharing as a whole, then enable or disable the individual networks. The theme ships <strong>X/Twitter</strong>, <strong>Reddit</strong>, and <strong>email</strong>. Switch off the ones you do not want so the video page stays uncluttered.</p>
@@ -1341,6 +1365,13 @@
 
         <h3>Why is a password or report action unavailable?</h3>
         <p>Sign in when required, disable conflicting caching or security restrictions, and confirm JavaScript is enabled. A visitor may also be prevented from voting or reporting the same item again within the applicable time window.</p>
+
+        <h3>Can I have a dark site?</h3>
+        <p>Yes. Set <span class="setting">Colour scheme</span> to <strong>Dark</strong> under <span class="path">Appearance &rarr; Customize &rarr; Majestic Tube - Logo &amp; Colours</span>. Set it to <strong>Follow system</strong> instead and each visitor gets the skin their own device already asks for, which is usually the friendliest default for a video site people watch at night.</p>
+        <p>To let visitors override it, also turn on <span class="setting">Show the light/dark toggle in the header</span>. Their choice is remembered per browser and never reaches your server, so it costs you nothing in stored data and reports no personal preference.</p>
+
+        <h3>Does the dark mode slow the page down?</h3>
+        <p>No. Both skins live in the same stylesheet as a set of CSS custom properties, so switching is a single attribute change on the root element and costs no extra download. If you leave the site on Light and keep the toggle off, the theme prints no scheme script and no button at all.</p>
       </section>
 
       <section id="credits">

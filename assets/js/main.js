@@ -6,7 +6,7 @@
  * the shared `ajax-nonce` the original theme used.
  *
  * @package Majestic Tube
- * @version 2.1.5
+ * @version 2.1.6
  */
 
 ( function () {
@@ -18,6 +18,9 @@
 	var THUMBS_INTERVAL = 750; // Original rotation speed.
 	var THUMBS_FIRST_DELAY = 150;
 	var HOVER_INTENT = 100;
+
+	// How far outside the viewport a card starts being prepared.
+	var ROOT_MARGIN = '250px 0px';
 
 	/**
 	 * Query helpers.
@@ -606,6 +609,138 @@
 	}
 
 	/**
+	 * Bind a per-card setup only once a card is near the viewport.
+	 *
+	 * The hover previews are the only per-card listeners on an archive page,
+	 * and a page can hold a hundred cards, of which a visitor sees perhaps
+	 * twenty. Setting all of them up up front cost a listener and a closure
+	 * per card, and - for trailers - left a muted video element playing off
+	 * screen whenever the page scrolled out from under a stationary pointer.
+	 *
+	 * The setup function is called when a card comes within ROOT_MARGIN of the
+	 * viewport and may return a teardown, which runs when it leaves again. The
+	 * teardown restores the card to its resting state, so a card scrolled back
+	 * into view behaves exactly as it did the first time.
+	 *
+	 * Without IntersectionObserver, or with it unavailable, every card is set
+	 * up immediately and no teardown ever runs: the previous behaviour, which
+	 * is the safe fallback.
+	 *
+	 * @param {string}   selector Cards to watch.
+	 * @param {Function} setup    Per-card setup; may return a teardown.
+	 */
+	function observeCards( selector, setup ) {
+		var cards = findAll( selector );
+
+		if ( ! cards.length ) {
+			return;
+		}
+
+		if ( ! ( 'IntersectionObserver' in window ) ) {
+			cards.forEach( function ( card ) {
+				setup( card );
+			} );
+
+			return;
+		}
+
+		var teardowns = new WeakMap();
+
+		var observer = new IntersectionObserver( function ( entries ) {
+			entries.forEach( function ( entry ) {
+				var card = entry.target;
+
+				if ( entry.isIntersecting ) {
+					if ( ! teardowns.has( card ) ) {
+						teardowns.set( card, setup( card ) || null );
+					}
+
+					return;
+				}
+
+				var teardown = teardowns.get( card );
+
+				if ( teardown ) {
+					teardown();
+					teardowns.delete( card );
+				}
+			} );
+		}, { rootMargin: ROOT_MARGIN } );
+
+		cards.forEach( function ( card ) {
+			observer.observe( card );
+		} );
+	}
+
+	/**
+	 * Light/dark toggle.
+	 *
+	 * The site default is already on the root element by the time this runs,
+	 * possibly replaced by the head script from this visitor's stored choice.
+	 * Pressing the button stores the next scheme locally and swaps the
+	 * attribute; nothing is sent to the server, so the choice follows the
+	 * browser rather than the account.
+	 *
+	 * "System" is only offered as a step when the site itself is set to
+	 * follow the system, so a pinned light or dark site does not hand a
+	 * visitor a third state it never asked for.
+	 */
+	function initThemeToggle() {
+		var button = document.querySelector( '[data-majestic-tube-theme-toggle]' );
+
+		if ( ! button ) {
+			return;
+		}
+
+		var order = 'system' === button.getAttribute( 'data-state' ) ?
+			[ 'system', 'light', 'dark' ] :
+			[ 'light', 'dark' ];
+
+		var names = {
+			light: i18n.themeLight || 'Light',
+			dark: i18n.themeDark || 'Dark',
+			system: i18n.themeSystem || 'Follow system'
+		};
+
+		function current() {
+			var state = document.documentElement.getAttribute( 'data-theme' );
+
+			return order.indexOf( state ) > -1 ? state : order[ 0 ];
+		}
+
+		function render() {
+			var state = current();
+			var next = order[ ( order.indexOf( state ) + 1 ) % order.length ];
+
+			button.setAttribute( 'data-state', state );
+			button.setAttribute( 'aria-label', names[ next ] );
+			button.setAttribute( 'title', names[ next ] );
+
+			var label = button.querySelector( '.screen-reader-text' );
+
+			if ( label ) {
+				label.textContent = names[ next ];
+			}
+		}
+
+		button.addEventListener( 'click', function () {
+			var next = order[ ( order.indexOf( current() ) + 1 ) % order.length ];
+
+			document.documentElement.setAttribute( 'data-theme', next );
+
+			try {
+				window.localStorage.setItem( 'majestic_tube_theme', next );
+			} catch ( e ) {
+				// Storage unavailable. The choice still applies to this page.
+			}
+
+			render();
+		} );
+
+		render();
+	}
+
+	/**
 	 * Thumbnail rotation on hover (original `thumbs` meta, `data-thumbs`).
 	 *
 	 * The card template writes `data-thumbs` / `data-trailer` on the
@@ -618,7 +753,7 @@
 			return;
 		}
 
-		findAll( '.video-card[data-thumbs]' ).forEach( function ( card ) {
+		observeCards( '.video-card[data-thumbs]', function ( card ) {
 			/*
 			 * A trailer outranks rotation. The card template only ever emits
 			 * one of the two attributes, so this is belt-and-braces for a
@@ -627,7 +762,7 @@
 			 * trailer was still inside its hover-intent delay.
 			 */
 			if ( card.hasAttribute( 'data-trailer' ) ) {
-				return;
+				return null;
 			}
 
 			// .video-main-thumb is the original class of the card image; the
@@ -636,7 +771,7 @@
 			var raw = card.getAttribute( 'data-thumbs' );
 
 			if ( ! img || ! raw ) {
-				return;
+				return null;
 			}
 
 			var thumbs = raw.split( ',' ).map( function ( url ) {
@@ -644,14 +779,24 @@
 			} ).filter( Boolean );
 
 			if ( thumbs.length < 2 ) {
-				return;
+				return null;
 			}
 
 			var mainSrc = card.getAttribute( 'data-main-thumb' ) || img.getAttribute( 'src' );
 			var index = 1;
 			var timer = null;
 
-			card.addEventListener( 'mouseenter', function () {
+			function restore() {
+				window.clearTimeout( timer );
+				timer = null;
+				index = 1;
+
+				if ( mainSrc ) {
+					img.setAttribute( 'src', mainSrc );
+				}
+			}
+
+			function onEnter() {
 				img.setAttribute( 'src', thumbs[ index ] );
 				index = ( index + 1 ) % thumbs.length;
 
@@ -666,17 +811,19 @@
 				}
 
 				timer = window.setTimeout( cycle, THUMBS_FIRST_DELAY );
-			} );
+			}
 
-			card.addEventListener( 'mouseleave', function () {
-				window.clearTimeout( timer );
-				timer = null;
-				index = 1;
+			card.addEventListener( 'mouseenter', onEnter );
+			card.addEventListener( 'mouseleave', restore );
 
-				if ( mainSrc ) {
-					img.setAttribute( 'src', mainSrc );
-				}
-			} );
+			// Runs when the card scrolls out of range: stops a rotation that
+			// is still ticking and puts the main thumbnail back, so a card
+			// scrolled back into view never resumes mid-sequence.
+			return function () {
+				card.removeEventListener( 'mouseenter', onEnter );
+				card.removeEventListener( 'mouseleave', restore );
+				restore();
+			};
 		} );
 	}
 
@@ -711,18 +858,18 @@
 	 * card never carries both and the two previews never fight.
 	 */
 	function initTrailerPreview() {
-		findAll( '.video-card[data-trailer]' ).forEach( function ( card ) {
+		observeCards( '.video-card[data-trailer]', function ( card ) {
 			var trailerUrl = card.getAttribute( 'data-trailer' );
 
 			if ( ! trailerUrl ) {
-				return;
+				return null;
 			}
 
 			var isVideo = /\.(mp4|webm)(\?.*)?$/i.test( trailerUrl );
 			var isImage = /\.(gif|webp)(\?.*)?$/i.test( trailerUrl );
 
 			if ( ! isVideo && ! isImage ) {
-				return;
+				return null;
 			}
 
 			// The overlay div is original markup; trailers are injected into it.
@@ -801,17 +948,34 @@
 				}
 			}
 
-			card.addEventListener( 'mouseenter', function () {
+			function onEnter() {
 				window.clearTimeout( intentTimer );
 				intentTimer = window.setTimeout( start, HOVER_INTENT );
-			} );
+			}
 
-			card.addEventListener( 'mouseleave', stop );
-			card.addEventListener( 'touchstart', function () {
+			function onTouchStart() {
 				window.clearTimeout( intentTimer );
 				intentTimer = window.setTimeout( start, HOVER_INTENT );
-			}, { passive: true } );
+			}
+
+			card.addEventListener( 'mouseenter', onEnter );
+			card.addEventListener( 'mouseleave', stop );
+			card.addEventListener( 'touchstart', onTouchStart, { passive: true } );
 			card.addEventListener( 'touchend', stop );
+
+			/*
+			 * Runs when the card scrolls out of range. This is not just
+			 * tidiness: a page scrolled out from under a stationary pointer
+			 * fires no mouseleave, so without this the muted trailer kept
+			 * playing off screen and the real thumbnail stayed hidden.
+			 */
+			return function () {
+				card.removeEventListener( 'mouseenter', onEnter );
+				card.removeEventListener( 'mouseleave', stop );
+				card.removeEventListener( 'touchstart', onTouchStart );
+				card.removeEventListener( 'touchend', stop );
+				stop();
+			};
 		} );
 	}
 
@@ -1161,6 +1325,7 @@
 		initLikeButtons();
 		initReadMore();
 		initUserModal();
+		initThemeToggle();
 		initThumbRotation();
 		initTrailerPreview();
 		initContentClose();

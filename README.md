@@ -199,6 +199,12 @@ Use the **Main thumbnail** field for the default card image. A featured image at
 
 Video trailers play briefly on hover. Supported image previews appear as an overlay. A trailer takes priority over thumbnail rotation for that card.
 
+Neither effect is wired up when the page loads. A card starts listening for hover only once it has scrolled close to the screen, and lets go again when it scrolls away, so a long category page with sixty cards does not sit on sixty dormant timers and listeners. Cards far below the fold are not prepared at all until they are nearly in view, which is also why a page of trailers no longer costs anything on the reader's data until they actually scroll to it.
+
+> **Note**
+>
+> This needs no setting and cannot be switched off. A browser without `IntersectionObserver` — which in practice means no current browser — falls back to preparing every card on load, exactly as the theme behaved before.
+
 **Organize the library**
 
 ## Actors, Categories, and Tags
@@ -402,6 +408,8 @@ This is the main section for listings, cards, video details, membership, footer 
 
 - Enable a custom background.
 - Choose the main accent colour.
+- Set the site's default colour scheme: Light, Dark, or Follow system.
+- Optionally show a light/dark toggle in the header so visitors can switch.
 - Pick the site font: the bundled Inter, or the visitor's own system font.
 - Use an uploaded logo or a text logo with an icon.
 - Adjust logo font, size, dimensions, and spacing.
@@ -416,6 +424,29 @@ The theme ships one font of its own: **Inter**, self-hosted in two subset files 
 If the font file cannot be loaded — an offline reader, a blocked asset — the stack falls back to the operating system's own interface font, so the page is still readable. The **Site font** setting under *Appearance → Customize* switches the whole site to that operating-system font on purpose.
 
 The text logo has its own choice: **Inter** (the default), **System UI**, **System serif** (Georgia, Times New Roman, Noto Serif), and **System monospace** (Menlo, Consolas, DejaVu Sans Mono). The three system voices are installed fonts rather than downloaded ones, so each looks slightly different per operating system — that is expected, not a glitch.
+
+#### Colour scheme and dark mode
+
+Go to `Appearance → Customize → Majestic Tube - Logo & Colours`. Two settings control the skin.
+
+- **Colour scheme** chooses what the site uses by default.
+- **Show the light/dark toggle in the header** adds a small round button to the header so visitors can switch for themselves. It is off by default.
+
+**Light** is the classic Majestic Tube surface. **Dark** is a near-black companion built for evening viewing: the same layout, the same accent, retuned borders and text colours so nothing turns into unreadable grey-on-black. **Follow system** renders whatever the visitor's own operating system asks for and needs no script and no stored value — the browser decides, and the page is correct before any of the theme's JavaScript runs.
+
+The accent colour, background, and every other `Majestic Tube - Logo & Colours` control apply to both skins, so a dark site is the same site rather than a separate design.
+
+> **Note**
+>
+> A visitor's choice is stored in their own browser and is never sent to the server. No cookie is set, nothing is written to the database, and a visitor who has never chosen anything simply gets the site default. Clearing site data, or opening a private window, returns them to the default — which is usually the right behaviour.
+
+With the toggle on, the button cycles **Light** and **Dark**. If the site default is **Follow system**, it cycles all three, so a visitor can leave it back on automatic. The button's label, tooltip, and screen-reader text all name the scheme it will switch to, so it stays usable without relying on the glyph.
+
+A short script in the page head applies the stored choice before the first paint, so a dark-mode visitor never sees a flash of the light skin on the way in. On a site set to Light with the toggle switched off, the theme prints nothing for any of this. Where a browser refuses local storage — private browsing, a strict cookie policy, a partitioned frame — the script steps aside quietly and the site default stands, so the page is still readable.
+
+> **Note**
+>
+> **For developers:** the `majestic_tube_color_scheme` filter changes the default scheme, and `majestic_tube_theme_toggle_enabled` decides whether the toggle is rendered. Both live in `inc/theme-options.php` .
 
 ### Majestic Tube - Sharing & Social
 
@@ -743,6 +774,16 @@ They update as visitors use the site. A browser, server, or caching configuratio
 ### Why is a password or report action unavailable?
 
 Sign in when required, disable conflicting caching or security restrictions, and confirm JavaScript is enabled. A visitor may also be prevented from voting or reporting the same item again within the applicable time window.
+
+### Can I have a dark site?
+
+Yes. Set `Colour scheme` to **Dark** under `Appearance → Customize → Majestic Tube - Logo & Colours`. Set it to **Follow system** instead and each visitor gets the skin their own device already asks for, which is usually the friendliest default for a video site people watch at night.
+
+To let visitors override it, also turn on `Show the light/dark toggle in the header`. Their choice is remembered per browser and never reaches your server, so it costs you nothing in stored data and reports no personal preference.
+
+### Does the dark mode slow the page down?
+
+No. Both skins live in the same stylesheet as a set of CSS custom properties, so switching is a single attribute change on the root element and costs no extra download. If you leave the site on Light and keep the toggle off, the theme prints no scheme script and no button at all.
 
 **Support the project**
 
