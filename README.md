@@ -261,6 +261,23 @@ To change an image later, open the actor, choose **Edit Actor**, select a replac
 
 Add short, descriptive tags in the Video editor. The Tags page template presents all site tags as a cloud with video counts.
 
+### Write the line on a category or actor card
+
+Every card on the Categories and Actors pages carries a line of text between the name and the video count. By default it is that term's own description, and nothing shows for a term you never wrote one for.
+
+You can replace that with a phrase of your own under `Customize → Homepage & Listings → Category, Tag & Actor Archives`, using **Category card text** and **Actor card text**. The default reads `Free "{description}" videos`, and the same idea is available separately for actors.
+
+| Token | Becomes |
+| --- | --- |
+| `{description}` | The term's own description, or its name when no description has been written. |
+| `{name}` | The category or actor name. |
+| `{count}` | The number of videos, formatted for the site language. |
+| `{videos}` | The word *video* or *videos*, chosen to match the count. |
+
+So `{count} {videos} starring {name}` gives "42 videos starring Amber Waves", and on a term with a single video it gives "1 video starring…". An unrecognised token is left in place rather than silently deleted, so a typo is visible on the page instead of quietly producing a half-written sentence. Clear the box to go back to each term's own description.
+
+The line is clamped to two lines, and the card drops the blank title line that a grid card reserves, so filling this in does not make the cards any taller.
+
 ### Browse categories, tags, and actors by letter
 
 The Categories, Tags, and Actors pages all carry an alphabet bar above the listing. **All** shows the complete directory; each letter shows only the terms starting with it, along with how many there are. Only letters that actually have terms appear, so the bar never offers a letter that leads to an empty page.
@@ -484,7 +501,7 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 | --- | --- | --- |
 | Homepage & Listings | Homepage | How the homepage sorts its videos, how many show per page and per row, and the homepage title and where it sits. |
 | Homepage & Listings | Homepage on Mobile | Videos per page and per row on phones and tablets, and hiding the homepage widget areas on mobile. |
-| Homepage & Listings | Category, Tag & Actor Archives | Videos per page on those archives, and whether the category and tag description goes above or below the list. |
+| Homepage & Listings | Category, Tag & Actor Archives | Videos per page on those archives, whether the category and tag description goes above or below the list, and the line shown on each category and actor card. |
 | Video Page | Video Page Layout | The video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos. |
 | Video Page | Player | Autoplay, the player engine, the quality selector, view counting, and the optional keyboard shortcuts, speed, resume and theater controls. |
 | Video Page | Sharing | The share buttons printed under the player. |

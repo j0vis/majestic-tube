@@ -61,6 +61,48 @@ function majestic_tube_term_image_field( $image_id = 0, $context = 'add' ) {
 }
 
 /**
+ * Build the line shown on a category or actor directory card.
+ *
+ * The Customizer holds a short phrase for each of the two directories, and
+ * the tokens below are filled in per card. A token the site has no value for
+ * falls back to the term name rather than leaving a hole in the sentence:
+ * `{description}` on a category nobody has written a description for becomes
+ * the category name, so `Free "{description}" videos` reads sensibly on every
+ * card whether or not the administrator got round to writing one.
+ *
+ * An empty phrase means the site has opted out of the generated line, and the
+ * term's own description is used instead, which is what the card showed before
+ * the option existed.
+ *
+ * @param WP_Term $term     Term object.
+ * @param string  $taxonomy Term taxonomy.
+ * @return string Plain text, ready to escape, or an empty string.
+ */
+function majestic_tube_term_card_line( $term, $taxonomy ) {
+	$template = ( 'actors' === $taxonomy )
+		? (string) majestic_tube_get_option( 'wpst-options', 'actor-card-description', '' )
+		: (string) majestic_tube_get_option( 'wpst-options', 'category-card-description', '' );
+
+	$description = trim( wp_strip_all_tags( (string) get_term_field( 'description', $term->term_id, $taxonomy, 'raw' ) ) );
+	$name        = (string) $term->name;
+	$count       = (int) $term->count;
+
+	if ( '' === trim( $template ) ) {
+		return $description;
+	}
+
+	return strtr(
+		$template,
+		array(
+			'{name}'        => $name,
+			'{description}' => '' !== $description ? $description : $name,
+			'{count}'       => number_format_i18n( $count ),
+			'{videos}'      => _n( 'video', 'videos', $count, 'majestic-tube' ),
+		)
+	);
+}
+
+/**
  * Render one directory card for an actor or category.
  *
  * @param WP_Term $term     Term object.
@@ -78,14 +120,13 @@ function majestic_tube_render_term_card( $term, $taxonomy ) {
 	$type = 'actors' === $taxonomy ? 'actor' : 'category';
 
 	/*
-	 * The description fills the empty band between the title and the count.
-	 * A directory of categories and actors is mostly title plus number, and
-	 * the number alone left each card looking unfinished. Markup is stripped
-	 * because a card is a link target, not a page to render HTML in, and the
-	 * clamp in main.css keeps a long description to two lines so every card
-	 * in a row stays the same height.
+	 * The line fills the empty band between the title and the count. A
+	 * directory of categories and actors is mostly title plus number, and the
+	 * number alone left each card looking unfinished. main.css drops the two
+	 * line title reservation on these cards so the line lands in space the
+	 * card already had rather than making every card in a row taller.
 	 */
-	$description = trim( wp_strip_all_tags( (string) get_term_field( 'description', $term->term_id, $taxonomy, 'raw' ) ) );
+	$description = majestic_tube_term_card_line( $term, $taxonomy );
 	?>
 	<article class="video-card <?php echo esc_attr( $type ); ?>-card">
 		<a class="video-card-thumbnail" href="<?php echo esc_url( $link ); ?>">

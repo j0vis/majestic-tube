@@ -6,7 +6,7 @@
  * skin.
  *
  * @package Majestic Tube
- * @version 2.2.3
+ * @version 2.2.4
  */
 
 /*
@@ -986,14 +986,26 @@ ol {
 }
 
 /*
- * The term description on a category or actor directory card. It sits between
- * the title and the video count, and is clamped to two lines so that a long
- * description cannot make one card in a row taller than the rest.
+ * The line on a category or actor directory card. It sits between the title
+ * and the video count, clamped to two lines so a long one cannot make a card
+ * in a row taller than the rest.
+ *
+ * A grid title reserves two lines of height so that a one-line title does not
+ * leave its card short. On a directory card that reservation is a whole band
+ * of dead space directly above the line below, so it is dropped here and the
+ * card collapses back to the height it had before the line existed.
  */
+.category-card .video-card-title,
+.actor-card .video-card-title,
+.category-card .video-card-header .video-card-title,
+.actor-card .video-card-header .video-card-title {
+	min-height: 0;
+}
+
 .term-card-description {
 	display: -webkit-box;
 	overflow: hidden;
-	margin: 6px 0 0;
+	margin: 4px 0 0;
 	color: var(--mt-text-muted);
 	font-size: 0.8rem;
 	line-height: 1.45;
