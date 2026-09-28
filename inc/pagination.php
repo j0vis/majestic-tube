@@ -8,7 +8,7 @@
  * escaped links and the same `wpst_page_navi` contract.
  *
  * @package Majestic Tube
- * @version 2.2.5
+ * @version 2.2.6
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -240,6 +240,16 @@ function majestic_tube_get_term_directory( $taxonomy, $per_page, $page = 1, $let
 		// A letter with no terms is an empty result, not the unfiltered
 		// directory - passing an empty include would list everything.
 		$args['include'] = $letter_ids ? $letter_ids : array( 0 );
+
+		/*
+		 * Choosing a letter IS the navigation, so it lists every term under
+		 * that letter on one page. Paging a slice of a single letter on top of
+		 * a bar that already picked the letter is two controls doing one job,
+		 * and it is what made a working letter look like it had loaded
+		 * nothing when the interesting terms were on page two.
+		 */
+		$args['number'] = 0;
+		$args['offset'] = 0;
 	}
 
 	/**
@@ -453,38 +463,69 @@ function majestic_tube_get_term_letter_map( $taxonomy ) {
  * @return array<string, int[]> Letter => term IDs, keys in alphabetical order.
  */
 function majestic_tube_build_term_letter_map( $taxonomy ) {
-	$args = array(
-		'taxonomy' => $taxonomy,
-		// Must match what the listing will show, or the bar's counts lie.
-		'hide_empty' => majestic_tube_term_directory_hide_empty( $taxonomy ),
-		// Only the name is needed to bucket terms by letter, so this stays a
-		// cheap id=>name lookup rather than a full term object per row.
-		'fields'   => 'id=>name',
-	);
-
-	$terms = get_terms( $args );
+	$hide_empty = majestic_tube_term_directory_hide_empty( $taxonomy );
+	$map        = array();
 
 	/*
-	 * A directory that plainly lists terms but offers no letters is broken,
-	 * and by far the likeliest reason is that hide_empty filtered every one
-	 * of them out of this read. Retrying without it costs one extra query in
-	 * a case that should not happen at all, and it guarantees the bar can
-	 * never silently disagree with the listing sitting directly below it.
+	 * This is read straight from the term and term_taxonomy tables rather
+	 * than through get_terms( 'fields' => 'id=>name' ).
+	 *
+	 * It has to be. The letter map is what the whole alphabet feature stands
+	 * on: the bar's counts come from it, and clicking a letter resolves to the
+	 * term IDs it holds. When that read came back empty, the bar had no
+	 * letters to draw AND every letter it did draw resolved to an empty ID
+	 * set, so the listing underneath went blank. Two visible symptoms, one
+	 * cause, and a query that returned no rows could not tell anyone which.
+	 *
+	 * One SELECT of three columns over the taxonomy is the cheapest reliable
+	 * read available, it carries the term count so hide_empty can be applied
+	 * without a second query, and it cannot be defeated by a fields or
+	 * hide_empty combination the way the API query could.
 	 */
-	if ( is_wp_error( $terms ) || ! $terms ) {
-		$args['hide_empty'] = false;
-		$retry               = get_terms( $args );
-		$terms               = is_wp_error( $retry ) ? array() : $retry;
+	global $wpdb;
+
+	$rows = $wpdb->get_results(
+		$wpdb->prepare(
+			"SELECT t.term_id, t.name, tt.count
+			 FROM {$wpdb->terms} t
+			 INNER JOIN {$wpdb->term_taxonomy} tt ON tt.term_id = t.term_id
+			 WHERE tt.taxonomy = %s",
+			$taxonomy
+		)
+	);
+
+	if ( ! is_array( $rows ) ) {
+		// A direct query refused, most often by a host that disallows them.
+		// Fall back to the API rather than showing a directory with no bar.
+		$terms = get_terms(
+			array(
+				'taxonomy'   => $taxonomy,
+				'hide_empty' => $hide_empty,
+				'fields'     => 'id=>name',
+			)
+		);
+
+		$rows = array();
+
+		foreach ( ( is_wp_error( $terms ) ? array() : (array) $terms ) as $term ) {
+			if ( isset( $term->term_id, $term->name ) ) {
+				$rows[] = (object) array(
+					'term_id' => $term->term_id,
+					'name'    => $term->name,
+					'count'   => 1,
+				);
+			}
+		}
 	}
 
-	$map = array();
-
-	foreach ( (array) $terms as $term ) {
-		if ( ! isset( $term->name ) ) {
+	foreach ( $rows as $row ) {
+		// Keep in step with the listing: a term with no videos is not offered
+		// by the bar either, or the two would disagree.
+		if ( $hide_empty && isset( $row->count ) && (int) $row->count < 1 ) {
 			continue;
 		}
 
-		$letter = majestic_tube_term_initial( $term->name );
+		$letter = majestic_tube_term_initial( $row->name );
 
 		if ( '' === $letter ) {
 			continue;
@@ -494,7 +535,7 @@ function majestic_tube_build_term_letter_map( $taxonomy ) {
 			$map[ $letter ] = array();
 		}
 
-		$map[ $letter ][] = (int) $term->term_id;
+		$map[ $letter ][] = (int) $row->term_id;
 	}
 
 	ksort( $map );

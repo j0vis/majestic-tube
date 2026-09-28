@@ -41,7 +41,9 @@ $actors_total = $directory['total'];
 				}
 				?>				</div>
 
+				<?php if ( '' === $letter ) : ?>
 				<?php majestic_tube_term_pagination( $actors_total, $per_page ); ?>
+			<?php endif; ?>
 
 		<?php else : ?>
 

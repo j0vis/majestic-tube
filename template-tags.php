@@ -43,7 +43,9 @@ $tags_total = $directory['total'];
 				<?php endforeach; ?>
 			</div>
 
-			<?php majestic_tube_term_pagination( $tags_total, $per_page ); ?>
+			<?php if ( '' === $letter ) : ?>
+				<?php majestic_tube_term_pagination( $tags_total, $per_page ); ?>
+			<?php endif; ?>
 
 		<?php else : ?>
 

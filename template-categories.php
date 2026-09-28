@@ -42,7 +42,9 @@ $categories_total = $directory['total'];
 				?>
 			</div>
 
-			<?php majestic_tube_term_pagination( $categories_total, $per_page ); ?>
+			<?php if ( '' === $letter ) : ?>
+				<?php majestic_tube_term_pagination( $categories_total, $per_page ); ?>
+			<?php endif; ?>
 
 		<?php else : ?>
 
