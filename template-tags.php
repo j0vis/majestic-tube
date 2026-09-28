@@ -10,15 +10,25 @@
 
 get_header();
 
-// Tags per page reuses the categories-per-page option, like the original.
-$per_page  = majestic_tube_terms_per_page( 'categories-per-page', 20 );
-$tags_page = majestic_tube_get_paged();
+/*
+ * Every tag is listed on one page, so this directory has no paginator.
+ *
+ * A tag is a small label and the cloud is a flat, wrapping list: paging it
+ * split a set of related tags across pages, and someone looking for one tag
+ * had to page through the rest to find it. The categories and actors
+ * directories still paginate, because those are card grids where a page
+ * boundary is the natural way to break up a long wall of images.
+ *
+ * A per_page of 0 tells majestic_tube_get_term_directory() not to limit the
+ * query, so no option is read for a setting that no longer applies here.
+ */
+$per_page  = 0;
+$tags_page = 1;
 $letter    = majestic_tube_get_requested_letter();
 
-// One cached call for both the page of terms and the total count.
+// One cached call for both the terms and the total count.
 $directory = majestic_tube_get_term_directory( 'post_tag', $per_page, $tags_page, $letter );
 $tags      = $directory['terms'];
-$tags_total = $directory['total'];
 ?>
 
 <div id="primary" class="content-area">
@@ -42,10 +52,6 @@ $tags_total = $directory['total'];
 					</a>
 				<?php endforeach; ?>
 			</div>
-
-			<?php if ( '' === $letter ) : ?>
-				<?php majestic_tube_term_pagination( $tags_total, $per_page ); ?>
-			<?php endif; ?>
 
 		<?php else : ?>
 

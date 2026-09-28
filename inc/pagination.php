@@ -8,7 +8,7 @@
  * escaped links and the same `wpst_page_navi` contract.
  *
  * @package Majestic Tube
- * @version 2.2.7
+ * @version 2.2.8
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -178,8 +178,12 @@ const MAJESTIC_TUBE_TERM_CACHE_TTL = 6 * HOUR_IN_SECONDS;
  * `edited_term`, which would miss the paths that matter here (bulk imports,
  * CLI updates, and anything writing terms without going through the admin UI).
  *
+ * A per_page of 0 means "every term on one page". The tags directory is
+ * listed that way: a tag is a small label, the cloud is a flat list, and
+ * splitting it across pages only hides tags from someone looking for one.
+ *
  * @param string $taxonomy Taxonomy name.
- * @param int    $per_page Terms per page.
+ * @param int    $per_page Terms per page, or 0 for every term on one page.
  * @param int    $page     1-based page number.
  * @param string $letter   Optional A-Z or 0-9 to list only that letter.
  * @return array{terms: array, total: int, error: mixed} Terms, the total term
@@ -187,9 +191,14 @@ const MAJESTIC_TUBE_TERM_CACHE_TTL = 6 * HOUR_IN_SECONDS;
  */
 function majestic_tube_get_term_directory( $taxonomy, $per_page, $page = 1, $letter = '' ) {
 	$taxonomy = sanitize_key( $taxonomy );
-	$per_page = max( 1, absint( $per_page ) );
+	$per_page = absint( $per_page );
 	$page     = max( 1, absint( $page ) );
 	$letter   = preg_match( '/^[A-Z0-9]$/', strtoupper( (string) $letter ) ) ? strtoupper( (string) $letter ) : '';
+
+	// 0 is the caller's way of saying "do not paginate this directory", not a
+	// request for a single term, so it has to survive the normalisation.
+	$unlimited = ( 0 === $per_page );
+	$per_page  = $unlimited ? 0 : max( 1, $per_page );
 
 	if ( ! taxonomy_exists( $taxonomy ) ) {
 		return array(
@@ -231,10 +240,15 @@ function majestic_tube_get_term_directory( $taxonomy, $per_page, $page = 1, $let
 		'taxonomy'   => $taxonomy,
 		'hide_empty' => $hide_empty,
 		'number'     => $per_page,
-		'offset'     => ( $page - 1 ) * $per_page,
+		'offset'     => $unlimited ? 0 : ( $page - 1 ) * $per_page,
 		'orderby'    => 'name',
 		'order'      => 'ASC',
 	);
+
+	if ( $unlimited ) {
+		// get_terms() reads `number` 0 as "no limit", which is the same request.
+		$args['number'] = 0;
+	}
 
 	if ( $letter ) {
 		// A letter with no terms is an empty result, not the unfiltered
@@ -313,12 +327,21 @@ function majestic_tube_get_term_directory( $taxonomy, $per_page, $page = 1, $let
  * Terms are not paginated by WordPress, so the links are derived from the
  * total term count and the per-page option.
  *
+ * A per_page of 0 means this directory is not paginated - the tags page passes
+ * that - so nothing is printed. The guard is here rather than left to the
+ * caller simply because `max( 1, 0 )` would otherwise read as one term per
+ * page and offer to page through every single tag on the site.
+ *
  * @param int $total_terms Total number of terms.
- * @param int $per_page    Terms per page.
+ * @param int $per_page    Terms per page, or 0 for no pagination.
  * @return void
  */
 function majestic_tube_term_pagination( $total_terms, $per_page ) {
-	$per_page = max( 1, absint( $per_page ) );
+	$per_page = absint( $per_page );
+
+	if ( $per_page < 1 ) {
+		return;
+	}
 	$pages    = (int) ceil( absint( $total_terms ) / $per_page );
 
 	if ( $pages < 2 ) {
@@ -592,19 +615,23 @@ function majestic_tube_term_initial( $name ) {
 }/**
  * Print the A-Z bar for a term directory.
  *
- * The bar is unconditional. Every letter A-Z and 0-9 is printed on every
- * directory page, whether or not any data came back: a letter that has terms
- * is a link carrying its count, and a letter that has none is printed dimmed
- * and inert. That is deliberate. A bar whose letters are decided by a query
- * is a bar that disappears the moment that query returns nothing, and a
- * directory with a working listing but no visible sort control is worse than
- * one that plainly shows which letters are empty.
+ * Only letters that lead somewhere are printed. A letter with no terms behind
+ * it is left off the bar entirely rather than shown dimmed: a chip that cannot
+ * be clicked is dead weight in the row, and on a directory where only a dozen
+ * letters are ever used the other two dozen chips pushed the useful ones onto
+ * a second line for no benefit. The bar is therefore as short as the data
+ * makes it, and "All" is always present so a visitor on a filtered view can
+ * get back to the full directory.
+ *
+ * The letter carries no count. The number of terms under a letter is a fact
+ * about the directory rather than something a visitor picks between, and on a
+ * narrow screen the badge was wide enough to wrap the row onto a second line
+ * by itself.
  *
  * Each link carries the letter as a query argument rather than as a path
  * segment, because these directories are page templates: the page segment is
  * already carrying `/page/N/`, and a second rewrite rule would collide with
- * it. Pagination links keep the argument, so moving between pages does not
- * silently drop the filter.
+ * it.
  *
  * @param string $taxonomy Taxonomy name.
  * @return void
@@ -614,10 +641,24 @@ function majestic_tube_term_letter_nav( $taxonomy ) {
 	$current = majestic_tube_get_requested_letter();
 	$base    = majestic_tube_term_directory_base_url();
 
-	// The full set, always, in reading order. Digits sit last because on a
-	// video site they are rare, and "4K" or "18" filed under a digit should
-	// not push the letters a visitor actually came for off the row.
+	// Reading order, letters first. Digits sit last because on a video site
+	// they are rare, and "4K" or "18" filed under a digit should not push the
+	// letters a visitor actually came for off the row.
 	$all_letters = array_merge( range( 'A', 'Z' ), range( 0, 9 ) );
+
+	$available = array();
+
+	foreach ( $all_letters as $letter ) {
+		if ( ! empty( $letters[ $letter ] ) ) {
+			$available[] = $letter;
+		}
+	}
+
+	// Nothing to sort by. Printing a bar with only "All" on it would be a
+	// control that does nothing, so the whole nav is skipped.
+	if ( ! $available ) {
+		return;
+	}
 	?>
 	<nav class="term-letter-nav" aria-label="<?php esc_attr_e( 'Browse by letter', 'majestic-tube' ); ?>">
 		<ul>
@@ -626,22 +667,12 @@ function majestic_tube_term_letter_nav( $taxonomy ) {
 					href="<?php echo esc_url( $base ); ?>"
 					<?php echo '' === $current ? ' aria-current="true"' : ''; ?>><?php esc_html_e( 'All', 'majestic-tube' ); ?></a>
 			</li>
-			<?php foreach ( $all_letters as $letter ) : ?>
-				<?php $count = isset( $letters[ $letter ] ) ? (int) $letters[ $letter ] : 0; ?>
-			<li>
-				<?php if ( $count > 0 ) : ?>
+			<?php foreach ( $available as $letter ) : ?>
+				<li>
 					<a class="term-letter<?php echo $current === $letter ? ' is-active' : ''; ?>"
 						href="<?php echo esc_url( add_query_arg( 'letter', rawurlencode( $letter ), $base ) ); ?>"
-						<?php echo $current === $letter ? ' aria-current="true"' : ''; ?>>
-						<?php echo esc_html( $letter ); ?>
-						<span class="term-letter-count"><?php echo esc_html( number_format_i18n( $count ) ); ?></span>
-					</a>
-				<?php else : ?>
-					<span class="term-letter is-empty" aria-disabled="true">
-						<?php echo esc_html( $letter ); ?>
-					</span>
-				<?php endif; ?>
-			</li>
+						<?php echo $current === $letter ? ' aria-current="true"' : ''; ?>><?php echo esc_html( $letter ); ?></a>
+				</li>
 			<?php endforeach; ?>
 		</ul>
 	</nav>

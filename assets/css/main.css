@@ -6,7 +6,7 @@
  * skin.
  *
  * @package Majestic Tube
- * @version 2.2.7
+ * @version 2.2.8
  */
 
 /*
@@ -2236,7 +2236,6 @@ ol {
 	display: inline-flex;
 	align-items: center;
 	justify-content: center;
-	gap: 0.2rem;
 	min-width: 2.1rem;
 	padding: 0.34rem 0.5rem;
 	background: var(--mt-surface-hover);
@@ -2259,24 +2258,8 @@ ol {
 	color: #fff;
 }
 
-/* A letter with no terms. It is still printed, so the bar is always the same
- * shape and a visitor can see at a glance which letters are worth clicking,
- * but it is not a link and does not invite a click. */
-.term-letter.is-empty {
-	opacity: 0.4;
-	cursor: default;
-	background: transparent;
-	border: 1px dashed var(--mt-border);
-	color: var(--mt-text-muted);
-}
-
-/* The count is secondary: it should not compete with the letter itself, and
-   it must not push a single letter off the fixed-width box. */
-.term-letter-count {
-	font-size: 0.7rem;
-	font-weight: 500;
-	opacity: 0.75;
-}
+/* Only letters that lead somewhere are printed, so there is no empty-letter
+ * style to draw: every chip in the bar is a link to a real listing. */
 
 @media screen and (max-width: 480px) {
 	.term-letter-nav {

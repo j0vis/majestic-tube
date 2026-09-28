@@ -7,7 +7,7 @@
  * do not mistake the theme's widget chrome for a specific promotional format.
  *
  * @package Majestic Tube
- * @version 2.2.7
+ * @version 2.2.8
  */
 
 defined( 'ABSPATH' ) || exit;
