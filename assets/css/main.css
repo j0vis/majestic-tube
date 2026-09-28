@@ -6,7 +6,7 @@
  * skin.
  *
  * @package Majestic Tube
- * @version 2.2.1
+ * @version 2.2.2
  */
 
 /*
@@ -380,30 +380,52 @@ ol {
 	max-height: var(--mt-logo-max-height, 120px);
 }
 
+/*
+ * The logo icon is masked SVG rather than a glyph, so it is drawn in the
+ * logo's own colour, needs no icon font, and can be a real film strip and a
+ * real camcorder instead of the two Unicode characters that cannot tell them
+ * apart. The four shapes are the only ones the Icon logo option offers.
+ */
+.site-logo {
+	--mt-icon-film: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill-rule='evenodd' d='M1 5.5A1.5 1.5 0 0 1 2.5 4h19A1.5 1.5 0 0 1 23 5.5v13a1.5 1.5 0 0 1-1.5 1.5h-19A1.5 1.5 0 0 1 1 18.5zM3 6.2h4v11.6H3zM17 6.2h4v11.6h-4zM8.4 6.2h2.6v2.6H8.4zM13 6.2h2.6v2.6H13zM8.4 10.7h2.6v2.6H8.4zM13 10.7h2.6v2.6H13zM8.4 15.2h2.6v2.6H8.4zM13 15.2h2.6v2.6H13z'/%3E%3C/svg%3E");
+	--mt-icon-video: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z'/%3E%3C/svg%3E");
+	--mt-icon-heart: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z'/%3E%3C/svg%3E");
+	--mt-icon-star: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z'/%3E%3C/svg%3E");
+}
+
 .site-logo > .fa {
-	display: inline-grid;
-	place-items: center;
+	display: inline-block;
 	flex: 0 0 auto;
-	width: 1.45em;
-	height: 1.45em;
-	border-radius: 50%;
-	background: var(--mt-accent);
-	color: #fff;
-	font-size: 0.7em;
-	font-style: normal;
+	width: 1em;
+	height: 1em;
+	background-color: currentColor;
+	vertical-align: -0.09em;
+	-webkit-mask-repeat: no-repeat;
+	mask-repeat: no-repeat;
+	-webkit-mask-position: center;
+	mask-position: center;
+	-webkit-mask-size: contain;
+	mask-size: contain;
 }
 
-.site-logo > .fa-film::before,
-.site-logo > .fa-video::before {
-	content: "\25A4";
+.site-logo > .fa-film {
+	-webkit-mask-image: var(--mt-icon-film);
+	mask-image: var(--mt-icon-film);
 }
 
-.site-logo > .fa-heart::before {
-	content: "\2665";
+.site-logo > .fa-video {
+	-webkit-mask-image: var(--mt-icon-video);
+	mask-image: var(--mt-icon-video);
 }
 
-.site-logo > .fa-star::before {
-	content: "\2605";
+.site-logo > .fa-heart {
+	-webkit-mask-image: var(--mt-icon-heart);
+	mask-image: var(--mt-icon-heart);
+}
+
+.site-logo > .fa-star {
+	-webkit-mask-image: var(--mt-icon-star);
+	mask-image: var(--mt-icon-star);
 }
 
 /*
