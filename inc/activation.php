@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.2
+ * @version 2.2.3
  */
 
 defined( 'ABSPATH' ) || exit;

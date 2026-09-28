@@ -76,6 +76,16 @@ function majestic_tube_render_term_card( $term, $taxonomy ) {
 	}
 
 	$type = 'actors' === $taxonomy ? 'actor' : 'category';
+
+	/*
+	 * The description fills the empty band between the title and the count.
+	 * A directory of categories and actors is mostly title plus number, and
+	 * the number alone left each card looking unfinished. Markup is stripped
+	 * because a card is a link target, not a page to render HTML in, and the
+	 * clamp in main.css keeps a long description to two lines so every card
+	 * in a row stays the same height.
+	 */
+	$description = trim( wp_strip_all_tags( (string) get_term_field( 'description', $term->term_id, $taxonomy, 'raw' ) ) );
 	?>
 	<article class="video-card <?php echo esc_attr( $type ); ?>-card">
 		<a class="video-card-thumbnail" href="<?php echo esc_url( $link ); ?>">
@@ -89,6 +99,9 @@ function majestic_tube_render_term_card( $term, $taxonomy ) {
 			<h3 class="video-card-title">
 				<a href="<?php echo esc_url( $link ); ?>"><?php echo esc_html( $term->name ); ?></a>
 			</h3>
+			<?php if ( '' !== $description ) : ?>
+				<p class="term-card-description"><?php echo esc_html( $description ); ?></p>
+			<?php endif; ?>
 		</header>
 		<footer class="video-card-meta">
 			<?php /*

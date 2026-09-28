@@ -269,7 +269,7 @@ Terms are filed under the first letter of their first word, so *AnnaBelle* appea
 
 The letter is a query argument, so it survives pagination: `/tags/?letter=A` can be bookmarked and shared, and moving to page 2 keeps the filter. Choosing a letter resets to page 1.
 
-Terms with no videos attached are left off the directory pages, and out of the alphabet bar's counts, so the two always agree. This is a change from the original theme, which listed them. It matters after a bulk import, which can leave a large number of unused terms behind; they made every directory page longer and linked to archives with nothing in them.
+Terms with no videos attached are left off the directory pages, and out of the alphabet bar's counts, so the two normally agree. The one exception is deliberate: if a directory somehow produced no letters at all, the bar still prints rather than silently disappearing, so an empty directory is never mistaken for a broken theme. This is a change from the original theme, which listed them. It matters after a bulk import, which can leave a large number of unused terms behind; they made every directory page longer and linked to archives with nothing in them.
 
 To go back to listing them, add this to a small plugin:
 

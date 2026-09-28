@@ -6,7 +6,7 @@
  * skin.
  *
  * @package Majestic Tube
- * @version 2.2.2
+ * @version 2.2.3
  */
 
 /*
@@ -792,6 +792,8 @@ ol {
 }
 
 .video-card {
+	display: flex;
+	flex-direction: column;
 	min-width: 0;
 	overflow: hidden;
 	background: var(--mt-surface);
@@ -975,9 +977,28 @@ ol {
 .video-card-meta {
 	display: flex;
 	justify-content: space-between;
+	/* Keeps the count on the bottom edge of the card when a neighbouring card
+	 * in the same row has a description and this one does not. */
+	margin-top: auto;
 	padding: 0 12px 12px;
 	color: var(--mt-text-muted);
 	font-size: 0.78rem;
+}
+
+/*
+ * The term description on a category or actor directory card. It sits between
+ * the title and the video count, and is clamped to two lines so that a long
+ * description cannot make one card in a row taller than the rest.
+ */
+.term-card-description {
+	display: -webkit-box;
+	overflow: hidden;
+	margin: 6px 0 0;
+	color: var(--mt-text-muted);
+	font-size: 0.8rem;
+	line-height: 1.45;
+	-webkit-box-orient: vertical;
+	-webkit-line-clamp: 2;
 }
 
 /*

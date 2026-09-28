@@ -8,7 +8,7 @@
  * escaped links and the same `wpst_page_navi` contract.
  *
  * @package Majestic Tube
- * @version 2.2.2
+ * @version 2.2.3
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -405,51 +405,99 @@ function majestic_tube_get_term_letter_map( $taxonomy ) {
 		return array();
 	}
 
-	$last_changed = wp_cache_get( 'last_changed', 'terms' );
-	$cache_key    = sprintf(
-		'letters_%s_%s',
-		$taxonomy,
-		preg_replace( '/[^A-Za-z0-9_.:-]/', '', (string) $last_changed )
-	);
+	$last_changed = (string) wp_cache_get( 'last_changed', 'terms' );
+	$cache_key    = 'majestic_tube_letters_' . $taxonomy;
+	$fast_key     = $cache_key . '_' . preg_replace( '/[^A-Za-z0-9_.:-]/', '', $last_changed );
 
-	$cached = wp_cache_get( $cache_key, MAJESTIC_TUBE_TERM_CACHE_GROUP );
+	$cached = wp_cache_get( $fast_key, MAJESTIC_TUBE_TERM_CACHE_GROUP );
 
 	if ( is_array( $cached ) ) {
 		return $cached;
 	}
 
-	$terms = get_terms(
-		array(
-			'taxonomy'   => $taxonomy,
-			// Must match what the listing will show, or the bar's counts lie.
-			'hide_empty' => majestic_tube_term_directory_hide_empty( $taxonomy ),
-			// Only the name is needed to bucket terms by letter, so this stays a
-			// cheap id=>name lookup rather than a full term object per row.
-			'fields'     => 'id=>name',
-		)
+	/*
+	 * A directory of several hundred tags is a real id=>name read, and the
+	 * object cache above only survives the request when a persistent object
+	 * cache happens to be installed. On an ordinary install that meant the
+	 * lookup ran again on every single page view, which is the database
+	 * burden this bar is supposed to avoid.
+	 *
+	 * The stored copy carries the last_changed marker it was built from.
+	 * WordPress bumps that whenever any term is created, renamed or deleted,
+	 * so the copy cannot go stale without this module hooking anything, and a
+	 * bulk import invalidates it just as reliably as an edit in the admin.
+	 */
+	$stored = get_option( $cache_key );
+
+	if ( is_array( $stored ) && isset( $stored['last_changed'], $stored['map'] ) && $stored['last_changed'] === $last_changed ) {
+		$map = is_array( $stored['map'] ) ? $stored['map'] : array();
+
+		wp_cache_set( $fast_key, $map, MAJESTIC_TUBE_TERM_CACHE_GROUP, MAJESTIC_TUBE_TERM_CACHE_TTL );
+
+		return $map;
+	}
+
+	$map = majestic_tube_build_term_letter_map( $taxonomy );
+
+	update_option( $cache_key, array( 'last_changed' => $last_changed, 'map' => $map ), false );
+
+	wp_cache_set( $fast_key, $map, MAJESTIC_TUBE_TERM_CACHE_GROUP, MAJESTIC_TUBE_TERM_CACHE_TTL );
+
+	return $map;
+}
+
+/**
+ * Read every term name in a taxonomy and bucket the terms by first letter.
+ *
+ * @param string $taxonomy Taxonomy name.
+ * @return array<string, int[]> Letter => term IDs, keys in alphabetical order.
+ */
+function majestic_tube_build_term_letter_map( $taxonomy ) {
+	$args = array(
+		'taxonomy' => $taxonomy,
+		// Must match what the listing will show, or the bar's counts lie.
+		'hide_empty' => majestic_tube_term_directory_hide_empty( $taxonomy ),
+		// Only the name is needed to bucket terms by letter, so this stays a
+		// cheap id=>name lookup rather than a full term object per row.
+		'fields'   => 'id=>name',
 	);
+
+	$terms = get_terms( $args );
+
+	/*
+	 * A directory that plainly lists terms but offers no letters is broken,
+	 * and by far the likeliest reason is that hide_empty filtered every one
+	 * of them out of this read. Retrying without it costs one extra query in
+	 * a case that should not happen at all, and it guarantees the bar can
+	 * never silently disagree with the listing sitting directly below it.
+	 */
+	if ( is_wp_error( $terms ) || ! $terms ) {
+		$args['hide_empty'] = false;
+		$retry               = get_terms( $args );
+		$terms               = is_wp_error( $retry ) ? array() : $retry;
+	}
 
 	$map = array();
 
-	if ( ! is_wp_error( $terms ) ) {
-		foreach ( $terms as $term ) {
-			$letter = majestic_tube_term_initial( $term->name );
-
-			if ( '' === $letter ) {
-				continue;
-			}
-
-			if ( ! isset( $map[ $letter ] ) ) {
-				$map[ $letter ] = array();
-			}
-
-			$map[ $letter ][] = (int) $term->term_id;
+	foreach ( (array) $terms as $term ) {
+		if ( ! isset( $term->name ) ) {
+			continue;
 		}
+
+		$letter = majestic_tube_term_initial( $term->name );
+
+		if ( '' === $letter ) {
+			continue;
+		}
+
+		if ( ! isset( $map[ $letter ] ) ) {
+			$map[ $letter ] = array();
+		}
+
+		$map[ $letter ][] = (int) $term->term_id;
 	}
 
 	ksort( $map );
-
-	wp_cache_set( $cache_key, $map, MAJESTIC_TUBE_TERM_CACHE_GROUP, MAJESTIC_TUBE_TERM_CACHE_TTL );
 
 	return $map;
 }
@@ -517,14 +565,16 @@ function majestic_tube_term_initial( $name ) {
  */
 function majestic_tube_term_letter_nav( $taxonomy ) {
 	$letters = majestic_tube_get_term_letters( $taxonomy );
-
-	// Nothing to navigate between on a directory with no terms at all.
-	if ( ! $letters ) {
-		return;
-	}
-
 	$current = majestic_tube_get_requested_letter();
 	$base    = majestic_tube_term_directory_base_url();
+
+	/*
+	 * This always prints. It used to return early when a taxonomy produced no
+	 * letters, which meant that on a site where the lookup came back empty
+	 * the directory silently lost its sort bar and there was nothing on the
+	 * page to say why. A lone "All" link is the honest answer to a directory
+	 * with nothing to file yet; a missing bar looks like a broken theme.
+	 */
 	?>
 	<nav class="term-letter-nav" aria-label="<?php esc_attr_e( 'Browse by letter', 'majestic-tube' ); ?>">
 		<ul>
