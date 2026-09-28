@@ -700,7 +700,7 @@
               <tr><td>Main thumbnail</td><td>Default card image</td><td>Use a clear 16:9 image when possible.</td></tr>
               <tr><td>Tracking URL</td><td>Destination for the tracking/download button</td><td>Enter the complete destination URL.</td></tr>
               <tr><td>HD video</td><td>Shows an HD badge on cards</td><td>Turn on only when the video should be presented as HD.</td></tr>
-              <tr><td>Advertising under the video player</td><td>Special content for this video only</td><td>Leave blank to use the general Below-player content area.</td></tr>
+              <tr><td>Advertising under the video player</td><td>Special content for this video only</td><td>Leave blank to use the general Below player: code and ads area.</td></tr>
             </tbody>
           </table>
         </div>
@@ -1016,10 +1016,10 @@
               <tr><td rowspan="3">Homepage &amp; Listings</td><td>Homepage</td><td>How the homepage sorts its videos, how many show per page and per row, and the homepage title and where it sits.</td></tr>
               <tr><td>Homepage on Mobile</td><td>Videos per page and per row on phones and tablets, and hiding the homepage widget areas on mobile.</td></tr>
               <tr><td>Category, Tag &amp; Actor Archives</td><td>Videos per page on those archives, and whether the category and tag description goes above or below the list.</td></tr>
-              <tr><td rowspan="3">Video Page</td><td>Video Page Layout</td><td>The video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the tracking button, the view, duration and rating displays, the Report video button, and related videos.</td></tr>
+              <tr><td rowspan="3">Video Page</td><td>Video Page Layout</td><td>The video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos.</td></tr>
               <tr><td>Player</td><td>Autoplay, the player engine, the quality selector, view counting, and the optional keyboard shortcuts, speed, resume and theater controls.</td></tr>
               <tr><td>Sharing</td><td>The share buttons printed under the player.</td></tr>
-              <tr><td rowspan="4">Site Design</td><td>Colours &amp; Typography</td><td>Light or dark skin, the header toggle, the accent colour, the custom background class, and the site font.</td></tr>
+              <tr><td rowspan="4">Site Design</td><td>Colours &amp; Typography</td><td>Light or dark skin, the header toggle, the accent colour, whether to ignore the site background image, and the site font.</td></tr>
               <tr><td>Logo</td><td>An image or text logo, its font, size, dimensions and spacing, a copy in the footer, and the favicon.</td></tr>
               <tr><td>Player Watermark</td><td>A logo overlaid on the player, with its size, colour treatment and corner.</td></tr>
               <tr><td>Thumbnails</td><td>Thumbnail aspect ratio, image fit, image quality, and the hover rotation on video cards.</td></tr>
@@ -1027,7 +1027,7 @@
               <tr><td>Accounts &amp; Spam Protection</td><td>Member login and registration, and the Cloudflare Turnstile spam check with its two keys.</td></tr>
               <tr><td>Video Submission</td><td>The submission form, the links that lead to it, and which fields are required.</td></tr>
               <tr><td>Advertising</td><td>In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from <span class="path">Appearance &rarr; Widgets</span>.</td></tr>
-              <tr><td rowspan="2">SEO &amp; Analytics</td><td>SEO &amp; Social</td><td>The Facebook app ID, the X/Twitter handle, the playable card URL, verification tags, and SEO footer text.</td></tr>
+              <tr><td rowspan="2">SEO &amp; Analytics</td><td>SEO &amp; Social</td><td>The Facebook app ID, the X/Twitter handle, the playable card URL, verification tags, and the homepage intro text.</td></tr>
               <tr><td>Custom Code</td><td>Analytics code in the page head, extra scripts before the closing body tag, and scripts for mobile visitors only.</td></tr>
             </tbody>
           </table>
@@ -1099,7 +1099,7 @@
         <p>Enable or disable the front-end submission form, its navigation links, and each required field. The duration and title are required by default.</p>
 
         <h3>Advertising</h3>
-        <p>This section directs you to <span class="path">Appearance → Widgets</span>, where header, player, below-player, video-sidebar, and footer content is managed. It also carries the advertising placements that the theme controls for you and that need no widget at all.</p>
+        <p>This section directs you to <span class="path">Appearance → Widgets</span>, where the header, player, below-player, video-sidebar and footer code and ads areas are managed. It also carries the advertising placements that the theme controls for you and that need no widget at all.</p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -1130,7 +1130,7 @@
           <li>Add an X/Twitter site handle.</li>
           <li>Add an optional Twitter player URL, which upgrades the video preview card to the playable player card.</li>
           <li>Paste search engine verification tags.</li>
-          <li>Add optional SEO footer text.</li>
+          <li>Add optional homepage intro text.</li>
         </ul>
         <p>Majestic Tube also supplies social preview information and video structured data on individual video pages. If a major SEO plugin is active, the theme normally avoids duplicating its social output.</p>
         <h4>Playable cards on X and Twitter</h4>
@@ -1173,21 +1173,23 @@
 
         <h3>Content Block widget</h3>
         <p>The <strong>Content Block</strong> widget is a general place for administrator-provided shortcodes and approved content markup. It can be targeted to all devices, desktop only, or mobile only.</p>
+        <p>Every area named <strong>code and ads</strong> accepts this widget and nothing else, so any ad tag, tracking snippet or raw embed goes in one of those. The single area named <strong>Footer widgets</strong> is the opposite: it accepts every standard widget, and that is where a link list, a friends-links block, a menu or a small logo belongs.</p>
 
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th scope="col">Content area</th>
+                <th scope="col">Area on the Widgets screen</th>
                 <th scope="col">Where it appears</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Header content</td><td>Below the site header.</td></tr>
-              <tr><td>Player content</td><td>Over the desktop video player where supported.</td></tr>
-              <tr><td>Below-player content</td><td>Below the individual video player unless the video has its own content.</td></tr>
-              <tr><td>Video sidebar</td><td>Beside an individual video when the sidebar setting is enabled and the area contains content.</td></tr>
-              <tr><td>Footer content</td><td>At the top of the site footer.</td></tr>
+              <tr><td>Header: code and ads</td><td>Below the site header. Content Block widgets only.</td></tr>
+              <tr><td>Player: code and ads</td><td>Over the desktop video player where supported. Content Block widgets only.</td></tr>
+              <tr><td>Below player: code and ads</td><td>Below the individual video player unless the video has its own content. Content Block widgets only.</td></tr>
+              <tr><td>Video sidebar: code and ads</td><td>Beside an individual video when the sidebar setting is enabled. Content Block widgets only.</td></tr>
+              <tr><td>Footer: code and ads</td><td>At the very top of the site footer, above the footer widgets. Content Block widgets only.</td></tr>
+              <tr><td>Footer widgets</td><td>The column area at the bottom of the footer. Accepts every standard widget, so menus, link lists, friends links, text and images all go here.</td></tr>
             </tbody>
           </table>
         </div>
@@ -1409,7 +1411,7 @@
           <div>
             <ul>
               <li>Confirm <span class="setting">Show the video sidebar</span> is On.</li>
-              <li>Open <span class="path">Appearance → Widgets → Video sidebar</span>.</li>
+              <li>Open <span class="path">Appearance → Widgets → Video sidebar: code and ads</span>.</li>
               <li>Add at least one widget and save.</li>
               <li>Remember that the sidebar belongs to individual video pages, not the homepage or normal archives.</li>
             </ul>
@@ -1453,7 +1455,7 @@
         <p>Yes. Each display option is in the main Majestic Tube Customizer section.</p>
 
         <h3>Can I show content below every video player?</h3>
-        <p>Yes. Add a <strong>Content Block</strong> widget to <strong>Below-player content</strong>. A video-specific value entered in the editor takes priority for that individual video.</p>
+        <p>Yes. Add a <strong>Content Block</strong> widget to <strong>Below player: code and ads</strong>. A video-specific value entered in the editor takes priority for that individual video.</p>
 
         <h3>Can I target content to desktop or mobile?</h3>
         <p>Yes. Each Content Block widget can display on all devices, desktop only, or mobile only.</p>

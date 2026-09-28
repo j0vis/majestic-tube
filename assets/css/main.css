@@ -980,6 +980,19 @@ ol {
 	font-size: 0.78rem;
 }
 
+/*
+ * The video count on a category or actor directory card. It belongs to the
+ * meta row under the title, not on the thumbnail, so it must never pick up the
+ * absolute positioning that the thumbnail's view, duration and rating badges
+ * use. A `.video-card-views` here is what pushed it out of the card.
+ */
+.term-card-count {
+	position: static;
+	color: inherit;
+	font-size: inherit;
+	font-weight: inherit;
+}
+
 /* Pagination ------------------------------------------------------------ */
 
 .pagination {

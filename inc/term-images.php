@@ -91,7 +91,15 @@ function majestic_tube_render_term_card( $term, $taxonomy ) {
 			</h3>
 		</header>
 		<footer class="video-card-meta">
-			<span class="video-card-views">
+			<?php /*
+			 * Deliberately not `video-card-views`. That class is a badge
+			 * absolutely positioned over the card's thumbnail, and this count
+			 * sits in the meta row underneath the title in normal flow. With
+			 * the badge class it was torn out of the card and positioned
+			 * against a distant ancestor, so it painted along the left edge of
+			 * the page and only showed once hovering a card lifted it clear.
+			 */ ?>
+			<span class="term-card-count">
 				<?php
 				printf(
 					/* translators: %s: video count. */

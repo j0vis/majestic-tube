@@ -43,8 +43,23 @@ get_header();
 
 		<?php if ( have_posts() ) : ?>
 
-			<div class="post-list">
-				<?php majestic_tube_render_post_grid( 'excerpt' ); ?>
+			<?php
+			/*
+			 * The standard video grid, exactly as index.php, the video branch
+			 * of search.php and taxonomy-actors.php render it.
+			 *
+			 * This template used to ask for the excerpt part inside a
+			 * .post-list instead, which is a one-across column of full-width
+			 * images with the excerpt underneath. Every archive a video site
+			 * serves - category, tag, actor, author, date - is videos, so that
+			 * layout only ever produced an overblown single column on top of
+			 * losing the card's duration, rating and duration badges. The
+			 * excerpt part is still what search.php uses for page results,
+			 * which is the one listing that genuinely has no thumbnail.
+			 */
+			?>
+			<div class="video-grid">
+				<?php majestic_tube_render_post_grid(); ?>
 			</div>
 
 			<?php if ( $description && $desc_below ) : ?>

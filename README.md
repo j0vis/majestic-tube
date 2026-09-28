@@ -182,7 +182,7 @@ Use one of the following playback methods:
 | Main thumbnail | Default card image | Use a clear 16:9 image when possible. |
 | Tracking URL | Destination for the tracking/download button | Enter the complete destination URL. |
 | HD video | Shows an HD badge on cards | Turn on only when the video should be presented as HD. |
-| Advertising under the video player | Special content for this video only | Leave blank to use the general Below-player content area. |
+| Advertising under the video player | Special content for this video only | Leave blank to use the general Below player: code and ads area. |
 
 ### Recommended publishing workflow
 
@@ -485,10 +485,10 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 | Homepage & Listings | Homepage | How the homepage sorts its videos, how many show per page and per row, and the homepage title and where it sits. |
 | Homepage & Listings | Homepage on Mobile | Videos per page and per row on phones and tablets, and hiding the homepage widget areas on mobile. |
 | Homepage & Listings | Category, Tag & Actor Archives | Videos per page on those archives, and whether the category and tag description goes above or below the list. |
-| Video Page | Video Page Layout | The video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the tracking button, the view, duration and rating displays, the Report video button, and related videos. |
+| Video Page | Video Page Layout | The video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos. |
 | Video Page | Player | Autoplay, the player engine, the quality selector, view counting, and the optional keyboard shortcuts, speed, resume and theater controls. |
 | Video Page | Sharing | The share buttons printed under the player. |
-| Site Design | Colours & Typography | Light or dark skin, the header toggle, the accent colour, the custom background class, and the site font. |
+| Site Design | Colours & Typography | Light or dark skin, the header toggle, the accent colour, whether to ignore the site background image, and the site font. |
 | Site Design | Logo | An image or text logo, its font, size, dimensions and spacing, a copy in the footer, and the favicon. |
 | Site Design | Player Watermark | A logo overlaid on the player, with its size, colour treatment and corner. |
 | Site Design | Thumbnails | Thumbnail aspect ratio, image fit, image quality, and the hover rotation on video cards. |
@@ -496,7 +496,7 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 | Site Features | Accounts & Spam Protection | Member login and registration, and the Cloudflare Turnstile spam check with its two keys. |
 | Site Features | Video Submission | The submission form, the links that lead to it, and which fields are required. |
 | Advertising | Advertising | In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from `Appearance → Widgets`. |
-| SEO & Analytics | SEO & Social | The Facebook app ID, the X/Twitter handle, the playable card URL, verification tags, and SEO footer text. |
+| SEO & Analytics | SEO & Social | The Facebook app ID, the X/Twitter handle, the playable card URL, verification tags, and the homepage intro text. |
 | SEO & Analytics | Custom Code | Analytics code in the page head, extra scripts before the closing body tag, and scripts for mobile visitors only. |
 
 #### Homepage sort options
@@ -595,7 +595,7 @@ Advertising is unchanged by default. Turning on `Only load advertising after con
 - Add an X/Twitter site handle.
 - Add an optional Twitter player URL, which upgrades the video preview card to the playable player card.
 - Paste search engine verification tags.
-- Add optional SEO footer text.
+- Add optional homepage intro text.
 
 Majestic Tube also supplies social preview information and video structured data on individual video pages. If a major SEO plugin is active, the theme normally avoids duplicating its social output.
 
@@ -642,13 +642,16 @@ Available sorting choices are Latest, Most viewed, and Random.
 
 The **Content Block** widget is a general place for administrator-provided shortcodes and approved content markup. It can be targeted to all devices, desktop only, or mobile only.
 
-| Content area | Where it appears |
+Every area named **code and ads** accepts this widget and nothing else, so any ad tag, tracking snippet or raw embed goes in one of those. The single area named **Footer widgets** is the opposite: it accepts every standard widget, and that is where a link list, a friends-links block, a menu or a small logo belongs.
+
+| Area on the Widgets screen | Where it appears |
 | --- | --- |
-| Header content | Below the site header. |
-| Player content | Over the desktop video player where supported. |
-| Below-player content | Below the individual video player unless the video has its own content. |
-| Video sidebar | Beside an individual video when the sidebar setting is enabled and the area contains content. |
-| Footer content | At the top of the site footer. |
+| Header: code and ads | Below the site header. Content Block widgets only. |
+| Player: code and ads | Over the desktop video player where supported. Content Block widgets only. |
+| Below player: code and ads | Below the individual video player unless the video has its own content. Content Block widgets only. |
+| Video sidebar: code and ads | Beside an individual video when the sidebar setting is enabled. Content Block widgets only. |
+| Footer: code and ads | At the very top of the site footer, above the footer widgets. Content Block widgets only. |
+| Footer widgets | The column area at the bottom of the footer. Accepts every standard widget, so menus, link lists, friends links, text and images all go here. |
 
 > **Important**
 >
@@ -805,7 +808,7 @@ Front-end submissions are intentionally moderated. Open `Videos`, select the pen
 #### The single-video sidebar is not visible
 
 - Confirm `Show the video sidebar` is On.
-- Open `Appearance → Widgets → Video sidebar`.
+- Open `Appearance → Widgets → Video sidebar: code and ads`.
 - Add at least one widget and save.
 - Remember that the sidebar belongs to individual video pages, not the homepage or normal archives.
 
@@ -851,7 +854,7 @@ Yes. Each display option is in the main Majestic Tube Customizer section.
 
 ### Can I show content below every video player?
 
-Yes. Add a **Content Block** widget to **Below-player content**. A video-specific value entered in the editor takes priority for that individual video.
+Yes. Add a **Content Block** widget to **Below player: code and ads**. A video-specific value entered in the editor takes priority for that individual video.
 
 ### Can I target content to desktop or mobile?
 

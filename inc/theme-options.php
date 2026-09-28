@@ -422,14 +422,15 @@ function majestic_tube_options_map() {
 			'setting' => 'majestic_tube_display_tracking_button',
 			'default' => 'on',
 			'type'    => 'onoff',
-			'label'   => __( 'Display the tracking button', 'majestic-tube' ),
+			'label'   => __( 'Show the outbound video button', 'majestic-tube' ),
 			'section' => $single,
+			'description' => __( 'An optional call-to-action button under the player that sends the visitor off this site - to a partner, a network, or your own download page. It only appears when there is a link to send them to, and the three settings below control that button.', 'majestic-tube' ),
 		),
 		'tracking-button-icon'     => array(
 			'setting' => 'majestic_tube_tracking_button_icon',
 			'default' => 'download',
 			'type'    => 'select',
-			'label'   => __( 'Tracking button icon', 'majestic-tube' ),
+			'label'   => __( 'Outbound button icon', 'majestic-tube' ),
 			'section' => $single,
 			'choices' => array(
 				'download'    => __( 'Download', 'majestic-tube' ),
@@ -443,15 +444,17 @@ function majestic_tube_options_map() {
 			'setting' => 'majestic_tube_tracking_button_link',
 			'default' => '',
 			'type'    => 'url',
-			'label'   => __( 'Tracking button link', 'majestic-tube' ),
+			'label'   => __( 'Outbound button link', 'majestic-tube' ),
 			'section' => $single,
+			'description' => __( 'Where the button sends the visitor. Leave it blank to use each video&rsquo;s own tracking link, and the button then appears only on videos that have one.', 'majestic-tube' ),
 		),
 		'tracking-button-text'     => array(
 			'setting' => 'majestic_tube_tracking_button_text',
 			'default' => 'Download complete video now!',
 			'type'    => 'text',
-			'label'   => __( 'Tracking button text', 'majestic-tube' ),
+			'label'   => __( 'Outbound button text', 'majestic-tube' ),
 			'section' => $single,
+			'description' => __( 'The words on the button. Leave it blank for &ldquo;Watch the full video&rdquo;.', 'majestic-tube' ),
 		),
 		'enable-views-system'      => array(
 			'setting' => 'majestic_tube_enable_views_system',
@@ -679,15 +682,17 @@ function majestic_tube_options_map() {
 			'setting' => 'majestic_tube_main_color',
 			'default' => '#0f8a99',
 			'type'    => 'color',
-			'label'   => __( 'Main colour', 'majestic-tube' ),
+			'label'   => __( 'Accent colour', 'majestic-tube' ),
 			'section' => $colours,
+			'description' => __( 'The highlight colour: buttons, links, the active menu item, and the play badge over a thumbnail.', 'majestic-tube' ),
 		),
 		'custom-background'        => array(
 			'setting' => 'majestic_tube_custom_background',
 			'default' => 'off',
 			'type'    => 'onoff',
-			'label'   => __( 'Enable the custom background class', 'majestic-tube' ),
+			'label'   => __( 'Ignore the site background image', 'majestic-tube' ),
 			'section' => $colours,
+			'description' => __( 'Turn this on to drop any background image set under Appearance &rarr; Customize &rarr; Background. The theme then paints its own flat background colour instead. Leave it off to let that image show through.', 'majestic-tube' ),
 		),
 		'site-font-family'         => array(
 			'setting'     => 'majestic_tube_site_font_family',
@@ -823,8 +828,9 @@ function majestic_tube_options_map() {
 			'setting' => 'majestic_tube_favicon',
 			'default' => '',
 			'type'    => 'file',
-			'label'   => __( 'Favicon URL', 'majestic-tube' ),
+			'label'   => __( 'Browser tab icon (favicon)', 'majestic-tube' ),
 			'section' => $logo,
+			'description' => __( 'The small picture visitors see on the browser tab. Leave it blank to keep the icon set under Appearance &rarr; Customize &rarr; Site Identity &rarr; Site Icon.', 'majestic-tube' ),
 		),
 		/* ------------------------------------------------------------------
 		 * Site design - logo overlaid on the player
@@ -899,6 +905,7 @@ function majestic_tube_options_map() {
 			'type'    => 'select',
 			'label'   => __( 'Thumbnails fit', 'majestic-tube' ),
 			'section' => $thumbnails,
+			'description' => __( 'How an image that does not match the chosen aspect ratio is handled. Cover fills the box and crops the overflow, Contain fits the whole image and leaves bars, Fill stretches the image to the box.', 'majestic-tube' ),
 			'choices' => array(
 				'cover'   => __( 'Cover', 'majestic-tube' ),
 				'contain' => __( 'Contain', 'majestic-tube' ),
@@ -938,8 +945,9 @@ function majestic_tube_options_map() {
 			'setting' => 'majestic_tube_footer_columns',
 			'default' => 'four-columns-footer',
 			'type'    => 'select',
-			'label'   => __( 'Footer columns', 'majestic-tube' ),
+			'label'   => __( 'Footer widget columns', 'majestic-tube' ),
 			'section' => $chrome,
+			'description' => __( 'How the Footer widgets area is arranged. It does not affect the Footer: code and ads area, which is always full width.', 'majestic-tube' ),
 			'choices' => array(
 				'one-column-footer'   => __( 'One column', 'majestic-tube' ),
 				'two-columns-footer'  => __( 'Two columns', 'majestic-tube' ),
@@ -1154,7 +1162,7 @@ function majestic_tube_options_map() {
 			'type'        => 'onoff',
 			'label'       => __( 'Only load advertising after consent', 'majestic-tube' ),
 			'section' => $advertising,
-			'description' => __( 'Requires a consent solution that sets the majestic_tube_ads_allowed filter (a cookie banner plugin or a small snippet). While no consent is recorded, every ad placement prints nothing.', 'majestic-tube' ),
+			'description' => __( 'Hold every ad back until the visitor has agreed to cookies. This needs a consent banner that reports the visitor&rsquo;s choice back to the theme - a cookie banner plugin, or a short snippet of your own. Until consent is recorded, no ad placement prints anything at all.', 'majestic-tube' ),
 		),
 		'header-ad-desktop'        => array(
 			'setting' => 'majestic_tube_ad_header_desktop',
@@ -1298,8 +1306,9 @@ function majestic_tube_options_map() {
 			'setting' => 'majestic_tube_seo_footer_text',
 			'default' => '',
 			'type'    => 'textarea',
-			'label'   => __( 'SEO footer text', 'majestic-tube' ),
+			'label'   => __( 'Homepage intro text', 'majestic-tube' ),
 			'section' => $seo,
+			'description' => __( 'A short paragraph printed directly under the homepage title. Despite the name this option comes from, it appears on the front page and not in the footer. Search engines often use it as the site description, so one or two sentences works best.', 'majestic-tube' ),
 		),
 		/* ------------------------------------------------------------------
 		 * Custom code

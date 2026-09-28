@@ -22,31 +22,40 @@ defined( 'ABSPATH' ) || exit;
  * @return array<string, array<string, string>>
  */
 function majestic_tube_content_widget_areas() {
+	/*
+	 * Every area in this list is a Content Block area: it takes the theme's
+	 * own Content Block widget and nothing else, because that widget is the
+	 * only thing here that can print administrator-provided markup. Each name
+	 * therefore says what belongs in it, and every one says "code and ads"
+	 * because that is the decision an administrator is actually making. A
+	 * plain "Footer content" name next to the plain "Footer" widget area gave
+	 * no clue which of the two took a link list and which took an ad tag.
+	 */
 	return array(
 		'header'        => array(
 			'id'          => 'majestic-tube-header-content',
-			'name'        => esc_html__( 'Header content', 'majestic-tube' ),
-			'description' => esc_html__( 'Content displayed below the site header.', 'majestic-tube' ),
+			'name'        => esc_html__( 'Header: code and ads', 'majestic-tube' ),
+			'description' => esc_html__( 'Code and ads shown directly below the site header. Takes Content Block widgets only.', 'majestic-tube' ),
 		),
 		'player'        => array(
 			'id'          => 'majestic-tube-player-content',
-			'name'        => esc_html__( 'Player content', 'majestic-tube' ),
-			'description' => esc_html__( 'Content displayed over a desktop video player.', 'majestic-tube' ),
+			'name'        => esc_html__( 'Player: code and ads', 'majestic-tube' ),
+			'description' => esc_html__( 'Code and ads shown over the desktop video player. Takes Content Block widgets only.', 'majestic-tube' ),
 		),
 		'under-player'  => array(
 			'id'          => 'majestic-tube-below-player',
-			'name'        => esc_html__( 'Below-player content', 'majestic-tube' ),
-			'description' => esc_html__( 'Content displayed below a video player.', 'majestic-tube' ),
+			'name'        => esc_html__( 'Below player: code and ads', 'majestic-tube' ),
+			'description' => esc_html__( 'Code and ads shown directly below the video player. Takes Content Block widgets only.', 'majestic-tube' ),
 		),
 		'video-sidebar' => array(
 			'id'          => 'majestic-tube-video-sidebar',
-			'name'        => esc_html__( 'Video sidebar', 'majestic-tube' ),
-			'description' => esc_html__( 'Content displayed beside individual video pages.', 'majestic-tube' ),
+			'name'        => esc_html__( 'Video sidebar: code and ads', 'majestic-tube' ),
+			'description' => esc_html__( 'Code and ads shown beside a video page when the video sidebar is switched on. Takes Content Block widgets only.', 'majestic-tube' ),
 		),
 		'footer'        => array(
 			'id'          => 'majestic-tube-footer-content',
-			'name'        => esc_html__( 'Footer content', 'majestic-tube' ),
-			'description' => esc_html__( 'Content displayed at the top of the site footer.', 'majestic-tube' ),
+			'name'        => esc_html__( 'Footer: code and ads', 'majestic-tube' ),
+			'description' => esc_html__( 'Code and ads shown at the very top of the site footer, above the footer widgets. Takes Content Block widgets only.', 'majestic-tube' ),
 		),
 	);
 }
@@ -185,27 +194,13 @@ function majestic_tube_widget_area_content( $area_id ) {
 }
 
 /**
- * Register the ordinary footer area and all theme content areas.
+ * Register the theme content areas and the ordinary footer widget area.
+ *
+ * The content areas register first so the Widgets screen lists every box in
+ * the order the page prints it, which also leaves the two footer boxes side
+ * by side instead of at opposite ends of the screen.
  */
 function majestic_tube_widgets_init() {
-	$shared = array(
-		'before_widget' => '<section id="%1$s" class="widget %2$s">',
-		'after_widget'  => '</section>',
-		'before_title'  => '<h2 class="widget-title">',
-		'after_title'   => '</h2>',
-	);
-
-	register_sidebar(
-		array_merge(
-			$shared,
-			array(
-				'name'        => esc_html__( 'Footer', 'majestic-tube' ),
-				'id'          => 'majestic-tube-footer',
-				'description' => esc_html__( 'Display widgets in your footer.', 'majestic-tube' ),
-			)
-		)
-	);
-
 	$content_before_widget = '<section id="%1$s" class="widget majestic-tube-content-widget %2$s">';
 
 	foreach ( majestic_tube_content_widget_areas() as $area ) {
@@ -221,6 +216,19 @@ function majestic_tube_widgets_init() {
 			)
 		);
 	}
+
+	// The one area that accepts every standard widget, not just Content Blocks.
+	register_sidebar(
+		array(
+			'name'          => esc_html__( 'Footer widgets', 'majestic-tube' ),
+			'id'            => 'majestic-tube-footer',
+			'description'   => esc_html__( 'Any standard widget: menus, link lists, friends links, text and images. Arranged in columns below the footer code and ads area.', 'majestic-tube' ),
+			'before_widget' => '<section id="%1$s" class="widget %2$s">',
+			'after_widget'  => '</section>',
+			'before_title'  => '<h2 class="widget-title">',
+			'after_title'   => '</h2>',
+		)
+	);
 
 	register_widget( 'Majestic_Tube_Content_Widget' );
 }
