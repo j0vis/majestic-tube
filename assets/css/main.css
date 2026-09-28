@@ -6,7 +6,7 @@
  * skin.
  *
  * @package Majestic Tube
- * @version 2.1.7
+ * @version 2.2.0
  */
 
 /*
@@ -1923,6 +1923,27 @@ ol {
 .majestic-tube-profile-form .form-field,
 .majestic-tube-user-modal .form-field {
 	margin-bottom: 14px;
+}
+
+/*
+ * Spam-protection widget. The provider draws the iframe, so nothing here
+ * styles the challenge itself - only the space it sits in, so it lines up
+ * with the labelled fields above and below it.
+ */
+.majestic-tube-captcha {
+	margin-bottom: 14px;
+	max-width: 100%;
+}
+
+/*
+ * Turnstile's own responsive recipe: scale the 300px widget down on a narrow
+ * phone rather than letting it overflow the form.
+ */
+@media (max-width: 400px) {
+	.majestic-tube-captcha {
+		transform: scale(0.9);
+		transform-origin: left top;
+	}
 }
 
 .video-submit-form label,

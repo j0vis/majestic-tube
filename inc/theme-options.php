@@ -1,35 +1,138 @@
 <?php
 /**
- * Theme options - native Customizer settings with legacy wpst-options migration.
+ * Theme options - native Customizer settings with wpst-options migration.
  *
- * Every legacy option key remains mapped and readable by Majestic Tube itself.
+ * Every option key stays mapped and readable by Majestic Tube itself.
  * Content-placement keys are retained for migration but are intentionally not
  * exposed as Customizer fields; their values are managed by widgets instead.
  * The theme does not define, require, or emulate any external settings framework.
  *
+ * The Customizer is organised by the template each setting affects, so an
+ * editor finds homepage settings in one panel and single-video-page settings
+ * in another. See majestic_tube_option_sections() for the full structure.
+ *
  * @package Majestic Tube
- * @version 2.0.0
+ * @version 2.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
 
 /**
- * Customizer sections used by the option map.
+ * Customizer panels, and the sections inside each one, in display order.
  *
- * @return array<string, string>
+ * The first two panels are the ones an editor visits most, so they are split
+ * by the template they affect: the homepage and the listing archives on one
+ * side, the single video page on the other. A setting is filed under the
+ * template that reads it, which is why the video sidebar sits in "Video Page"
+ * while the grid density sits in "Homepage".
+ *
+ * Each entry is: section key, section title, panel key, panel title.
+ *
+ * @return array<string, array{title: string, panel: string, panel_title: string, description?: string}>
  */
 function majestic_tube_option_sections() {
 	return array(
-		'general'      => __( 'Majestic Tube Options', 'majestic-tube' ),
-		'player'       => __( 'Majestic Tube - Video Player', 'majestic-tube' ),
-		'branding'     => __( 'Majestic Tube - Logo &amp; Colours', 'majestic-tube' ),
-		'social'       => __( 'Majestic Tube - Sharing &amp; Social', 'majestic-tube' ),
-		'submission'   => __( 'Majestic Tube - Video Submission', 'majestic-tube' ),
-		'advertising'  => __( 'Majestic Tube - Content areas', 'majestic-tube' ),
-		'seo'          => __( 'Majestic Tube - SEO &amp; Social', 'majestic-tube' ),
-		'scripts'      => __( 'Majestic Tube - Custom Code', 'majestic-tube' ),
-		'mobile'       => __( 'Majestic Tube - Mobile', 'majestic-tube' ),
+		'home'         => array(
+			'title'       => __( 'Homepage', 'majestic-tube' ),
+			'panel'       => 'listings',
+			'panel_title' => __( 'Homepage &amp; Listings', 'majestic-tube' ),
+			'description' => __( 'Controls the video grid on the site&rsquo;s front page.', 'majestic-tube' ),
+		),
+		'home_mobile'  => array(
+			'title'       => __( 'Homepage on Mobile', 'majestic-tube' ),
+			'panel'       => 'listings',
+			'panel_title' => __( 'Homepage &amp; Listings', 'majestic-tube' ),
+		),
+		'archives'     => array(
+			'title'       => __( 'Category, Tag &amp; Actor Archives', 'majestic-tube' ),
+			'panel'       => 'listings',
+			'panel_title' => __( 'Homepage &amp; Listings', 'majestic-tube' ),
+		),
+		'single'       => array(
+			'title'       => __( 'Video Page Layout', 'majestic-tube' ),
+			'panel'       => 'video',
+			'panel_title' => __( 'Video Page', 'majestic-tube' ),
+			'description' => __( 'Controls what a single video page shows around the player.', 'majestic-tube' ),
+		),
+		'player'       => array(
+			'title'       => __( 'Player', 'majestic-tube' ),
+			'panel'       => 'video',
+			'panel_title' => __( 'Video Page', 'majestic-tube' ),
+		),
+		'social'       => array(
+			'title'       => __( 'Sharing', 'majestic-tube' ),
+			'panel'       => 'video',
+			'panel_title' => __( 'Video Page', 'majestic-tube' ),
+		),
+		'colours'      => array(
+			'title'       => __( 'Colours &amp; Typography', 'majestic-tube' ),
+			'panel'       => 'design',
+			'panel_title' => __( 'Site Design', 'majestic-tube' ),
+		),
+		'logo'         => array(
+			'title'       => __( 'Logo', 'majestic-tube' ),
+			'panel'       => 'design',
+			'panel_title' => __( 'Site Design', 'majestic-tube' ),
+		),
+		'watermark'    => array(
+			'title'       => __( 'Player Watermark', 'majestic-tube' ),
+			'panel'       => 'design',
+			'panel_title' => __( 'Site Design', 'majestic-tube' ),
+		),
+		'thumbnails'   => array(
+			'title'       => __( 'Thumbnails', 'majestic-tube' ),
+			'panel'       => 'design',
+			'panel_title' => __( 'Site Design', 'majestic-tube' ),
+		),
+		'chrome'       => array(
+			'title'       => __( 'Header, Footer &amp; Search', 'majestic-tube' ),
+			'panel'       => 'features',
+			'panel_title' => __( 'Site Features', 'majestic-tube' ),
+		),
+		'members'      => array(
+			'title'       => __( 'Accounts &amp; Spam Protection', 'majestic-tube' ),
+			'panel'       => 'features',
+			'panel_title' => __( 'Site Features', 'majestic-tube' ),
+		),
+		'submission'   => array(
+			'title'       => __( 'Video Submission', 'majestic-tube' ),
+			'panel'       => 'features',
+			'panel_title' => __( 'Site Features', 'majestic-tube' ),
+		),
+		'advertising'  => array(
+			'title'       => __( 'Advertising', 'majestic-tube' ),
+			'panel'       => 'ads',
+			'panel_title' => __( 'Advertising', 'majestic-tube' ),
+			'description' => __( 'The ad slots this theme prints itself are switched on here. The remaining page areas are managed from Appearance &rarr; Widgets.', 'majestic-tube' ),
+		),
+		'seo'          => array(
+			'title'       => __( 'SEO &amp; Social', 'majestic-tube' ),
+			'panel'       => 'seo',
+			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
+		),
+		'code'         => array(
+			'title'       => __( 'Custom Code', 'majestic-tube' ),
+			'panel'       => 'seo',
+			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
+		),
 	);
+}
+
+/**
+ * Panels in display order, derived from the section list.
+ *
+ * @return array<string, string>
+ */
+function majestic_tube_option_panels() {
+	$panels = array();
+
+	foreach ( majestic_tube_option_sections() as $section ) {
+		if ( ! isset( $panels[ $section['panel'] ] ) ) {
+			$panels[ $section['panel'] ] = $section['panel_title'];
+		}
+	}
+
+	return $panels;
 }
 
 /**
@@ -60,9 +163,9 @@ function majestic_tube_flush_options_map() {
 /**
  * Original option key => Customizer setting + default.
  *
- * Key names, defaults and stored value strings remain compatible with the
- * legacy wpst-options row so existing sites keep their settings after switching
- * themes. Runtime reads always go through majestic_tube_get_option().
+ * Key names, defaults and stored value strings stay compatible with the
+ * wpst-options row, so a site that installed the theme earlier keeps its
+ * settings. Runtime reads always go through majestic_tube_get_option().
  *
  * The array is built once per request and kept in a global. It is a pure
  * function of the translated strings, and every option read goes through here,
@@ -80,25 +183,36 @@ function majestic_tube_options_map() {
 		return $GLOBALS['majestic_tube_options_map_cache'];
 	}
 
-	$general    = 'general';
-	$player     = 'player';
-	$branding   = 'branding';
-	$social     = 'social';
-	$submission = 'submission';
-	$advertising = 'advertising';
-	$seo        = 'seo';
-	$scripts    = 'scripts';
-	$mobile     = 'mobile';
+	// Section keys, in the same order as majestic_tube_option_sections(). The
+	// map is grouped to match, so the file reads top to bottom in the same
+	// order an editor sees in the Customizer.
+	$home         = 'home';
+	$home_mobile  = 'home_mobile';
+	$archives     = 'archives';
+	$single       = 'single';
+	$player       = 'player';
+	$social       = 'social';
+	$colours      = 'colours';
+	$logo         = 'logo';
+	$watermark    = 'watermark';
+	$thumbnails   = 'thumbnails';
+	$chrome       = 'chrome';
+	$members      = 'members';
+	$submission   = 'submission';
+	$advertising  = 'advertising';
+	$seo          = 'seo';
+	$code         = 'code';
 
 	$map_value = array(
-		/* ---------------------------------------------------------------
-		 * Listing / homepage
-		 * ------------------------------------------------------------- */
+		/* ------------------------------------------------------------------
+		 * Homepage - the video grid on the site front page (index.php)
+		 * ------------------------------------------------------------------ */
 		'show-videos-homepage'     => array(
 			'setting' => 'majestic_tube_default_filter',
 			'default' => 'latest',
 			'type'    => 'select',
 			'label'   => __( 'Videos displayed on homepage', 'majestic-tube' ),
+			'section' => $home,
 			'choices' => array(
 				'latest'      => __( 'Latest', 'majestic-tube' ),
 				'most-viewed' => __( 'Most viewed', 'majestic-tube' ),
@@ -112,18 +226,7 @@ function majestic_tube_options_map() {
 			'default'     => 30,
 			'type'        => 'number',
 			'label'       => __( 'Videos per page', 'majestic-tube' ),
-			'input_attrs' => array(
-				'min'  => 1,
-				'max'  => 100,
-				'step' => 1,
-			),
-		),
-		'videos-per-page-mobile'   => array(
-			'setting'     => 'majestic_tube_videos_per_page_mobile',
-			'default'     => 20,
-			'type'        => 'number',
-			'label'       => __( 'Videos per page (mobile)', 'majestic-tube' ),
-			'section'     => $mobile,
+			'section' => $home,
 			'input_attrs' => array(
 				'min'  => 1,
 				'max'  => 100,
@@ -135,20 +238,43 @@ function majestic_tube_options_map() {
 			'default'     => 5,
 			'type'        => 'number',
 			'label'       => __( 'Videos per row', 'majestic-tube' ),
+			'section' => $home,
 			'input_attrs' => array(
 				'min'  => 1,
 				'max'  => 8,
 				'step' => 1,
 			),
 		),
-		'categories-per-row'       => array(
-			'setting'     => 'majestic_tube_categories_per_row',
-			'default'     => 5,
+		'homepage-title'           => array(
+			'setting' => 'majestic_tube_homepage_title',
+			'default' => '',
+			'type'    => 'text',
+			'label'   => __( 'Homepage title', 'majestic-tube' ),
+			'section' => $home,
+		),
+		'homepage-title-desc-position' => array(
+			'setting' => 'majestic_tube_homepage_title_desc_position',
+			'default' => 'bottom',
+			'type'    => 'select',
+			'label'   => __( 'Homepage title position', 'majestic-tube' ),
+			'section' => $home,
+			'choices' => array(
+				'top'    => __( 'Above the grid', 'majestic-tube' ),
+				'bottom' => __( 'Below the grid', 'majestic-tube' ),
+			),
+		),
+		/* ------------------------------------------------------------------
+		 * Homepage on mobile visitors
+		 * ------------------------------------------------------------------ */
+		'videos-per-page-mobile'   => array(
+			'setting'     => 'majestic_tube_videos_per_page_mobile',
+			'default'     => 20,
 			'type'        => 'number',
-			'label'       => __( 'Categories per row', 'majestic-tube' ),
+			'label'       => __( 'Videos per page (mobile)', 'majestic-tube' ),
+			'section' => $home_mobile,
 			'input_attrs' => array(
 				'min'  => 1,
-				'max'  => 8,
+				'max'  => 100,
 				'step' => 1,
 			),
 		),
@@ -157,7 +283,7 @@ function majestic_tube_options_map() {
 			'default'     => 2,
 			'type'        => 'number',
 			'label'       => __( 'Videos per row (mobile)', 'majestic-tube' ),
-			'section'     => $mobile,
+			'section' => $home_mobile,
 			'input_attrs' => array(
 				'min'  => 1,
 				'max'  => 4,
@@ -169,143 +295,142 @@ function majestic_tube_options_map() {
 			'default' => 'off',
 			'type'    => 'onoff',
 			'label'   => __( 'Hide homepage widgets on mobile', 'majestic-tube' ),
-			'section' => $mobile,
+			'section' => $home_mobile,
 		),
+		/* ------------------------------------------------------------------
+		 * Listing archives - category, tag and actor pages
+		 * ------------------------------------------------------------------ */
+		'categories-per-row'       => array(
+			'setting'     => 'majestic_tube_categories_per_row',
+			'default'     => 5,
+			'type'        => 'number',
+			'label'       => __( 'Categories per row', 'majestic-tube' ),
+			'section' => $archives,
+			'input_attrs' => array(
+				'min'  => 1,
+				'max'  => 8,
+				'step' => 1,
+			),
+		),
+		'categories-per-page'      => array(
+			'setting'     => 'majestic_tube_categories_per_page',
+			'default'     => 20,
+			'type'        => 'number',
+			'label'       => __( 'Categories per page', 'majestic-tube' ),
+			'section' => $archives,
+			'input_attrs' => array(
+				'min'  => 1,
+				'max'  => 100,
+				'step' => 1,
+			),
+		),
+		'cat-desc-position'        => array(
+			'setting' => 'majestic_tube_cat_desc_position',
+			'default' => 'top',
+			'type'    => 'select',
+			'label'   => __( 'Category description position', 'majestic-tube' ),
+			'section' => $archives,
+			'choices' => array(
+				'top'    => __( 'Top', 'majestic-tube' ),
+				'bottom' => __( 'Bottom', 'majestic-tube' ),
+			),
+		),
+		'tag-desc-position'        => array(
+			'setting' => 'majestic_tube_tag_desc_position',
+			'default' => 'top',
+			'type'    => 'select',
+			'label'   => __( 'Tag description position', 'majestic-tube' ),
+			'section' => $archives,
+			'choices' => array(
+				'top'    => __( 'Top', 'majestic-tube' ),
+				'bottom' => __( 'Bottom', 'majestic-tube' ),
+			),
+		),
+		'actors-per-page'          => array(
+			'setting'     => 'majestic_tube_actors_per_page',
+			'default'     => 20,
+			'type'        => 'number',
+			'label'       => __( 'Actors per page', 'majestic-tube' ),
+			'section' => $archives,
+			'input_attrs' => array(
+				'min'  => 1,
+				'max'  => 100,
+				'step' => 1,
+			),
+		),
+		/* ------------------------------------------------------------------
+		 * Single video page - everything around the player (single.php)
+		 * ------------------------------------------------------------------ */
 		'single-sidebar'              => array(
 			'setting'     => 'majestic_tube_single_sidebar',
 			'default'     => 'on',
 			'type'        => 'onoff',
 			'label'       => __( 'Show the video sidebar', 'majestic-tube' ),
+			'section' => $single,
 			'description' => __( 'Show the Video sidebar widget area beside individual video pages. The area stays empty until you add content.', 'majestic-tube' ),
-		),
-		'thumbnails-ratio'         => array(
-			'setting'     => 'majestic_tube_thumbnails_ratio',
-			'default'     => '16/9',
-			'type'        => 'select',
-			'label'       => __( 'Thumbnails aspect ratio', 'majestic-tube' ),
-			'description' => __( 'Stored in the original "16/9" format because front-end scripts split it on the slash.', 'majestic-tube' ),
-			'choices'     => array(
-				'16/9'  => '16/9',
-				'4/3'   => '4/3',
-				'1/1'   => '1/1',
-				'3/4'   => '3/4',
-				'9/16'  => '9/16',
-			),
-		),
-		'thumbnails-fit'           => array(
-			'setting' => 'majestic_tube_thumbnails_fit',
-			'default' => 'cover',
-			'type'    => 'select',
-			'label'   => __( 'Thumbnails fit', 'majestic-tube' ),
-			'choices' => array(
-				'cover'   => __( 'Cover', 'majestic-tube' ),
-				'contain' => __( 'Contain', 'majestic-tube' ),
-				'fill'    => __( 'Fill', 'majestic-tube' ),
-			),
-		),
-		'main-thumbnail-quality'   => array(
-			'setting' => 'majestic_tube_thumbnail_quality',
-			'default' => 'wpst_thumb_medium',
-			'type'    => 'select',
-			'label'   => __( 'Main thumbnail quality', 'majestic-tube' ),
-			'choices' => array(
-				'wpst_thumb_small'  => __( 'Basic (150px)', 'majestic-tube' ),
-				'wpst_thumb_medium' => __( 'Normal (320px)', 'majestic-tube' ),
-				'wpst_thumb_large'  => __( 'Fine (640px)', 'majestic-tube' ),
-			),
-		),
-		'enable-thumbnails-rotation' => array(
-			'setting' => 'majestic_tube_enable_thumbs_rotation',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Enable thumbnails rotation on hover', 'majestic-tube' ),
-		),
-		'enable-views-system'      => array(
-			'setting' => 'majestic_tube_enable_views_system',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Display the view counter', 'majestic-tube' ),
-		),
-		'enable-duration-system'   => array(
-			'setting' => 'majestic_tube_enable_duration_system',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Display video durations', 'majestic-tube' ),
-		),
-		'enable-rating-system'     => array(
-			'setting' => 'majestic_tube_enable_rating_system',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Display the rating percentage', 'majestic-tube' ),
-		),
-		'related-videos-number'    => array(
-			'setting'     => 'majestic_tube_related_videos_number',
-			'default'     => 15,
-			'type'        => 'number',
-			'label'       => __( 'Number of related videos', 'majestic-tube' ),
-			'input_attrs' => array(
-				'min'  => 1,
-				'max'  => 30,
-				'step' => 1,
-			),
-		),
-		'display-related-videos'   => array(
-			'setting' => 'majestic_tube_display_related_videos',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Display related videos', 'majestic-tube' ),
 		),
 		'enable-comments'          => array(
 			'setting' => 'majestic_tube_enable_comments',
 			'default' => 'on',
 			'type'    => 'onoff',
 			'label'   => __( 'Display comments on videos', 'majestic-tube' ),
+			'section' => $single,
 		),
 		'enable-breadcrumbs'       => array(
 			'setting' => 'majestic_tube_enable_breadcrumbs',
 			'default' => 'on',
 			'type'    => 'onoff',
 			'label'   => __( 'Display breadcrumbs', 'majestic-tube' ),
-		),
-		'show-search-bar'          => array(
-			'setting' => 'majestic_tube_show_search_bar',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Display the search bar', 'majestic-tube' ),
+			'section' => $single,
 		),
 		'truncate-description'     => array(
 			'setting' => 'majestic_tube_truncate_description',
 			'default' => 'on',
 			'type'    => 'onoff',
 			'label'   => __( 'Truncate long descriptions', 'majestic-tube' ),
+			'section' => $single,
 		),
-		'homepage-title'           => array(
-			'setting' => 'majestic_tube_homepage_title',
-			'default' => '',
-			'type'    => 'text',
-			'label'   => __( 'Homepage title', 'majestic-tube' ),
+		'show-description-video-about' => array(
+			'setting' => 'majestic_tube_show_description_video_about',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Show the description block', 'majestic-tube' ),
+			'section' => $single,
 		),
-		'homepage-title-desc-position' => array(
-			'setting' => 'majestic_tube_homepage_title_desc_position',
-			'default' => 'bottom',
-			'type'    => 'select',
-			'label'   => __( 'Homepage title position', 'majestic-tube' ),
-			'choices' => array(
-				'top'    => __( 'Above the grid', 'majestic-tube' ),
-				'bottom' => __( 'Below the grid', 'majestic-tube' ),
-			),
+		'show-categories-video-about' => array(
+			'setting' => 'majestic_tube_show_categories_video_about',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Show video categories', 'majestic-tube' ),
+			'section' => $single,
+		),
+		'show-tags-video-about'    => array(
+			'setting' => 'majestic_tube_show_tags_video_about',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Show video tags', 'majestic-tube' ),
+			'section' => $single,
+		),
+		'show-actors-video-about'  => array(
+			'setting' => 'majestic_tube_show_actors_video_about',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Show video actors', 'majestic-tube' ),
+			'section' => $single,
 		),
 		'display-tracking-button'  => array(
 			'setting' => 'majestic_tube_display_tracking_button',
 			'default' => 'on',
 			'type'    => 'onoff',
 			'label'   => __( 'Display the tracking button', 'majestic-tube' ),
+			'section' => $single,
 		),
 		'tracking-button-icon'     => array(
 			'setting' => 'majestic_tube_tracking_button_icon',
 			'default' => 'download',
 			'type'    => 'select',
 			'label'   => __( 'Tracking button icon', 'majestic-tube' ),
+			'section' => $single,
 			'choices' => array(
 				'download'    => __( 'Download', 'majestic-tube' ),
 				'external'    => __( 'External link', 'majestic-tube' ),
@@ -319,369 +444,72 @@ function majestic_tube_options_map() {
 			'default' => '',
 			'type'    => 'url',
 			'label'   => __( 'Tracking button link', 'majestic-tube' ),
+			'section' => $single,
 		),
 		'tracking-button-text'     => array(
 			'setting' => 'majestic_tube_tracking_button_text',
 			'default' => 'Download complete video now!',
 			'type'    => 'text',
 			'label'   => __( 'Tracking button text', 'majestic-tube' ),
+			'section' => $single,
 		),
-		'show-description-video-about' => array(
-			'setting' => 'majestic_tube_show_description_video_about',
+		'enable-views-system'      => array(
+			'setting' => 'majestic_tube_enable_views_system',
 			'default' => 'on',
 			'type'    => 'onoff',
-			'label'   => __( 'Show the description block', 'majestic-tube' ),
+			'label'   => __( 'Display the view counter', 'majestic-tube' ),
+			'section' => $single,
 		),
-		'show-categories-video-about' => array(
-			'setting' => 'majestic_tube_show_categories_video_about',
+		'enable-duration-system'   => array(
+			'setting' => 'majestic_tube_enable_duration_system',
 			'default' => 'on',
 			'type'    => 'onoff',
-			'label'   => __( 'Show video categories', 'majestic-tube' ),
+			'label'   => __( 'Display video durations', 'majestic-tube' ),
+			'section' => $single,
 		),
-		'show-tags-video-about'    => array(
-			'setting' => 'majestic_tube_show_tags_video_about',
+		'enable-rating-system'     => array(
+			'setting' => 'majestic_tube_enable_rating_system',
 			'default' => 'on',
 			'type'    => 'onoff',
-			'label'   => __( 'Show video tags', 'majestic-tube' ),
+			'label'   => __( 'Display the rating percentage', 'majestic-tube' ),
+			'section' => $single,
 		),
-		'show-actors-video-about'  => array(
-			'setting' => 'majestic_tube_show_actors_video_about',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Show video actors', 'majestic-tube' ),
-		),
-		'categories-per-page'      => array(
-			'setting'     => 'majestic_tube_categories_per_page',
-			'default'     => 20,
-			'type'        => 'number',
-			'label'       => __( 'Categories per page', 'majestic-tube' ),
-			'input_attrs' => array(
-				'min'  => 1,
-				'max'  => 100,
-				'step' => 1,
-			),
-		),
-		'cat-desc-position'        => array(
-			'setting' => 'majestic_tube_cat_desc_position',
-			'default' => 'top',
-			'type'    => 'select',
-			'label'   => __( 'Category description position', 'majestic-tube' ),
-			'choices' => array(
-				'top'    => __( 'Top', 'majestic-tube' ),
-				'bottom' => __( 'Bottom', 'majestic-tube' ),
-			),
-		),
-		'tag-desc-position'        => array(
-			'setting' => 'majestic_tube_tag_desc_position',
-			'default' => 'top',
-			'type'    => 'select',
-			'label'   => __( 'Tag description position', 'majestic-tube' ),
-			'choices' => array(
-				'top'    => __( 'Top', 'majestic-tube' ),
-				'bottom' => __( 'Bottom', 'majestic-tube' ),
-			),
-		),
-		'actors-per-page'          => array(
-			'setting'     => 'majestic_tube_actors_per_page',
-			'default'     => 20,
-			'type'        => 'number',
-			'label'       => __( 'Actors per page', 'majestic-tube' ),
-			'input_attrs' => array(
-				'min'  => 1,
-				'max'  => 100,
-				'step' => 1,
-			),
-		),
-		'enable-membership'        => array(
-			'setting' => 'majestic_tube_enable_membership',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Enable membership (login/register)', 'majestic-tube' ),
-		),
-		'display-video-submit-link' => array(
-			'setting' => 'majestic_tube_display_video_submit_link',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Show the "Submit a Video" link', 'majestic-tube' ),
-			'section' => $submission,
-		),
-		'display-my-profile-link'  => array(
-			'setting' => 'majestic_tube_display_my_profile_link',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Show the "My Profile" link', 'majestic-tube' ),
-			'section' => $submission,
-		),
-		'display-my-channel-link'  => array(
-			'setting' => 'majestic_tube_display_my_channel_link',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Show the "My Channel" link', 'majestic-tube' ),
-			'section' => $submission,
-		),
-		'display-admin-bar'        => array(
-			// Keep the early-release setting ID; its stored value now follows
-			// KingTube's original meaning: on = display, off = hide.
-			'setting'     => 'majestic_tube_hide_admin_bar',
-			'default'     => 'off',
+		'enable-video-report'      => array(
+			'setting'     => 'majestic_tube_enable_video_report',
+			'default'     => 'on',
 			'type'        => 'onoff',
-			'label'       => __( 'Display admin bar for logged-in users', 'majestic-tube' ),
-			'description' => __( 'When off, the WordPress admin bar is hidden for everyone except administrators.', 'majestic-tube' ),
+			'label'       => __( 'Enable "Report video" button', 'majestic-tube' ),
+			'section' => $single,
+			'description' => __( 'Lets visitors flag broken or miscategorized videos. Reports appear under Videos > Reported Videos.', 'majestic-tube' ),
 		),
-		'copyright-bar'            => array(
-			'setting' => 'majestic_tube_copyright_bar',
+		'display-related-videos'   => array(
+			'setting' => 'majestic_tube_display_related_videos',
 			'default' => 'on',
 			'type'    => 'onoff',
-			'label'   => __( 'Display the copyright bar', 'majestic-tube' ),
+			'label'   => __( 'Display related videos', 'majestic-tube' ),
+			'section' => $single,
 		),
-		'copyright-text'           => array(
-			'setting' => 'majestic_tube_copyright_text',
-			'default' => '',
-			'type'    => 'textarea',
-			'label'   => __( 'Copyright text', 'majestic-tube' ),
-		),
-		'footer-columns'           => array(
-			'setting' => 'majestic_tube_footer_columns',
-			'default' => 'four-columns-footer',
-			'type'    => 'select',
-			'label'   => __( 'Footer columns', 'majestic-tube' ),
-			'choices' => array(
-				'one-column-footer'   => __( 'One column', 'majestic-tube' ),
-				'two-columns-footer'  => __( 'Two columns', 'majestic-tube' ),
-				'three-columns-footer' => __( 'Three columns', 'majestic-tube' ),
-				'four-columns-footer' => __( 'Four columns', 'majestic-tube' ),
-			),
-		),
-		'custom-background'        => array(
-			'setting' => 'majestic_tube_custom_background',
-			'default' => 'off',
-			'type'    => 'onoff',
-			'label'   => __( 'Enable the custom background class', 'majestic-tube' ),
-			'section' => $branding,
-		),
-		'main-color'               => array(
-			'setting' => 'majestic_tube_main_color',
-			'default' => '#0f8a99',
-			'type'    => 'color',
-			'label'   => __( 'Main colour', 'majestic-tube' ),
-			'section' => $branding,
-		),
-		'color-scheme'             => array(
-			'setting'     => 'majestic_tube_color_scheme',
-			'default'     => 'light',
-			'type'        => 'select',
-			'label'       => __( 'Colour scheme', 'majestic-tube' ),
-			'section'     => $branding,
-			'description' => __( 'The skin the site uses by default. "Follow system" follows each visitor\'s operating-system setting and needs no script. Visitors can still override this with the header toggle, and that choice is stored only in their own browser.', 'majestic-tube' ),
-			'choices'     => array(
-				'light'  => __( 'Light', 'majestic-tube' ),
-				'dark'   => __( 'Dark', 'majestic-tube' ),
-				'system' => __( 'Follow system', 'majestic-tube' ),
-			),
-		),
-		'show-theme-toggle'        => array(
-			'setting' => 'majestic_tube_show_theme_toggle',
-			'default' => 'off',
-			'type'    => 'onoff',
-			'label'   => __( 'Show the light/dark toggle in the header', 'majestic-tube' ),
-			'section' => $branding,
-		),
-
-		/* ---------------------------------------------------------------
-		 * Branding / logo (original keys, including the video watermark
-		 * keys the original read but never registered in its own panel)
-		 * ------------------------------------------------------------- */
-		'use-logo-image'           => array(
-			'setting' => 'majestic_tube_use_logo_image',
-			'default' => 'off',
-			'type'    => 'onoff',
-			'label'   => __( 'Use an image logo', 'majestic-tube' ),
-			'section' => $branding,
-		),
-		'image-logo-file'          => array(
-			'setting' => 'majestic_tube_image_logo_file',
-			'default' => '',
-			'type'    => 'file',
-			'label'   => __( 'Logo image URL', 'majestic-tube' ),
-			'section' => $branding,
-		),
-		'icon-logo'                => array(
-			'setting' => 'majestic_tube_icon_logo',
-			'default' => 'play-circle',
-			'type'    => 'select',
-			'label'   => __( 'Icon logo', 'majestic-tube' ),
-			'section' => $branding,
-			'choices' => array(
-				'play-circle' => __( 'Play circle', 'majestic-tube' ),
-				'film'        => __( 'Film', 'majestic-tube' ),
-				'video'       => __( 'Video', 'majestic-tube' ),
-				'heart'       => __( 'Heart', 'majestic-tube' ),
-				'star'        => __( 'Star', 'majestic-tube' ),
-			),
-		),
-		'text-logo'                => array(
-			'setting' => 'majestic_tube_text_logo',
-			'default' => '',
-			'type'    => 'text',
-			'label'   => __( 'Text logo', 'majestic-tube' ),
-			'section' => $branding,
-		),
-		'site-font-family'         => array(
-			'setting'     => 'majestic_tube_site_font_family',
-			'default'     => 'Inter',
-			'type'        => 'select',
-			'label'       => __( 'Site font', 'majestic-tube' ),
-			'section'     => $branding,
-			'description' => __( 'Inter is bundled with the theme, so every visitor - Windows, macOS, Android, iOS - sees the same letterforms. The system option renders in whatever interface font the visitor already has, which costs no download but looks different on each platform.', 'majestic-tube' ),
-			'choices'     => array(
-				'Inter'     => __( 'Inter (bundled with the theme)', 'majestic-tube' ),
-				'System UI' => __( 'System UI (the visitor\'s own font)', 'majestic-tube' ),
-			),
-		),
-		'logo-font-family'         => array(
-			'setting'     => 'majestic_tube_logo_font_family',
-			'default'     => 'Inter',
-			'type'        => 'select',
-			'label'       => __( 'Logo font family', 'majestic-tube' ),
-			'section'     => $branding,
-			'description' => __( 'A text logo can use its own voice here. "Inter" and "System UI" match the rest of the site; the serif and monospace choices are fonts already installed on each visitor device and are never downloaded.', 'majestic-tube' ),
-			'choices'     => array(
-				'Inter'            => __( 'Inter (same as the site)', 'majestic-tube' ),
-				'System UI'        => __( 'System UI', 'majestic-tube' ),
-				'System Serif'     => __( 'System serif', 'majestic-tube' ),
-				'System Monospace' => __( 'System monospace', 'majestic-tube' ),
-			),
-		),
-		'logo-font-size'           => array(
-			'setting'     => 'majestic_tube_logo_font_size',
-			'default'     => 36,
+		'related-videos-number'    => array(
+			'setting'     => 'majestic_tube_related_videos_number',
+			'default'     => 15,
 			'type'        => 'number',
-			'label'       => __( 'Logo font size (px)', 'majestic-tube' ),
-			'section'     => $branding,
+			'label'       => __( 'Number of related videos', 'majestic-tube' ),
+			'section' => $single,
 			'input_attrs' => array(
-				'min'  => 8,
-				'max'  => 120,
+				'min'  => 1,
+				'max'  => 30,
 				'step' => 1,
 			),
 		),
-		'logo-max-width'           => array(
-			'setting'     => 'majestic_tube_logo_max_width',
-			'default'     => 300,
-			'type'        => 'number',
-			'label'       => __( 'Logo max width (px)', 'majestic-tube' ),
-			'section'     => $branding,
-			'input_attrs' => array(
-				'min'  => 0,
-				'max'  => 2000,
-				'step' => 1,
-			),
-		),
-		'logo-max-height'          => array(
-			'setting'     => 'majestic_tube_logo_max_height',
-			'default'     => 120,
-			'type'        => 'number',
-			'label'       => __( 'Logo max height (px)', 'majestic-tube' ),
-			'section'     => $branding,
-			'input_attrs' => array(
-				'min'  => 0,
-				'max'  => 2000,
-				'step' => 1,
-			),
-		),
-		'logo-margin-top'          => array(
-			'setting'     => 'majestic_tube_logo_margin_top',
-			'default'     => 0,
-			'type'        => 'number',
-			'label'       => __( 'Logo top margin (px)', 'majestic-tube' ),
-			'section'     => $branding,
-			'input_attrs' => array(
-				'min'  => -100,
-				'max'  => 500,
-				'step' => 1,
-			),
-		),
-		'logo-margin-left'         => array(
-			'setting'     => 'majestic_tube_logo_margin_left',
-			'default'     => 0,
-			'type'        => 'number',
-			'label'       => __( 'Logo left margin (px)', 'majestic-tube' ),
-			'section'     => $branding,
-			'input_attrs' => array(
-				'min'  => -100,
-				'max'  => 500,
-				'step' => 1,
-			),
-		),
-		'logo-footer'              => array(
-			'setting' => 'majestic_tube_logo_footer',
-			'default' => 'off',
-			'type'    => 'onoff',
-			'label'   => __( 'Show the logo in the footer', 'majestic-tube' ),
-			'section' => $branding,
-		),
-		'logo-watermark-video-player' => array(
-			'setting' => 'majestic_tube_logo_watermark_video_player',
-			'default' => 'off',
-			'type'    => 'onoff',
-			'label'   => __( 'Overlay a logo watermark on the player', 'majestic-tube' ),
-			'section' => $branding,
-		),
-		'image-logo-watermark-file' => array(
-			'setting' => 'majestic_tube_image_logo_watermark_file',
-			'default' => '',
-			'type'    => 'file',
-			'label'   => __( 'Watermark image URL', 'majestic-tube' ),
-			'section' => $branding,
-		),
-		'logo-watermark-max-width' => array(
-			'setting'     => 'majestic_tube_logo_watermark_max_width',
-			'default'     => 200,
-			'type'        => 'number',
-			'label'       => __( 'Watermark max width (px)', 'majestic-tube' ),
-			'section'     => $branding,
-			'input_attrs' => array(
-				'min'  => 0,
-				'max'  => 1000,
-				'step' => 1,
-			),
-		),
-		'logo-watermark-grayscale' => array(
-			'setting' => 'majestic_tube_logo_watermark_grayscale',
-			'default' => 'off',
-			'type'    => 'onoff',
-			'label'   => __( 'Grayscale the watermark', 'majestic-tube' ),
-			'section' => $branding,
-		),
-		'logo-position-video-player' => array(
-			'setting' => 'majestic_tube_logo_position_video_player',
-			'default' => 'top-left',
-			'type'    => 'select',
-			'label'   => __( 'Watermark position', 'majestic-tube' ),
-			'section' => $branding,
-			'choices' => array(
-				'top-left'     => __( 'Top left', 'majestic-tube' ),
-				'top-right'    => __( 'Top right', 'majestic-tube' ),
-				'bottom-left'  => __( 'Bottom left', 'majestic-tube' ),
-				'bottom-right' => __( 'Bottom right', 'majestic-tube' ),
-			),
-		),
-		'favicon'                  => array(
-			'setting' => 'majestic_tube_favicon',
-			'default' => '',
-			'type'    => 'file',
-			'label'   => __( 'Favicon URL', 'majestic-tube' ),
-			'section' => $branding,
-		),
-
-		/* ---------------------------------------------------------------
-		 * Player
-		 * ------------------------------------------------------------- */
+		/* ------------------------------------------------------------------
+		 * Single video page - the player itself
+		 * ------------------------------------------------------------------ */
 		'autoplay-video-player'    => array(
 			'setting'     => 'majestic_tube_autoplay',
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Autoplay video player', 'majestic-tube' ),
-			'section'     => $player,
+			'section' => $player,
 			'description' => __( 'Browsers only honor autoplay for muted videos.', 'majestic-tube' ),
 		),
 		'use-native-player'        => array(
@@ -689,22 +517,22 @@ function majestic_tube_options_map() {
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Use the native HTML5 player instead of Video.js', 'majestic-tube' ),
-			'section'     => $player,
+			'section' => $player,
 			'description' => __( 'Removes the Video.js dependency entirely. Quality switcher, keyboard shortcuts and skinning are then handled by the browser.', 'majestic-tube' ),
 		),
 		/*
-		 * Play-anchored view counting. The original counted a view the moment
-		 * the page loaded; this switch keeps that default but lets a site count
-		 * only plays that actually reach three seconds. Off by default so the
-		 * stored counters keep their historical meaning until the operator opts
-		 * in.
+		 * Play-anchored view counting. Earlier versions counted a view the
+		 * moment the page loaded; this switch keeps that default but lets a
+		 * site count only plays that actually reach three seconds. Off by
+		 * default so the stored counters keep their historical meaning until
+		 * the operator opts in.
 		 */
 		'count-views-on-play'      => array(
 			'setting'     => 'majestic_tube_count_views_on_play',
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Count a view only after playback starts', 'majestic-tube' ),
-			'section'     => $player,
+			'section' => $player,
 			'description' => __( 'The view is recorded once the video has played for three seconds instead of on page load. Applies to new views only.', 'majestic-tube' ),
 		),
 		'videojs-quality-selector' => array(
@@ -726,7 +554,7 @@ function majestic_tube_options_map() {
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Keyboard shortcuts on the video page', 'majestic-tube' ),
-			'section'     => $player,
+			'section' => $player,
 			'description' => __( 'Adds the usual player keys: space to play and pause, the arrow keys to seek and change volume, M to mute, F for full screen, 0-9 to jump to a point, and T for theater mode. Shortcuts never fire while a visitor is typing in a form field.', 'majestic-tube' ),
 		),
 		'player-speed'              => array(
@@ -734,7 +562,7 @@ function majestic_tube_options_map() {
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Playback speed control', 'majestic-tube' ),
-			'section'     => $player,
+			'section' => $player,
 			'description' => __( 'Adds a speed button to the player with the usual range from 0.5x to 2x. The chosen speed is remembered in that visitor\'s own browser and applied to every video they open.', 'majestic-tube' ),
 		),
 		'player-resume'             => array(
@@ -742,7 +570,7 @@ function majestic_tube_options_map() {
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Offer to resume where the visitor stopped', 'majestic-tube' ),
-			'section'     => $player,
+			'section' => $player,
 			'description' => __( 'After a visitor watches a few seconds of a video, a bar offers to continue from where they left off on their next visit. The position is kept in that visitor\'s own browser, never on your server, and finishing a video clears it.', 'majestic-tube' ),
 		),
 		'player-theater'            => array(
@@ -750,24 +578,38 @@ function majestic_tube_options_map() {
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Theater mode', 'majestic-tube' ),
-			'section'     => $player,
+			'section' => $player,
 			'description' => __( 'Adds a button that widens the player across the page and dims the surrounding content, for watching without distractions. Also available on the keyboard with T while the shortcuts are on.', 'majestic-tube' ),
 		),
-
-		/* ---------------------------------------------------------------
-		 * Sharing / social (original per-network switches)
-		 *
-		 * Facebook, LinkedIn, Tumblr and Odnoklassniki (ok.ru) no longer
-		 * print a share button - see inc/share.php for why. Their keys stay
-		 * in the map so a stored value from the original theme is still
-		 * readable, but the toggles are hidden from the Customizer so no
-		 * switch is offered for a button that will never appear.
-		 * ------------------------------------------------------------- */
+		/* ------------------------------------------------------------------
+		 * Single video page - sharing
+		 * ------------------------------------------------------------------ */
 		'enable-video-share'       => array(
 			'setting' => 'majestic_tube_enable_video_share',
 			'default' => 'on',
 			'type'    => 'onoff',
 			'label'   => __( 'Enable video sharing', 'majestic-tube' ),
+			'section' => $social,
+		),
+		'twitter-video-share'      => array(
+			'setting' => 'majestic_tube_share_twitter',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Share on X / Twitter', 'majestic-tube' ),
+			'section' => $social,
+		),
+		'reddit-video-share'       => array(
+			'setting' => 'majestic_tube_share_reddit',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Share on Reddit', 'majestic-tube' ),
+			'section' => $social,
+		),
+		'email-video-share'        => array(
+			'setting' => 'majestic_tube_share_email',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Share by email', 'majestic-tube' ),
 			'section' => $social,
 		),
 		'facebook-video-share'     => array(
@@ -777,13 +619,6 @@ function majestic_tube_options_map() {
 			'label'   => __( 'Share on Facebook', 'majestic-tube' ),
 			'section' => $social,
 			'customizer' => false,
-		),
-		'twitter-video-share'      => array(
-			'setting' => 'majestic_tube_share_twitter',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Share on X / Twitter', 'majestic-tube' ),
-			'section' => $social,
 		),
 		'google-plus-video-share'  => array(
 			'setting' => 'majestic_tube_share_google_plus',
@@ -809,13 +644,6 @@ function majestic_tube_options_map() {
 			'section' => $social,
 			'customizer' => false,
 		),
-		'reddit-video-share'       => array(
-			'setting' => 'majestic_tube_share_reddit',
-			'default' => 'on',
-			'type'    => 'onoff',
-			'label'   => __( 'Share on Reddit', 'majestic-tube' ),
-			'section' => $social,
-		),
 		'odnoklassniki-video-share' => array(
 			'setting' => 'majestic_tube_share_odnoklassniki',
 			'default' => 'on',
@@ -824,22 +652,390 @@ function majestic_tube_options_map() {
 			'section' => $social,
 			'customizer' => false,
 		),
-		'email-video-share'        => array(
-			'setting' => 'majestic_tube_share_email',
+		/* ------------------------------------------------------------------
+		 * Site design - colour scheme and body font
+		 * ------------------------------------------------------------------ */
+		'color-scheme'             => array(
+			'setting'     => 'majestic_tube_color_scheme',
+			'default'     => 'light',
+			'type'        => 'select',
+			'label'       => __( 'Colour scheme', 'majestic-tube' ),
+			'section' => $colours,
+			'description' => __( 'The skin the site uses by default. "Follow system" follows each visitor\'s operating-system setting and needs no script. Visitors can still override this with the header toggle, and that choice is stored only in their own browser.', 'majestic-tube' ),
+			'choices'     => array(
+				'light'  => __( 'Light', 'majestic-tube' ),
+				'dark'   => __( 'Dark', 'majestic-tube' ),
+				'system' => __( 'Follow system', 'majestic-tube' ),
+			),
+		),
+		'show-theme-toggle'        => array(
+			'setting' => 'majestic_tube_show_theme_toggle',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Show the light/dark toggle in the header', 'majestic-tube' ),
+			'section' => $colours,
+		),
+		'main-color'               => array(
+			'setting' => 'majestic_tube_main_color',
+			'default' => '#0f8a99',
+			'type'    => 'color',
+			'label'   => __( 'Main colour', 'majestic-tube' ),
+			'section' => $colours,
+		),
+		'custom-background'        => array(
+			'setting' => 'majestic_tube_custom_background',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Enable the custom background class', 'majestic-tube' ),
+			'section' => $colours,
+		),
+		'site-font-family'         => array(
+			'setting'     => 'majestic_tube_site_font_family',
+			'default'     => 'Inter',
+			'type'        => 'select',
+			'label'       => __( 'Site font', 'majestic-tube' ),
+			'section' => $colours,
+			'description' => __( 'Inter is bundled with the theme, so every visitor - Windows, macOS, Android, iOS - sees the same letterforms. The system option renders in whatever interface font the visitor already has, which costs no download but looks different on each platform.', 'majestic-tube' ),
+			'choices'     => array(
+				'Inter'     => __( 'Inter (bundled with the theme)', 'majestic-tube' ),
+				'System UI' => __( 'System UI (the visitor\'s own font)', 'majestic-tube' ),
+			),
+		),
+		/* ------------------------------------------------------------------
+		 * Site design - header and footer logo
+		 * ------------------------------------------------------------------ */
+		'use-logo-image'           => array(
+			'setting' => 'majestic_tube_use_logo_image',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Use an image logo', 'majestic-tube' ),
+			'section' => $logo,
+		),
+		'image-logo-file'          => array(
+			'setting' => 'majestic_tube_image_logo_file',
+			'default' => '',
+			'type'    => 'file',
+			'label'   => __( 'Logo image URL', 'majestic-tube' ),
+			'section' => $logo,
+		),
+		'icon-logo'                => array(
+			'setting' => 'majestic_tube_icon_logo',
+			'default' => 'play-circle',
+			'type'    => 'select',
+			'label'   => __( 'Icon logo', 'majestic-tube' ),
+			'section' => $logo,
+			'choices' => array(
+				'play-circle' => __( 'Play circle', 'majestic-tube' ),
+				'film'        => __( 'Film', 'majestic-tube' ),
+				'video'       => __( 'Video', 'majestic-tube' ),
+				'heart'       => __( 'Heart', 'majestic-tube' ),
+				'star'        => __( 'Star', 'majestic-tube' ),
+			),
+		),
+		'text-logo'                => array(
+			'setting' => 'majestic_tube_text_logo',
+			'default' => '',
+			'type'    => 'text',
+			'label'   => __( 'Text logo', 'majestic-tube' ),
+			'section' => $logo,
+		),
+		'logo-font-family'         => array(
+			'setting'     => 'majestic_tube_logo_font_family',
+			'default'     => 'Inter',
+			'type'        => 'select',
+			'label'       => __( 'Logo font family', 'majestic-tube' ),
+			'section' => $logo,
+			'description' => __( 'A text logo can use its own voice here. "Inter" and "System UI" match the rest of the site; the serif and monospace choices are fonts already installed on each visitor device and are never downloaded.', 'majestic-tube' ),
+			'choices'     => array(
+				'Inter'            => __( 'Inter (same as the site)', 'majestic-tube' ),
+				'System UI'        => __( 'System UI', 'majestic-tube' ),
+				'System Serif'     => __( 'System serif', 'majestic-tube' ),
+				'System Monospace' => __( 'System monospace', 'majestic-tube' ),
+			),
+		),
+		'logo-font-size'           => array(
+			'setting'     => 'majestic_tube_logo_font_size',
+			'default'     => 36,
+			'type'        => 'number',
+			'label'       => __( 'Logo font size (px)', 'majestic-tube' ),
+			'section' => $logo,
+			'input_attrs' => array(
+				'min'  => 8,
+				'max'  => 120,
+				'step' => 1,
+			),
+		),
+		'logo-max-width'           => array(
+			'setting'     => 'majestic_tube_logo_max_width',
+			'default'     => 300,
+			'type'        => 'number',
+			'label'       => __( 'Logo max width (px)', 'majestic-tube' ),
+			'section' => $logo,
+			'input_attrs' => array(
+				'min'  => 0,
+				'max'  => 2000,
+				'step' => 1,
+			),
+		),
+		'logo-max-height'          => array(
+			'setting'     => 'majestic_tube_logo_max_height',
+			'default'     => 120,
+			'type'        => 'number',
+			'label'       => __( 'Logo max height (px)', 'majestic-tube' ),
+			'section' => $logo,
+			'input_attrs' => array(
+				'min'  => 0,
+				'max'  => 2000,
+				'step' => 1,
+			),
+		),
+		'logo-margin-top'          => array(
+			'setting'     => 'majestic_tube_logo_margin_top',
+			'default'     => 0,
+			'type'        => 'number',
+			'label'       => __( 'Logo top margin (px)', 'majestic-tube' ),
+			'section' => $logo,
+			'input_attrs' => array(
+				'min'  => -100,
+				'max'  => 500,
+				'step' => 1,
+			),
+		),
+		'logo-margin-left'         => array(
+			'setting'     => 'majestic_tube_logo_margin_left',
+			'default'     => 0,
+			'type'        => 'number',
+			'label'       => __( 'Logo left margin (px)', 'majestic-tube' ),
+			'section' => $logo,
+			'input_attrs' => array(
+				'min'  => -100,
+				'max'  => 500,
+				'step' => 1,
+			),
+		),
+		'logo-footer'              => array(
+			'setting' => 'majestic_tube_logo_footer',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Show the logo in the footer', 'majestic-tube' ),
+			'section' => $logo,
+		),
+		'favicon'                  => array(
+			'setting' => 'majestic_tube_favicon',
+			'default' => '',
+			'type'    => 'file',
+			'label'   => __( 'Favicon URL', 'majestic-tube' ),
+			'section' => $logo,
+		),
+		/* ------------------------------------------------------------------
+		 * Site design - logo overlaid on the player
+		 * ------------------------------------------------------------------ */
+		'logo-watermark-video-player' => array(
+			'setting' => 'majestic_tube_logo_watermark_video_player',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Overlay a logo watermark on the player', 'majestic-tube' ),
+			'section' => $watermark,
+		),
+		'image-logo-watermark-file' => array(
+			'setting' => 'majestic_tube_image_logo_watermark_file',
+			'default' => '',
+			'type'    => 'file',
+			'label'   => __( 'Watermark image URL', 'majestic-tube' ),
+			'section' => $watermark,
+		),
+		'logo-watermark-max-width' => array(
+			'setting'     => 'majestic_tube_logo_watermark_max_width',
+			'default'     => 200,
+			'type'        => 'number',
+			'label'       => __( 'Watermark max width (px)', 'majestic-tube' ),
+			'section' => $watermark,
+			'input_attrs' => array(
+				'min'  => 0,
+				'max'  => 1000,
+				'step' => 1,
+			),
+		),
+		'logo-watermark-grayscale' => array(
+			'setting' => 'majestic_tube_logo_watermark_grayscale',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Grayscale the watermark', 'majestic-tube' ),
+			'section' => $watermark,
+		),
+		'logo-position-video-player' => array(
+			'setting' => 'majestic_tube_logo_position_video_player',
+			'default' => 'top-left',
+			'type'    => 'select',
+			'label'   => __( 'Watermark position', 'majestic-tube' ),
+			'section' => $watermark,
+			'choices' => array(
+				'top-left'     => __( 'Top left', 'majestic-tube' ),
+				'top-right'    => __( 'Top right', 'majestic-tube' ),
+				'bottom-left'  => __( 'Bottom left', 'majestic-tube' ),
+				'bottom-right' => __( 'Bottom right', 'majestic-tube' ),
+			),
+		),
+		/* ------------------------------------------------------------------
+		 * Site design - video thumbnails
+		 * ------------------------------------------------------------------ */
+		'thumbnails-ratio'         => array(
+			'setting'     => 'majestic_tube_thumbnails_ratio',
+			'default'     => '16/9',
+			'type'        => 'select',
+			'label'       => __( 'Thumbnails aspect ratio', 'majestic-tube' ),
+			'section' => $thumbnails,
+			'description' => __( 'Written as width/height. The front end splits this value on the slash, so keep the "16/9" form.', 'majestic-tube' ),
+			'choices'     => array(
+				'16/9'  => '16/9',
+				'4/3'   => '4/3',
+				'1/1'   => '1/1',
+				'3/4'   => '3/4',
+				'9/16'  => '9/16',
+			),
+		),
+		'thumbnails-fit'           => array(
+			'setting' => 'majestic_tube_thumbnails_fit',
+			'default' => 'cover',
+			'type'    => 'select',
+			'label'   => __( 'Thumbnails fit', 'majestic-tube' ),
+			'section' => $thumbnails,
+			'choices' => array(
+				'cover'   => __( 'Cover', 'majestic-tube' ),
+				'contain' => __( 'Contain', 'majestic-tube' ),
+				'fill'    => __( 'Fill', 'majestic-tube' ),
+			),
+		),
+		'main-thumbnail-quality'   => array(
+			'setting' => 'majestic_tube_thumbnail_quality',
+			'default' => 'wpst_thumb_medium',
+			'type'    => 'select',
+			'label'   => __( 'Main thumbnail quality', 'majestic-tube' ),
+			'section' => $thumbnails,
+			'choices' => array(
+				'wpst_thumb_small'  => __( 'Basic (150px)', 'majestic-tube' ),
+				'wpst_thumb_medium' => __( 'Normal (320px)', 'majestic-tube' ),
+				'wpst_thumb_large'  => __( 'Fine (640px)', 'majestic-tube' ),
+			),
+		),
+		'enable-thumbnails-rotation' => array(
+			'setting' => 'majestic_tube_enable_thumbs_rotation',
 			'default' => 'on',
 			'type'    => 'onoff',
-			'label'   => __( 'Share by email', 'majestic-tube' ),
-			'section' => $social,
+			'label'   => __( 'Enable thumbnails rotation on hover', 'majestic-tube' ),
+			'section' => $thumbnails,
 		),
-
-		/* ---------------------------------------------------------------
-		 * Video submission (original per-field requirements)
-		 * ------------------------------------------------------------- */
+		/* ------------------------------------------------------------------
+		 * Site chrome - header, footer and search
+		 * ------------------------------------------------------------------ */
+		'show-search-bar'          => array(
+			'setting' => 'majestic_tube_show_search_bar',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Display the search bar', 'majestic-tube' ),
+			'section' => $chrome,
+		),
+		'footer-columns'           => array(
+			'setting' => 'majestic_tube_footer_columns',
+			'default' => 'four-columns-footer',
+			'type'    => 'select',
+			'label'   => __( 'Footer columns', 'majestic-tube' ),
+			'section' => $chrome,
+			'choices' => array(
+				'one-column-footer'   => __( 'One column', 'majestic-tube' ),
+				'two-columns-footer'  => __( 'Two columns', 'majestic-tube' ),
+				'three-columns-footer' => __( 'Three columns', 'majestic-tube' ),
+				'four-columns-footer' => __( 'Four columns', 'majestic-tube' ),
+			),
+		),
+		'copyright-bar'            => array(
+			'setting' => 'majestic_tube_copyright_bar',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Display the copyright bar', 'majestic-tube' ),
+			'section' => $chrome,
+		),
+		'copyright-text'           => array(
+			'setting' => 'majestic_tube_copyright_text',
+			'default' => '',
+			'type'    => 'textarea',
+			'label'   => __( 'Copyright text', 'majestic-tube' ),
+			'section' => $chrome,
+		),
+		'display-admin-bar'        => array(
+			// Keep the original setting ID so a stored value keeps its
+			// meaning: on = display the bar, off = hide it.
+			'setting'     => 'majestic_tube_hide_admin_bar',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'Display admin bar for logged-in users', 'majestic-tube' ),
+			'section' => $chrome,
+			'description' => __( 'When off, the WordPress admin bar is hidden for everyone except administrators.', 'majestic-tube' ),
+		),
+		/* ------------------------------------------------------------------
+		 * Accounts and spam protection
+		 * ------------------------------------------------------------------ */
+		'enable-membership'        => array(
+			'setting' => 'majestic_tube_enable_membership',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Enable membership (login/register)', 'majestic-tube' ),
+			'section' => $members,
+		),
+		'enable-captcha'           => array(
+			'setting'     => 'majestic_tube_enable_captcha',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'Enable spam protection', 'majestic-tube' ),
+			'description' => __( 'Asks visitors to prove they are human with Cloudflare Turnstile on the sign-up and video submission forms. Nothing is shown until this is on, and both Turnstile keys below must be filled in.', 'majestic-tube' ),
+			'section' => $members,
+		),
+		'turnstile-site-key'      => array(
+			'setting'     => 'majestic_tube_turnstile_site_key',
+			'default'     => '',
+			'type'        => 'text',
+			'label'       => __( 'Turnstile site key', 'majestic-tube' ),
+			'description' => __( 'The Site Key shown in the Turnstile widget you created at dash.cloudflare.com.', 'majestic-tube' ),
+			'section' => $members,
+		),
+		'turnstile-secret-key'    => array(
+			'setting'     => 'majestic_tube_turnstile_secret_key',
+			'default'     => '',
+			'type'        => 'text',
+			'label'       => __( 'Turnstile secret key', 'majestic-tube' ),
+			'description' => __( 'The Secret Key from the same widget. This one is sent to Cloudflare from the server and must never appear on the page.', 'majestic-tube' ),
+			'section' => $members,
+		),
+		/* ------------------------------------------------------------------
+		 * Visitor video submission
+		 * ------------------------------------------------------------------ */
 		'enable-video-submission'  => array(
 			'setting' => 'majestic_tube_enable_video_submission',
 			'default' => 'on',
 			'type'    => 'onoff',
 			'label'   => __( 'Enable video submission', 'majestic-tube' ),
+			'section' => $submission,
+		),
+		'display-video-submit-link' => array(
+			'setting' => 'majestic_tube_display_video_submit_link',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Show the "Submit a Video" link', 'majestic-tube' ),
+			'section' => $submission,
+		),
+		'display-my-profile-link'  => array(
+			'setting' => 'majestic_tube_display_my_profile_link',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Show the "My Profile" link', 'majestic-tube' ),
+			'section' => $submission,
+		),
+		'display-my-channel-link'  => array(
+			'setting' => 'majestic_tube_display_my_channel_link',
+			'default' => 'on',
+			'type'    => 'onoff',
+			'label'   => __( 'Show the "My Channel" link', 'majestic-tube' ),
+			'section' => $submission,
 		),
 		'video-submit-title-required' => array(
 			'setting' => 'majestic_tube_submit_title_required',
@@ -897,113 +1093,9 @@ function majestic_tube_options_map() {
 			'label'   => __( 'Duration required', 'majestic-tube' ),
 			'section' => $submission,
 		),
-
-		/* ---------------------------------------------------------------
-		 * Membership / recaptcha
-		 * ------------------------------------------------------------- */
-		'enable-recaptcha'         => array(
-			'setting' => 'majestic_tube_enable_recaptcha',
-			'default' => 'off',
-			'type'    => 'onoff',
-			'label'   => __( 'Enable reCAPTCHA', 'majestic-tube' ),
-		),
-		'recaptcha-site-key'       => array(
-			'setting' => 'majestic_tube_recaptcha_site_key',
-			'default' => '',
-			'type'    => 'text',
-			'label'   => __( 'reCAPTCHA site key', 'majestic-tube' ),
-		),
-		'recaptcha-secret-key'     => array(
-			'setting' => 'majestic_tube_recaptcha_secret_key',
-			'default' => '',
-			'type'    => 'text',
-			'label'   => __( 'reCAPTCHA secret key', 'majestic-tube' ),
-		),
-
-		/* ---------------------------------------------------------------
-		 * Legacy content keys (retained for data compatibility)
-		 * ------------------------------------------------------------- */
-		'header-ad-desktop'        => array(
-			'setting' => 'majestic_tube_ad_header_desktop',
-			'default' => '',
-			'type'    => 'html',
-			'label'   => __( 'Legacy header content (desktop)', 'majestic-tube' ),
-			'section'    => $advertising,
-			'customizer' => false,
-		),
-		'header-ad-mobile'         => array(
-			'setting' => 'majestic_tube_ad_header_mobile',
-			'default' => '',
-			'type'    => 'html',
-			'label'   => __( 'Legacy header content (mobile)', 'majestic-tube' ),
-			'section'    => $advertising,
-			'customizer' => false,
-		),
-		'sidebar-ad-desktop-1'     => array(
-			'setting' => 'majestic_tube_ad_sidebar_desktop_1',
-			'default' => '',
-			'type'    => 'html',
-			'label'   => __( 'Legacy video sidebar content 1', 'majestic-tube' ),
-			'section'    => $advertising,
-			'customizer' => false,
-		),
-		'sidebar-ad-desktop-2'     => array(
-			'setting' => 'majestic_tube_ad_sidebar_desktop_2',
-			'default' => '',
-			'type'    => 'html',
-			'label'   => __( 'Legacy video sidebar content 2', 'majestic-tube' ),
-			'section'    => $advertising,
-			'customizer' => false,
-		),
-		'sidebar-ad-desktop-3'     => array(
-			'setting' => 'majestic_tube_ad_sidebar_desktop_3',
-			'default' => '',
-			'type'    => 'html',
-			'label'   => __( 'Legacy video sidebar content 3', 'majestic-tube' ),
-			'section'    => $advertising,
-			'customizer' => false,
-		),
-		'sidebar-ad-mobile'        => array(
-			'setting' => 'majestic_tube_ad_sidebar_mobile',
-			'default' => '',
-			'type'    => 'html',
-			'label'   => __( 'Legacy mobile sidebar content', 'majestic-tube' ),
-			'section'    => $advertising,
-			'customizer' => false,
-		),
-		'inside-player-ad-zone-1-desktop' => array(
-			'setting'     => 'majestic_tube_ad_inside_player_1',
-			'default'     => '',
-			'type'        => 'html',
-			'label'       => __( 'Legacy player content 1', 'majestic-tube' ),
-			'section'     => $advertising,
-			'description' => __( 'Retained for migration into the Player content widget area.', 'majestic-tube' ),
-			'customizer'  => false,
-		),
-		'inside-player-ad-zone-2-desktop' => array(
-			'setting' => 'majestic_tube_ad_inside_player_2',
-			'default' => '',
-			'type'    => 'html',
-			'label'   => __( 'Legacy player content 2', 'majestic-tube' ),
-			'section'    => $advertising,
-			'customizer' => false,
-		),
-		'under-player-ad-desktop'  => array(
-			'setting' => 'majestic_tube_ad_under_player_desktop',
-			'default' => '',
-			'type'    => 'html',
-			'label'   => __( 'Legacy below-player content (desktop)', 'majestic-tube' ),
-			'section'    => $advertising,
-			'customizer' => false,
-		),
-		'under-player-ad-mobile'   => array(
-			'setting' => 'majestic_tube_ad_under_player_mobile',
-			'default' => '',
-			'type'    => 'html',
-			'label'   => __( 'Legacy below-player content (mobile)', 'majestic-tube' ),
-			'section'    => $advertising,
-			'customizer' => false,
-		),
+		/* ------------------------------------------------------------------
+		 * Advertising
+		 * ------------------------------------------------------------------ */
 		/*
 		 * In-feed advertising (2.1.0). One code blob repeated through the video
 		 * grid after every Nth card. The zone reuses the ad sanitizer and the
@@ -1014,22 +1106,22 @@ function majestic_tube_options_map() {
 			'default' => 'off',
 			'type'    => 'onoff',
 			'label'   => __( 'Enable in-feed advertising', 'majestic-tube' ),
-			'section'    => $advertising,
+			'section' => $advertising,
 		),
 		'infeed-ad-frequency'      => array(
 			'setting'     => 'majestic_tube_infeed_ad_frequency',
 			'default'     => 9,
 			'type'        => 'number',
 			'label'       => __( 'In-feed ad every N videos', 'majestic-tube' ),
+			'section' => $advertising,
 			'description' => __( 'A card-sized content block is inserted after this many video cards. A value below 3 behaves like 3.', 'majestic-tube' ),
-			'section'    => $advertising,
 		),
 		'infeed-ad-code'           => array(
 			'setting' => 'majestic_tube_infeed_ad_code',
 			'default' => '',
 			'type'    => 'html',
 			'label'   => __( 'In-feed ad code', 'majestic-tube' ),
-			'section'    => $advertising,
+			'section' => $advertising,
 			'customizer' => false,
 		),
 		/*
@@ -1042,14 +1134,14 @@ function majestic_tube_options_map() {
 			'default' => 'off',
 			'type'    => 'onoff',
 			'label'   => __( 'Enable popunder / interstitial code', 'majestic-tube' ),
-			'section'    => $advertising,
+			'section' => $advertising,
 		),
 		'popunder-ad-code'         => array(
 			'setting' => 'majestic_tube_popunder_ad_code',
 			'default' => '',
 			'type'    => 'html',
 			'label'   => __( 'Popunder / interstitial code', 'majestic-tube' ),
-			'section'    => $advertising,
+			'section' => $advertising,
 			'customizer' => false,
 		),
 		/*
@@ -1062,15 +1154,96 @@ function majestic_tube_options_map() {
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Only load advertising after consent', 'majestic-tube' ),
+			'section' => $advertising,
 			'description' => __( 'Requires a consent solution that sets the majestic_tube_ads_allowed filter (a cookie banner plugin or a small snippet). While no consent is recorded, every ad placement prints nothing.', 'majestic-tube' ),
-			'section'    => $advertising,
+		),
+		'header-ad-desktop'        => array(
+			'setting' => 'majestic_tube_ad_header_desktop',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'Legacy header content (desktop)', 'majestic-tube' ),
+			'section' => $advertising,
+			'customizer' => false,
+		),
+		'header-ad-mobile'         => array(
+			'setting' => 'majestic_tube_ad_header_mobile',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'Legacy header content (mobile)', 'majestic-tube' ),
+			'section' => $advertising,
+			'customizer' => false,
+		),
+		'sidebar-ad-desktop-1'     => array(
+			'setting' => 'majestic_tube_ad_sidebar_desktop_1',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'Legacy video sidebar content 1', 'majestic-tube' ),
+			'section' => $advertising,
+			'customizer' => false,
+		),
+		'sidebar-ad-desktop-2'     => array(
+			'setting' => 'majestic_tube_ad_sidebar_desktop_2',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'Legacy video sidebar content 2', 'majestic-tube' ),
+			'section' => $advertising,
+			'customizer' => false,
+		),
+		'sidebar-ad-desktop-3'     => array(
+			'setting' => 'majestic_tube_ad_sidebar_desktop_3',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'Legacy video sidebar content 3', 'majestic-tube' ),
+			'section' => $advertising,
+			'customizer' => false,
+		),
+		'sidebar-ad-mobile'        => array(
+			'setting' => 'majestic_tube_ad_sidebar_mobile',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'Legacy mobile sidebar content', 'majestic-tube' ),
+			'section' => $advertising,
+			'customizer' => false,
+		),
+		'inside-player-ad-zone-1-desktop' => array(
+			'setting'     => 'majestic_tube_ad_inside_player_1',
+			'default'     => '',
+			'type'        => 'html',
+			'label'       => __( 'Legacy player content 1', 'majestic-tube' ),
+			'section' => $advertising,
+			'description' => __( 'Retained for migration into the Player content widget area.', 'majestic-tube' ),
+			'customizer'  => false,
+		),
+		'inside-player-ad-zone-2-desktop' => array(
+			'setting' => 'majestic_tube_ad_inside_player_2',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'Legacy player content 2', 'majestic-tube' ),
+			'section' => $advertising,
+			'customizer' => false,
+		),
+		'under-player-ad-desktop'  => array(
+			'setting' => 'majestic_tube_ad_under_player_desktop',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'Legacy below-player content (desktop)', 'majestic-tube' ),
+			'section' => $advertising,
+			'customizer' => false,
+		),
+		'under-player-ad-mobile'   => array(
+			'setting' => 'majestic_tube_ad_under_player_mobile',
+			'default' => '',
+			'type'    => 'html',
+			'label'   => __( 'Legacy below-player content (mobile)', 'majestic-tube' ),
+			'section' => $advertising,
+			'customizer' => false,
 		),
 		'footer-ad-desktop'        => array(
 			'setting' => 'majestic_tube_ad_footer_desktop',
 			'default' => '',
 			'type'    => 'html',
 			'label'   => __( 'Legacy footer content (desktop)', 'majestic-tube' ),
-			'section'    => $advertising,
+			'section' => $advertising,
 			'customizer' => false,
 		),
 		'footer-ad-mobile'         => array(
@@ -1078,20 +1251,19 @@ function majestic_tube_options_map() {
 			'default' => '',
 			'type'    => 'html',
 			'label'   => __( 'Legacy footer content (mobile)', 'majestic-tube' ),
-			'section'    => $advertising,
+			'section' => $advertising,
 			'customizer' => false,
 		),
-
-		/* ---------------------------------------------------------------
-		 * SEO & social
-		 * ------------------------------------------------------------- */
+		/* ------------------------------------------------------------------
+		 * SEO and social metadata
+		 * ------------------------------------------------------------------ */
 		'facebook-app-id'          => array(
 			'setting'     => 'majestic_tube_facebook_app_id',
 			'default'     => '',
 			'type'        => 'text',
 			'label'       => __( 'Facebook app ID', 'majestic-tube' ),
-			'section'     => $seo,
-			'description' => __( 'Optional. The original theme hardcoded a third-party app ID; leave this empty to omit the tag.', 'majestic-tube' ),
+			'section' => $seo,
+			'description' => __( 'Optional. Leave this empty to omit the Facebook tag entirely.', 'majestic-tube' ),
 		),
 		'twitter-site'             => array(
 			'setting' => 'majestic_tube_twitter_site',
@@ -1112,15 +1284,15 @@ function majestic_tube_options_map() {
 			'default'     => '',
 			'type'        => 'url',
 			'label'       => __( 'Twitter player URL base (optional)', 'majestic-tube' ),
+			'section' => $seo,
 			'description' => __( 'HTTPS URL of a page that embeds a video when given ?post={id}. Leave empty to keep the summary_large_image card.', 'majestic-tube' ),
-			'section'     => $seo,
 		),
 		'meta-verification'        => array(
 			'setting'     => 'majestic_tube_meta_verification',
 			'default'     => '',
 			'type'        => 'code',
 			'label'       => __( 'Search engine verification tags', 'majestic-tube' ),
-			'section'     => $seo,
+			'section' => $seo,
 			'description' => __( 'Printed verbatim inside <head>. Paste the full <meta> tag(s).', 'majestic-tube' ),
 		),
 		'seo-footer-text'          => array(
@@ -1130,24 +1302,23 @@ function majestic_tube_options_map() {
 			'label'   => __( 'SEO footer text', 'majestic-tube' ),
 			'section' => $seo,
 		),
-
-		/* ---------------------------------------------------------------
+		/* ------------------------------------------------------------------
 		 * Custom code
-		 * ------------------------------------------------------------- */
+		 * ------------------------------------------------------------------ */
 		'google-analytics'         => array(
 			'setting'     => 'majestic_tube_google_analytics',
 			'default'     => '',
 			'type'        => 'code',
 			'label'       => __( 'Analytics code', 'majestic-tube' ),
-			'section'     => $scripts,
-			'description' => __( 'Printed inside <head> on the front-end, exactly like the original theme.', 'majestic-tube' ),
+			'section' => $code,
+			'description' => __( 'Printed inside the document head on every front-end page.', 'majestic-tube' ),
 		),
 		'other-scripts'            => array(
 			'setting'     => 'majestic_tube_other_scripts',
 			'default'     => '',
 			'type'        => 'code',
 			'label'       => __( 'Other scripts', 'majestic-tube' ),
-			'section'     => $scripts,
+			'section' => $code,
 			'description' => __( 'Extra markup printed before </body>.', 'majestic-tube' ),
 		),
 		'mobile-scripts'           => array(
@@ -1155,19 +1326,8 @@ function majestic_tube_options_map() {
 			'default'     => '',
 			'type'        => 'code',
 			'label'       => __( 'Mobile scripts', 'majestic-tube' ),
-			'section'     => $mobile,
+			'section' => $code,
 			'description' => __( 'Extra markup printed before </body> for mobile visitors only.', 'majestic-tube' ),
-		),
-
-		/* ---------------------------------------------------------------
-		 * Majestic Tube additions (not part of the original contract)
-		 * ------------------------------------------------------------- */
-		'enable-video-report'      => array(
-			'setting'     => 'majestic_tube_enable_video_report',
-			'default'     => 'on',
-			'type'        => 'onoff',
-			'label'       => __( 'Enable "Report video" button', 'majestic-tube' ),
-			'description' => __( 'Lets visitors flag broken or miscategorized videos. Reports appear under Videos > Reported Videos.', 'majestic-tube' ),
 		),
 	);
 
@@ -1177,17 +1337,16 @@ function majestic_tube_options_map() {
 }
 
 /**
- * Legacy option row imported from the original theme.
+ * The stored option row that predates the Customizer settings.
  */
 define( 'MAJESTIC_TUBE_LEGACY_OPTION', 'wpst-options' );
 
 /**
- * Read a value straight out of the legacy wpst-options array.
+ * Read a value straight out of the wpst-options array.
  *
- * Sites migrated from the original theme still have their settings in the
- * `wpst-options` database row. Reading it as a fallback means an existing
- * installation keeps its ad codes, colours and network switches after
- * switching to Majestic Tube.
+ * A site that installed the theme before the Customizer settings existed
+ * still has its settings in this database row. Reading it as a fallback means
+ * such a site keeps its ad codes, colours and network switches.
  *
  * @param string $field_id Field id.
  * @param mixed  $default  Default when the key is absent.
@@ -1233,9 +1392,9 @@ function majestic_tube_get_option( $option_group, $field_id, $default = false ) 
 
 	$map = majestic_tube_options_map();
 
-	// A mapped key: the Customizer wins, then the original theme's stored
-	// value, then the declared default. An explicitly saved empty string is
-	// honoured (it means "the administrator cleared this zone").
+	// A mapped key: the Customizer wins, then the value stored in the
+	// wpst-options row, then the declared default. An explicitly saved empty
+	// string is honoured (it means "the administrator cleared this zone").
 	if ( isset( $map[ $field_id ] ) ) {
 		$saved = get_theme_mod( $map[ $field_id ]['setting'], null );
 
@@ -1246,15 +1405,16 @@ function majestic_tube_get_option( $option_group, $field_id, $default = false ) 
 		return majestic_tube_get_legacy_option( $field_id, $map[ $field_id ]['default'] );
 	}
 
-	// Unknown key that the original theme used but we do not model: honour the
-	// value stored by the original theme, otherwise fall back to the default.
+	// A key this theme no longer models but an earlier install may still
+	// have stored: honour the value in the wpst-options row, otherwise fall
+	// back to the caller's default.
 	return majestic_tube_get_legacy_option( $field_id, $default );
 }
 
 /**
- * Whether an original-style on/off option is enabled.
+ * Whether an on/off option is enabled.
  *
- * @param string $field_id Original field id.
+ * @param string $field_id Field id.
  * @return bool
  */
 function majestic_tube_option_is_on( $field_id ) {
@@ -1267,25 +1427,36 @@ function majestic_tube_option_is_on( $field_id ) {
  * @param WP_Customize_Manager $wp_customize Manager.
  */
 function majestic_tube_options_customize_register( $wp_customize ) {
-	$sections = majestic_tube_option_sections();
-	$priority = 30;
+	$priority = 20;
 
-	foreach ( $sections as $slug => $title ) {
-		$section_args = array(
-			'title'    => $title,
-			'priority' => $priority,
+	foreach ( majestic_tube_option_panels() as $slug => $title ) {
+		$wp_customize->add_panel(
+			'majestic_tube_' . $slug,
+			array(
+				'title'    => $title,
+				'priority' => $priority,
+			)
 		);
 
-		if ( 'advertising' === $slug ) {
-			$section_args['description'] = __( 'Content blocks are managed from Appearance → Widgets. The single-video sidebar has its own switch in the main options section.', 'majestic-tube' );
+		$priority += 2;
+	}
+
+	$section_priority = 10;
+
+	foreach ( majestic_tube_option_sections() as $slug => $section ) {
+		$section_args = array(
+			'title'    => $section['title'],
+			'panel'    => 'majestic_tube_' . $section['panel'],
+			'priority' => $section_priority,
+		);
+
+		if ( isset( $section['description'] ) ) {
+			$section_args['description'] = $section['description'];
 		}
 
-		$wp_customize->add_section(
-			'majestic_tube_options' . ( 'general' === $slug ? '' : '-' . $slug ),
-			$section_args
-		);
+		$wp_customize->add_section( 'majestic_tube_options-' . $slug, $section_args );
 
-		++$priority;
+		++$section_priority;
 	}
 
 	foreach ( majestic_tube_options_map() as $config ) {
@@ -1293,7 +1464,7 @@ function majestic_tube_options_customize_register( $wp_customize ) {
 			continue;
 		}
 
-		$section  = isset( $config['section'] ) ? $config['section'] : 'general';
+		$section  = isset( $config['section'] ) ? $config['section'] : 'home';
 		$sanitize = isset( $config['sanitize'] ) ? $config['sanitize'] : majestic_tube_option_sanitizer( $config['type'] );
 
 		$wp_customize->add_setting(
@@ -1307,7 +1478,7 @@ function majestic_tube_options_customize_register( $wp_customize ) {
 
 		$control_args = array(
 			'label'       => $config['label'],
-			'section'     => 'majestic_tube_options' . ( 'general' === $section ? '' : '-' . $section ),
+			'section'     => 'majestic_tube_options-' . $section,
 			'description' => isset( $config['description'] ) ? $config['description'] : '',
 		);
 

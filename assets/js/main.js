@@ -487,6 +487,69 @@
 	}
 
 	/**
+	 * Mount any Turnstile widget inside a container, at most once each.
+	 *
+	 * Turnstile is loaded in explicit-render mode, and the sign-up form lives
+	 * in a modal that stays hidden until a visitor opens it. A widget mounted
+	 * into a hidden element measures itself as zero and never recovers, so
+	 * mounting is deferred until the container is actually on screen.
+	 *
+	 * @param {Element|Document} root Container to search.
+	 */
+	function initCaptcha( root ) {
+		if ( ! window.turnstile || typeof window.turnstile.render !== 'function' ) {
+			return;
+		}
+
+		findAll( '.cf-turnstile[data-mt-turnstile]', root || document ).forEach( function ( mount ) {
+			if ( '1' === mount.getAttribute( 'data-mt-mounted' ) ) {
+				return;
+			}
+
+			/*
+			 * Skip anything still inside a hidden container, and leave it
+			 * unmarked so a later call can mount it once revealed. This is
+			 * what keeps the pass over the whole document from mounting the
+			 * sign-up widget inside the closed modal.
+			 */
+			if ( mount.closest( '[hidden]' ) ) {
+				return;
+			}
+
+			mount.setAttribute( 'data-mt-mounted', '1' );
+
+			var widget = window.turnstile.render( mount, {
+				sitekey: mount.getAttribute( 'data-sitekey' ),
+				theme: mount.getAttribute( 'data-theme' ) || 'auto'
+			} );
+
+			if ( widget ) {
+				mount.setAttribute( 'data-mt-widget', widget );
+			}
+		} );
+	}
+
+	/**
+	 * Clear a solved Turnstile widget so the next attempt starts over.
+	 *
+	 * A token is good once. Without this, a visitor who fails for an
+	 * unrelated reason - a username already taken, say - is left looking at a
+	 * completed challenge that no longer verifies, and the form can never
+	 * succeed without a full page reload.
+	 *
+	 * @param {Element} form Form that was submitted.
+	 */
+	function resetCaptcha( form ) {
+		if ( ! window.turnstile || typeof window.turnstile.reset !== 'function' ) {
+			return;
+		}
+
+		findAll( '.cf-turnstile[data-mt-widget]', form ).forEach( function ( mount ) {
+			window.turnstile.reset( mount.getAttribute( 'data-mt-widget' ) );
+		} );
+	}
+
+	/**
 	 * Membership modal (login / register / reset).
 	 */
 	function initUserModal() {
@@ -509,6 +572,10 @@
 
 			if ( target ) {
 				target.style.display = 'block';
+
+				// The sign-up panel was display:none until this moment, which is
+				// exactly when a spam widget inside it can finally be mounted.
+				initCaptcha( target );
 			}
 
 			var footer = modal.querySelector( '.majestic-tube-modal-footer' );
@@ -585,6 +652,10 @@
 						if ( errors ) {
 							errors.innerHTML = json.message || '';
 						}
+
+						// The token was consumed by the failed attempt, so hand
+						// the visitor a fresh challenge instead of a dead form.
+						resetCaptcha( form );
 						return;
 					}
 
@@ -2007,6 +2078,7 @@
 		countView();
 		initLikeButtons();
 		initReadMore();
+		initCaptcha( document );
 		initUserModal();
 		initThemeToggle();
 		initThumbRotation();

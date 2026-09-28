@@ -444,6 +444,7 @@
     <nav class="toc" aria-label="User guide contents">
       <strong>Contents</strong>
       <ul>
+        <li><a href="#whats-new-220">What&rsquo;s new in 2.2.0</a></li>
         <li><a href="#requirements">Requirements</a></li>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#quick-start">Quick start</a></li>
@@ -465,6 +466,31 @@
     </nav>
 
     <main>
+      <section id="whats-new-220">
+        <p class="eyebrow">Release</p>
+        <h2>What&rsquo;s New in 2.2.0</h2>
+        <p>This release reorganizes the Customizer, replaces the spam check with Cloudflare Turnstile, and makes imported videos display correctly.</p>
+
+        <h3>A Customizer you can navigate</h3>
+        <p>The settings used to sit in nine flat sections with a catch-all bucket that mixed homepage settings with video-page settings. They are now grouped into panels, and every setting is filed under the page it actually affects. The two panels you will visit most are kept apart: <strong>Homepage &amp; Listings</strong> and <strong>Video Page</strong>. The full map is in <a href="#customizer">Customizer Settings</a>.</p>
+        <p>Nothing is lost in the move, and no setting is reset: the values stay exactly where they were stored. Only the labels and the layout around them changed.</p>
+
+        <h3>Cloudflare Turnstile replaces reCAPTCHA</h3>
+        <p>Spam protection on sign-up and video submission is now handled by Cloudflare Turnstile, and reCAPTCHA has been removed. Turnstile is free at any traffic level and asks less of a visitor. Setup takes a few minutes and is covered in <a href="#membership">Members and Video Submissions</a>.</p>
+
+        <h3>Imported videos display correctly</h3>
+        <p>Two problems showed up on videos brought in by an importer, and both are fixed:</p>
+        <ul>
+          <li><strong>Ratings appeared as 0%.</strong> Imported posts store their rating as a pair of values, which the theme was not reading, so every imported video showed no rating. The theme now reads them, and the first visitor vote builds on the imported score instead of replacing it with 100%.</li>
+          <li><strong>Hover previews showed one broken image.</strong> Extra preview images are stored as a single comma-separated value, while the theme read them as one URL per stored value. A comma is a legal URL character, so the whole string survived as one unusable address. Both storage shapes are now handled, including removing a single preview from the editor.</li>
+        </ul>
+        <p>The 18 USC 2257 page is also now repaired automatically if it goes missing from the footer menu, so a deleted or renamed legal link comes back on its own.</p>
+
+        <div class="note">
+          <strong>Upgrading from 2.1.7:</strong> replace the theme folder. Your settings carry over. If you were using reCAPTCHA, create a Turnstile widget and paste its two keys into <span class="path">Appearance &rarr; Customize &rarr; Site Features &rarr; Accounts &amp; Spam Protection</span> &mdash; the old reCAPTCHA keys are no longer used.
+        </div>
+      </section>
+
       <section id="requirements">
         <p class="eyebrow">Before you begin</p>
         <h2>Requirements</h2>
@@ -811,7 +837,7 @@
         </div>
 
         <h3>Playback speed, keyboard shortcuts, resume, and theater mode</h3>
-        <p>Four optional extras, all under <span class="path">Appearance &rarr; Customize &rarr; Majestic Tube - Video Player</span> and all <strong>off by default</strong>, so updating the theme changes nothing a visitor can see until you switch one on. Each is independent: you can offer the speed control without the keyboard shortcuts, or theater mode on its own.</p>
+        <p>Four optional extras, all under <span class="path">Appearance &rarr; Customize &rarr; Video Page &rarr; Player</span> and all <strong>off by default</strong>, so updating the theme changes nothing a visitor can see until you switch one on. Each is independent: you can offer the speed control without the keyboard shortcuts, or theater mode on its own.</p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -885,7 +911,7 @@
 
         <h3>Enable or disable membership</h3>
         <ol class="steps">
-          <li>Go to <span class="path">Appearance → Customize → Majestic Tube Options</span>.</li>
+          <li>Go to <span class="path">Appearance → Customize → Site Features → Accounts &amp; Spam Protection</span>.</li>
           <li>Find <span class="setting">Enable membership (login/register)</span>.</li>
           <li>Choose <strong>On</strong> or <strong>Off</strong>.</li>
           <li>Choose <strong>Publish</strong>.</li>
@@ -921,13 +947,13 @@
           <li>Open <span class="path">My Account → Submit a Video</span>.</li>
           <li>Complete the title, description, playback source, thumbnail, duration, category, tags, and actors as needed.</li>
           <li>For duration, enter hours, minutes, and seconds using the three boxes.</li>
-          <li>Complete the verification when reCAPTCHA is enabled.</li>
+          <li>Complete the verification when spam protection is enabled.</li>
           <li>Choose <strong>Submit video</strong>.</li>
         </ol>
         <p>New submissions are saved for moderation and do not appear publicly until an administrator publishes them.</p>
 
         <h3>Configure required submission fields</h3>
-        <p>Go to <span class="path">Appearance → Customize → Majestic Tube - Video Submission</span>. You can make the following fields required or optional:</p>
+        <p>Go to <span class="path">Appearance → Customize → Site Features → Video Submission</span>. You can make the following fields required or optional:</p>
         <ul class="checklist">
           <li>Video title</li>
           <li>Description</li>
@@ -939,43 +965,70 @@
           <li>Duration</li>
         </ul>
 
-        <h3>Set up reCAPTCHA</h3>
+        <h3>Set up Cloudflare Turnstile</h3>
+        <p>Turnstile is Cloudflare’s free, privacy-friendly spam check. It asks less of a visitor than the puzzles it replaces, it is free at any traffic level, and it runs without sending visitors to a third-party page. It is the only spam-protection service this theme supports, and it is off until you switch it on.</p>
         <ol class="steps">
-          <li>Create a reCAPTCHA v2 site in the service’s administration area.</li>
-          <li>Copy the site key and secret key.</li>
-          <li>Open <span class="path">Appearance → Customize → Majestic Tube Options</span>.</li>
-          <li>Enable reCAPTCHA and enter both keys.</li>
-          <li>Publish the changes.</li>
-          <li>Test registration and video submission in a private browser window.</li>
+          <li>Sign in to the Cloudflare dashboard and open <span class="path">Turnstile</span> in the left-hand menu. An account is enough &mdash; the site does not have to be using Cloudflare as its host or DNS, and the free plan is all that is required.</li>
+          <li>Choose <strong>Add widget</strong>.</li>
+          <li>Name the widget after your site, for example <em>example.com sign-up</em>. The name is only for your own reference.</li>
+          <li>Set <strong>Widget Mode</strong> to <strong>Managed</strong>. Managed is the best default for a public sign-up form: Cloudflare decides when to issue an interactive challenge and stays quiet for most visitors who pass. <strong>Non-interactive</strong> never interrupts anyone, and <strong>Invisible</strong> is not used by this theme.</li>
+          <li>Add every hostname the widget will appear on. The form is protected on each host you list, so include <span class="setting">example.com</span> and, if your staging or development site is public, its hostname too. A hostname you leave out will be refused.</li>
+          <li>Choose <strong>Create</strong>.</li>
+          <li>Cloudflare shows a <strong>Site Key</strong> and a <strong>Secret Key</strong>. Copy both &mdash; the dialog will not show them again.</li>
+          <li>Open <span class="path">Appearance → Customize → Site Features → Accounts &amp; Spam Protection</span>.</li>
+          <li>Turn on <strong>Enable spam protection</strong>.</li>
+          <li>Paste the site key into <strong>Turnstile site key</strong> and the secret key into <strong>Turnstile secret key</strong>. Both are required: while either one is blank the theme leaves the forms alone rather than blocking every visitor.</li>
+          <li>Choose <strong>Publish</strong>.</li>
+          <li>Open your site in a private browser window, choose <strong>Sign up</strong>, and complete the challenge to confirm it works. Sign-up and video submission are the two protected forms.</li>
         </ol>
-        <div class="warning">Keep the secret key private. Never paste it into a public page, post, or widget.</div>
+        <div class="note">
+          <strong>Before going live, use Cloudflare&rsquo;s test keys.</strong> Cloudflare publishes a pair that always passes and a pair that always fails, so you can prove the wiring without creating real challenges. Paste <span class="setting">1x00000000000000000000AA</span> as the site key and <span class="setting">1x0000000000000000000000000000000AA</span> as the secret key, and the widget will succeed every time. When you are ready, swap in the keys from your own widget.
+        </div>
+        <div class="warning">Keep the secret key private. Never paste it into a public page, post, widget, or any field marked as custom code &mdash; the theme sends it to Cloudflare from the server and it must never reach the browser.</div>
+
+        <h4>How the theme uses Turnstile</h4>
+        <p>Turnstile&rsquo;s script is loaded only while spam protection is switched on and both keys are filled in, so a site with the feature off makes no request to Cloudflare at all.</p>
+        <ul>
+          <li>The widget&rsquo;s token is sent to Cloudflare&rsquo;s <span class="setting">siteverify</span> endpoint from the server, along with the visitor&rsquo;s IP address. A token that does not verify stops the sign-up or the submission.</li>
+          <li>Tokens are good once. If a visitor fails for an unrelated reason &mdash; a username already taken, say &mdash; the theme clears the challenge and hands them a fresh one instead of leaving them with a form that can never succeed.</li>
+          <li>The sign-up form sits in a modal, so the widget is mounted only once that panel is actually open. A challenge mounted into a hidden panel measures itself as zero and never recovers.</li>
+        </ul>
+
+        <h3>Turn protection off</h3>
+        <p>Set <strong>Enable spam protection</strong> to <strong>Off</strong>. The widget disappears from both forms and Cloudflare&rsquo;s script stops loading; your Turnstile keys stay saved, so switching back on needs no work.</p>
       </section>
 
       <section id="customizer">
         <p class="eyebrow">Theme preferences</p>
         <h2>Customizer Settings</h2>
-        <p class="section-intro">Open <span class="path">Appearance → Customize</span>. The Majestic Tube sections appear in the Customizer sidebar.</p>
+        <p class="section-intro">Open <span class="path">Appearance &rarr; Customize</span>. The settings are grouped into panels, and each panel holds one or more sections. Every setting is filed under the page it affects, so the homepage and the listing archives sit in one place and the single video page sits in another.</p>
 
-        <h3>Majestic Tube Options</h3>
-        <p>This is the main section for listings, cards, video details, membership, footer behavior, and reports.</p>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th scope="col">Setting group</th>
+                <th scope="col">Panel</th>
+                <th scope="col">Section</th>
                 <th scope="col">What you can control</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Homepage and listing</td><td>Homepage sort, videos per page, videos per row, category columns, and desktop/mobile counts.</td></tr>
-              <tr><td>Video cards</td><td>Thumbnail aspect ratio, image fit, thumbnail quality, hover rotation, views, durations, and rating display.</td></tr>
-              <tr><td>Single video</td><td>Related videos, comments, breadcrumbs, search bar, description block, categories, tags, actors, and video sidebar.</td></tr>
-              <tr><td>Homepage presentation</td><td>Homepage title, description position, search bar, and whether long descriptions are shortened.</td></tr>
-              <tr><td>Tracking button</td><td>Show or hide the button, choose its icon, text, and destination URL.</td></tr>
-              <tr><td>Directories</td><td>Categories and actors per page, plus description position for category and tag archives.</td></tr>
-              <tr><td>Membership</td><td>Enable member login and registration, reCAPTCHA, account links, and the admin bar.</td></tr>
-              <tr><td>Footer</td><td>Enable the copyright bar, edit copyright text, and choose one to four columns.</td></tr>
-              <tr><td>Reporting</td><td>Enable the front-end Report video button.</td></tr>
+              <tr><td rowspan="3">Homepage &amp; Listings</td><td>Homepage</td><td>How the homepage sorts its videos, how many show per page and per row, and the homepage title and where it sits.</td></tr>
+              <tr><td>Homepage on Mobile</td><td>Videos per page and per row on phones and tablets, and hiding the homepage widget areas on mobile.</td></tr>
+              <tr><td>Category, Tag &amp; Actor Archives</td><td>Videos per page on those archives, and whether the category and tag description goes above or below the list.</td></tr>
+              <tr><td rowspan="3">Video Page</td><td>Video Page Layout</td><td>The video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the tracking button, the view, duration and rating displays, the Report video button, and related videos.</td></tr>
+              <tr><td>Player</td><td>Autoplay, the player engine, the quality selector, view counting, and the optional keyboard shortcuts, speed, resume and theater controls.</td></tr>
+              <tr><td>Sharing</td><td>The share buttons printed under the player.</td></tr>
+              <tr><td rowspan="4">Site Design</td><td>Colours &amp; Typography</td><td>Light or dark skin, the header toggle, the accent colour, the custom background class, and the site font.</td></tr>
+              <tr><td>Logo</td><td>An image or text logo, its font, size, dimensions and spacing, a copy in the footer, and the favicon.</td></tr>
+              <tr><td>Player Watermark</td><td>A logo overlaid on the player, with its size, colour treatment and corner.</td></tr>
+              <tr><td>Thumbnails</td><td>Thumbnail aspect ratio, image fit, image quality, and the hover rotation on video cards.</td></tr>
+              <tr><td rowspan="3">Site Features</td><td>Header, Footer &amp; Search</td><td>The search bar, the number of footer columns, the copyright bar and its text, and the admin bar.</td></tr>
+              <tr><td>Accounts &amp; Spam Protection</td><td>Member login and registration, and the Cloudflare Turnstile spam check with its two keys.</td></tr>
+              <tr><td>Video Submission</td><td>The submission form, the links that lead to it, and which fields are required.</td></tr>
+              <tr><td>Advertising</td><td>In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from <span class="path">Appearance &rarr; Widgets</span>.</td></tr>
+              <tr><td rowspan="2">SEO &amp; Analytics</td><td>SEO &amp; Social</td><td>The Facebook app ID, the X/Twitter handle, the playable card URL, verification tags, and SEO footer text.</td></tr>
+              <tr><td>Custom Code</td><td>Analytics code in the page head, extra scripts before the closing body tag, and scripts for mobile visitors only.</td></tr>
             </tbody>
           </table>
         </div>
@@ -993,7 +1046,7 @@
           </div>
         </details>
 
-        <h3>Majestic Tube - Video Player</h3>
+        <h3>Video Page &rarr; Player</h3>
         <ul>
           <li>Enable or disable autoplay.</li>
           <li>Choose the enhanced player or the browser’s native player.</li>
@@ -1001,7 +1054,7 @@
           <li>Count a view only after playback starts, so a visit is only counted as a view once the video has actually played for three seconds.</li>
         </ul>
 
-        <h3>Majestic Tube - Logo &amp; Colours</h3>
+        <h3>Site Design</h3>
         <ul>
           <li>Enable a custom background.</li>
           <li>Choose the main accent colour.</li>
@@ -1022,13 +1075,13 @@
 
 
         <h4>Colour scheme and dark mode</h4>
-        <p>Go to <span class="path">Appearance &rarr; Customize &rarr; Majestic Tube - Logo &amp; Colours</span>. Two settings control the skin.</p>
+        <p>Go to <span class="path">Appearance &rarr; Customize &rarr; Site Design &rarr; Colours &amp; Typography</span>. Two settings control the skin.</p>
         <ul>
           <li><strong>Colour scheme</strong> chooses what the site uses by default.</li>
           <li><strong>Show the light/dark toggle in the header</strong> adds a small round button to the header so visitors can switch for themselves. It is off by default.</li>
         </ul>
         <p><strong>Light</strong> is the classic Majestic Tube surface. <strong>Dark</strong> is a near-black companion built for evening viewing: the same layout, the same accent, retuned borders and text colours so nothing turns into unreadable grey-on-black. <strong>Follow system</strong> renders whatever the visitor's own operating system asks for and needs no script and no stored value &mdash; the browser decides, and the page is correct before any of the theme's JavaScript runs.</p>
-        <p>The accent colour, background, and every other <span class="setting">Majestic Tube - Logo &amp; Colours</span> control apply to both skins, so a dark site is the same site rather than a separate design.</p>
+        <p>The accent colour, background, and every other control in the <span class="setting">Site Design</span> panel apply to both skins, so a dark site is the same site rather than a separate design.</p>
         <div class="note">
           A visitor's choice is stored in their own browser and is never sent to the server. No cookie is set, nothing is written to the database, and a visitor who has never chosen anything simply gets the site default. Clearing site data, or opening a private window, returns them to the default &mdash; which is usually the right behaviour.
         </div>
@@ -1038,14 +1091,14 @@
           <strong>For developers:</strong> the <span class="setting">majestic_tube_color_scheme</span> filter changes the default scheme, and <span class="setting">majestic_tube_theme_toggle_enabled</span> decides whether the toggle is rendered. Both live in <code>inc/theme-options.php</code>.
         </div>
 
-        <h3>Majestic Tube - Sharing &amp; Social</h3>
+        <h3>Video Page &rarr; Sharing</h3>
         <p>Enable sharing as a whole, then enable or disable the individual networks. The theme ships <strong>X/Twitter</strong>, <strong>Reddit</strong>, and <strong>email</strong>. Switch off the ones you do not want so the video page stays uncluttered.</p>
         <p>Facebook, LinkedIn and Tumblr all restrict or remove adult content, and Odnoklassniki (ok.ru) is no longer reachable for an anonymous share, so none of the four prints a button here. Their settings are kept for compatibility but the toggles are hidden.</p>
 
-        <h3>Majestic Tube - Video Submission</h3>
+        <h3>Site Features &rarr; Video Submission</h3>
         <p>Enable or disable the front-end submission form, its navigation links, and each required field. The duration and title are required by default.</p>
 
-        <h3>Majestic Tube - Content areas</h3>
+        <h3>Advertising</h3>
         <p>This section directs you to <span class="path">Appearance → Widgets</span>, where header, player, below-player, video-sidebar, and footer content is managed. It also carries the advertising placements that the theme controls for you and that need no widget at all.</p>
         <div class="table-wrap">
           <table>
@@ -1071,7 +1124,7 @@
           Connecting a consent plugin is a one-line filter in a small snippet or a site-specific plugin. Let the consent plugin return <span class="setting">true</span> once advertising is allowed, and the theme will print its placements as normal. The filter is <span class="setting">majestic_tube_ads_allowed</span> and it receives the placement name as its second argument: in-feed, popunder, header, footer, under-player, video-sidebar, or player. It also works the other way round for a single placement, which is useful if one area should always be shown.
         </div>
 
-        <h3>Majestic Tube - SEO &amp; Social</h3>
+        <h3>SEO &amp; Analytics &rarr; SEO &amp; Social</h3>
         <ul>
           <li>Add an optional Facebook app ID.</li>
           <li>Add an X/Twitter site handle.</li>
@@ -1084,14 +1137,13 @@
         <p>By default a shared video link produces the large image card. To get the playable card, fill in <span class="setting">Twitter player URL base</span> with the HTTPS address of a small, bare page of your own that embeds a video and reads the <span class="setting">?post=</span> query argument. The theme appends the video ID for you, so a base of <span class="path">https://example.com/player/</span> points that page at <span class="path">https://example.com/player/?post=123</span> for video 123, and the card becomes playable on the timeline.</p>
         <p>Leave the field empty to keep the large image card. The page you point at must be served over HTTPS, must return nothing but the player, and should stay under a few hundred kilobytes: X loads it in a card of roughly 435 pixels wide, so a full site template with a header, sidebar, and footer would look wrong inside the card.</p>
 
-        <h3>Majestic Tube - Custom Code</h3>
+        <h3>SEO &amp; Analytics &rarr; Custom Code</h3>
         <p>Administrators can add analytics code to the page header and extra scripts near the end of the page. Paste complete snippets exactly as supplied by the service. Incorrect code can affect the entire site.</p>
 
-        <h3>Majestic Tube - Mobile</h3>
+        <h3>Homepage &amp; Listings &rarr; Homepage on Mobile</h3>
         <ul>
           <li>Choose the number of videos per mobile page and per row.</li>
           <li>Hide homepage widget areas on mobile if needed.</li>
-          <li>Add optional scripts for mobile visitors only.</li>
         </ul>
       </section>
 
@@ -1151,7 +1203,7 @@
 
         <h3>Enable reports</h3>
         <ol class="steps">
-          <li>Open <span class="path">Appearance → Customize → Majestic Tube Options</span>.</li>
+          <li>Open <span class="path">Appearance → Customize → Video Page → Video Page Layout</span>.</li>
           <li>Find <span class="setting">Enable “Report video” button</span>.</li>
           <li>Choose <strong>On</strong>.</li>
           <li>Publish the changes.</li>
@@ -1250,7 +1302,7 @@
           <li>Limit administrator accounts.</li>
           <li>Require HTTPS.</li>
           <li>Review new registrations and submitted content.</li>
-          <li>Do not share secret API keys, reCAPTCHA secrets, or tracking credentials.</li>
+          <li>Do not share secret API keys, the Turnstile secret key, or tracking credentials.</li>
         </ul>
 
         <h3>Translate the theme</h3>
@@ -1313,7 +1365,8 @@
               <li>Confirm membership is enabled in the Customizer.</li>
               <li>Check <span class="path">Settings → General → Membership</span>.</li>
               <li>Review any security, spam, or membership plugin restrictions.</li>
-              <li>If reCAPTCHA is enabled, confirm both keys are valid and the challenge appears.</li>
+              <li>If spam protection is on, confirm both Turnstile keys are filled in and the challenge appears.</li>
+              <li>Confirm the site&rsquo;s hostname is listed in the widget&rsquo;s allowed hostnames at Cloudflare. A hostname left out is refused, and the check can never pass.</li>
             </ul>
           </div>
         </details>
@@ -1424,7 +1477,7 @@
         <p>They update as visitors use the site. A browser, server, or caching configuration can delay the visible refresh; refreshing the video page normally shows the latest stored values.</p>
 
         <h3>Why are there no keyboard shortcuts or speed control?</h3>
-        <p>They are off until you turn them on, under <span class="path">Appearance &rarr; Customize &rarr; Majestic Tube - Video Player</span>. That is deliberate: a theme update should not start intercepting a visitor&rsquo;s keystrokes or add buttons to a page they already got used to. Turn on the ones you want, one at a time or together.</p>
+        <p>They are off until you turn them on, under <span class="path">Appearance &rarr; Customize &rarr; Video Page &rarr; Player</span>. That is deliberate: a theme update should not start intercepting a visitor&rsquo;s keystrokes or add buttons to a page they already got used to. Turn on the ones you want, one at a time or together.</p>
 
         <h3>Do the resume position and theater mode store anything about my visitors?</h3>
         <p>No. The playback position, the chosen speed, and whether theater mode is on are all kept in the visitor&rsquo;s own browser, exactly like the colour scheme choice in 2.1.6. Nothing is sent to your server, no cookie is set, and nothing is written to the database or any report. Clearing site data, or opening a private window, simply returns a visitor to your defaults.</p>
@@ -1433,7 +1486,7 @@
         <p>Sign in when required, disable conflicting caching or security restrictions, and confirm JavaScript is enabled. A visitor may also be prevented from voting or reporting the same item again within the applicable time window.</p>
 
         <h3>Can I have a dark site?</h3>
-        <p>Yes. Set <span class="setting">Colour scheme</span> to <strong>Dark</strong> under <span class="path">Appearance &rarr; Customize &rarr; Majestic Tube - Logo &amp; Colours</span>. Set it to <strong>Follow system</strong> instead and each visitor gets the skin their own device already asks for, which is usually the friendliest default for a video site people watch at night.</p>
+        <p>Yes. Set <span class="setting">Colour scheme</span> to <strong>Dark</strong> under <span class="path">Appearance &rarr; Customize &rarr; Site Design &rarr; Colours &amp; Typography</span>. Set it to <strong>Follow system</strong> instead and each visitor gets the skin their own device already asks for, which is usually the friendliest default for a video site people watch at night.</p>
         <p>To let visitors override it, also turn on <span class="setting">Show the light/dark toggle in the header</span>. Their choice is remembered per browser and never reaches your server, so it costs you nothing in stored data and reports no personal preference.</p>
 
         <h3>Does the dark mode slow the page down?</h3>

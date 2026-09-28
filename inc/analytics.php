@@ -311,10 +311,31 @@ function majestic_tube_analytics_get( $post_id ) {
 
 	$meta = get_post_meta( $post_id );
 
+	/*
+	 * Imported posts carry their rating as a `thumbs_up` / `thumbs_down` pair
+	 * rather than the native `likes_count` / `dislikes_count` pair. The values
+	 * are a percentage that sums to 100, not vote totals, but the display is a
+	 * ratio - likes / (likes + dislikes) - so the two forms produce the same
+	 * number and can be read as the starting figures.
+	 *
+	 * The native keys win whenever they are present, so a post that already
+	 * has votes is never overwritten by the imported baseline. Because the vote
+	 * handler increments whatever this returns, the first vote on an imported
+	 * post moves the imported rating by one rather than replacing it with a
+	 * bare 100%.
+	 */
+	$likes    = isset( $meta['likes_count'] ) ? absint( $meta['likes_count'][0] ) : null;
+	$dislikes = isset( $meta['dislikes_count'] ) ? absint( $meta['dislikes_count'][0] ) : null;
+
+	if ( null === $likes || null === $dislikes ) {
+		$likes    = ( null === $likes && isset( $meta['thumbs_up'] ) ) ? absint( $meta['thumbs_up'][0] ) : $likes;
+		$dislikes = ( null === $dislikes && isset( $meta['thumbs_down'] ) ) ? absint( $meta['thumbs_down'][0] ) : $dislikes;
+	}
+
 	$data = array(
 		'views'    => isset( $meta['post_views_count'] ) ? absint( $meta['post_views_count'][0] ) : 0,
-		'likes'    => isset( $meta['likes_count'] ) ? absint( $meta['likes_count'][0] ) : 0,
-		'dislikes' => isset( $meta['dislikes_count'] ) ? absint( $meta['dislikes_count'][0] ) : 0,
+		'likes'    => null === $likes ? 0 : $likes,
+		'dislikes' => null === $dislikes ? 0 : $dislikes,
 		'rate'     => isset( $meta['rate'] ) ? absint( $meta['rate'][0] ) : 0,
 		'reported' => isset( $meta['reported_count'] ) ? absint( $meta['reported_count'][0] ) : 0,
 	);

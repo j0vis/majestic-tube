@@ -28,6 +28,40 @@ function majestic_tube_add_thumbs_meta_box() {
 add_action( 'add_meta_boxes', 'majestic_tube_add_thumbs_meta_box' );
 
 /**
+ * Flatten a post's stored `thumbs` meta into a list of single URLs.
+ *
+ * Two shapes of this key are in the wild. The theme's own admin screen stores
+ * one meta row per thumbnail, and the video importer stores a single row whose
+ * URLs are joined with commas. Reading the comma-joined form as one value
+ * lets it survive esc_url_raw() intact, because a comma is a legal URL
+ * character - so the hover preview would then request one nonexistent image
+ * and the admin screen would show a single unremovable entry. Splitting on the
+ * comma makes both shapes produce the same list.
+ *
+ * @param mixed $values Raw get_post_meta( $post_id, 'thumbs', false ) result.
+ * @return string[] Individual, non-empty URLs.
+ */
+function majestic_tube_parse_thumbs_meta( $values ) {
+	$urls = array();
+
+	foreach ( (array) $values as $value ) {
+		if ( ! is_scalar( $value ) ) {
+			continue;
+		}
+
+		foreach ( explode( ',', (string) $value ) as $url ) {
+			$url = trim( $url );
+
+			if ( '' !== $url ) {
+				$urls[] = $url;
+			}
+		}
+	}
+
+	return $urls;
+}
+
+/**
  * Render the thumbnails metabox.
  *
  * @param WP_Post $post Current post.
@@ -35,7 +69,7 @@ add_action( 'add_meta_boxes', 'majestic_tube_add_thumbs_meta_box' );
 function majestic_tube_thumbs_meta_box_callback( $post ) {
 	wp_nonce_field( 'majestic_tube_thumbs', 'majestic_tube_thumbs_nonce' );
 
-	$thumbs = get_post_meta( $post->ID, 'thumbs', false );
+	$thumbs = majestic_tube_parse_thumbs_meta( get_post_meta( $post->ID, 'thumbs', false ) );
 	?>
 	<div class="majestic-tube-thumbs-list" id="majestic-tube-thumbs-list">
 		<?php
@@ -94,7 +128,39 @@ function majestic_tube_handle_thumb_mutation( $remove ) {
 	}
 
 	if ( $remove ) {
-		delete_post_meta( $post_id, 'thumbs', $thumb_url );
+		/*
+		 * delete_post_meta() matches one whole row, so it finds nothing when
+		 * the row holds several comma-joined URLs - which is exactly how the
+		 * importer stores them. Rebuild the row without the requested URL and
+		 * fall back to a plain delete when it was stored as a row of its own.
+		 */
+		$stored = get_post_meta( $post_id, 'thumbs', false );
+		$joined = false;
+
+		foreach ( (array) $stored as $value ) {
+			if ( is_string( $value ) && false !== strpos( $value, ',' ) ) {
+				$joined = true;
+				break;
+			}
+		}
+
+		if ( $joined ) {
+			$remaining = array();
+
+			foreach ( majestic_tube_parse_thumbs_meta( $stored ) as $url ) {
+				if ( $url !== $thumb_url ) {
+					$remaining[] = $url;
+				}
+			}
+
+			delete_post_meta( $post_id, 'thumbs' );
+
+			if ( $remaining ) {
+				update_post_meta( $post_id, 'thumbs', implode( ',', $remaining ) );
+			}
+		} else {
+			delete_post_meta( $post_id, 'thumbs', $thumb_url );
+		}
 	} else {
 		add_post_meta( $post_id, 'thumbs', $thumb_url, false );
 	}
@@ -162,7 +228,7 @@ function majestic_tube_get_multithumbs( $post_id = 0 ) {
 	}
 
 	if ( ! $thumbs ) {
-		$thumbs = (array) get_post_meta( $post_id, 'thumbs', false );
+		$thumbs = majestic_tube_parse_thumbs_meta( get_post_meta( $post_id, 'thumbs', false ) );
 	}
 
 	$urls = array();

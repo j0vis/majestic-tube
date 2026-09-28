@@ -3,7 +3,7 @@
  * Script and style enqueuing.
  *
  * @package Majestic Tube
- * @version 2.1.7
+ * @version 2.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -201,6 +201,30 @@ function majestic_tube_enqueue_assets() {
 			array( 'majestic-tube-main' ),
 			majestic_tube_asset_version( 'assets/css/player.css' )
 		);
+	}
+
+	/*
+	 * Cloudflare Turnstile, the theme's only spam-protection service. It is
+	 * loaded only while a check is active and configured, so a site with the
+	 * feature off makes no request to Cloudflare at all.
+	 *
+	 * Enqueued without async or defer, and declared a dependency of main.js.
+	 * That ordering is deliberate: main.js is deferred and therefore runs
+	 * after the document is parsed, by which time a plain footer script has
+	 * already executed, so `window.turnstile` is guaranteed to exist when the
+	 * mounting code runs. Making the script async instead would race it, and
+	 * the widget would then be mounted never.
+	 */
+	if ( majestic_tube_captcha_is_configured() ) {
+		wp_enqueue_script(
+			'cloudflare-turnstile',
+			'https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit',
+			array(),
+			null,
+			true
+		);
+
+		$deps[] = 'cloudflare-turnstile';
 	}
 
 	// Main script: no jQuery dependency, vanilla JS.

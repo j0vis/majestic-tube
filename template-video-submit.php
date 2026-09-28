@@ -15,7 +15,6 @@ $error              = '';
 $success            = '';
 $submission_enabled = majestic_tube_option_is_on( 'enable-video-submission' );
 $logged_in          = is_user_logged_in();
-$recaptcha_site_key = majestic_tube_recaptcha_site_key();
 
 // Handle submission only while the feature is enabled and the visitor is logged in.
 if ( $submission_enabled && $logged_in && isset( $_POST['wpst-submitted'] ) ) {
@@ -23,12 +22,12 @@ if ( $submission_enabled && $logged_in && isset( $_POST['wpst-submitted'] ) ) {
 		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wpst-post_nonce_field'] ) ), 'post_nonce' ) ) {
 		$error = __( 'Security check failed. Please try again.', 'majestic-tube' );
 	} else {
-		$recaptcha_on = majestic_tube_recaptcha_enabled();
-		$captcha_ok   = true;
+		$captcha_ok = true;
 
-		if ( $recaptcha_on ) {
-			$token       = isset( $_POST['g-recaptcha-response'] ) ? sanitize_text_field( wp_unslash( $_POST['g-recaptcha-response'] ) ) : '';
-			$captcha_ok = majestic_tube_verify_recaptcha( $token );
+		if ( majestic_tube_captcha_is_configured() ) {
+			$field      = majestic_tube_captcha_token_field();
+			$token      = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
+			$captcha_ok = majestic_tube_verify_captcha( $token );
 
 			if ( ! $captcha_ok ) {
 				$error = __( 'Captcha verification failed, please try again.', 'majestic-tube' );
@@ -205,9 +204,9 @@ get_header();
 					majestic_tube_render_submission_field( 'actors', __( 'Actors (comma separated)', 'majestic-tube' ), 'text', $actors_required );
 					?>
 
-					<?php if ( majestic_tube_recaptcha_enabled() && $recaptcha_site_key ) : ?>
+					<?php if ( majestic_tube_captcha_is_configured() ) : ?>
 						<div class="form-field">
-							<div class="g-recaptcha" data-sitekey="<?php echo esc_attr( $recaptcha_site_key ); ?>"></div>
+							<?php majestic_tube_captcha_widget(); ?>
 						</div>
 					<?php endif; ?>
 

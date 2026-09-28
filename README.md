@@ -23,9 +23,39 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#reports)
 - [Legal pages](#legal)
 - [Routine maintenance](#maintenance)
+- [What's new in 2.2.0](#whats-new-in-220)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#faq)
 - [Credits, license & support](#credits)
+
+**Release**
+
+## What’s New in 2.2.0
+
+This release reorganizes the Customizer, replaces the spam check with Cloudflare Turnstile, and makes imported videos display correctly.
+
+### A Customizer you can navigate
+
+The settings used to sit in nine flat sections with a catch-all bucket that mixed homepage settings with video-page settings. They are now grouped into panels, and every setting is filed under the page it actually affects. The two panels you will visit most are kept apart: **Homepage & Listings** and **Video Page**. The full map is in [Customizer Settings](#customizer-settings).
+
+Nothing is lost in the move, and no setting is reset: the values stay exactly where they were stored. Only the labels and the layout around them changed.
+
+### Cloudflare Turnstile replaces reCAPTCHA
+
+Spam protection on sign-up and video submission is now handled by Cloudflare Turnstile, and reCAPTCHA has been removed. Turnstile is free at any traffic level and asks less of a visitor. Setup takes a few minutes and is covered in [Members and Video Submissions](#members-and-video-submissions).
+
+### Imported videos display correctly
+
+Two problems showed up on videos brought in by an importer, and both are fixed:
+
+- **Ratings appeared as 0%.** Imported posts store their rating as a pair of values, which the theme was not reading, so every imported video showed no rating. The theme now reads them, and the first visitor vote builds on the imported score instead of replacing it with 100%.
+- **Hover previews showed one broken image.** Extra preview images are stored as a single comma-separated value, while the theme read them as one URL per stored value. A comma is a legal URL character, so the whole string survived as one unusable address. Both storage shapes are now handled, including removing a single preview from the editor.
+
+The 18 USC 2257 page is also now repaired automatically if it goes missing from the footer menu, so a deleted or renamed legal link comes back on its own.
+
+> **Upgrading from 2.1.7**
+>
+> Replace the theme folder. Your settings carry over. If you were using reCAPTCHA, create a Turnstile widget and paste its two keys into `Appearance → Customize → Site Features → Accounts & Spam Protection` — the old reCAPTCHA keys are no longer used.
 
 **Before you begin**
 
@@ -288,7 +318,7 @@ Add direct video URLs for 240p, 360p, 480p, 720p, 1080p, and 4K. When more than 
 
 ### Playback speed, keyboard shortcuts, resume, and theater mode
 
-Four optional extras, all under `Appearance → Customize → Majestic Tube - Video Player` and all **off by default**, so updating the theme changes nothing a visitor can see until you switch one on. Each is independent: you can offer the speed control without the keyboard shortcuts, or theater mode on its own.
+Four optional extras, all under `Appearance → Customize → Video Page → Player` and all **off by default**, so updating the theme changes nothing a visitor can see until you switch one on. Each is independent: you can offer the speed control without the keyboard shortcuts, or theater mode on its own.
 
 | Option | What it does |
 | --- | --- |
@@ -348,7 +378,7 @@ The player controls keep the same dark chrome in both colour schemes, on purpose
 
 ### Enable or disable membership
 
-1. Go to `Appearance → Customize → Majestic Tube Options`.
+1. Go to `Appearance → Customize → Site Features → Accounts & Spam Protection`.
 2. Find `Enable membership (login/register)`.
 3. Choose **On** or **Off**.
 4. Choose **Publish**.
@@ -385,14 +415,14 @@ Administrators can hide the Submit a Video, My Profile, and My Channel links in 
 2. Open `My Account → Submit a Video`.
 3. Complete the title, description, playback source, thumbnail, duration, category, tags, and actors as needed.
 4. For duration, enter hours, minutes, and seconds using the three boxes.
-5. Complete the verification when reCAPTCHA is enabled.
+5. Complete the verification when spam protection is enabled.
 6. Choose **Submit video**.
 
 New submissions are saved for moderation and do not appear publicly until an administrator publishes them.
 
 ### Configure required submission fields
 
-Go to `Appearance → Customize → Majestic Tube - Video Submission`. You can make the following fields required or optional:
+Go to `Appearance → Customize → Site Features → Video Submission`. You can make the following fields required or optional:
 
 - [ ] Video title
 - [ ] Description
@@ -403,14 +433,42 @@ Go to `Appearance → Customize → Majestic Tube - Video Submission`. You can m
 - [ ] Actors
 - [ ] Duration
 
-### Set up reCAPTCHA
+### Set up Cloudflare Turnstile
 
-1. Create a reCAPTCHA v2 site in the service’s administration area.
-2. Copy the site key and secret key.
-3. Open `Appearance → Customize → Majestic Tube Options`.
-4. Enable reCAPTCHA and enter both keys.
-5. Publish the changes.
-6. Test registration and video submission in a private browser window.
+Turnstile is Cloudflare’s free, privacy-friendly spam check. It asks less of a visitor than the puzzles it replaces, it is free at any traffic level, and it runs without sending visitors to a third-party page. It is the only spam-protection service this theme supports, and it is off until you switch it on.
+
+1. Sign in to the Cloudflare dashboard and open `Turnstile` in the left-hand menu. An account is enough — the site does not have to be using Cloudflare as its host or DNS, and the free plan is all that is required.
+2. Choose **Add widget**.
+3. Name the widget after your site, for example *example.com sign-up*. The name is only for your own reference.
+4. Set **Widget Mode** to **Managed**. Managed is the best default for a public sign-up form: Cloudflare decides when to issue an interactive challenge and stays quiet for most visitors who pass. **Non-interactive** never interrupts anyone, and **Invisible** is not used by this theme.
+5. Add every hostname the widget will appear on. The form is protected on each host you list, so include `example.com` and, if your staging or development site is public, its hostname too. A hostname you leave out will be refused.
+6. Choose **Create**.
+7. Cloudflare shows a **Site Key** and a **Secret Key**. Copy both — the dialog will not show them again.
+8. Open `Appearance → Customize → Site Features → Accounts & Spam Protection`.
+9. Turn on **Enable spam protection**.
+10. Paste the site key into **Turnstile site key** and the secret key into **Turnstile secret key**. Both are required: while either one is blank the theme leaves the forms alone rather than blocking every visitor.
+11. Choose **Publish**.
+12. Open your site in a private browser window, choose **Sign up**, and complete the challenge to confirm it works. Sign-up and video submission are the two protected forms.
+
+> **Tip**
+>
+> **Before going live, use Cloudflare’s test keys.** Cloudflare publishes a pair that always passes and a pair that always fails, so you can prove the wiring without creating real challenges. Paste `1x00000000000000000000AA` as the site key and `1x0000000000000000000000000000000AA` as the secret key, and the widget will succeed every time. When you are ready, swap in the keys from your own widget.
+
+> **Important**
+>
+> Keep the secret key private. Never paste it into a public page, post, widget, or any field marked as custom code — the theme sends it to Cloudflare from the server and it must never reach the browser.
+
+#### How the theme uses Turnstile
+
+Turnstile’s script is loaded only while spam protection is switched on and both keys are filled in, so a site with the feature off makes no request to Cloudflare at all.
+
+- The widget’s token is sent to Cloudflare’s `siteverify` endpoint from the server, along with the visitor’s IP address. A token that does not verify stops the sign-up or the submission.
+- Tokens are good once. If a visitor fails for an unrelated reason — a username already taken, say — the theme clears the challenge and hands them a fresh one instead of leaving them with a form that can never succeed.
+- The sign-up form sits in a modal, so the widget is mounted only once that panel is actually open. A challenge mounted into a hidden panel measures itself as zero and never recovers.
+
+#### Turn protection off
+
+Set **Enable spam protection** to **Off**. The widget disappears from both forms and Cloudflare’s script stops loading; your Turnstile keys stay saved, so switching back on needs no work.
 
 > **Important**
 >
@@ -420,23 +478,26 @@ Go to `Appearance → Customize → Majestic Tube - Video Submission`. You can m
 
 ## Customizer Settings
 
-Open `Appearance → Customize`. The Majestic Tube sections appear in the Customizer sidebar.
+Open `Appearance → Customize`. The settings are grouped into panels, and each panel holds one or more sections. Every setting is filed under the page it affects, so the homepage and the listing archives sit in one place and the single video page sits in another.
 
-### Majestic Tube Options
-
-This is the main section for listings, cards, video details, membership, footer behavior, and reports.
-
-| Setting group | What you can control |
-| --- | --- |
-| Homepage and listing | Homepage sort, videos per page, videos per row, category columns, and desktop/mobile counts. |
-| Video cards | Thumbnail aspect ratio, image fit, thumbnail quality, hover rotation, views, durations, and rating display. |
-| Single video | Related videos, comments, breadcrumbs, search bar, description block, categories, tags, actors, and video sidebar. |
-| Homepage presentation | Homepage title, description position, search bar, and whether long descriptions are shortened. |
-| Tracking button | Show or hide the button, choose its icon, text, and destination URL. |
-| Directories | Categories and actors per page, plus description position for category and tag archives. |
-| Membership | Enable member login and registration, reCAPTCHA, account links, and the admin bar. |
-| Footer | Enable the copyright bar, edit copyright text, and choose one to four columns. |
-| Reporting | Enable the front-end Report video button. |
+| Panel | Section | What you can control |
+| --- | --- | --- |
+| Homepage & Listings | Homepage | How the homepage sorts its videos, how many show per page and per row, and the homepage title and where it sits. |
+| Homepage & Listings | Homepage on Mobile | Videos per page and per row on phones and tablets, and hiding the homepage widget areas on mobile. |
+| Homepage & Listings | Category, Tag & Actor Archives | Videos per page on those archives, and whether the category and tag description goes above or below the list. |
+| Video Page | Video Page Layout | The video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the tracking button, the view, duration and rating displays, the Report video button, and related videos. |
+| Video Page | Player | Autoplay, the player engine, the quality selector, view counting, and the optional keyboard shortcuts, speed, resume and theater controls. |
+| Video Page | Sharing | The share buttons printed under the player. |
+| Site Design | Colours & Typography | Light or dark skin, the header toggle, the accent colour, the custom background class, and the site font. |
+| Site Design | Logo | An image or text logo, its font, size, dimensions and spacing, a copy in the footer, and the favicon. |
+| Site Design | Player Watermark | A logo overlaid on the player, with its size, colour treatment and corner. |
+| Site Design | Thumbnails | Thumbnail aspect ratio, image fit, image quality, and the hover rotation on video cards. |
+| Site Features | Header, Footer & Search | The search bar, the number of footer columns, the copyright bar and its text, and the admin bar. |
+| Site Features | Accounts & Spam Protection | Member login and registration, and the Cloudflare Turnstile spam check with its two keys. |
+| Site Features | Video Submission | The submission form, the links that lead to it, and which fields are required. |
+| Advertising | Advertising | In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from `Appearance → Widgets`. |
+| SEO & Analytics | SEO & Social | The Facebook app ID, the X/Twitter handle, the playable card URL, verification tags, and SEO footer text. |
+| SEO & Analytics | Custom Code | Analytics code in the page head, extra scripts before the closing body tag, and scripts for mobile visitors only. |
 
 #### Homepage sort options
 
@@ -446,14 +507,14 @@ This is the main section for listings, cards, video details, membership, footer 
 - **Popular** prioritizes the video rating percentage.
 - **Random** changes the order on each visit.
 
-### Majestic Tube - Video Player
+### Video Page → Player
 
 - Enable or disable autoplay.
 - Choose the enhanced player or the browser’s native player.
 - Enable or disable the quality selector.
 - Count a view only after playback starts, so a visit is only counted as a view once the video has actually played for three seconds.
 
-### Majestic Tube - Logo & Colours
+### Site Design
 
 - Enable a custom background.
 - Choose the main accent colour.
@@ -476,14 +537,14 @@ The text logo has its own choice: **Inter** (the default), **System UI**, **Syst
 
 #### Colour scheme and dark mode
 
-Go to `Appearance → Customize → Majestic Tube - Logo & Colours`. Two settings control the skin.
+Go to `Appearance → Customize → Site Design → Colours & Typography`. Two settings control the skin.
 
 - **Colour scheme** chooses what the site uses by default.
 - **Show the light/dark toggle in the header** adds a small round button to the header so visitors can switch for themselves. It is off by default.
 
 **Light** is the classic Majestic Tube surface. **Dark** is a near-black companion built for evening viewing: the same layout, the same accent, retuned borders and text colours so nothing turns into unreadable grey-on-black. **Follow system** renders whatever the visitor's own operating system asks for and needs no script and no stored value — the browser decides, and the page is correct before any of the theme's JavaScript runs.
 
-The accent colour, background, and every other `Majestic Tube - Logo & Colours` control apply to both skins, so a dark site is the same site rather than a separate design.
+The accent colour, background, and every other control in the `Site Design` panel apply to both skins, so a dark site is the same site rather than a separate design.
 
 > **Note**
 >
@@ -497,17 +558,17 @@ A short script in the page head applies the stored choice before the first paint
 >
 > **For developers:** the `majestic_tube_color_scheme` filter changes the default scheme, and `majestic_tube_theme_toggle_enabled` decides whether the toggle is rendered. Both live in `inc/theme-options.php` .
 
-### Majestic Tube - Sharing & Social
+### Video Page → Sharing
 
 Enable sharing as a whole, then enable or disable the individual networks. The theme ships **X/Twitter**, **Reddit**, and **email**. Switch off the ones you do not want so the video page stays uncluttered.
 
 Facebook, LinkedIn and Tumblr all restrict or remove adult content, and Odnoklassniki (ok.ru) is no longer reachable for an anonymous share, so none of the four prints a button here. Their settings are kept for compatibility but the toggles are hidden.
 
-### Majestic Tube - Video Submission
+### Site Features → Video Submission
 
 Enable or disable the front-end submission form, its navigation links, and each required field. The duration and title are required by default.
 
-### Majestic Tube - Content areas
+### Advertising
 
 This section directs you to `Appearance → Widgets`, where header, player, below-player, video-sidebar, and footer content is managed. It also carries the advertising placements that the theme controls for you and that need no widget at all.
 
@@ -528,7 +589,7 @@ Advertising is unchanged by default. Turning on `Only load advertising after con
 >
 > Connecting a consent plugin is a one-line filter in a small snippet or a site-specific plugin. Let the consent plugin return `true` once advertising is allowed, and the theme will print its placements as normal. The filter is `majestic_tube_ads_allowed` and it receives the placement name as its second argument: in-feed, popunder, header, footer, under-player, video-sidebar, or player. It also works the other way round for a single placement, which is useful if one area should always be shown.
 
-### Majestic Tube - SEO & Social
+### SEO & Analytics → SEO & Social
 
 - Add an optional Facebook app ID.
 - Add an X/Twitter site handle.
@@ -544,15 +605,14 @@ By default a shared video link produces the large image card. To get the playabl
 
 Leave the field empty to keep the large image card. The page you point at must be served over HTTPS, must return nothing but the player, and should stay under a few hundred kilobytes: X loads it in a card of roughly 435 pixels wide, so a full site template with a header, sidebar, and footer would look wrong inside the card.
 
-### Majestic Tube - Custom Code
+### SEO & Analytics → Custom Code
 
 Administrators can add analytics code to the page header and extra scripts near the end of the page. Paste complete snippets exactly as supplied by the service. Incorrect code can affect the entire site.
 
-### Majestic Tube - Mobile
+### Homepage & Listings → Homepage on Mobile
 
 - Choose the number of videos per mobile page and per row.
 - Hide homepage widget areas on mobile if needed.
-- Add optional scripts for mobile visitors only.
 
 **Navigation and optional content**
 
@@ -600,7 +660,7 @@ The **Content Block** widget is a general place for administrator-provided short
 
 ### Enable reports
 
-1. Open `Appearance → Customize → Majestic Tube Options`.
+1. Open `Appearance → Customize → Video Page → Video Page Layout`.
 2. Find `Enable “Report video” button`.
 3. Choose **On**.
 4. Publish the changes.
@@ -677,7 +737,7 @@ Use a reliable WordPress backup solution or your hosting provider’s backup ser
 - Limit administrator accounts.
 - Require HTTPS.
 - Review new registrations and submitted content.
-- Do not share secret API keys, reCAPTCHA secrets, or tracking credentials.
+- Do not share secret API keys, the Turnstile secret key, or tracking credentials.
 
 ### Translate the theme
 
@@ -719,7 +779,8 @@ Confirm the trailer URL is complete and publicly reachable. MP4 and WebM video t
 - Confirm membership is enabled in the Customizer.
 - Check `Settings → General → Membership`.
 - Review any security, spam, or membership plugin restrictions.
-- If reCAPTCHA is enabled, confirm both keys are valid and the challenge appears.
+- If spam protection is on, confirm both Turnstile keys are filled in and the challenge appears.
+- Confirm the site’s hostname is listed in the widget’s allowed hostnames at Cloudflare. A hostname left out is refused, and the check can never pass.
 
 #### Password reset email is not received
 
@@ -822,7 +883,7 @@ They update as visitors use the site. A browser, server, or caching configuratio
 
 ### Why are there no keyboard shortcuts or speed control?
 
-They are off until you turn them on, under `Appearance → Customize → Majestic Tube - Video Player`. That is deliberate: a theme update should not start intercepting a visitor’s keystrokes or add buttons to a page they already got used to. Turn on the ones you want, one at a time or together.
+They are off until you turn them on, under `Appearance → Customize → Video Page → Player`. That is deliberate: a theme update should not start intercepting a visitor’s keystrokes or add buttons to a page they already got used to. Turn on the ones you want, one at a time or together.
 
 ### Do the resume position and theater mode store anything about my visitors?
 
@@ -834,7 +895,7 @@ Sign in when required, disable conflicting caching or security restrictions, and
 
 ### Can I have a dark site?
 
-Yes. Set `Colour scheme` to **Dark** under `Appearance → Customize → Majestic Tube - Logo & Colours`. Set it to **Follow system** instead and each visitor gets the skin their own device already asks for, which is usually the friendliest default for a video site people watch at night.
+Yes. Set `Colour scheme` to **Dark** under `Appearance → Customize → Site Design → Colours & Typography`. Set it to **Follow system** instead and each visitor gets the skin their own device already asks for, which is usually the friendliest default for a video site people watch at night.
 
 To let visitors override it, also turn on `Show the light/dark toggle in the header`. Their choice is remembered per browser and never reaches your server, so it costs you nothing in stored data and reports no personal preference.
 

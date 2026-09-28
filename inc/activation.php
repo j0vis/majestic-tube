@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.1.7
+ * @version 2.2.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -792,9 +792,13 @@ function majestic_tube_add_legal_pages_to_menu( $menu_id ) {
 			continue;
 		}
 
-		majestic_tube_update_page_menu_item( $menu_id, $title, $page->ID );
+		$updated = majestic_tube_update_page_menu_item( $menu_id, $title, $page->ID );
 
-		$have_ids[] = (int) $page->ID;
+		// Only remember a page that really was added, so a failed insert is
+		// retried on the next run instead of being counted as done.
+		if ( ! is_wp_error( $updated ) && $updated ) {
+			$have_ids[] = (int) $page->ID;
+		}
 	}
 }
 
@@ -904,6 +908,80 @@ function majestic_tube_create_default_menu() {
 
 	return true;
 }
+
+/**
+ * Revision of the footer legal-link repair.
+ *
+ * Deliberately separate from majestic_tube_setup_revision() so the footer menu
+ * can be repaired on an installation whose full setup already completed. Bumping
+ * this makes every existing site check its footer menu once.
+ *
+ * @return int
+ */
+function majestic_tube_footer_legal_revision() {
+	/**
+	 * Filter the revision of the footer legal-link repair.
+	 *
+	 * @param int $revision Current revision.
+	 */
+	return (int) apply_filters( 'majestic_tube_footer_legal_revision', 1 );
+}
+
+/**
+ * Make sure every legal page exists and sits in the assigned footer menu.
+ *
+ * The full site setup only runs once per revision, so a legal page that was
+ * created later, a page whose slug was migrated, or a footer menu item that
+ * was deleted by hand was never repaired: the link simply stayed missing for
+ * good. That is how the 18 USC 2257 page ended up unlinked while DMCA and the
+ * Privacy Policy were still there.
+ *
+ * This runs on admin requests only, and stops after it finds nothing to do, so
+ * it costs a single option read per admin page load.
+ *
+ * @return void
+ */
+function majestic_tube_repair_footer_legal_links() {
+	$revision = majestic_tube_footer_legal_revision();
+
+	if ( (int) get_option( 'majestic_tube_footer_legal_revision', 0 ) >= $revision ) {
+		return;
+	}
+
+	$locations = get_theme_mod( 'nav_menu_locations', array() );
+	$locations = is_array( $locations ) ? $locations : array();
+	$menu_id   = isset( $locations['majestic_tube_footer_menu'] ) ? absint( $locations['majestic_tube_footer_menu'] ) : 0;
+	$menu      = $menu_id ? wp_get_nav_menu_object( $menu_id ) : false;
+
+	if ( $menu && ! is_wp_error( $menu ) ) {
+		$menu_id = (int) $menu->term_id;
+	} else {
+		// Either the setup never assigned the location or the assigned menu was
+		// deleted. Recreate the same menu the setup would have produced, rather
+		// than writing legal links into a menu nothing points at.
+		$menu_id = majestic_tube_get_or_create_nav_menu( 'Footer Legal Menu' );
+
+		if ( ! $menu_id ) {
+			// The full setup owns the location assignment; it will retry.
+			return;
+		}
+
+		$locations['majestic_tube_footer_menu'] = (int) $menu_id;
+		set_theme_mod( 'nav_menu_locations', $locations );
+	}
+
+	foreach ( majestic_tube_legal_pages() as $title => $definition ) {
+		if ( ! majestic_tube_get_or_create_legal_page( $title, $definition ) ) {
+			// Leave the marker unset so the next admin request tries again.
+			return;
+		}
+	}
+
+	majestic_tube_add_legal_pages_to_menu( $menu_id );
+	update_option( 'majestic_tube_footer_legal_revision', $revision );
+}
+add_action( 'admin_init', 'majestic_tube_repair_footer_legal_links', 20 );
+add_action( 'after_switch_theme', 'majestic_tube_repair_footer_legal_links', 50 );
 
 /**
  * Carry the original footer widget assignment over to this theme.

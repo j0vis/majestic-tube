@@ -33,21 +33,74 @@ function majestic_tube_membership_field( $name, $label, $type = 'text', $id = ''
 }
 
 /**
- * Whether reCAPTCHA is enabled for membership forms.
+ * Whether spam protection is switched on.
  *
  * @return bool
  */
-function majestic_tube_recaptcha_enabled() {
-	return 'on' === majestic_tube_get_option( 'wpst-options', 'enable-recaptcha' );
+function majestic_tube_captcha_enabled() {
+	return 'on' === majestic_tube_get_option( 'wpst-options', 'enable-captcha' );
 }
 
 /**
- * Return the configured reCAPTCHA site key.
+ * The public Turnstile key.
  *
  * @return string
  */
-function majestic_tube_recaptcha_site_key() {
-	return (string) majestic_tube_get_option( 'wpst-options', 'recaptcha-site-key' );
+function majestic_tube_captcha_site_key() {
+	return (string) majestic_tube_get_option( 'wpst-options', 'turnstile-site-key' );
+}
+
+/**
+ * Name of the form field Turnstile posts its token in.
+ *
+ * @return string
+ */
+function majestic_tube_captcha_token_field() {
+	return 'cf-turnstile-response';
+}
+
+/**
+ * Whether a spam check is active and fully configured.
+ *
+ * A site that switches protection on but leaves a key blank is not blocked:
+ * an unconfigured check that silently rejects every visitor is worse than no
+ * check at all, so the form simply prints without a widget.
+ *
+ * @return bool
+ */
+function majestic_tube_captcha_is_configured() {
+	return majestic_tube_captcha_enabled() && '' !== majestic_tube_captcha_site_key() && '' !== majestic_tube_captcha_secret_key();
+}
+
+/**
+ * The private Turnstile key.
+ *
+ * @return string
+ */
+function majestic_tube_captcha_secret_key() {
+	return (string) majestic_tube_get_option( 'wpst-options', 'turnstile-secret-key' );
+}
+
+/**
+ * Print the Turnstile widget.
+ *
+ * The widget is mounted by the theme's own script rather than by
+ * auto-rendering, because the sign-up form lives inside a modal that is
+ * hidden until a visitor opens it. A widget rendered into a hidden container
+ * measures itself as zero and never recovers.
+ *
+ * @return void
+ */
+function majestic_tube_captcha_widget() {
+	if ( ! majestic_tube_captcha_is_configured() ) {
+		return;
+	}
+	?>
+	<div class="cf-turnstile majestic-tube-captcha"
+		data-sitekey="<?php echo esc_attr( majestic_tube_captcha_site_key() ); ?>"
+		data-theme="auto"
+		data-mt-turnstile="1"></div>
+	<?php
 }
 
 /**
@@ -58,8 +111,6 @@ function majestic_tube_login_register_modal() {
 		return;
 	}
 
-	$recaptcha_on = majestic_tube_recaptcha_enabled();
-	$site_key     = majestic_tube_recaptcha_site_key();
 	?>
 	<div class="majestic-tube-user-modal" id="wpst-user-modal" hidden>
 		<div class="majestic-tube-modal-dialog" data-active-tab="">
@@ -78,9 +129,7 @@ function majestic_tube_login_register_modal() {
 							majestic_tube_membership_field( 'user_email', __( 'Email', 'majestic-tube' ), 'email', 'wpst_user_email' );
 							majestic_tube_membership_field( 'user_pass', __( 'Password', 'majestic-tube' ), 'password', 'wpst_user_pass', 8 );
 							?>
-							<?php if ( $recaptcha_on && $site_key ) : ?>
-								<div class="g-recaptcha" data-sitekey="<?php echo esc_attr( $site_key ); ?>"></div>
-							<?php endif; ?>
+						<?php majestic_tube_captcha_widget(); ?>
 							<input type="hidden" name="action" value="wpst_register_member" />
 							<button type="submit"><?php esc_html_e( 'Sign up', 'majestic-tube' ); ?></button>
 							<?php wp_nonce_field( 'ajax-login-nonce', 'register-security' ); ?>
@@ -141,26 +190,36 @@ function majestic_tube_login_register_modal() {
 add_action( 'wp_footer', 'majestic_tube_login_register_modal' );
 
 /**
- * Sanitize and validate recaptcha token via Google's siteverify API.
+ * Validate a Turnstile token against Cloudflare's siteverify API.
  *
- * @param string $response g-recaptcha-response token.
+ * @param string $response cf-turnstile-response token.
  * @return bool
  */
-function majestic_tube_verify_recaptcha( $response ) {
-	$secret = majestic_tube_get_option( 'wpst-options', 'recaptcha-secret-key' );
+function majestic_tube_verify_captcha( $response ) {
+	$secret = majestic_tube_captcha_secret_key();
 
 	if ( ! $secret || ! $response ) {
 		return false;
 	}
 
+	$body = array(
+		'secret'   => $secret,
+		'response' => $response,
+	);
+
+	// Optional, but it lets Cloudflare score the request against the address
+	// the token was issued to rather than trusting the token alone.
+	$remote_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+
+	if ( $remote_ip ) {
+		$body['remoteip'] = $remote_ip;
+	}
+
 	$resp = wp_remote_post(
-		'https://www.google.com/recaptcha/api/siteverify',
+		'https://challenges.cloudflare.com/turnstile/v0/siteverify',
 		array(
 			'timeout' => 10,
-			'body'    => array(
-				'secret'   => $secret,
-				'response' => $response,
-			),
+			'body'    => $body,
 		)
 	);
 
@@ -168,9 +227,9 @@ function majestic_tube_verify_recaptcha( $response ) {
 		return false;
 	}
 
-	$body = json_decode( wp_remote_retrieve_body( $resp ) );
+	$result = json_decode( wp_remote_retrieve_body( $resp ) );
 
-	return ! empty( $body->success );
+	return ! empty( $result->success );
 }
 
 /**
@@ -248,10 +307,11 @@ function majestic_tube_ajax_register() {
 		majestic_tube_ajax_error( __( 'Registration is disabled.', 'majestic-tube' ) );
 	}
 
-	if ( majestic_tube_recaptcha_enabled() ) {
-		$token = isset( $_POST['g-recaptcha-response'] ) ? sanitize_text_field( wp_unslash( $_POST['g-recaptcha-response'] ) ) : '';
+	if ( majestic_tube_captcha_is_configured() ) {
+		$field = majestic_tube_captcha_token_field();
+		$token = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
 
-		if ( ! majestic_tube_verify_recaptcha( $token ) ) {
+		if ( ! majestic_tube_verify_captcha( $token ) ) {
 			majestic_tube_ajax_error( __( 'Captcha verification failed, please try again.', 'majestic-tube' ) );
 		}
 	}
