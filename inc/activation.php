@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.0
+ * @version 2.2.1
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -982,6 +982,77 @@ function majestic_tube_repair_footer_legal_links() {
 }
 add_action( 'admin_init', 'majestic_tube_repair_footer_legal_links', 20 );
 add_action( 'after_switch_theme', 'majestic_tube_repair_footer_legal_links', 50 );
+
+/**
+ * Revision of the page-template repair.
+ *
+ * @return int
+ */
+function majestic_tube_page_template_revision() {
+	/**
+	 * Filter the revision of the page-template repair.
+	 *
+	 * @param int $revision Current revision.
+	 */
+	return (int) apply_filters( 'majestic_tube_page_template_revision', 1 );
+}
+
+/**
+ * Put the theme's own page templates back on the pages that need them.
+ *
+ * A page template lives in the `_wp_page_template` meta row of the page, not
+ * in the theme. Anything that clears it - switching themes, a restore, an
+ * import - leaves the page rendering through page.php instead, which prints
+ * the page's own content and none of the theme's form. The full site setup
+ * assigns the templates but only runs once per revision, so a cleared
+ * assignment was never restored and the page stayed broken for good.
+ *
+ * Only a missing or unknown assignment is touched. A page deliberately put
+ * back on the default template is left alone, because the empty string and
+ * 'default' both mean the administrator chose it.
+ *
+ * @return void
+ */
+function majestic_tube_repair_page_templates() {
+	$revision = majestic_tube_page_template_revision();
+
+	if ( (int) get_option( 'majestic_tube_page_template_revision', 0 ) >= $revision ) {
+		return;
+	}
+
+	$available = wp_get_theme()->get_page_templates();
+	$complete  = true;
+
+	foreach ( majestic_tube_activation_pages() as $title => $template ) {
+		// A template the installed theme no longer ships cannot be applied.
+		if ( ! isset( $available[ $template ] ) ) {
+			continue;
+		}
+
+		$page = get_page_by_path( sanitize_title( $title ) );
+
+		// The page does not exist yet. The full setup creates it and assigns
+		// the template itself, so leave the marker unset and try again later.
+		if ( ! $page || ! isset( $page->ID ) ) {
+			$complete = false;
+			continue;
+		}
+
+		$assigned = get_post_meta( $page->ID, '_wp_page_template', true );
+		$assigned = is_string( $assigned ) ? $assigned : '';
+
+		if ( '' === $assigned || 'default' === $assigned ) {
+			update_post_meta( $page->ID, '_wp_page_template', $template );
+		}
+	}
+
+	// Stop retrying only once every page carries a template of its own.
+	if ( $complete ) {
+		update_option( 'majestic_tube_page_template_revision', $revision );
+	}
+}
+add_action( 'admin_init', 'majestic_tube_repair_page_templates', 25 );
+add_action( 'after_switch_theme', 'majestic_tube_repair_page_templates', 55 );
 
 /**
  * Carry the original footer widget assignment over to this theme.

@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.2.0
+ * @version 2.2.1
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -720,12 +720,11 @@ function majestic_tube_options_map() {
 		),
 		'icon-logo'                => array(
 			'setting' => 'majestic_tube_icon_logo',
-			'default' => 'play-circle',
+			'default' => 'film',
 			'type'    => 'select',
 			'label'   => __( 'Icon logo', 'majestic-tube' ),
 			'section' => $logo,
 			'choices' => array(
-				'play-circle' => __( 'Play circle', 'majestic-tube' ),
 				'film'        => __( 'Film', 'majestic-tube' ),
 				'video'       => __( 'Video', 'majestic-tube' ),
 				'heart'       => __( 'Heart', 'majestic-tube' ),

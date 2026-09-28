@@ -11,7 +11,7 @@
  * exactly like the original theme and like the ad zones.
  *
  * @package Majestic Tube
- * @version 2.2.0
+ * @version 2.2.1
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -364,10 +364,16 @@ add_action( 'wp_head', 'majestic_tube_output_brand_css', 10 );
  * @return void
  */
 function majestic_tube_site_logo() {
-	$icon      = (string) majestic_tube_get_option( 'wpst-options', 'icon-logo', 'play-circle' );
+	$icon      = (string) majestic_tube_get_option( 'wpst-options', 'icon-logo', 'film' );
 	$text      = (string) majestic_tube_get_option( 'wpst-options', 'text-logo', '' );
 	$use_image = majestic_tube_option_is_on( 'use-logo-image' );
 	$image     = (string) majestic_tube_get_option( 'wpst-options', 'image-logo-file', '' );
+
+	// "Play circle" is no longer offered, so a value saved before it was
+	// dropped is retired here rather than left to render a dangling class.
+	if ( 'play-circle' === $icon ) {
+		$icon = 'film';
+	}
 
 	if ( $use_image && $image ) {
 		printf(

@@ -6,7 +6,7 @@
  * skin.
  *
  * @package Majestic Tube
- * @version 2.2.0
+ * @version 2.2.1
  */
 
 /*
@@ -383,17 +383,14 @@ ol {
 .site-logo > .fa {
 	display: inline-grid;
 	place-items: center;
-	width: 1.15em;
-	height: 1.15em;
+	flex: 0 0 auto;
+	width: 1.45em;
+	height: 1.45em;
 	border-radius: 50%;
 	background: var(--mt-accent);
 	color: #fff;
-	font-size: 0.56em;
+	font-size: 0.7em;
 	font-style: normal;
-}
-
-.site-logo > .fa-play-circle::before {
-	content: "\25B6";
 }
 
 .site-logo > .fa-film::before,
