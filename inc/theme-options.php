@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.2.4
+ * @version 2.2.5
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -326,24 +326,24 @@ function majestic_tube_options_map() {
 		),
 		'category-card-description' => array(
 			'setting'     => 'majestic_tube_category_card_description',
-			'default'     => 'Free "{description}" videos',
+			'default'     => 'Free {description} videos',
 			'type'        => 'text',
 			'label'       => __( 'Category card text', 'majestic-tube' ),
 			'section' => $archives,
 			'description' => __( 'A phrase shown on every category card, built from the tokens below. Leave it blank to use each category\'s own description instead.', 'majestic-tube' ),
 			'input_attrs' => array(
-				'placeholder' => 'Free "{description}" videos',
+				'placeholder' => 'Free {description} videos',
 			),
 		),
 		'actor-card-description'  => array(
 			'setting'     => 'majestic_tube_actor_card_description',
-			'default'     => 'Watch "{description}" videos',
+			'default'     => 'Watch {description} videos',
 			'type'        => 'text',
 			'label'       => __( 'Actor card text', 'majestic-tube' ),
 			'section' => $archives,
 			'description' => __( 'The same idea for actor cards. Leave it blank to use each actor\'s own description instead.', 'majestic-tube' ),
 			'input_attrs' => array(
-				'placeholder' => 'Watch "{description}" videos',
+				'placeholder' => 'Watch {description} videos',
 			),
 		),
 		'cat-desc-position'        => array(

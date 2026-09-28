@@ -8,7 +8,7 @@
  * escaped links and the same `wpst_page_navi` contract.
  *
  * @package Majestic Tube
- * @version 2.2.4
+ * @version 2.2.5
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -548,17 +548,22 @@ function majestic_tube_term_initial( $name ) {
 	$first = function_exists( 'mb_strtoupper' ) ? mb_strtoupper( $first, 'UTF-8' ) : strtoupper( $first );
 
 	return preg_match( '/^[A-Z0-9]$/', $first ) ? $first : '';
-}
-
-/**
+}/**
  * Print the A-Z bar for a term directory.
  *
- * Renders "All" followed by one link per letter that actually has terms, with
- * the active letter marked. Each link carries the letter as a query argument
- * rather than as a path segment, because these directories are page templates:
- * the page segment is already carrying `/page/N/`, and a second rewrite rule
- * would collide with it. Pagination links keep the argument, so moving between
- * pages does not silently drop the filter.
+ * The bar is unconditional. Every letter A-Z and 0-9 is printed on every
+ * directory page, whether or not any data came back: a letter that has terms
+ * is a link carrying its count, and a letter that has none is printed dimmed
+ * and inert. That is deliberate. A bar whose letters are decided by a query
+ * is a bar that disappears the moment that query returns nothing, and a
+ * directory with a working listing but no visible sort control is worse than
+ * one that plainly shows which letters are empty.
+ *
+ * Each link carries the letter as a query argument rather than as a path
+ * segment, because these directories are page templates: the page segment is
+ * already carrying `/page/N/`, and a second rewrite rule would collide with
+ * it. Pagination links keep the argument, so moving between pages does not
+ * silently drop the filter.
  *
  * @param string $taxonomy Taxonomy name.
  * @return void
@@ -568,13 +573,10 @@ function majestic_tube_term_letter_nav( $taxonomy ) {
 	$current = majestic_tube_get_requested_letter();
 	$base    = majestic_tube_term_directory_base_url();
 
-	/*
-	 * This always prints. It used to return early when a taxonomy produced no
-	 * letters, which meant that on a site where the lookup came back empty
-	 * the directory silently lost its sort bar and there was nothing on the
-	 * page to say why. A lone "All" link is the honest answer to a directory
-	 * with nothing to file yet; a missing bar looks like a broken theme.
-	 */
+	// The full set, always, in reading order. Digits sit last because on a
+	// video site they are rare, and "4K" or "18" filed under a digit should
+	// not push the letters a visitor actually came for off the row.
+	$all_letters = array_merge( range( 'A', 'Z' ), range( 0, 9 ) );
 	?>
 	<nav class="term-letter-nav" aria-label="<?php esc_attr_e( 'Browse by letter', 'majestic-tube' ); ?>">
 		<ul>
@@ -583,15 +585,22 @@ function majestic_tube_term_letter_nav( $taxonomy ) {
 					href="<?php echo esc_url( $base ); ?>"
 					<?php echo '' === $current ? ' aria-current="true"' : ''; ?>><?php esc_html_e( 'All', 'majestic-tube' ); ?></a>
 			</li>
-			<?php foreach ( $letters as $letter => $count ) : ?>
-				<li>
+			<?php foreach ( $all_letters as $letter ) : ?>
+				<?php $count = isset( $letters[ $letter ] ) ? (int) $letters[ $letter ] : 0; ?>
+			<li>
+				<?php if ( $count > 0 ) : ?>
 					<a class="term-letter<?php echo $current === $letter ? ' is-active' : ''; ?>"
 						href="<?php echo esc_url( add_query_arg( 'letter', rawurlencode( $letter ), $base ) ); ?>"
 						<?php echo $current === $letter ? ' aria-current="true"' : ''; ?>>
 						<?php echo esc_html( $letter ); ?>
 						<span class="term-letter-count"><?php echo esc_html( number_format_i18n( $count ) ); ?></span>
 					</a>
-				</li>
+				<?php else : ?>
+					<span class="term-letter is-empty" aria-disabled="true">
+						<?php echo esc_html( $letter ); ?>
+					</span>
+				<?php endif; ?>
+			</li>
 			<?php endforeach; ?>
 		</ul>
 	</nav>
