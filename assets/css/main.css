@@ -6,7 +6,7 @@
  * skin.
  *
  * @package Majestic Tube
- * @version 2.2.6
+ * @version 2.2.7
  */
 
 /*
@@ -2728,6 +2728,30 @@ ol {
 	flex: 1 1 auto;
 	min-width: 0;
 	margin: 0 1em;
+	/*
+	 * The container was already taking the space between the logo and the
+	 * menu, but the form inside it was a fixed 210px sitting hard against the
+	 * logo, so the bar read as left-aligned with a large empty gap before the
+	 * navigation. Centring the form in that space, and letting the input grow
+	 * inside it, puts the bar where a visitor expects it.
+	 */
+	display: flex;
+	justify-content: center;
+}
+
+.header-inner .header-search .search-form {
+	width: 100%;
+	max-width: 440px;
+}
+
+.header-inner .header-search .search-form label {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.header-inner .header-search .search-field {
+	width: auto;
+	flex: 1 1 auto;
 }
 
 .header-inner .main-navigation {
@@ -2987,6 +3011,23 @@ body.custom-background {
 	flex: 1 1 auto;
 	min-width: 0;
 	margin: 0 1em;
+	display: flex;
+	justify-content: center;
+}
+
+.header-inner .header-search .search-form {
+	width: 100%;
+	max-width: 440px;
+}
+
+.header-inner .header-search .search-form label {
+	flex: 1 1 auto;
+	min-width: 0;
+}
+
+.header-inner .header-search .search-field {
+	width: auto;
+	flex: 1 1 auto;
 }
 
 .header-inner #site-navigation {
