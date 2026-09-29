@@ -165,7 +165,19 @@ Use one of the following playback methods:
 
 > **Important**
 >
-> Do not add both a direct video URL and a conflicting embed or shortcode. If more than one source is present, keep only the method you intend visitors to use.
+> Do not add both a direct video URL and a conflicting embed or shortcode. If more than one source is present, keep only the method you intend visitors to use, or choose which one wins site-wide.
+
+### Choosing between a video URL and an embed code
+
+`Appearance → Customize → Video Page → Video Page Layout → Video source for the player` decides which of the two fields the player uses, on every video page at once:
+
+| Choice | What plays |
+| --- | --- |
+| Automatic | The Video URL when the post has one, otherwise the embed code. This is the default. |
+| Video URL | The Video URL is preferred. Posts without one fall back to their embed code. |
+| Video embed code | The embed code is preferred. Posts without one fall back to their Video URL. |
+
+The setting only changes which field is preferred. Both are still saved on the post, so you can switch at any time without touching a single video, and a video that is missing the field you picked still plays from the other one rather than showing an empty player. The choice is also what the `og:video` and `twitter:player` tags and the schema.org `VideoObject` markup describe, so social previews match what a visitor sees.
 
 ### Video information fields
 
@@ -266,6 +278,10 @@ Add short, descriptive tags in the Video editor. The Tags page template presents
 Every card on the Categories and Actors pages carries a line of text between the name and the video count. By default it is that term's own description, and nothing shows for a term you never wrote one for.
 
 You can replace that with a phrase of your own under `Customize → Homepage & Listings → Category, Tag & Actor Archives`, using **Category card text** and **Actor card text**. The default reads `Free "{description}" videos`, and the same idea is available separately for actors.
+
+### Choose how many categories sit in a row
+
+**Categories per row**, in the same section, sets how many category cards line up on the Categories page. The number is the desktop figure; the theme steps it down on its own as the screen narrows, never showing fewer than two cards on a phone or three on a tablet, so a wide desktop value never squeezes the cards into unreadable slivers.
 
 | Token | Becomes |
 | --- | --- |
@@ -500,9 +516,9 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 | Panel | Section | What you can control |
 | --- | --- | --- |
 | Homepage & Listings | Homepage | How the homepage sorts its videos, how many show per page and per row, and the homepage title and where it sits. |
-| Homepage & Listings | Homepage on Mobile | Videos per page and per row on phones and tablets, and hiding the homepage widget areas on mobile. |
-| Homepage & Listings | Category, Tag & Actor Archives | Videos per page on those archives, whether the category and tag description goes above or below the list, and the line shown on each category and actor card. |
-| Video Page | Video Page Layout | The video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos. |
+| Homepage & Listings | Homepage on Mobile | Videos per page and per row on phones and tablets. |
+| Homepage & Listings | Category, Tag & Actor Archives | How many categories sit in a row and how many show per page on the Categories page, videos per page on the other archives, whether the category and tag description goes above or below the list, and the line shown on each category and actor card. |
+| Video Page | Video Page Layout | Which of a post's two video fields the player uses (Video URL or embed code), the video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos. |
 | Video Page | Player | Autoplay, the player engine, the quality selector, view counting, and the optional keyboard shortcuts, speed, resume and theater controls. |
 | Video Page | Sharing | The share buttons printed under the player. |
 | Site Design | Colours & Typography | Light or dark skin, the header toggle, the accent colour, whether to ignore the site background image, and the site font. |
@@ -629,7 +645,8 @@ Administrators can add analytics code to the page header and extra scripts near 
 ### Homepage & Listings → Homepage on Mobile
 
 - Choose the number of videos per mobile page and per row.
-- Hide homepage widget areas on mobile if needed.
+
+The homepage has no widget area of its own, so there is nothing to hide on mobile. The theme's widget areas are the header strip, the player overlay, the strip below the player, the video sidebar, the footer, and the footer's own widget row.
 
 **Navigation and optional content**
 
@@ -664,7 +681,7 @@ Every area named **code and ads** accepts this widget and nothing else, so any a
 | Area on the Widgets screen | Where it appears |
 | --- | --- |
 | Header: code and ads | Below the site header. Content Block widgets only. |
-| Player: code and ads | Over the desktop video player where supported. Content Block widgets only. |
+| Player overlay: 300x250 code and ads | A single 300x250 ad with a close button, over the top right of the desktop video player. Content Block widgets only. |
 | Below player: code and ads | Below the individual video player unless the video has its own content. Content Block widgets only. |
 | Video sidebar: code and ads | Beside an individual video when the sidebar setting is enabled. Content Block widgets only. |
 | Footer: code and ads | At the very top of the site footer, above the footer widgets. Content Block widgets only. |

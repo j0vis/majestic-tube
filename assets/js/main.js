@@ -1086,16 +1086,23 @@
 	}
 
 	/**
-	 * Close button for the optional player content overlay.
+	 * Close button for the 300x250 player overlay.
+	 *
+	 * The zone is taken out of the document rather than hidden: it is
+	 * rebuilt on every page load, so nothing has to remember that a visitor
+	 * already dismissed it, and a leftover display:none box would still be
+	 * picked up by ad scripts that scan the player.
 	 */
-	function initContentClose() {
-		findAll( '.happy-inside-player .close' ).forEach( function ( button ) {
-			button.addEventListener( 'click', function () {
-				var zone = button.closest( '.happy-inside-player' );
+	function initPlayerOverlay() {
+		findAll( '.player-overlay' ).forEach( function ( zone ) {
+			var button = zone.querySelector( '.player-overlay-close' );
 
-				if ( zone ) {
-					zone.style.display = 'none';
-				}
+			if ( ! button ) {
+				return;
+			}
+
+			button.addEventListener( 'click', function () {
+				zone.remove();
 			} );
 		} );
 	}
@@ -2083,7 +2090,7 @@
 		initThemeToggle();
 		initThumbRotation();
 		initTrailerPreview();
-		initContentClose();
+		initPlayerOverlay();
 		initReportVideo();
 		initPlayer();
 		refreshStats( true );

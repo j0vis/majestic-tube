@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.8
+ * @version 2.2.9
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -750,10 +750,19 @@ function majestic_tube_add_legal_pages_to_menu( $menu_id ) {
 			$menu_item_id = isset( $item->ID ) ? (int) $item->ID : 0;
 
 			if ( in_array( (int) $canonical_map['canonical_id'], $have_ids, true ) ) {
-				if ( $menu_item_id && function_exists( 'wp_delete_nav_menu_item' ) ) {
-					wp_delete_nav_menu_item( (int) $menu_id, $menu_item_id );
+				if ( $menu_item_id && function_exists( 'wp_delete_post' ) ) {
+					/*
+					 * A menu item is a `nav_menu_item` post, and core's own
+					 * wp_delete_nav_menu() removes one with wp_delete_post().
+					 * WordPress has no wp_delete_nav_menu_item(), so the
+					 * function_exists() guard this call used to carry was always
+					 * false and the duplicate item was never removed.
+					 */
+					wp_delete_post( $menu_item_id, true );
 				}
-				continue;				}
+
+				continue;
+			}
 
 				if ( $menu_item_id && function_exists( 'wp_update_nav_menu_item' ) ) {
 					$updated = majestic_tube_update_page_menu_item(
@@ -776,8 +785,9 @@ function majestic_tube_add_legal_pages_to_menu( $menu_id ) {
 		if ( isset( $canonical_ids[ $item_id ] ) && in_array( $item_id, $have_ids, true ) ) {
 			$menu_item_id = isset( $item->ID ) ? (int) $item->ID : 0;
 
-			if ( $menu_item_id && function_exists( 'wp_delete_nav_menu_item' ) ) {
-				wp_delete_nav_menu_item( (int) $menu_id, $menu_item_id );
+			if ( $menu_item_id && function_exists( 'wp_delete_post' ) ) {
+				// Same as above: core deletes a menu item as a post.
+				wp_delete_post( $menu_item_id, true );
 			}
 			continue;
 		}

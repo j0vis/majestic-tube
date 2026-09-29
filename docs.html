@@ -675,8 +675,25 @@
         </ul>
 
         <div class="warning">
-          Do not add both a direct video URL and a conflicting embed or shortcode. If more than one source is present, keep only the method you intend visitors to use.
+          Do not add both a direct video URL and a conflicting embed or shortcode. If more than one source is present, keep only the method you intend visitors to use, or choose which one wins site-wide.
         </div>
+
+        <h3>Choosing between a video URL and an embed code</h3>
+
+        <p><span class="path">Appearance &rarr; Customize &rarr; Video Page &rarr; Video Page Layout &rarr; Video source for the player</span> decides which of the two fields the player uses, on every video page at once.</p>
+
+        <table>
+          <thead>
+            <tr><th>Choice</th><th>What plays</th></tr>
+          </thead>
+          <tbody>
+            <tr><td>Automatic</td><td>The Video URL when the post has one, otherwise the embed code. This is the default.</td></tr>
+            <tr><td>Video URL</td><td>The Video URL is preferred. Posts without one fall back to their embed code.</td></tr>
+            <tr><td>Video embed code</td><td>The embed code is preferred. Posts without one fall back to their Video URL.</td></tr>
+          </tbody>
+        </table>
+
+        <p>The setting only changes which field is preferred. Both are still saved on the post, so you can switch at any time without touching a single video, and a video that is missing the field you picked still plays from the other one rather than showing an empty player. The choice is also what the <code>og:video</code> and <code>twitter:player</code> tags and the schema.org <code>VideoObject</code> markup describe, so social previews match what a visitor sees.</p>
 
         <h3>Video information fields</h3>
         <div class="table-wrap">
@@ -804,6 +821,9 @@
         </div>
         <p>So <span class="path">{count} {videos} starring {name}</span> gives &ldquo;42 videos starring Amber Waves&rdquo;, and on a term with a single video it gives &ldquo;1 video starring&hellip;&rdquo;. An unrecognised token is left in place rather than silently deleted, so a typo is visible on the page instead of quietly producing a half-written sentence. Clear the box to go back to each term's own description.</p>
         <p>The line is clamped to two lines, and the card drops the blank title line that a grid card reserves, so filling this in does not make the cards any taller.</p>
+
+        <h3>Choose how many categories sit in a row</h3>
+        <p><strong>Categories per row</strong>, in the same section, sets how many category cards line up on the Categories page. The number is the desktop figure; the theme steps it down on its own as the screen narrows, never showing fewer than two cards on a phone or three on a tablet, so a wide desktop value never squeezes the cards into unreadable slivers.</p>
 
         <h3>Browse categories, tags, and actors by letter</h3>
         <p>The Categories, Tags, and Actors pages all carry an alphabet bar above the listing. <strong>All</strong> shows the complete directory; each letter shows only the terms starting with it, along with how many there are. Only letters that actually have terms appear, so the bar never offers a letter that leads to an empty page.</p>
@@ -1036,9 +1056,9 @@
             </thead>
             <tbody>
               <tr><td rowspan="3">Homepage &amp; Listings</td><td>Homepage</td><td>How the homepage sorts its videos, how many show per page and per row, and the homepage title and where it sits.</td></tr>
-              <tr><td>Homepage on Mobile</td><td>Videos per page and per row on phones and tablets, and hiding the homepage widget areas on mobile.</td></tr>
-              <tr><td>Category, Tag &amp; Actor Archives</td><td>Videos per page on those archives, whether the category and tag description goes above or below the list, and the line shown on each category and actor card.</td></tr>
-              <tr><td rowspan="3">Video Page</td><td>Video Page Layout</td><td>The video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos.</td></tr>
+              <tr><td>Homepage on Mobile</td><td>Videos per page and per row on phones and tablets.</td></tr>
+              <tr><td>Category, Tag &amp; Actor Archives</td><td>How many categories sit in a row and how many show per page on the Categories page, videos per page on the other archives, whether the category and tag description goes above or below the list, and the line shown on each category and actor card.</td></tr>
+              <tr><td rowspan="3">Video Page</td><td>Video Page Layout</td><td>Which of a post's two video fields the player uses (Video URL or embed code), the video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos.</td></tr>
               <tr><td>Player</td><td>Autoplay, the player engine, the quality selector, view counting, and the optional keyboard shortcuts, speed, resume and theater controls.</td></tr>
               <tr><td>Sharing</td><td>The share buttons printed under the player.</td></tr>
               <tr><td rowspan="4">Site Design</td><td>Colours &amp; Typography</td><td>Light or dark skin, the header toggle, the accent colour, whether to ignore the site background image, and the site font.</td></tr>
@@ -1165,8 +1185,8 @@
         <h3>Homepage &amp; Listings &rarr; Homepage on Mobile</h3>
         <ul>
           <li>Choose the number of videos per mobile page and per row.</li>
-          <li>Hide homepage widget areas on mobile if needed.</li>
         </ul>
+        <p>The homepage has no widget area of its own, so there is nothing to hide on mobile. The theme's widget areas are the header strip, the player overlay, the strip below the player, the video sidebar, the footer, and the footer's own widget row.</p>
       </section>
 
       <section id="appearance">
@@ -1207,7 +1227,7 @@
             </thead>
             <tbody>
               <tr><td>Header: code and ads</td><td>Below the site header. Content Block widgets only.</td></tr>
-              <tr><td>Player: code and ads</td><td>Over the desktop video player where supported. Content Block widgets only.</td></tr>
+              <tr><td>Player overlay: 300x250 code and ads</td><td>A single 300x250 ad with a close button, over the top right of the desktop video player. Content Block widgets only.</td></tr>
               <tr><td>Below player: code and ads</td><td>Below the individual video player unless the video has its own content. Content Block widgets only.</td></tr>
               <tr><td>Video sidebar: code and ads</td><td>Beside an individual video when the sidebar setting is enabled. Content Block widgets only.</td></tr>
               <tr><td>Footer: code and ads</td><td>At the very top of the site footer, above the footer widgets. Content Block widgets only.</td></tr>

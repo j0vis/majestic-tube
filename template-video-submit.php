@@ -114,6 +114,40 @@ if ( $submission_enabled && $logged_in && isset( $_POST['wpst-submitted'] ) ) {
 					}
 					set_post_format( $post_id, 'video' );
 
+					/*
+					 * wp_insert_post() applies tax_input only when the acting user
+					 * holds the taxonomy's assign_terms capability, and that
+					 * capability is edit_posts for both post_tag and the actors
+					 * taxonomy. A member who registered through the theme is a
+					 * subscriber, so the tags and actors typed into this form were
+					 * handed to the insert and then silently dropped. Neither call
+					 * below is capability gated, and the post is already known to be
+					 * this visitor's own pending submission.
+					 */
+					if ( $tags ) {
+						// wp_set_post_terms() splits the comma list itself.
+						wp_set_post_terms( $post_id, $tags, 'post_tag' );
+					}
+
+					/*
+					 * wp_set_object_terms() does not split a comma list - it would
+					 * store the whole string as one actor named "a, b" - so the list
+					 * is split here first.
+					 */
+					$actor_names = array();
+
+					foreach ( explode( ',', (string) $actors ) as $actor_name ) {
+						$actor_name = trim( $actor_name );
+
+						if ( '' !== $actor_name ) {
+							$actor_names[] = $actor_name;
+						}
+					}
+
+					if ( $actor_names && taxonomy_exists( 'actors' ) ) {
+						wp_set_object_terms( $post_id, $actor_names, 'actors' );
+					}
+
 					$success = __( 'Thanks for submitting a video! Your submission is being moderated.', 'majestic-tube' );
 				}
 			}

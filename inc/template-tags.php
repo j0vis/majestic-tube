@@ -84,9 +84,40 @@ function majestic_tube_get_video_sources( $post_id = 0 ) {
 		'shortcode' => get_post_meta( $post_id, 'shortcode', true ),
 	);
 
-	if ( $main_url || $sources ) {
+	/*
+	 * Which of the two fields the player uses is a site-wide Customizer
+	 * choice (Appearance -> Customize -> Video Page -> Video Page Layout),
+	 * not a per-post one, and it is resolved here because this is the only
+	 * place the theme ranks the fields. Everything downstream - the player
+	 * branches in single.php, the quality menu, the og:video tags in
+	 * inc/meta-social.php - reads the type decided here, so one setting
+	 * moves all of them and every post on the site at once.
+	 *
+	 * The choice sets priority, not availability. A post that does not carry
+	 * the preferred field still plays from the other one: forcing `embed`
+	 * over a post whose embed box is empty would otherwise leave the page
+	 * with no player at all, which is a far worse outcome than ignoring the
+	 * setting for that one post. Both fields stay in the returned data
+	 * either way, so turning the setting back needs no re-save.
+	 */
+	$preference = majestic_tube_get_option( 'wpst-options', 'video-player-source', 'auto' );
+
+	// is_string, not a cast: a filter handing back an array would otherwise
+	// raise a warning on the cast and produce the string "Array".
+	$preference = is_string( $preference ) ? $preference : '';
+
+	if ( ! in_array( $preference, array( 'auto', 'url', 'embed' ), true ) ) {
+		$preference = 'auto';
+	}
+
+	$has_file  = ( $main_url || $sources );
+	$has_embed = '' !== trim( (string) $data['embed'] );
+
+	if ( 'embed' === $preference && $has_embed ) {
+		$data['type'] = 'embed';
+	} elseif ( $has_file ) {
 		$data['type'] = 'self-hosted';
-	} elseif ( $data['embed'] ) {
+	} elseif ( $has_embed ) {
 		$data['type'] = 'embed';
 	} elseif ( $data['shortcode'] ) {
 		$data['type'] = 'shortcode';

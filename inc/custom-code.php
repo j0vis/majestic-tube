@@ -11,7 +11,7 @@
  * exactly like the original theme and like the ad zones.
  *
  * @package Majestic Tube
- * @version 2.2.8
+ * @version 2.2.9
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -202,7 +202,8 @@ function majestic_tube_uses_bundled_font() {
  * Turn the brand options into CSS custom properties.
  *
  * Printing a small variable block keeps the main stylesheet cacheable while
- * still honouring main-color / logo-* / thumbnails-fit / videos-per-row.
+ * still honouring main-color / logo-* / thumbnails-fit / videos-per-row and
+ * categories-per-row.
  *
  * @return void
  */
@@ -271,6 +272,22 @@ function majestic_tube_output_brand_css() {
 
 	if ( $per_row_mobile > 0 ) {
 		$declarations[] = '--mt-columns-mobile:' . min( max( $per_row_mobile, 1 ), 3 );
+	}
+
+	/*
+	 * Categories per row. The categories listing reuses .video-grid, so without
+	 * a token of its own it silently followed videos-per-row and the
+	 * categories-per-row control changed nothing. The cap is 8, the maximum
+	 * the control accepts.
+	 */
+	$per_row_categories = absint( majestic_tube_get_option( 'wpst-options', 'categories-per-row', 5 ) );
+
+	if ( $per_row_categories > 0 ) {
+		$per_row_categories = min( max( $per_row_categories, 1 ), 8 );
+
+		$declarations[] = '--mt-category-columns:' . $per_row_categories;
+		$declarations[] = '--mt-category-columns-tablet:' . min( $per_row_categories, 3 );
+		$declarations[] = '--mt-category-columns-mobile:' . min( $per_row_categories, 2 );
 	}
 
 	$site_font  = (string) majestic_tube_get_option( 'wpst-options', 'site-font-family', majestic_tube_bundled_font_family() );

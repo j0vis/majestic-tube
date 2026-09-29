@@ -7,7 +7,7 @@
  * "report video" action.
  *
  * @package Majestic Tube
- * @version 2.2.8
+ * @version 2.2.9
  */
 
 get_header();
@@ -125,20 +125,24 @@ while ( have_posts() ) :
 					get_template_part( 'template-parts/content', 'logo-watermark' );
 					?>						<?php
 						/*
-						 * Player content is widget-managed. Keep the original
-						 * overlay container and close behavior, but do not expose
-						 * a placement-specific class or label in the output.
+						 * Player overlay: one 300x250 ad over the top right of the
+						 * player, with a close button. The old full-width bar that
+						 * ran along the bottom of the controls is gone; the widget
+						 * area it read from moved with it and its saved widgets were
+						 * carried over (see majestic_tube_migrate_player_overlay_widgets).
 						 */
-						$player_content = ! majestic_tube_is_mobile() && ! majestic_tube_is_ctpl_active() && is_active_sidebar( 'majestic-tube-player-content' )
-							? majestic_tube_widget_area_content( 'majestic-tube-player-content' )
+						$player_overlay = ! majestic_tube_is_mobile() && ! majestic_tube_is_ctpl_active() && is_active_sidebar( 'majestic-tube-player-overlay' )
+							? majestic_tube_widget_area_content( 'majestic-tube-player-overlay' )
 							: '';
 
-						if ( '' !== trim( $player_content ) && 'none' !== $sources['type'] ) :
+						if ( '' !== trim( $player_overlay ) && 'none' !== $sources['type'] ) :
 							?>
-							<div class="happy-inside-player">
-								<?php echo $player_content; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- widget output. ?>
-								<button type="button" class="close close-text"><?php esc_html_e( 'Close', 'majestic-tube' ); ?></button>
-							</div>
+							<aside class="player-overlay" role="complementary" aria-label="<?php esc_attr_e( 'Player overlay', 'majestic-tube' ); ?>">
+								<button type="button" class="player-overlay-close" aria-label="<?php esc_attr_e( 'Close the player overlay', 'majestic-tube' ); ?>"><span aria-hidden="true">&times;</span></button>
+								<div class="player-overlay-slot">
+									<?php echo $player_overlay; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- widget output. ?>
+								</div>
+							</aside>
 						<?php endif; ?>
 
 				</div>					<?php

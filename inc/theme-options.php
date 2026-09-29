@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.2.8
+ * @version 2.2.9
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -253,8 +253,15 @@ function majestic_tube_options_map() {
 			'section' => $home,
 		),
 		'homepage-title-desc-position' => array(
+			/*
+			 * Above the grid by default, because that is the only position that
+			 * prints the description twice: once under the title and again at
+			 * the foot of the homepage. Below the grid it prints once, at the
+			 * bottom, which is the whole of what the block does. Sites that
+			 * already chose a position keep it; this only moves the default.
+			 */
 			'setting' => 'majestic_tube_homepage_title_desc_position',
-			'default' => 'bottom',
+			'default' => 'top',
 			'type'    => 'select',
 			'label'   => __( 'Homepage title position', 'majestic-tube' ),
 			'section' => $home,
@@ -289,13 +296,6 @@ function majestic_tube_options_map() {
 				'max'  => 4,
 				'step' => 1,
 			),
-		),
-		'disable-homepage-widgets-mobile' => array(
-			'setting' => 'majestic_tube_disable_homepage_widgets_mobile',
-			'default' => 'off',
-			'type'    => 'onoff',
-			'label'   => __( 'Hide homepage widgets on mobile', 'majestic-tube' ),
-			'section' => $home_mobile,
 		),
 		/* ------------------------------------------------------------------
 		 * Listing archives - category, tag and actor pages
@@ -383,6 +383,31 @@ function majestic_tube_options_map() {
 		/* ------------------------------------------------------------------
 		 * Single video page - everything around the player (single.php)
 		 * ------------------------------------------------------------------ */
+		'video-player-source'      => array(
+			/*
+			 * Which of a post's two video fields the player uses. Read once in
+			 * majestic_tube_get_video_sources(), which is the only place the
+			 * theme decides between them, so this reaches the player, the
+			 * quality menu and the social tags together and applies to every
+			 * post on the site.
+			 *
+			 * `auto` is the original order: a file if the post has one,
+			 * otherwise the embed. The two explicit choices change the
+			 * priority, not the availability - a post missing the chosen field
+			 * still plays from the other one rather than going blank.
+			 */
+			'setting'     => 'majestic_tube_video_player_source',
+			'default'     => 'auto',
+			'type'        => 'select',
+			'label'       => __( 'Video source for the player', 'majestic-tube' ),
+			'section' => $single,
+			'choices'     => array(
+				'auto'  => __( 'Automatic: Video URL if the post has one, otherwise the embed code', 'majestic-tube' ),
+				'url'   => __( 'Video URL', 'majestic-tube' ),
+				'embed' => __( 'Video embed code', 'majestic-tube' ),
+			),
+			'description' => __( 'Which field the player uses on every video page. Both are still saved on the post either way, so switching back costs nothing. A video that does not have the field you picked falls back to the other one instead of showing an empty player.', 'majestic-tube' ),
+		),
 		'single-sidebar'              => array(
 			'setting'     => 'majestic_tube_single_sidebar',
 			'default'     => 'on',
@@ -1328,9 +1353,9 @@ function majestic_tube_options_map() {
 			'setting' => 'majestic_tube_seo_footer_text',
 			'default' => '',
 			'type'    => 'textarea',
-			'label'   => __( 'Homepage intro text', 'majestic-tube' ),
+			'label'   => __( 'Homepage description', 'majestic-tube' ),
 			'section' => $seo,
-			'description' => __( 'A short paragraph printed directly under the homepage title. Despite the name this option comes from, it appears on the front page and not in the footer. Search engines often use it as the site description, so one or two sentences works best.', 'majestic-tube' ),
+			'description' => __( 'A short paragraph describing the site. It is printed under the homepage title and again at the very bottom of the homepage, so the same words bookend the video grid for search engines. Despite the name this option comes from, it appears on the front page and not in the site footer. One or two sentences works best.', 'majestic-tube' ),
 		),
 		/* ------------------------------------------------------------------
 		 * Custom code

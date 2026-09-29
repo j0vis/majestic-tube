@@ -7,7 +7,7 @@
  * do not mistake the theme's widget chrome for a specific promotional format.
  *
  * @package Majestic Tube
- * @version 2.2.8
+ * @version 2.2.9
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -37,10 +37,15 @@ function majestic_tube_content_widget_areas() {
 			'name'        => esc_html__( 'Header: code and ads', 'majestic-tube' ),
 			'description' => esc_html__( 'Code and ads shown directly below the site header. Takes Content Block widgets only.', 'majestic-tube' ),
 		),
+		/*
+		 * The player zone is a fixed 300x250 slot, not a bar. The name says
+		 * the size because that is the number an ad network quotes back, and
+		 * anything else pasted into this area will be clipped by the box.
+		 */
 		'player'        => array(
-			'id'          => 'majestic-tube-player-content',
-			'name'        => esc_html__( 'Player: code and ads', 'majestic-tube' ),
-			'description' => esc_html__( 'Code and ads shown over the desktop video player. Takes Content Block widgets only.', 'majestic-tube' ),
+			'id'          => 'majestic-tube-player-overlay',
+			'name'        => esc_html__( 'Player overlay: 300x250 code and ads', 'majestic-tube' ),
+			'description' => esc_html__( 'A single 300x250 ad with a close button, shown over the top right of the desktop video player. Takes Content Block widgets only.', 'majestic-tube' ),
 		),
 		'under-player'  => array(
 			'id'          => 'majestic-tube-below-player',
@@ -233,6 +238,50 @@ function majestic_tube_widgets_init() {
 	register_widget( 'Majestic_Tube_Content_Widget' );
 }
 add_action( 'widgets_init', 'majestic_tube_widgets_init' );
+
+/*
+ * The player zone changed shape: a full-width bar under the controls became a
+ * fixed 300x250 overlay. Widgets already placed in the old area are moved to
+ * the new one so an update does not quietly delete an ad, and the old id is
+ * then emptied rather than left dangling as an unregistered area.
+ */
+function majestic_tube_migrate_player_overlay_widgets() {
+	if ( 1 <= (int) get_option( 'majestic_tube_player_overlay_migrated', 0 ) ) {
+		return;
+	}
+
+	$old_id = 'majestic-tube-player-content';
+	$new_id = 'majestic-tube-player-overlay';
+	$areas  = majestic_tube_content_widget_areas();
+
+	if ( ! isset( $areas['player']['id'] ) || $new_id !== $areas['player']['id'] ) {
+		return;
+	}
+
+	$sidebars = get_option( 'sidebars_widgets', array() );
+	$sidebars = is_array( $sidebars ) ? $sidebars : array();
+
+	if ( isset( $sidebars[ $old_id ] ) && is_array( $sidebars[ $old_id ] ) ) {
+		if ( ! isset( $sidebars[ $new_id ] ) || ! is_array( $sidebars[ $new_id ] ) ) {
+			$sidebars[ $new_id ] = array();
+		}
+
+		foreach ( $sidebars[ $old_id ] as $widget ) {
+			if ( ! in_array( $widget, $sidebars[ $new_id ], true ) ) {
+				$sidebars[ $new_id ][] = $widget;
+			}
+		}
+
+		unset( $sidebars[ $old_id ] );
+
+		update_option( 'sidebars_widgets', $sidebars );
+	}
+
+	// Set even when the old area was empty: the check is a one-time sweep.
+	update_option( 'majestic_tube_player_overlay_migrated', 1 );
+}
+add_action( 'after_setup_theme', 'majestic_tube_migrate_player_overlay_widgets', 26 );
+add_action( 'after_switch_theme', 'majestic_tube_migrate_player_overlay_widgets', 26 );
 
 /**
  * Migrate saved legacy content into Content Block widget instances once.

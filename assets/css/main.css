@@ -6,7 +6,7 @@
  * skin.
  *
  * @package Majestic Tube
- * @version 2.2.8
+ * @version 2.2.9
  */
 
 /*
@@ -731,6 +731,23 @@ ol {
 	max-width: 760px;
 	margin-top: 8px;
 	color: var(--mt-text-muted);
+}
+
+/* The closing copy of the homepage description, printed below the grid and
+ * the pagination so it is the last thing in the page content. The rule above
+ * the grid is separated by a border, and this one is not: it is a closing
+ * paragraph rather than a second heading, and a divider under the last page
+ * link would read as the page ending twice. */
+.homepage-seo-footer {
+	margin: 32px 0 0;
+	padding: 24px 0 0;
+	border-top: 1px solid var(--mt-border);
+}
+
+.homepage-seo-footer .archive-description {
+	margin: 0;
+	font-size: 0.95rem;
+	line-height: 1.65;
 }
 
 .filter-nav {
@@ -2341,35 +2358,94 @@ ol {
 	height: auto;
 }
 
-.happy-inside-player {
+/*
+ * Player overlay: a single 300x250 ad over the top right of the video.
+ *
+ * The size is fixed because that is the creative size the slot is sold at,
+ * so the box never grows to fit whatever is inside it and never reflows the
+ * player. `max-width` is the only concession to narrow columns: a player
+ * that cannot fit 300px is clipped by the player's own `overflow: hidden`
+ * rather than by the page, so the cap is measured against the player.
+ *
+ * The close button is pinned in the top left corner of the slot and overlaps
+ * the creative instead of taking rows from it, which keeps the visible ad
+ * area at the full 300x250. Logical offsets keep it in the same corner in RTL.
+ */
+.player-overlay {
 	position: absolute;
-	inset: auto 0 0;
-	z-index: 3;
+	top: 12px;
+	inset-inline-end: 12px;
+	z-index: 4;
+	width: 300px;
+	max-width: calc(100% - 24px);
+	height: 250px;
+	overflow: hidden;
+	background: #000;
+	border-radius: 4px;
+}
+
+.player-overlay-close {
+	position: absolute;
+	top: 0;
+	inset-inline-start: 0;
+	z-index: 2;
 	display: flex;
 	align-items: center;
-	gap: 10px;
-	padding: 8px 12px;
-	background: rgba(0, 0, 0, 0.88);
-}
-
-.happy-inside-player .majestic-tube-content-widget {
-	flex: 1 1 0;
-	margin: 0;
-}
-
-.happy-inside-player .majestic-tube-content-block {
-	margin: 0;
-}
-
-.happy-inside-player .close {
-	flex: 0 0 auto;
+	justify-content: center;
+	width: 26px;
+	height: 26px;
 	padding: 0;
-	background: transparent;
+	background: rgba(0, 0, 0, 0.82);
 	border: 0;
+	border-radius: 0 0 4px 0;
 	color: #fff;
-	font-size: 0.75rem;
+	font-size: 1.15rem;
+	line-height: 1;
 	cursor: pointer;
-	text-decoration: underline;
+}
+
+.player-overlay-close:hover,
+.player-overlay-close:focus {
+	background: #000;
+	color: #fff;
+}
+
+.player-overlay-slot {
+	width: 100%;
+	height: 100%;
+}
+
+.player-overlay .majestic-tube-content-widget,
+.player-overlay .majestic-tube-content-block {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+
+/*
+ * A widget title would come out of the fixed 250px height and leave the
+ * creative the wrong size, so the slot prints the ad alone.
+ */
+.player-overlay .widget-title {
+	display: none;
+}
+
+.player-overlay .majestic-tube-content-block img,
+.player-overlay .majestic-tube-content-block iframe {
+	max-width: 100%;
+}
+
+/*
+ * Below this the player is shorter than 250px, so a full-size slot would be
+ * clipped by the player's own `overflow: hidden` and the ad would print
+ * half-cut. The server already skips the zone for phones; this covers the
+ * narrow desktop window in between, where the height runs out before the
+ * 300px width does.
+ */
+@media screen and (max-width: 520px) {
+	.player-overlay {
+		display: none;
+	}
 }
 
 /* Comments -------------------------------------------------------------- */
@@ -3941,5 +4017,34 @@ object {
 	select,
 	textarea {
 		font-size: 16px;
+	}
+}
+
+/*
+ * Categories per row (categories-per-row).
+ *
+ * The categories listing reuses .video-grid, so it used to inherit
+ * videos-per-row and the categories-per-row control had no effect at all.
+ * inc/custom-code.php emits the three category tokens and this block consumes
+ * them.
+ *
+ * It is placed last and carries the extra .categories-grid class, so it wins on
+ * specificity rather than on source order. The video-grid rules above are
+ * restated at several breakpoints and the one that wins is simply whichever
+ * comes last, which makes them unsafe to rely on.
+ */
+.video-grid.categories-grid {
+	grid-template-columns: repeat(var(--mt-category-columns, 5), minmax(0, 1fr));
+}
+
+@media (max-width: 1100px) {
+	.video-grid.categories-grid {
+		grid-template-columns: repeat(var(--mt-category-columns-tablet, 3), minmax(0, 1fr));
+	}
+}
+
+@media (max-width: 782px) {
+	.video-grid.categories-grid {
+		grid-template-columns: repeat(var(--mt-category-columns-mobile, 2), minmax(0, 1fr));
 	}
 }

@@ -407,9 +407,24 @@ function majestic_tube_membership_nav( $items, $args ) {
 	if ( is_user_logged_in() ) {
 		$items .= '<li class="my-account"><a href="#">' . esc_html__( 'My Account', 'majestic-tube' ) . '</a>';
 		$items .= '<ul class="sub-menu">';
-		$items .= '<li><a href="' . esc_url( home_url( '/submit-a-video' ) ) . '">' . esc_html__( 'Submit a Video', 'majestic-tube' ) . '</a></li>';
-		$items .= '<li><a href="' . esc_url( get_author_posts_url( get_current_user_id() ) ) . '">' . esc_html__( 'My Channel', 'majestic-tube' ) . '</a></li>';
-		$items .= '<li><a href="' . esc_url( home_url( '/my-profile' ) ) . '">' . esc_html__( 'My Profile', 'majestic-tube' ) . '</a></li>';
+
+		/*
+		 * Each of the three links honours its own switch in the Visitor video
+		 * submission section; before that they were printed unconditionally and
+		 * the switches changed nothing. Logout is not optional and is always
+		 * printed, so the sub-menu is never empty.
+		 */
+		if ( majestic_tube_option_is_on( 'display-video-submit-link' ) ) {
+			$items .= '<li><a href="' . esc_url( home_url( '/submit-a-video' ) ) . '">' . esc_html__( 'Submit a Video', 'majestic-tube' ) . '</a></li>';
+		}
+
+		if ( majestic_tube_option_is_on( 'display-my-channel-link' ) ) {
+			$items .= '<li><a href="' . esc_url( get_author_posts_url( get_current_user_id() ) ) . '">' . esc_html__( 'My Channel', 'majestic-tube' ) . '</a></li>';
+		}
+
+		if ( majestic_tube_option_is_on( 'display-my-profile-link' ) ) {
+			$items .= '<li><a href="' . esc_url( home_url( '/my-profile' ) ) . '">' . esc_html__( 'My Profile', 'majestic-tube' ) . '</a></li>';
+		}
 		$items .= '<li><a href="' . esc_url( wp_logout_url( is_home() ? home_url() : get_permalink() ) ) . '">' . esc_html__( 'Logout', 'majestic-tube' ) . '</a></li>';
 		$items .= '</ul></li>';
 	} else {
