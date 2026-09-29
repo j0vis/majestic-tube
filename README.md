@@ -681,7 +681,7 @@ Every area named **code and ads** accepts this widget and nothing else, so any a
 | Area on the Widgets screen | Where it appears |
 | --- | --- |
 | Header: code and ads | Below the site header. Content Block widgets only. |
-| Player overlay: 300x250 code and ads | A single 300x250 ad with a close button, over the top right of the desktop video player. Content Block widgets only. |
+| Player overlay: 300x250 code and ads | A single 300x250 ad with a close button, centered over the desktop video player. Content Block widgets only. |
 | Below player: code and ads | Below the individual video player unless the video has its own content. Content Block widgets only. |
 | Video sidebar: code and ads | Beside an individual video when the sidebar setting is enabled. Content Block widgets only. |
 | Footer: code and ads | At the very top of the site footer, above the footer widgets. Content Block widgets only. |

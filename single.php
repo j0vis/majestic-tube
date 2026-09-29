@@ -7,7 +7,7 @@
  * "report video" action.
  *
  * @package Majestic Tube
- * @version 2.2.9
+ * @version 2.2.10
  */
 
 get_header();
@@ -125,11 +125,11 @@ while ( have_posts() ) :
 					get_template_part( 'template-parts/content', 'logo-watermark' );
 					?>						<?php
 						/*
-						 * Player overlay: one 300x250 ad over the top right of the
-						 * player, with a close button. The old full-width bar that
-						 * ran along the bottom of the controls is gone; the widget
-						 * area it read from moved with it and its saved widgets were
-						 * carried over (see majestic_tube_migrate_player_overlay_widgets).
+						 * Player overlay: one 300x250 ad centered over the player,
+						 * with a close button. The old full-width bar that ran along
+						 * the bottom of the controls is gone; the widget area it read
+						 * from moved with it and its saved widgets were carried over
+						 * (see majestic_tube_migrate_player_overlay_widgets).
 						 */
 						$player_overlay = ! majestic_tube_is_mobile() && ! majestic_tube_is_ctpl_active() && is_active_sidebar( 'majestic-tube-player-overlay' )
 							? majestic_tube_widget_area_content( 'majestic-tube-player-overlay' )
@@ -138,7 +138,7 @@ while ( have_posts() ) :
 						if ( '' !== trim( $player_overlay ) && 'none' !== $sources['type'] ) :
 							?>
 							<aside class="player-overlay" role="complementary" aria-label="<?php esc_attr_e( 'Player overlay', 'majestic-tube' ); ?>">
-								<button type="button" class="player-overlay-close" aria-label="<?php esc_attr_e( 'Close the player overlay', 'majestic-tube' ); ?>"><span aria-hidden="true">&times;</span></button>
+								<button type="button" class="player-overlay-close" data-overlay-close aria-label="<?php esc_attr_e( 'Close the player overlay', 'majestic-tube' ); ?>" title="<?php esc_attr_e( 'Close the player overlay', 'majestic-tube' ); ?>"><span aria-hidden="true">&times;</span></button>
 								<div class="player-overlay-slot">
 									<?php echo $player_overlay; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- widget output. ?>
 								</div>

@@ -10,7 +10,7 @@
  * (majestic_tube_disable_schema).
  *
  * @package Majestic Tube
- * @version 2.2.9
+ * @version 2.2.10
  */
 
 defined( 'ABSPATH' ) || exit;

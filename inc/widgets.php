@@ -7,7 +7,7 @@
  * do not mistake the theme's widget chrome for a specific promotional format.
  *
  * @package Majestic Tube
- * @version 2.2.9
+ * @version 2.2.10
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -45,7 +45,7 @@ function majestic_tube_content_widget_areas() {
 		'player'        => array(
 			'id'          => 'majestic-tube-player-overlay',
 			'name'        => esc_html__( 'Player overlay: 300x250 code and ads', 'majestic-tube' ),
-			'description' => esc_html__( 'A single 300x250 ad with a close button, shown over the top right of the desktop video player. Takes Content Block widgets only.', 'majestic-tube' ),
+			'description' => esc_html__( 'A single 300x250 ad with a close button, shown centered over the desktop video player. Takes Content Block widgets only.', 'majestic-tube' ),
 		),
 		'under-player'  => array(
 			'id'          => 'majestic-tube-below-player',

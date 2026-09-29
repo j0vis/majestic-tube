@@ -6,7 +6,7 @@
  * skin.
  *
  * @package Majestic Tube
- * @version 2.2.9
+ * @version 2.2.10
  */
 
 /*
@@ -2359,7 +2359,7 @@ ol {
 }
 
 /*
- * Player overlay: a single 300x250 ad over the top right of the video.
+ * Player overlay: a single 300x250 ad centered over the video.
  *
  * The size is fixed because that is the creative size the slot is sold at,
  * so the box never grows to fit whatever is inside it and never reflows the
@@ -2367,14 +2367,22 @@ ol {
  * that cannot fit 300px is clipped by the player's own `overflow: hidden`
  * rather than by the page, so the cap is measured against the player.
  *
+ * Centering uses physical `left`/`top` plus a half-size `translate`, and
+ * that is deliberate. The percentage in `translate` is a fraction of the
+ * element's own box, so it shifts the same way in both directions, whereas
+ * a logical `inset-inline-start` would resolve to the right edge in RTL and
+ * walk the slot 300px off center. Centering is direction-neutral; corner
+ * pinning is not.
+ *
  * The close button is pinned in the top left corner of the slot and overlaps
  * the creative instead of taking rows from it, which keeps the visible ad
  * area at the full 300x250. Logical offsets keep it in the same corner in RTL.
  */
 .player-overlay {
 	position: absolute;
-	top: 12px;
-	inset-inline-end: 12px;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
 	z-index: 4;
 	width: 300px;
 	max-width: calc(100% - 24px);
@@ -2384,6 +2392,18 @@ ol {
 	border-radius: 4px;
 }
 
+/*
+ * The close button has to be recognizable as a button, not just a glyph
+ * floating on a dark video, so it carries a solid plate, a hairline edge and
+ * a heavy cross. All three are missing against a black player otherwise: a
+ * translucent black plate on a black frame reads as part of the creative.
+ * The hairline and the plate are what make it identifiable; the `×` alone
+ * is not, because an ad creative is free to draw a cross of its own.
+ *
+ * It stays overlapping rather than taking a row, so the slot keeps the full
+ * 300x250 the creative is sold at. `data-overlay-close` is the stable hook
+ * for tests and for anyone styling the control from a child theme.
+ */
 .player-overlay-close {
 	position: absolute;
 	top: 0;
@@ -2392,21 +2412,40 @@ ol {
 	display: flex;
 	align-items: center;
 	justify-content: center;
-	width: 26px;
-	height: 26px;
+	width: 28px;
+	height: 28px;
 	padding: 0;
-	background: rgba(0, 0, 0, 0.82);
-	border: 0;
-	border-radius: 0 0 4px 0;
+	background: rgba(17, 17, 17, 0.94);
+	border: 1px solid rgba(255, 255, 255, 0.75);
+	border-width: 0 1px 1px 0;
+	border-radius: 0 0 6px 0;
 	color: #fff;
-	font-size: 1.15rem;
+	font-size: 1.6rem;
+	font-weight: 700;
 	line-height: 1;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.6);
 	cursor: pointer;
 }
 
-.player-overlay-close:hover,
-.player-overlay-close:focus {
-	background: #000;
+.player-overlay-close:hover {
+	background: #c0392b;
+	border-color: #fff;
+	color: #fff;
+}
+
+/*
+ * Focus repaints the control rather than drawing a ring around it, which is
+ * the theme's habit elsewhere (.term-letter, .majestic-tube-theme-toggle)
+ * and here is also the only thing that works. An outline is painted outside
+ * the button, and both this slot and the player set `overflow: hidden`, so a
+ * ring on a control pinned into the corner is sliced off along the top and
+ * the inline start edge: measured, the 2px ring at offset 2px is clipped on
+ * both of them and the keyboard user is left with no indicator at all. A
+ * repaint is inside the control and cannot be clipped.
+ */
+.player-overlay-close:focus-visible {
+	background: var(--mt-accent);
+	border-color: #fff;
 	color: #fff;
 }
 
