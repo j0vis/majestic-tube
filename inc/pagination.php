@@ -8,7 +8,7 @@
  * escaped links and the same `wpst_page_navi` contract.
  *
  * @package Majestic Tube
- * @version 2.2.15
+ * @version 2.2.16
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -470,11 +470,23 @@ function majestic_tube_get_term_letter_map( $taxonomy ) {
 		return $map;
 	}
 
+	// Only one request rebuilds the map; concurrent misses serve this request
+	// from a direct build instead of stampeding one option row.
+	$lock_key = $cache_key . '_lock';
+
+	if ( get_transient( $lock_key ) ) {
+		return majestic_tube_build_term_letter_map( $taxonomy );
+	}
+
+	set_transient( $lock_key, 1, MINUTE_IN_SECONDS );
+
 	$map = majestic_tube_build_term_letter_map( $taxonomy );
 
 	update_option( $cache_key, array( 'last_changed' => $last_changed, 'map' => $map ), false );
 
 	wp_cache_set( $fast_key, $map, MAJESTIC_TUBE_TERM_CACHE_GROUP, MAJESTIC_TUBE_TERM_CACHE_TTL );
+
+	delete_transient( $lock_key );
 
 	return $map;
 }

@@ -7,7 +7,7 @@
  * "report video" action.
  *
  * @package Majestic Tube
- * @version 2.2.15
+ * @version 2.2.16
  */
 
 get_header();
@@ -72,46 +72,22 @@ while ( have_posts() ) :
 
 					<?php elseif ( 'embed' === $sources['type'] ) : ?>
 						<div class="video-embed">
-							<?php
-							// Embed codes come from trusted site admins and may contain iframes.
-							$embed = (string) $sources['embed'];
-
-							if ( current_user_can( 'unfiltered_html' ) ) {
-								echo $embed; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- admin-provided embed code.
-							} else {
-								echo wp_kses(
-									$embed,
-									array(
-										'iframe' => array(
-											'src'             => true,
-											'width'           => true,
-											'height'          => true,
-											'frameborder'     => true,
-											'allow'           => true,
-											'allowfullscreen' => true,
-											'loading'         => true,
-											'style'           => true,
-										),
-										'video'  => array(
-											'src'      => true,
-											'controls' => true,
-											'poster'   => true,
-											'width'    => true,
-											'height'   => true,
-										),
-										'source' => array(
-											'src'  => true,
-											'type' => true,
-										),
-									)
-								);
-							}
+							<?php							// Embed markup is filtered at write time through
+							// majestic_tube_kses_player_markup(). Re-filtering here
+							// keeps this safe even for rows written before that
+							// filter existed, with no privilege fork.
+							echo majestic_tube_kses_player_markup( (string) $sources['embed'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- filtered through the player allowlist.
 							?>
 						</div>
 
-					<?php elseif ( 'shortcode' === $sources['type'] ) : ?>
+						<?php elseif ( 'shortcode' === $sources['type'] ) : ?>
 						<div class="video-shortcode">
-							<?php echo do_shortcode( $sources['shortcode'] ); ?>
+							<?php
+							// Intentional: shortcode output is active markup by
+							// definition. Safety comes from the write-time
+							// allowlist, not from escaping here.
+							echo do_shortcode( $sources['shortcode'] ); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- player shortcode output.
+							?>
 						</div>
 					<?php endif; ?>
 

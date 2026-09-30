@@ -298,10 +298,40 @@ add_action( 'wp_ajax_majestic_tube_refresh_nonces', 'majestic_tube_refresh_nonce
 add_action( 'wp_ajax_nopriv_majestic_tube_refresh_nonces', 'majestic_tube_refresh_nonces' );
 
 /**
+ * Per-IP throttle for membership endpoints.
+ *
+ * @param string $action login|register|reset.
+ * @return bool True when the caller must back off.
+ */
+function majestic_tube_auth_throttled( $action ) {
+	$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$key = 'majestic_tube_auth_' . $action . '_' . md5( $ip );
+
+	return (int) get_transient( $key ) > 10;
+}
+
+/**
+ * Record one failed membership attempt.
+ *
+ * @param string $action login|register|reset.
+ */
+function majestic_tube_auth_note_failure( $action ) {
+	$ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$key   = 'majestic_tube_auth_' . $action . '_' . md5( $ip );
+	$count = (int) get_transient( $key );
+
+	set_transient( $key, $count + 1, 15 * MINUTE_IN_SECONDS );
+}
+
+/**
  * Handle login requests (original action: wpst_login_member).
  */
 function majestic_tube_ajax_login() {
 	check_ajax_referer( 'ajax-login-nonce', 'login-security', false ) || majestic_tube_ajax_error( __( 'Security check failed.', 'majestic-tube' ), 403 );
+
+	if ( majestic_tube_auth_throttled( 'login' ) ) {
+		majestic_tube_ajax_error( __( 'Too many attempts. Please try again later.', 'majestic-tube' ), 429 );
+	}
 
 	$login    = isset( $_POST['wpst_user_login'] ) ? sanitize_user( wp_unslash( $_POST['wpst_user_login'] ) ) : '';
 	$password = isset( $_POST['wpst_user_pass'] ) ? (string) wp_unslash( $_POST['wpst_user_pass'] ) : '';
@@ -319,7 +349,10 @@ function majestic_tube_ajax_login() {
 	$user = wp_signon( $creds, is_ssl() );
 
 	if ( is_wp_error( $user ) ) {
-		majestic_tube_ajax_error( $user->get_error_message() );
+		majestic_tube_auth_note_failure( 'login' );
+		// Generic on purpose: distinct "bad user" vs "bad password"
+		// strings let scanners enumerate accounts.
+		majestic_tube_ajax_error( __( 'Invalid username or password.', 'majestic-tube' ) );
 	}
 
 	majestic_tube_ajax_membership_success( __( 'Login successful, reloading page...', 'majestic-tube' ) );
@@ -331,6 +364,10 @@ add_action( 'wp_ajax_nopriv_wpst_login_member', 'majestic_tube_ajax_login' );
  */
 function majestic_tube_ajax_register() {
 	check_ajax_referer( 'ajax-login-nonce', 'register-security', false ) || majestic_tube_ajax_error( __( 'Security check failed.', 'majestic-tube' ), 403 );
+
+	if ( majestic_tube_auth_throttled( 'register' ) ) {
+		majestic_tube_ajax_error( __( 'Too many attempts. Please try again later.', 'majestic-tube' ), 429 );
+	}
 
 	if ( ! get_option( 'users_can_register' ) ) {
 		majestic_tube_ajax_error( __( 'Registration is disabled.', 'majestic-tube' ) );
@@ -360,22 +397,22 @@ function majestic_tube_ajax_register() {
 		majestic_tube_ajax_error( __( 'The password must be at least 8 characters long.', 'majestic-tube' ) );
 	}
 
-	if ( username_exists( $login ) ) {
-		majestic_tube_ajax_error( __( 'This username is already taken.', 'majestic-tube' ) );
-	}
-
 	if ( ! is_email( $email ) ) {
 		majestic_tube_ajax_error( __( 'The email address is not valid.', 'majestic-tube' ) );
 	}
 
-	if ( email_exists( $email ) ) {
-		majestic_tube_ajax_error( __( 'This email is already registered.', 'majestic-tube' ) );
+	// One generic message for both collisions: distinct "username taken"
+	// vs "email registered" strings let scanners enumerate accounts.
+	if ( username_exists( $login ) || email_exists( $email ) ) {
+		majestic_tube_auth_note_failure( 'register' );
+		majestic_tube_ajax_error( __( 'This account cannot be created. Try a different username or email.', 'majestic-tube' ) );
 	}
 
 	$user_id = wp_create_user( $login, $password, $email );
 
 	if ( is_wp_error( $user_id ) ) {
-		majestic_tube_ajax_error( $user_id->get_error_message() );
+		majestic_tube_auth_note_failure( 'register' );
+		majestic_tube_ajax_error( __( 'This account cannot be created. Try a different username or email.', 'majestic-tube' ) );
 	}
 
 	// Notify both the new member and the site administrator through the
@@ -391,6 +428,10 @@ add_action( 'wp_ajax_nopriv_wpst_register_member', 'majestic_tube_ajax_register'
  */
 function majestic_tube_ajax_reset_password() {
 	check_ajax_referer( 'ajax-login-nonce', 'password-security', false ) || majestic_tube_ajax_error( __( 'Security check failed.', 'majestic-tube' ), 403 );
+
+	if ( majestic_tube_auth_throttled( 'reset' ) ) {
+		majestic_tube_ajax_error( __( 'Too many attempts. Please try again later.', 'majestic-tube' ), 429 );
+	}
 
 	$user_or_email = isset( $_POST['wpst_user_or_email'] ) ? sanitize_text_field( wp_unslash( $_POST['wpst_user_or_email'] ) ) : '';
 
@@ -424,6 +465,7 @@ function majestic_tube_ajax_reset_password() {
 		majestic_tube_ajax_error( $result->get_error_message() );
 	}
 
+	majestic_tube_auth_note_failure( 'reset' );
 	majestic_tube_ajax_error( __( 'Could not create reset key. Please try again.', 'majestic-tube' ) );
 }
 add_action( 'wp_ajax_nopriv_wpst_reset_password', 'majestic_tube_ajax_reset_password' );

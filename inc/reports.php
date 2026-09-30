@@ -309,7 +309,7 @@ function majestic_tube_report_video() {
 		__( 'Invalid video.', 'majestic-tube' )
 	);
 	$reason  = isset( $_POST['reason'] ) ? sanitize_key( wp_unslash( $_POST['reason'] ) ) : '';
-	$message = isset( $_POST['message'] ) ? sanitize_textarea_field( wp_unslash( $_POST['message'] ) ) : '';
+	$message = isset( $_POST['message'] ) ? mb_substr( sanitize_textarea_field( wp_unslash( $_POST['message'] ) ), 0, 2000 ) : '';
 
 	if ( ! majestic_tube_option_is_on( 'enable-video-report' ) ) {
 		wp_send_json_error( array( 'message' => __( 'Reporting is disabled.', 'majestic-tube' ) ), 403 );

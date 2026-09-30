@@ -756,6 +756,21 @@ Activation creates starter pages for:
 - DMCA
 - Privacy Policy
 
+### Bringing a deleted page back
+
+If one of these pages is deleted, two things break: the footer link to it becomes dead, and the document is no longer published at all. The theme used to repair that only when a release advanced an internal version marker, so a page deleted between releases simply stayed gone.
+
+There is now a control for it. Go to `Appearance → Themes → Majestic Tube` — the welcome screen — and scroll to **Legal pages**. It lists all three with a link to each, marks any that are **Missing**, and offers a button to recreate them.
+
+A few things it deliberately does not do:
+
+- **It only creates what is missing.** A page that exists is never touched, so anything you have written into it stays.
+- **It is not automatic.** The theme repairs missing *references* — a menu item, a template assignment — on its own, where a missing target is unambiguous. A page is content, and someone who removed their 2257 page may have done it on purpose. So this waits for you to ask.
+- **It re-links the footer menu.** Recreating the page is only half the job, so the repair also runs afterwards to point the footer legal menu back at the pages.
+- **It tells you what it did.** If a page could not be created — most often because the database user is not allowed to create pages — the screen says so and names the page, rather than reporting a success that did not happen.
+
+A page still sitting on the original `18-usc-2257` address counts as present, not missing, and a site using WordPress's own custom privacy page counts as having its privacy page.
+
 ### The 18 USC 2257 page and which role your site is in
 
 The starter 2257 page is written for a site that **distributes material produced by other people** — the posture this theme's video submission and membership features normally put an operator in. It describes the *secondary producer* role under 18 U.S.C. § 2257 and 28 C.F.R. part 75 in general terms, and it does not assert that your site holds any particular obligation.

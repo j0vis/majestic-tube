@@ -35,14 +35,18 @@ if ( $submission_enabled && $logged_in && isset( $_POST['wpst-submitted'] ) ) {
 		}
 
 		if ( $captcha_ok ) {
-			$title              = isset( $_POST['wpst-video_title'] ) ? sanitize_text_field( wp_unslash( $_POST['wpst-video_title'] ) ) : '';
-			$desc               = isset( $_POST['wpst-video_description'] ) ? sanitize_textarea_field( wp_unslash( $_POST['wpst-video_description'] ) ) : '';
+			$title              = isset( $_POST['wpst-video_title'] ) ? mb_substr( sanitize_text_field( wp_unslash( $_POST['wpst-video_title'] ) ), 0, 200 ) : '';
+			$desc               = isset( $_POST['wpst-video_description'] ) ? mb_substr( sanitize_textarea_field( wp_unslash( $_POST['wpst-video_description'] ) ), 0, 5000 ) : '';
 			$video              = isset( $_POST['wpst-video_url'] ) ? esc_url_raw( wp_unslash( $_POST['wpst-video_url'] ) ) : '';
-			$embed              = isset( $_POST['wpst-embed'] ) ? wp_kses_post( wp_unslash( $_POST['wpst-embed'] ) ) : '';
+			$embed              = isset( $_POST['wpst-embed'] ) ? majestic_tube_kses_player_markup( wp_unslash( $_POST['wpst-embed'] ) ) : '';
 			$thumb              = isset( $_POST['wpst-thumb'] ) ? esc_url_raw( wp_unslash( $_POST['wpst-thumb'] ) ) : '';
 			$category           = isset( $_POST['wpst-category_selected'] ) ? absint( wp_unslash( $_POST['wpst-category_selected'] ) ) : 0;
-			$tags               = isset( $_POST['wpst-tags'] ) ? sanitize_text_field( wp_unslash( $_POST['wpst-tags'] ) ) : '';
-			$actors             = isset( $_POST['wpst-actors'] ) ? sanitize_text_field( wp_unslash( $_POST['wpst-actors'] ) ) : '';
+			$tags               = isset( $_POST['wpst-tags'] ) ? mb_substr( sanitize_text_field( wp_unslash( $_POST['wpst-tags'] ) ), 0, 500 ) : '';
+			$actors             = isset( $_POST['wpst-actors'] ) ? mb_substr( sanitize_text_field( wp_unslash( $_POST['wpst-actors'] ) ), 0, 500 ) : '';
+
+			if ( $category && ! term_exists( $category, 'category' ) ) {
+				$category = 0;
+			}
 			$duration_raw       = array(
 				'hh' => '',
 				'mm' => '',

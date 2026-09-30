@@ -95,8 +95,8 @@ function majestic_tube_share_buttons( $post_id = 0 ) {
 		}
 
 		$links[] = array(
-			'id'    => 'majestic-tube-share-' . str_replace( '-video-share', '', $option_key ),
-			'icon'  => $network['icon'],
+			'id'    => sanitize_html_class( 'majestic-tube-share-' . str_replace( '-video-share', '', $option_key ) ),
+			'icon'  => sanitize_html_class( $network['icon'] ),
 			'label' => $network['label'],
 			'url'   => $url,
 		);

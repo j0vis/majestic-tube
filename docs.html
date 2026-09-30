@@ -1307,6 +1307,18 @@
           <li>Privacy Policy</li>
         </ul>
 
+        <h3>Bringing a deleted page back</h3>
+        <p>If one of these pages is deleted, two things break: the footer link to it becomes dead, and the document is no longer published at all. The theme used to repair that only when a release advanced an internal version marker, so a page deleted between releases simply stayed gone.</p>
+        <p>There is now a control for it. Go to <span class="path">Appearance &rarr; Themes &rarr; Majestic Tube</span> &mdash; the welcome screen &mdash; and scroll to <strong>Legal pages</strong>. It lists all three with a link to each, marks any that are <strong>Missing</strong>, and offers a button to recreate them.</p>
+        <p>A few things it deliberately does not do:</p>
+        <ul>
+          <li><strong>It only creates what is missing.</strong> A page that exists is never touched, so anything you have written into it stays.</li>
+          <li><strong>It is not automatic.</strong> The theme repairs missing <em>references</em> &mdash; a menu item, a template assignment &mdash; on its own, where a missing target is unambiguous. A page is content, and someone who removed their 2257 page may have done it on purpose. So this waits for you to ask.</li>
+          <li><strong>It re-links the footer menu.</strong> Recreating the page is only half the job, so the repair also runs afterwards to point the footer legal menu back at the pages.</li>
+          <li><strong>It tells you what it did.</strong> If a page could not be created &mdash; most often because the database user is not allowed to create pages &mdash; the screen says so and names the page, rather than reporting a success that did not happen.</li>
+        </ul>
+        <p>A page still sitting on the original <span class="path">18-usc-2257</span> address counts as present, not missing, and a site using WordPress&rsquo;s own custom privacy page counts as having its privacy page.</p>
+
         <h3>The 18 USC 2257 page and which role your site is in</h3>
         <p>The starter 2257 page is written for a site that <strong>distributes material produced by other people</strong> &mdash; the posture this theme&rsquo;s video submission and membership features normally put an operator in. It describes the <em>secondary producer</em> role under 18 U.S.C. &sect; 2257 and 28 C.F.R. part 75 in general terms, and it does not assert that your site holds any particular obligation.</p>
         <p>It also does not decide the question for you, and the page says so. If you produce any of the material on your site yourself &mdash; filming, directing, commissioning, or otherwise originating it &mdash; the obligations attach to the <strong>primary producer</strong> instead, and the generic secondary-producer wording is not sufficient. Rewrite the page to match your actual position, or get counsel to do it.</p>

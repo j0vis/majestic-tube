@@ -31,7 +31,8 @@ function majestic_tube_term_image_taxonomies() {
  */
 function majestic_tube_term_image_field( $image_id = 0, $context = 'add' ) {
 	$preview = $image_id ? wp_get_attachment_image( $image_id, 'thumbnail' ) : '';
-	$field   = sprintf(
+	$nonce   = wp_nonce_field( 'majestic_tube_term_image', 'majestic_tube_term_image_nonce', true, false );
+	$field   = $nonce . sprintf(
 		'<input type="hidden" name="majestic_tube_term_image_id" class="majestic-tube-term-image-id" value="%1$s" />' .
 		'<div class="majestic-tube-term-image-preview">%2$s</div>' .
 		'<button type="button" class="button majestic-tube-term-image-select">%3$s</button>' .
@@ -195,32 +196,49 @@ add_action( 'init', 'majestic_tube_term_image_edit_fields', 20 );
 /**
  * Save term image from add/edit forms.
  *
+ * Nonce-verified (term hooks carry no nonce of their own, so the add/edit
+ * form prints one). The taxonomy is resolved from the term itself, never
+ * trusted from $_POST, so a crafted request cannot pin meta onto a term in
+ * another taxonomy.
+ *
  * @param int $term_id Term ID.
  */
 function majestic_tube_term_image_save( $term_id ) {
-	if ( ! isset( $_POST['majestic_tube_term_image_id'] ) ) {
+	$term_id = absint( $term_id );
+
+	if ( ! $term_id ) {
 		return;
 	}
 
-	// phpcs:ignore WordPress.Security.NonceVerification.Missing -- term save hooks have no nonce context; capability checked below.
+	if ( ! isset( $_POST['majestic_tube_term_image_nonce'] ) ||
+		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['majestic_tube_term_image_nonce'] ) ), 'majestic_tube_term_image' ) ) {
+		return;
+	}
+
 	if ( ! current_user_can( 'manage_categories' ) ) {
 		return;
 	}
 
-	$image_id = absint( wp_unslash( $_POST['majestic_tube_term_image_id'] ) );
+	$term = get_term( $term_id );
 
-	// Determine which taxonomy's meta key to use.
-	$taxonomy = isset( $_POST['taxonomy'] ) ? sanitize_key( wp_unslash( $_POST['taxonomy'] ) ) : '';
-
-	$taxonomies = majestic_tube_term_image_taxonomies();
-
-	if ( ! isset( $taxonomies[ $taxonomy ] ) ) {
+	if ( ! $term || is_wp_error( $term ) ) {
 		return;
 	}
 
-	$meta_key = $taxonomies[ $taxonomy ];
+	$taxonomies = majestic_tube_term_image_taxonomies();
+
+	if ( ! isset( $taxonomies[ $term->taxonomy ] ) ) {
+		return;
+	}
+
+	$meta_key = $taxonomies[ $term->taxonomy ];
+	$image_id = isset( $_POST['majestic_tube_term_image_id'] ) ? absint( wp_unslash( $_POST['majestic_tube_term_image_id'] ) ) : 0;
 
 	if ( $image_id ) {
+		if ( ! wp_attachment_is_image( $image_id ) ) {
+			return;
+		}
+
 		update_term_meta( $term_id, $meta_key, $image_id );
 	} else {
 		delete_term_meta( $term_id, $meta_key );

@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.15
+ * @version 2.2.16
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -210,6 +210,65 @@ function majestic_tube_get_legal_page( $definition ) {
 	}
 
 	return get_page_by_path( $definition['slug'] );
+}
+
+/**
+ * Find a built-in legal page without changing anything.
+ *
+ * The read-only counterpart to majestic_tube_get_or_create_legal_page(). The
+ * status check on the welcome screen needs to answer "is this missing?" and
+ * must not migrate or write as a side effect of merely looking.
+ *
+ * The legacy 2257 slug counts as found. That page is not missing, it is
+ * simply on its old name, and recreating it would leave the site with two
+ * pages for one document.
+ *
+ * @param array $definition Legal page definition.
+ * @return object|false Page object, or false when the page does not exist.
+ */
+function majestic_tube_find_legal_page( $definition ) {
+	$page = majestic_tube_get_legal_page( $definition );
+
+	if ( $page && isset( $page->ID ) ) {
+		return $page;
+	}
+
+	$legacy_slug = ( is_array( $definition ) && ! empty( $definition['legacy_slug'] ) ) ? $definition['legacy_slug'] : '';
+
+	if ( $legacy_slug ) {
+		$legacy = get_page_by_path( $legacy_slug );
+
+		if ( $legacy && isset( $legacy->ID ) ) {
+			return $legacy;
+		}
+	}
+
+	return false;
+}
+
+/**
+ * Which built-in legal pages exist, and which do not.
+ *
+ * @return array{found: array<string,int>, missing: array<int,string>}
+ */
+function majestic_tube_legal_page_status() {
+	$found   = array();
+	$missing = array();
+
+	foreach ( majestic_tube_legal_pages() as $title => $definition ) {
+		$page = majestic_tube_find_legal_page( $definition );
+
+		if ( $page && isset( $page->ID ) ) {
+			$found[ $title ] = (int) $page->ID;
+		} else {
+			$missing[] = $title;
+		}
+	}
+
+	return array(
+		'found'   => $found,
+		'missing' => $missing,
+	);
 }
 
 /**
@@ -1206,6 +1265,88 @@ function majestic_tube_handle_setup_retry() {
 add_action( 'admin_init', 'majestic_tube_handle_setup_retry', 4 );
 
 /**
+ * Recreate the built-in legal pages an administrator has deleted.
+ *
+ * The footer repair below recreates missing pages, but only when a theme
+ * update advances its revision marker, so a page deleted after that stayed
+ * deleted - and a legal document that is gone is not a cosmetic problem, so
+ * there has to be a way to bring it back without waiting for a release.
+ *
+ * This is deliberately an explicit button rather than an automatic repair.
+ * The automatic repairs in this file restore *references* - a menu item, a
+ * page template assignment - where a missing target is unambiguous. A page is
+ * content: an operator who removed their 2257 page may have done it on purpose,
+ * and quietly restoring it, and its footer link, would be arguing with them.
+ *
+ * Only pages that are actually missing are touched. A page that exists keeps
+ * its content, its title and its URL, because that content is the
+ * administrator's, not the theme's.
+ *
+ * @return void
+ */
+function majestic_tube_handle_legal_page_restore() {
+	if ( ! isset( $_GET['majestic-tube-legal'] ) || 'restore' !== $_GET['majestic-tube-legal'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the nonce is verified on the next line.
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		wp_die(
+			esc_html__( 'You are not allowed to manage legal pages.', 'majestic-tube' ),
+			esc_html__( 'Legal pages', 'majestic-tube' ),
+			array( 'response' => 403 )
+		);
+	}
+
+	check_admin_referer( 'majestic_tube_legal_restore' );
+
+	$definitions = majestic_tube_legal_pages();
+	$missing     = majestic_tube_legal_page_status()['missing'];
+	$restored    = array();
+	$failed      = array();
+
+	foreach ( $missing as $title ) {
+		if ( ! isset( $definitions[ $title ] ) ) {
+			continue;
+		}
+
+		if ( majestic_tube_get_or_create_legal_page( $title, $definitions[ $title ] ) ) {
+			$restored[] = $title;
+		} else {
+			$failed[] = $title;
+		}
+	}
+
+	/*
+	 * Recreating the page is only half the job. The footer legal menu may
+	 * still hold a dead item, or no link at all for the page that just came
+	 * back. Resetting the revision marker and running the existing repair is
+	 * better than reimplementing the menu logic here: that repair already
+	 * knows how to relink without duplicating items, and it is the same code
+	 * path a theme update uses.
+	 */
+	update_option( 'majestic_tube_footer_legal_revision', 0 );
+	majestic_tube_repair_footer_legal_links();
+
+	$state = $failed
+		? ( $restored ? 'partial' : 'failed' )
+		: ( $restored ? 'restored' : 'none' );
+
+	$args = array( 'majestic-tube-legal' => $state );
+
+	if ( $restored ) {
+		$args['restored'] = implode( ',', $restored );
+	}
+
+	if ( $failed ) {
+		$args['failed'] = implode( ',', $failed );
+	}
+
+	wp_safe_redirect( add_query_arg( $args, admin_url( 'themes.php?page=majestic-tube-welcome' ) ) );
+	exit;
+}
+add_action( 'admin_init', 'majestic_tube_handle_legal_page_restore', 3 );
+
+/**
  * Tell an administrator when the automatic setup did not finish.
  *
  * @return void
@@ -1268,6 +1409,8 @@ function majestic_tube_render_welcome_page() {
 	$menu           = get_option( 'majestic_tube_menu_created', false );
 	$setup_complete = majestic_tube_setup_is_complete();
 	$retry_state    = isset( $_GET['majestic-tube-setup'] ) ? sanitize_key( wp_unslash( $_GET['majestic-tube-setup'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display state.
+	$legal          = majestic_tube_legal_page_status();
+	$legal_state    = isset( $_GET['majestic-tube-legal'] ) ? sanitize_key( wp_unslash( $_GET['majestic-tube-legal'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display state.
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Welcome to Majestic Tube', 'majestic-tube' ); ?></h1>
@@ -1313,6 +1456,63 @@ function majestic_tube_render_welcome_page() {
 				</a>
 			</p>
 		<?php endif; ?>
+
+		<h2><?php esc_html_e( 'Legal pages', 'majestic-tube' ); ?></h2>
+
+		<?php if ( 'restored' === $legal_state ) : ?>
+			<div class="notice notice-success inline"><p><?php esc_html_e( 'The missing legal pages have been recreated, and the footer legal links now point at them.', 'majestic-tube' ); ?></p></div>
+		<?php elseif ( 'partial' === $legal_state ) : ?>
+			<div class="notice notice-warning inline"><p>
+				<?php
+				printf(
+					/* translators: %s: comma-separated list of page titles. */
+					esc_html__( 'Some legal pages could not be recreated: %s. Check that your database user may create pages, then try again.', 'majestic-tube' ),
+					esc_html( isset( $_GET['failed'] ) ? sanitize_text_field( wp_unslash( $_GET['failed'] ) ) : '' ) // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display of our own redirect value.
+				);
+				?>
+			</p></div>
+		<?php elseif ( 'failed' === $legal_state ) : ?>
+			<div class="notice notice-error inline"><p><?php esc_html_e( 'No legal page could be recreated. Check that your database user may create pages, then try again.', 'majestic-tube' ); ?></p></div>
+		<?php elseif ( 'none' === $legal_state ) : ?>
+			<div class="notice notice-success inline"><p><?php esc_html_e( 'Every legal page is already present, so nothing was changed.', 'majestic-tube' ); ?></p></div>
+		<?php endif; ?>
+
+		<p><?php esc_html_e( 'These are the compliance pages the theme creates. If one has been deleted, the footer link to it is dead and the document is no longer published.', 'majestic-tube' ); ?></p>
+
+		<table class="widefat striped" style="max-width: 40em;">
+			<tbody>
+				<?php foreach ( $legal['found'] as $legal_title => $legal_id ) : ?>
+					<tr>
+						<td><?php echo esc_html( $legal_title ); ?></td>
+						<td>
+							<a href="<?php echo esc_url( (string) get_permalink( $legal_id ) ); ?>"><?php esc_html_e( 'View', 'majestic-tube' ); ?></a>
+							&middot;
+							<a href="<?php echo esc_url( (string) get_edit_post_link( $legal_id ) ); ?>"><?php esc_html_e( 'Edit', 'majestic-tube' ); ?></a>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+
+				<?php foreach ( $legal['missing'] as $legal_title ) : ?>
+					<tr>
+						<td><?php echo esc_html( $legal_title ); ?></td>
+						<td><strong><?php esc_html_e( 'Missing', 'majestic-tube' ); ?></strong></td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+
+		<p style="margin-top: 1em;">
+			<a class="button button-secondary" href="<?php echo esc_url( wp_nonce_url( add_query_arg( 'majestic-tube-legal', 'restore', admin_url( 'themes.php?page=majestic-tube-welcome' ) ), 'majestic_tube_legal_restore' ) ); ?>">
+				<?php
+				echo ! empty( $legal['missing'] )
+					? esc_html__( 'Recreate the missing legal pages', 'majestic-tube' )
+					: esc_html__( 'Check the legal pages again', 'majestic-tube' );
+				?>
+			</a>
+		</p>
+		<p style="color: #646970;">
+			<?php esc_html_e( 'Only pages that are missing are created, using the starter wording the theme ships with. A page that already exists is never overwritten, so any text you have written stays.', 'majestic-tube' ); ?>
+		</p>
 
 		<h2><?php esc_html_e( 'Next steps', 'majestic-tube' ); ?></h2>
 		<ul style="list-style: disc; padding-left: 1.5em;">

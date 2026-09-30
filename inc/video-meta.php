@@ -94,6 +94,51 @@ function majestic_tube_extract_iframe( $raw ) {
 }
 
 /**
+ * KSES allowlist for stored player markup.
+ *
+ * wp_kses_post() strips <iframe>, which broke front-end embeds, while storing
+ * raw markup kept javascript:/on* payloads. This list permits video iframes
+ * (and bare <video>/<source>) with presentation attributes only - no event
+ * handlers, no <script>, no <object>.
+ *
+ * @param string $html Raw markup.
+ * @return string Filtered markup.
+ */
+function majestic_tube_kses_player_markup( $html ) {
+	if ( ! is_string( $html ) || '' === trim( $html ) ) {
+		return '';
+	}
+
+	return wp_kses(
+		$html,
+		array(
+			'iframe' => array(
+				'src'             => true,
+				'width'           => true,
+				'height'          => true,
+				'frameborder'     => true,
+				'allow'           => true,
+				'allowfullscreen' => true,
+				'loading'         => true,
+				'title'           => true,
+			),
+			'video'  => array(
+				'src'      => true,
+				'controls' => true,
+				'poster'   => true,
+				'width'    => true,
+				'height'   => true,
+				'preload'  => true,
+			),
+			'source' => array(
+				'src'  => true,
+				'type' => true,
+			),
+		)
+	);
+}
+
+/**
  * Map front-end submission fields to the original required-field options.
  *
  * @return array<string, string> Submission field => legacy option id.
@@ -350,13 +395,15 @@ function majestic_tube_save_video_meta( $post_id ) {
 		 * An iframe is not a file the player can load, so it does not belong
 		 * in a direct-video field. Move it to the embed key and leave the
 		 * URL field empty rather than storing markup esc_url_raw() would
-		 * mangle into an unplayable source.
+		 * mangle into an unplayable source. Only relocate when the whole
+		 * value is markup, and filter it so a pasted <iframe onload=...>
+		 * never persists raw.
 		 */
 		if ( 'url' === $type ) {
 			$iframe = majestic_tube_extract_iframe( $raw );
 
-			if ( '' !== $iframe ) {
-				update_post_meta( $post_id, 'embed', $iframe );
+			if ( '' !== $iframe && '<' === substr( ltrim( (string) $raw ), 0, 1 ) ) {
+				update_post_meta( $post_id, 'embed', majestic_tube_kses_player_markup( $iframe ) );
 				update_post_meta( $post_id, $key, '' );
 
 				continue;
@@ -374,7 +421,11 @@ function majestic_tube_save_video_meta( $post_id ) {
 				$value = ( 'on' === $raw ) ? 'on' : 'off';
 				break;
 			default:
-				$value = majestic_tube_sanitize_ad_code( $raw );
+				if ( in_array( $key, array( 'embed', 'shortcode' ), true ) ) {
+					$value = majestic_tube_kses_player_markup( $raw );
+				} else {
+					$value = majestic_tube_sanitize_ad_code( $raw );
+				}
 		}
 
 		update_post_meta( $post_id, $key, $value );

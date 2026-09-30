@@ -33,7 +33,10 @@ $request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_
 // Handle profile save.
 if ( 'POST' === $request_method && isset( $_POST['majestic-tube-profile-nonce'] ) ) {
 
-	if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['majestic-tube-profile-nonce'] ) ), 'majestic_tube_update_profile' ) ) {
+	if ( ! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['majestic-tube-profile-nonce'] ) ), 'majestic_tube_update_profile' ) ) {
+		// A stale nonce previously discarded the whole save silently.
+		$errors[] = __( 'Your session expired. Please reload the page and try again.', 'majestic-tube' );
+	} else {
 
 		// Password.
 		$pass1 = isset( $_POST['pass1'] ) ? (string) wp_unslash( $_POST['pass1'] ) : '';
@@ -112,15 +115,39 @@ if ( 'POST' === $request_method && isset( $_POST['majestic-tube-profile-nonce'] 
 			update_user_meta( $current_user->ID, 'last_name', $last_name );
 		}
 		if ( $display ) {
-			$result = wp_update_user(
-				array(
-					'ID'           => $current_user->ID,
-					'display_name' => $display,
+			// Free-text display_name allowed impersonation ("Admin"). Only
+			// the user's own stored identities are acceptable - validated
+			// against the account, not the just-posted names, mirroring the
+			// offered-names dropdown on WP's own profile screen.
+			$stored_first = isset( $current_user->first_name ) ? trim( (string) $current_user->first_name ) : '';
+			$stored_last  = isset( $current_user->last_name ) ? trim( (string) $current_user->last_name ) : '';
+			$stored_nick  = isset( $current_user->nickname ) ? trim( (string) $current_user->nickname ) : '';
+			$stored_login = isset( $current_user->user_login ) ? trim( (string) $current_user->user_login ) : '';
+			$allowed_names = array_unique(
+				array_filter(
+					array(
+						$stored_login,
+						$stored_nick,
+						trim( $stored_first . ' ' . $stored_last ),
+						$stored_first,
+						$stored_last,
+					)
 				)
 			);
 
-			if ( is_wp_error( $result ) ) {
-				$errors[] = $result->get_error_message();
+			if ( ! $allowed_names || ! in_array( $display, $allowed_names, true ) ) {
+				$errors[] = __( 'Please choose one of the offered display names.', 'majestic-tube' );
+			} else {
+				$result = wp_update_user(
+					array(
+						'ID'           => $current_user->ID,
+						'display_name' => $display,
+					)
+				);
+
+				if ( is_wp_error( $result ) ) {
+					$errors[] = $result->get_error_message();
+				}
 			}
 		}
 		if ( isset( $_POST['description'] ) ) {
