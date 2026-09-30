@@ -12,7 +12,7 @@
  * It is `noindex, follow`. It is not a ranking target; it is a map.
  *
  * @package Majestic Tube
- * @version 2.2.22
+ * @version 2.2.23
  */
 
 defined( 'ABSPATH' ) || exit;

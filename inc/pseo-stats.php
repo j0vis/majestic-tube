@@ -20,7 +20,7 @@
  * for the same reason: hooks alone miss the paths that matter.
  *
  * @package Majestic Tube
- * @version 2.2.22
+ * @version 2.2.23
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -667,8 +667,16 @@ function majestic_tube_facet_summary( $type, $term, $term2 = null, $band = '', $
 	/**
 	 * Filter a facet's generated summary sentence.
 	 *
-	 * @param string $summary Plain text summary.
-	 * @param string $type    Facet type key.
+	 * The term, band and stats are passed as extra arguments so a listener
+	 * can replace the sentence with wording built from the same real values;
+	 * existing listeners reading only the first two arguments are unaffected.
+	 *
+	 * @param string       $summary Plain text summary.
+	 * @param string       $type    Facet type key.
+	 * @param WP_Term|null $term    Primary term.
+	 * @param WP_Term|null $term2   Secondary term.
+	 * @param string       $band    Duration band key.
+	 * @param array        $stats   Facet stats.
 	 */
-	return (string) apply_filters( 'majestic_tube_facet_summary', $summary, $type );
+	return (string) apply_filters( 'majestic_tube_facet_summary', $summary, $type, $term, $term2, $band, $stats );
 }

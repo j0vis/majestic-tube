@@ -127,6 +127,53 @@ function majestic_tube_pseo_options_map( $map ) {
 		'description' => __( 'Adds the enabled pages to the sitemap at /wp-sitemap.xml. This switches itself off while an SEO plugin is providing the sitemap.', 'majestic-tube' ),
 	);
 
+	/*
+	 * Text templates. Each generated page has three pieces of writing: the
+	 * title the browser tab and Google show, the description Google shows
+	 * under it, and the paragraph that opens the page. Every one is a format
+	 * with named slots, and every slot is replaced with something real from
+	 * the catalogue before the text is used. An empty field keeps the
+	 * theme's own writing, so a site only overrides what it cares about.
+	 */
+	$token_help = __( 'Placeholders: {name} the page’s main name, {other} the second name, {count} number of videos, {band} length group, {runtime} total length, {related} most common co-star, {site} your site name.', 'majestic-tube' );
+
+	$text_kinds = array(
+		'actor-category' => array( 'type' => 'actor_category', 'label' => __( 'Actor in category pages', 'majestic-tube' ) ),
+		'actor-actor'    => array( 'type' => 'actor_actor', 'label' => __( 'Actor pairing pages', 'majestic-tube' ) ),
+		'actor-length'   => array( 'type' => 'actor_length', 'label' => __( 'Actor duration band pages', 'majestic-tube' ) ),
+		'category-tag'   => array( 'type' => 'category_tag', 'label' => __( 'Tag in category pages', 'majestic-tube' ) ),
+		'studio'         => array( 'type' => 'studio', 'label' => __( 'Studio pages', 'majestic-tube' ) ),
+		'series'         => array( 'type' => 'series', 'label' => __( 'Series pages', 'majestic-tube' ) ),
+	);
+
+	foreach ( $text_kinds as $slug => $kind ) {
+		$type = $kind['type'];
+		$map[ 'generated-title-' . $slug ] = array(
+			'setting'     => 'majestic_tube_generated_title_' . $type,
+			'default'     => '',
+			'type'        => 'text',
+			'label'       => sprintf( /* translators: %s: page kind. */ __( '%s — browser title format', 'majestic-tube' ), $kind['label'] ),
+			'section'     => 'generated',
+			'description' => __( 'Blank = the theme\'s own format.', 'majestic-tube' ) . ' ' . $token_help,
+		);
+		$map[ 'generated-desc-' . $slug ] = array(
+			'setting'     => 'majestic_tube_generated_desc_' . $type,
+			'default'     => '',
+			'type'        => 'text',
+			'label'       => sprintf( /* translators: %s: page kind. */ __( '%s — search description format', 'majestic-tube' ), $kind['label'] ),
+			'section'     => 'generated',
+			'description' => __( 'Blank = the theme\'s own format.', 'majestic-tube' ) . ' ' . $token_help,
+		);
+		$map[ 'generated-intro-' . $slug ] = array(
+			'setting'     => 'majestic_tube_generated_intro_' . $type,
+			'default'     => '',
+			'type'        => 'textarea',
+			'label'       => sprintf( /* translators: %s: page kind. */ __( '%s — opening paragraph format', 'majestic-tube' ), $kind['label'] ),
+			'section'     => 'generated',
+			'description' => __( 'Blank = the theme\'s own paragraph.', 'majestic-tube' ) . ' ' . $token_help,
+		);
+	}
+
 	return $map;
 }
 add_filter( 'majestic_tube_options_map', 'majestic_tube_pseo_options_map', 20 );
@@ -293,6 +340,176 @@ function majestic_tube_pseo_sitemap_switch( $owned ) {
 	return $owned;
 }
 add_filter( 'majestic_tube_output_facet_sitemap', 'majestic_tube_pseo_sitemap_switch', 20 );
+
+/**
+ * Read a stored text template for one kind of generated page.
+ *
+ * @param string $kind  Facet type key (actor_category, studio, ...).
+ * @param string $field Which template: title, desc or intro.
+ * @return string The stored template, or an empty string when the field was
+ *                left blank - which means "use the theme's own writing".
+ */
+function majestic_tube_pseo_template( $kind, $field ) {
+
+	$slugs = array(
+		'actor_category' => 'actor-category',
+		'actor_actor'    => 'actor-actor',
+		'actor_length'   => 'actor-length',
+		'category_tag'   => 'category-tag',
+		'studio'         => 'studio',
+		'series'         => 'series',
+	);
+
+	if ( ! isset( $slugs[ $kind ] ) ) {
+		return '';
+	}
+
+	return trim( (string) majestic_tube_get_option( 'wpst-options', 'generated-' . $field . '-' . $slugs[ $kind ], '' ) );
+}
+
+/**
+ * The real values behind a template's placeholders.
+ *
+ * Every slot comes from the catalogue or the measurement layer, never from
+ * the template itself, so a page cannot claim a number nothing measured.
+ *
+ * @param string $type  Facet type key.
+ * @param array  $facet Facet descriptor (term, term2, band, count).
+ * @param array  $stats Optional facet stats, for runtime and co-star.
+ * @return array<string, string>
+ */
+function majestic_tube_pseo_tokens( $type, $facet, $stats = array() ) {
+
+	$bands      = function_exists( 'majestic_tube_length_bands' ) ? majestic_tube_length_bands() : array();
+	$band       = isset( $facet['band'] ) ? (string) $facet['band'] : '';
+	$band_label = ( $band && isset( $bands[ $band ] ) ) ? (string) $bands[ $band ]['label'] : '';
+
+	$tokens = array(
+		'name'    => isset( $facet['term'], $facet['term']->name ) ? (string) $facet['term']->name : '',
+		'other'   => ( ! empty( $facet['term2'] ) && isset( $facet['term2']->name ) ) ? (string) $facet['term2']->name : '',
+		'count'   => number_format_i18n( isset( $facet['count'] ) ? (int) $facet['count'] : 0 ),
+		'band'    => $band_label,
+		'runtime' => isset( $stats['runtime_label'] ) ? (string) $stats['runtime_label'] : '',
+		'related' => ( isset( $stats['related'] ) && is_array( $stats['related'] ) && isset( $stats['related'][0]['label'] ) ) ? (string) $stats['related'][0]['label'] : '',
+		'site'    => (string) get_bloginfo( 'name' ),
+	);
+
+	return $tokens;
+}
+
+/**
+ * Fill a template in.
+ *
+ * Unknown placeholders are removed rather than printed, a doubled blank is
+ * collapsed, and a template that reduces to nothing is reported as empty so
+ * the caller falls back to the theme's own writing.
+ *
+ * @param string                $template The stored format.
+ * @param array<string, string> $tokens   Slot values.
+ * @return string
+ */
+function majestic_tube_pseo_render_template( $template, $tokens ) {
+
+	$filled = preg_replace_callback(
+		'/\{([a-z]+)\}/',
+		function ( $m ) use ( $tokens ) {
+			return isset( $tokens[ $m[1] ] ) ? $tokens[ $m[1] ] : '';
+		},
+		(string) $template
+	);
+
+	$filled = trim( preg_replace( '/\s+/', ' ', (string) $filled ) );
+
+	return (string) $filled;
+}
+
+/**
+ * Fill the stored browser-title template, when there is one.
+ *
+ * Runs before the theme's own writer (default priority 10), which detects
+ * the changed value and stops - its built-in formats then never apply, and
+ * the stored wording wins. An empty result falls through to the writer.
+ *
+ * @param string $title Current title.
+ * @param array  $facet Facet descriptor.
+ * @return string
+ */
+function majestic_tube_pseo_template_title( $title, $facet ) {
+
+	if ( ! is_array( $facet ) || ! isset( $facet['type'] ) ) {
+		return $title;
+	}
+
+	$template = majestic_tube_pseo_template( $facet['type'], 'title' );
+
+	if ( '' === $template ) {
+		return $title;
+	}
+
+	$filled = majestic_tube_pseo_render_template( $template, majestic_tube_pseo_tokens( $facet['type'], $facet ) );
+
+	return ( '' !== $filled ) ? $filled : $title;
+}
+add_filter( 'majestic_tube_facet_title', 'majestic_tube_pseo_template_title', 5, 2 );
+
+/**
+ * Fill the stored search-description template, when there is one.
+ *
+ * @param string $description Current description.
+ * @param array  $facet       Facet descriptor.
+ * @return string
+ */
+function majestic_tube_pseo_template_description( $description, $facet ) {
+
+	if ( ! is_array( $facet ) || ! isset( $facet['type'] ) ) {
+		return $description;
+	}
+
+	$template = majestic_tube_pseo_template( $facet['type'], 'desc' );
+
+	if ( '' === $template ) {
+		return $description;
+	}
+
+	$stats = majestic_tube_facet_stats( $facet['type'], $facet['term'], isset( $facet['term2'] ) ? $facet['term2'] : null, isset( $facet['band'] ) ? $facet['band'] : '' );
+	$filled = majestic_tube_pseo_render_template( $template, majestic_tube_pseo_tokens( $facet['type'], $facet, $stats ) );
+
+	return ( '' !== $filled ) ? $filled : $description;
+}
+add_filter( 'majestic_tube_facet_description', 'majestic_tube_pseo_template_description', 5, 2 );
+
+/**
+ * Fill the stored opening-paragraph template, when there is one.
+ *
+ * @param string $summary Current summary.
+ * @param string $type    Facet type key.
+ * @param WP_Term|null $term  Primary term.
+ * @param WP_Term|null $term2 Secondary term.
+ * @param string       $band  Duration band key.
+ * @param array        $stats Facet stats.
+ * @return string
+ */
+function majestic_tube_pseo_template_summary( $summary, $type, $term = null, $term2 = null, $band = '', $stats = array() ) {
+
+	$template = majestic_tube_pseo_template( $type, 'intro' );
+
+	if ( '' === $template || ! $term ) {
+		return $summary;
+	}
+
+	$facet = array(
+		'type'  => $type,
+		'term'  => $term,
+		'term2' => $term2,
+		'band'  => $band,
+		'count' => isset( $stats['count'] ) ? (int) $stats['count'] : 0,
+	);
+
+	$filled = majestic_tube_pseo_render_template( $template, majestic_tube_pseo_tokens( $type, $facet, $stats ) );
+
+	return ( '' !== $filled ) ? $filled : $summary;
+}
+add_filter( 'majestic_tube_facet_summary', 'majestic_tube_pseo_template_summary', 5, 6 );
 
 /**
  * Leave rewrite rules for the switched-off kinds out of the set.
