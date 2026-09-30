@@ -591,15 +591,14 @@ function majestic_tube_popular_tags( $limit = 0 ) {
 		'hide_empty' => true,
 		'number'     => $limit,
 		/*
-		 * Sorted by how many videos carry the tag, then by name. The second
-		 * key is what stops two tags with the same count from swapping places
-		 * between requests - a bar that reshuffles itself on a reload reads
-		 * as broken rather than as a live ranking.
+		 * `orderby` is one string here, not the key => direction array that
+		 * WP_Query accepts. WP_Term_Query::parse_orderby() passes the value
+		 * straight to strtolower() with no array handling, so an array is a
+		 * fatal error that takes the front page with it, not a graceful
+		 * fallback. The name tiebreak is done in PHP instead, below.
 		 */
-		'orderby'    => array(
-			'count' => 'DESC',
-			'name'  => 'ASC',
-		),
+		'orderby'    => 'count',
+		'order'      => 'DESC',
 	);
 
 	/**
@@ -616,6 +615,34 @@ function majestic_tube_popular_tags( $limit = 0 ) {
 	if ( is_wp_error( $terms ) ) {
 		return array();
 	}
+
+	/*
+	 * One ORDER BY column is all the term query has, so tags tied on count
+	 * come back in whatever order the database felt like, and the bar
+	 * reshuffles itself between two visits that ought to look identical.
+	 * Sorting the fetched page settles that: most used first, then by name.
+	 *
+	 * This cannot decide *which* tags are in the top N when the count at the
+	 * boundary is tied - that is settled before PHP ever sees the rows - but
+	 * within the bar the order is now fixed.
+	 */
+	usort(
+		$terms,
+		static function ( $a, $b ) {
+			$by_count = (int) $b->count - (int) $a->count;
+
+			if ( 0 !== $by_count ) {
+				return $by_count;
+			}
+
+			$by_name = strcasecmp( $a->name, $b->name );
+
+			// strcasecmp alone ties on names differing only by case, which
+			// MySQL and PHP do not agree on; the exact comparison makes the
+			// order total.
+			return 0 !== $by_name ? $by_name : strcmp( $a->name, $b->name );
+		}
+	);
 
 	wp_cache_set( $cache_key, $terms, MAJESTIC_TUBE_TERM_CACHE_GROUP, MAJESTIC_TUBE_TERM_CACHE_TTL );
 
