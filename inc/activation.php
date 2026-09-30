@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.17
+ * @version 2.2.18
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -276,11 +276,11 @@ function majestic_tube_find_legal_page( $definition, $title = '' ) {
 		}
 	}
 
-	if ( '' !== $title && function_exists( 'get_page_by_title' ) ) {
-		$by_title = get_page_by_title( $title, OBJECT, 'page' );
-
-		if ( majestic_tube_legal_page_is_viewable( $by_title ) ) {
-			return $by_title;
+	if ( '' !== $title ) {
+		foreach ( majestic_tube_legal_pages_by_title( $title ) as $by_title ) {
+			if ( majestic_tube_legal_page_is_viewable( $by_title ) ) {
+				return $by_title;
+			}
 		}
 	}
 
@@ -288,27 +288,101 @@ function majestic_tube_find_legal_page( $definition, $title = '' ) {
 }
 
 /**
- * Which built-in legal pages exist, and which do not.
+ * Every page row carrying an exact title, in any status.
  *
- * @return array{found: array<string,int>, missing: array<int,string>}
+ * get_page_by_title() returns a single row, so a second live copy hiding
+ * under a suffixed slug is invisible to it - which is exactly the duplicate
+ * this machinery exists to find. An exact-title query returns them all.
+ *
+ * @param string $title Exact page title.
+ * @return array<int, object> Page rows, oldest first.
+ */
+function majestic_tube_legal_pages_by_title( $title ) {
+	if ( '' === $title || ! function_exists( 'get_posts' ) ) {
+		return array();
+	}
+
+	$found = get_posts(
+		array(
+			'post_type'      => 'page',
+			'post_status'    => array( 'publish', 'private', 'draft', 'pending', 'trash' ),
+			'title'          => $title,
+			'posts_per_page' => -1,
+			'orderby'        => 'ID',
+			'order'          => 'ASC',
+			'no_found_rows'  => true,
+		)
+	);
+
+	return is_array( $found ) ? array_values( $found ) : array();
+}
+
+/**
+ * Every viewable copy of one built-in legal document, canonical first.
+ *
+ * Normally this is a single page. When an earlier duplicate left two live
+ * copies behind (for example slugs 2257 and 2257-2), all of them are
+ * returned so the status screen can name the extras instead of pretending
+ * the document is fine while the Pages list shows it twice.
+ *
+ * @param array  $definition Legal page definition.
+ * @param string $title      Page title, for the renamed-copy fallback.
+ * @return array<int, object> Viewable page rows, keyed by page ID.
+ */
+function majestic_tube_find_legal_copies( $definition, $title = '' ) {
+	$copies = array();
+
+	$take = function ( $page ) use ( &$copies ) {
+		if ( majestic_tube_legal_page_is_viewable( $page ) ) {
+			$copies[ (int) $page->ID ] = $page;
+		}
+	};
+
+	$take( majestic_tube_get_legal_page( $definition ) );
+
+	$legacy_slug = ( is_array( $definition ) && ! empty( $definition['legacy_slug'] ) ) ? $definition['legacy_slug'] : '';
+
+	if ( $legacy_slug ) {
+		$take( get_page_by_path( $legacy_slug ) );
+	}
+
+	foreach ( majestic_tube_legal_pages_by_title( $title ) as $by_title ) {
+		$take( $by_title );
+	}
+
+	return $copies;
+}
+
+/**
+ * Which built-in legal pages exist, which do not, and which exist twice.
+ *
+ * @return array{found: array<string,int>, missing: array<int,string>, duplicates: array<string,array<int>>}
  */
 function majestic_tube_legal_page_status() {
-	$found   = array();
-	$missing = array();
+	$found      = array();
+	$missing    = array();
+	$duplicates = array();
 
 	foreach ( majestic_tube_legal_pages() as $title => $definition ) {
-		$page = majestic_tube_find_legal_page( $definition, $title );
+		$copies = majestic_tube_find_legal_copies( $definition, $title );
 
-		if ( $page && isset( $page->ID ) ) {
-			$found[ $title ] = (int) $page->ID;
-		} else {
+		if ( ! $copies ) {
 			$missing[] = $title;
+			continue;
+		}
+
+		$ids             = array_keys( $copies );
+		$found[ $title ] = $ids[0];
+
+		if ( count( $ids ) > 1 ) {
+			$duplicates[ $title ] = array_slice( $ids, 1 );
 		}
 	}
 
 	return array(
-		'found'   => $found,
-		'missing' => $missing,
+		'found'      => $found,
+		'missing'    => $missing,
+		'duplicates' => $duplicates,
 	);
 }
 
@@ -402,11 +476,10 @@ function majestic_tube_repair_unviewable_legal_page( $title, $definition, $publi
 		}
 	}
 
-	if ( '' !== $title && function_exists( 'get_page_by_title' ) ) {
-		$by_title = get_page_by_title( $title, OBJECT, 'page' );
-
-		if ( $by_title && isset( $by_title->ID ) && ! isset( $seen[ (int) $by_title->ID ] ) ) {
-			$candidates[] = (int) $by_title->ID;
+	foreach ( majestic_tube_legal_pages_by_title( $title ) as $by_title ) {
+		if ( isset( $by_title->ID ) && ! isset( $seen[ (int) $by_title->ID ] ) ) {
+			$seen[ (int) $by_title->ID ] = true;
+			$candidates[]               = (int) $by_title->ID;
 		}
 	}
 
@@ -1458,6 +1531,17 @@ function majestic_tube_handle_legal_page_restore() {
 			continue;
 		}
 
+		/*
+		 * Re-check immediately before writing: the status above was computed
+		 * moments ago, and another path in this same request (the automatic
+		 * setup runs on init and admin_init around this handler) may have
+		 * created the page since. Creating blindly here is how one click
+		 * minted the second copy.
+		 */
+		if ( majestic_tube_find_legal_page( $definitions[ $title ], $title ) ) {
+			continue;
+		}
+
 		if ( majestic_tube_get_or_create_legal_page( $title, $definitions[ $title ], true ) ) {
 			$restored[] = $title;
 		} else {
@@ -1494,6 +1578,68 @@ function majestic_tube_handle_legal_page_restore() {
 	exit;
 }
 add_action( 'admin_init', 'majestic_tube_handle_legal_page_restore', 3 );
+
+/**
+ * Move one duplicate legal-page copy to the trash from the welcome screen.
+ *
+ * When two live copies of a document exist, the footer can only link one and
+ * the Pages list shows both - this is the state the duplicate reports come
+ * from. Trashing (never deleting) is reversible, and the handler refuses
+ * when the copy is the last one standing, so the document itself is safe.
+ *
+ * @return void
+ */
+function majestic_tube_handle_legal_page_trash() {
+	if ( ! isset( $_GET['majestic-tube-legal'] ) || 'trash' !== $_GET['majestic-tube-legal'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the nonce is verified on the next line.
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		wp_die(
+			esc_html__( 'You are not allowed to manage legal pages.', 'majestic-tube' ),
+			esc_html__( 'Legal pages', 'majestic-tube' ),
+			array( 'response' => 403 )
+		);
+	}
+
+	check_admin_referer( 'majestic_tube_legal_trash' );
+
+	$post_id = isset( $_GET['post'] ) ? absint( wp_unslash( $_GET['post'] ) ) : 0;
+	$trashed = false;
+
+	if ( $post_id && function_exists( 'wp_trash_post' ) ) {
+		$post = get_post( $post_id );
+
+		if ( $post && isset( $post->ID, $post->post_type ) && 'page' === $post->post_type ) {
+			foreach ( majestic_tube_legal_pages() as $title => $definition ) {
+			$copies = majestic_tube_find_legal_copies( $definition, $title );
+
+			if ( isset( $copies[ $post_id ] ) && count( $copies ) > 1 ) {
+				$trashed = (bool) wp_trash_post( $post_id );
+				break;
+		}
+		}
+		}
+	}
+
+	if ( ! $trashed ) {
+		wp_die(
+			esc_html__( 'That page cannot be moved to the trash. It may be the only copy of its document, or it may already be gone.', 'majestic-tube' ),
+			esc_html__( 'Legal pages', 'majestic-tube' ),
+			array( 'response' => 400 )
+		);
+	}
+
+	wp_safe_redirect(
+		add_query_arg(
+			'majestic-tube-legal',
+			'trashed',
+			admin_url( 'themes.php?page=majestic-tube-welcome' )
+		)
+	);
+	exit;
+}
+add_action( 'admin_init', 'majestic_tube_handle_legal_page_trash', 3 );
 
 /**
  * Tell an administrator when the automatic setup did not finish.
@@ -1621,10 +1767,23 @@ function majestic_tube_render_welcome_page() {
 				?>
 			</p></div>
 		<?php elseif ( 'failed' === $legal_state ) : ?>
-			<div class="notice notice-error inline"><p><?php esc_html_e( 'No legal page could be recreated. Check that your database user may create pages, then try again.', 'majestic-tube' ); ?></p></div>
-		<?php elseif ( 'none' === $legal_state ) : ?>
-			<div class="notice notice-success inline"><p><?php esc_html_e( 'Every legal page is already present, so nothing was changed.', 'majestic-tube' ); ?></p></div>
-		<?php endif; ?>
+			<div class="notice notice-error inline"><p><?php esc_html_e( 'No legal page could be recreated. Check that your database user may create pages, then try again.', 'majestic-tube' ); ?></p></div>			<?php elseif ( 'none' === $legal_state ) : ?>
+				<div class="notice notice-success inline"><p><?php esc_html_e( 'Every legal page is already present, so nothing was changed.', 'majestic-tube' ); ?></p></div>
+			<?php elseif ( 'trashed' === $legal_state ) : ?>
+				<div class="notice notice-success inline"><p><?php esc_html_e( 'The duplicate copy was moved to the trash. The remaining page keeps its content and its footer link.', 'majestic-tube' ); ?></p></div>
+			<?php endif; ?>
+
+			<?php if ( ! empty( $legal['duplicates'] ) ) : ?>
+				<div class="notice notice-warning inline"><p>
+					<?php
+					printf(
+						/* translators: %s: comma-separated list of page titles. */
+						esc_html__( 'Two live copies of %s exist. The footer links at the first; move the other to the trash below and its content stays recoverable there.', 'majestic-tube' ),
+						esc_html( implode( ', ', array_keys( $legal['duplicates'] ) ) )
+					);
+					?>
+				</p></div>
+			<?php endif; ?>
 
 		<p><?php esc_html_e( 'These are the compliance pages the theme creates. If one has been deleted, the footer link to it is dead and the document is no longer published.', 'majestic-tube' ); ?></p>
 
@@ -1639,14 +1798,30 @@ function majestic_tube_render_welcome_page() {
 							<a href="<?php echo esc_url( (string) get_edit_post_link( $legal_id ) ); ?>"><?php esc_html_e( 'Edit', 'majestic-tube' ); ?></a>
 						</td>
 					</tr>
-				<?php endforeach; ?>
-
-				<?php foreach ( $legal['missing'] as $legal_title ) : ?>
+				<?php endforeach; ?>					<?php foreach ( $legal['missing'] as $legal_title ) : ?>
 					<tr>
 						<td><?php echo esc_html( $legal_title ); ?></td>
 						<td><strong><?php esc_html_e( 'Missing', 'majestic-tube' ); ?></strong></td>
 					</tr>
 				<?php endforeach; ?>
+
+					<?php foreach ( $legal['duplicates'] as $legal_title => $extra_ids ) : ?>
+						<?php foreach ( $extra_ids as $extra_id ) : ?>
+							<tr>
+								<td>
+									<?php echo esc_html( $legal_title ); ?>
+									<strong><?php esc_html_e( '(duplicate)', 'majestic-tube' ); ?></strong>
+								</td>
+								<td>
+									<a href="<?php echo esc_url( (string) get_permalink( $extra_id ) ); ?>"><?php esc_html_e( 'View', 'majestic-tube' ); ?></a>
+									&middot;
+									<a href="<?php echo esc_url( (string) get_edit_post_link( $extra_id ) ); ?>"><?php esc_html_e( 'Edit', 'majestic-tube' ); ?></a>
+									&middot;
+									<a href="<?php echo esc_url( wp_nonce_url( add_query_arg( array( 'majestic-tube-legal' => 'trash', 'post' => $extra_id ), admin_url( 'themes.php?page=majestic-tube-welcome' ) ), 'majestic_tube_legal_trash' ) ); ?>"><?php esc_html_e( 'Move to trash', 'majestic-tube' ); ?></a>
+								</td>
+							</tr>
+						<?php endforeach; ?>
+					<?php endforeach; ?>
 			</tbody>
 		</table>
 
