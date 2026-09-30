@@ -20,7 +20,7 @@
  * stands down - two sitemaps covering the same URLs is worse than one.
  *
  * @package Majestic Tube
- * @version 2.2.20
+ * @version 2.2.21
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -89,6 +89,16 @@ if ( class_exists( 'WP_Sitemaps_Provider' ) && ! class_exists( 'Majestic_Tube_PS
 	class Majestic_Tube_PSEO_Sitemap extends WP_Sitemaps_Provider {
 
 		/**
+		 * The flat URL list, built once per request.
+		 *
+		 * Both get_max_num_pages() and get_url_list() read it, and core can
+		 * ask for both on the same request.
+		 *
+		 * @var array<int, array<string, mixed>>|null
+		 */
+		private $flat_list = null;
+
+		/**
 		 * Provider name, used in the sitemap index.
 		 */
 		public function __construct() {
@@ -102,14 +112,25 @@ if ( class_exists( 'WP_Sitemaps_Provider' ) && ! class_exists( 'Majestic_Tube_PS
 		 * the whole catalogue here costs one cached read per group rather than
 		 * a query per facet. The flat list is then sliced to this file's page.
 		 *
-		 * @param int $page Page number, 1-based.
-		 * @return array<int, array<string, mixed>> URL map entries.
+		 * @param int    $page_num Page of results, 1-based.
+		 * @param string $object_subtype Unused; this provider has no subtypes.
+		 * @return array<int, array<string, mixed>> URL entries.
 		 */
-		public function get_url_map( $page ) {
-			$page   = max( 1, (int) $page );
+		public function get_url_list( $page_num, $object_subtype = '' ) {
+			$page   = max( 1, (int) $page_num );
 			$offset = ( $page - 1 ) * static::MAX_URLS_PER_SITEMAP;
 
 			return array_slice( $this->build_flat_list(), $offset, static::MAX_URLS_PER_SITEMAP );
+		}
+
+		/**
+		 * How many sitemap files the catalogue needs.
+		 *
+		 * @param string $object_subtype Unused; this provider has no subtypes.
+		 * @return int Page count, 0 when there is nothing to submit.
+		 */
+		public function get_max_num_pages( $object_subtype = '' ) {
+			return (int) ceil( count( $this->build_flat_list() ) / static::MAX_URLS_PER_SITEMAP );
 		}
 
 		/**
@@ -132,6 +153,10 @@ if ( class_exists( 'WP_Sitemaps_Provider' ) && ! class_exists( 'Majestic_Tube_PS
 		 * @return array<int, array<string, mixed>>
 		 */
 		private function build_flat_list() {
+			if ( null !== $this->flat_list ) {
+				return $this->flat_list;
+			}
+
 			$list = array();
 
 			/*
@@ -166,7 +191,9 @@ if ( class_exists( 'WP_Sitemaps_Provider' ) && ! class_exists( 'Majestic_Tube_PS
 			 *
 			 * @param array $list URL map entries.
 			 */
-			return (array) apply_filters( 'majestic_tube_facet_sitemap_urls', $list );
+			$this->flat_list = (array) apply_filters( 'majestic_tube_facet_sitemap_urls', $list );
+
+			return $this->flat_list;
 		}
 
 		/**

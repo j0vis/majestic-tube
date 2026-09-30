@@ -14,7 +14,7 @@
  * storing a single generated page.
  *
  * @package Majestic Tube
- * @version 2.2.20
+ * @version 2.2.21
  */
 
 defined( 'ABSPATH' ) || exit;
