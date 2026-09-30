@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.2.14
+ * @version 2.2.15
  */
 
 defined( 'ABSPATH' ) || exit;

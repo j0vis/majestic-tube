@@ -756,17 +756,39 @@ Activation creates starter pages for:
 - DMCA
 - Privacy Policy
 
+### The 18 USC 2257 page and which role your site is in
+
+The starter 2257 page is written for a site that **distributes material produced by other people** — the posture this theme's video submission and membership features normally put an operator in. It describes the *secondary producer* role under 18 U.S.C. § 2257 and 28 C.F.R. part 75 in general terms, and it does not assert that your site holds any particular obligation.
+
+It also does not decide the question for you, and the page says so. If you produce any of the material on your site yourself — filming, directing, commissioning, or otherwise originating it — the obligations attach to the **primary producer** instead, and the generic secondary-producer wording is not sufficient. Rewrite the page to match your actual position, or get counsel to do it.
+
+Only new installs receive this wording. A site that was activated with an earlier version keeps the page it already has; edit it by hand to match.
+
+### Placeholders that fill themselves
+
+Two of the placeholders on all three pages are substituted for you at render time, so you do not need to edit them:
+
+| Placeholder | Becomes |
+| --- | --- |
+| `[Site Name]` | The site title from `Settings → General`, escaped for output. |
+| `[majestic_tube_default_email_link]` | A mailto link to the site’s WordPress administrative email. |
+
+Because these are expanded when the page is displayed rather than written into it, renaming the site or changing the admin email updates all three legal pages at once — including the pages an earlier version of the theme already created. If the site title is left blank, the `[Site Name]` token stays visible rather than printing an empty name, so an unconfigured site is obvious instead of publishing “This site is operated by .” to the public.
+
+Every other bracketed field — records custodian, postal address, telephone, mailing address, designated agent — is yours to complete.
+
 ### Review before publishing
 
 1. Open `Pages`.
 2. Open each legal page.
-3. Replace every placeholder with accurate operator, contact, address, and policy information.
-4. Review the page against your actual content, hosting, analytics, account, age-verification, and recordkeeping practices.
-5. Ask qualified legal counsel to review the completed policies.
+3. Replace every remaining placeholder with accurate operator, contact, address, and policy information.
+4. Establish which 2257 role your site is in, and rewrite the page to match.
+5. Review the page against your actual content, hosting, analytics, account, age-verification, and recordkeeping practices.
+6. Ask qualified legal counsel to review the completed policies.
 
 > **Important**
 >
-> The included pages are starting templates, not legal advice. They do not by themselves establish compliance with every law that may apply to your website.
+> The included pages are starting templates, not legal advice. They do not by themselves establish compliance with every law that may apply to your website, and the 2257 page specifically does not state which obligations apply to your site.
 
 ### Contact email
 

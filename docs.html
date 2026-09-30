@@ -1307,17 +1307,39 @@
           <li>Privacy Policy</li>
         </ul>
 
+        <h3>The 18 USC 2257 page and which role your site is in</h3>
+        <p>The starter 2257 page is written for a site that <strong>distributes material produced by other people</strong> &mdash; the posture this theme&rsquo;s video submission and membership features normally put an operator in. It describes the <em>secondary producer</em> role under 18 U.S.C. &sect; 2257 and 28 C.F.R. part 75 in general terms, and it does not assert that your site holds any particular obligation.</p>
+        <p>It also does not decide the question for you, and the page says so. If you produce any of the material on your site yourself &mdash; filming, directing, commissioning, or otherwise originating it &mdash; the obligations attach to the <strong>primary producer</strong> instead, and the generic secondary-producer wording is not sufficient. Rewrite the page to match your actual position, or get counsel to do it.</p>
+        <p>Only new installs receive this wording. A site that was activated with an earlier version keeps the page it already has; edit it by hand to match.</p>
+
+        <h3>Placeholders that fill themselves</h3>
+        <p>Two of the placeholders on all three pages are substituted for you at render time, so you do not need to edit them:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Placeholder</th><th>Becomes</th></tr>
+            </thead>
+            <tbody>
+              <tr><td><span class="path">[Site Name]</span></td><td>The site title from <span class="path">Settings &rarr; General</span>, escaped for output.</td></tr>
+              <tr><td><span class="path">[majestic_tube_default_email_link]</span></td><td>A mailto link to the site&rsquo;s WordPress administrative email.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Because these are expanded when the page is displayed rather than written into it, renaming the site or changing the admin email updates all three legal pages at once &mdash; including the pages an earlier version of the theme already created. If the site title is left blank, the <span class="path">[Site Name]</span> token stays visible rather than printing an empty name, so an unconfigured site is obvious instead of publishing &ldquo;This site is operated by .&rdquo; to the public.</p>
+        <p>Every other bracketed field &mdash; records custodian, postal address, telephone, mailing address, designated agent &mdash; is yours to complete.</p>
+
         <h3>Review before publishing</h3>
         <ol class="steps">
           <li>Open <span class="path">Pages</span>.</li>
           <li>Open each legal page.</li>
-          <li>Replace every placeholder with accurate operator, contact, address, and policy information.</li>
+          <li>Replace every remaining placeholder with accurate operator, contact, address, and policy information.</li>
+          <li>Establish which 2257 role your site is in, and rewrite the page to match.</li>
           <li>Review the page against your actual content, hosting, analytics, account, age-verification, and recordkeeping practices.</li>
           <li>Ask qualified legal counsel to review the completed policies.</li>
         </ol>
 
         <div class="warning">
-          The included pages are starting templates, not legal advice. They do not by themselves establish compliance with every law that may apply to your website.
+          The included pages are starting templates, not legal advice. They do not by themselves establish compliance with every law that may apply to your website, and the 2257 page specifically does not state which obligations apply to your site.
         </div>
 
         <h3>Contact email</h3>

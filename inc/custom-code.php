@@ -11,7 +11,7 @@
  * exactly like the original theme and like the ad zones.
  *
  * @package Majestic Tube
- * @version 2.2.14
+ * @version 2.2.15
  */
 
 defined( 'ABSPATH' ) || exit;

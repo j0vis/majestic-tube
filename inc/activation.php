@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.14
+ * @version 2.2.15
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -102,6 +102,16 @@ function majestic_tube_send_contact_email( $subject, $message, $headers = array(
  * the correct records custodian, notice agent, and privacy contact before
  * publishing the site.
  *
+ * The 18 U.S.C. § 2257 page is written for a site that distributes material
+ * produced by other people, which is the posture this theme's submission and
+ * membership features put an operator in. That framing is a starting point
+ * and not a finding: the template says outright that it does not decide which
+ * obligations apply, and it tells the operator that a site which produces any
+ * of its own material needs primary-producer wording instead. A page that
+ * asserted the operator held the full producer duty would be wrong for most
+ * installs of this theme, and wronger still for anyone who published it
+ * without reading it.
+ *
  * @return array<string, array{slug: string, legacy_slug?: string, content: string}>
  */
 function majestic_tube_legal_pages() {
@@ -111,8 +121,10 @@ function majestic_tube_legal_pages() {
 			'legacy_slug' => '18-usc-2257',
 			'content'     => <<<'HTML'
 <h2>18 U.S.C. § 2257</h2>
-<p>This site is operated by <strong>[Site Name]</strong>. The operator is responsible for maintaining the records required by 18 U.S.C. § 2257 and its implementing regulations for any visual depiction of a real person where applicable.</p>
-<h3>Records custodian</h3>
+<p>This site is operated by <strong>[Site Name]</strong>. It publishes and distributes material produced by third parties.</p>
+<p>Where a site distributes or markets material it did not produce, it may fall within the definition of a <em>secondary producer</em> under 18 U.S.C. § 2257 and its implementing regulations at 28 C.F.R. part 75. Obligations attaching to that role can include keeping certain records, publishing a statement describing where those records are held, and producing them for lawful inspection. Which, if any, of those obligations apply to this site depends on the site’s content, the operator’s role in producing it, and the law applicable where the operator and the material are located.</p>
+<p><strong>Before publishing, confirm the site’s own position.</strong> The wording below is deliberately generic. It does not state which obligations apply to this site, and it is not a notice required by the statute, a certification of compliance, or legal advice.</p>
+<h3>Records, where the operator holds any</h3>
 <ul>
 <li>Name and title: [Records custodian]</li>
 <li>Postal address: [Street address, city, region, postal code, country]</li>
@@ -124,7 +136,7 @@ function majestic_tube_legal_pages() {
 <h3>Contact</h3>
 <p>Questions about records or this notice may be sent to [majestic_tube_default_email_link].</p>
 <hr />
-<p><strong>Template notice:</strong> This page is a starting template and does not certify compliance. The site operator is responsible for reviewing the policy against the site’s actual content, hosting, age-verification, and recordkeeping practices and for obtaining legal advice where needed.</p>
+<p><strong>Template notice:</strong> This page is a starting template and does not certify compliance. <strong>[Site Name]</strong> and the site contact address fill themselves in from Settings &rarr; General; every other bracketed field is the operator’s to complete. If the operator produces any material rather than only distributing material produced by others, obligations attach to the primary producer instead, and generic secondary-producer wording is not sufficient. The site operator is responsible for establishing which role the site falls in, reviewing this policy against the site’s actual content, hosting, age-verification, and recordkeeping practices, completing the placeholder fields, and obtaining legal advice where needed.</p>
 HTML,
 		),
 		'DMCA' => array(
@@ -144,7 +156,7 @@ HTML,
 </ol>
 <h3>Response and repeat infringers</h3>
 <p>The operator may review and remove alleged infringing material and may restrict access to repeat infringers. A notice does not guarantee removal. The operator may forward a valid notice to the person who posted the material and may disclose necessary information to comply with law.</p>
-<p><strong>Template notice:</strong> This page is a general starting point, not legal advice or a substitute for a review of the site’s actual content and hosting practices.</p>
+<p><strong>Template notice:</strong> This page is a general starting point, not legal advice or a substitute for a review of the site’s actual content and hosting practices. <strong>[Site Name]</strong> and the site contact address fill themselves in from Settings &rarr; General; the mailing address, designated-agent details, and legal name are the operator’s to complete.</p>
 HTML,
 		),
 		'Privacy Policy' => array(
@@ -166,7 +178,7 @@ HTML,
 <h3>Contact</h3>
 <p>Privacy questions and requests may be sent to [majestic_tube_default_email_link].</p>
 <hr />
-<p><strong>Template notice:</strong> This page is a starting point, not legal advice. The operator is responsible for documenting the site’s actual data practices, vendors, retention periods, legal bases, and region-specific rights before relying on it.</p>
+<p><strong>Template notice:</strong> This page is a starting point, not legal advice. <strong>[Site Name]</strong> and the site contact address fill themselves in from Settings &rarr; General. The operator is responsible for documenting the site’s actual data practices, vendors, retention periods, legal bases, and region-specific rights before relying on it.</p>
 HTML,
 		),
 	);
@@ -351,6 +363,66 @@ function majestic_tube_is_legal_document( $post ) {
 }
 
 /**
+ * Resolve the legal document being rendered, if this request is one.
+ *
+ * Shared by the placeholder filters below so each of them answers the same
+ * question the same way, and so adding a second placeholder does not mean a
+ * second copy of this lookup.
+ *
+ * @return object|false The page object, or false when this is not one.
+ */
+function majestic_tube_current_legal_document() {
+	$post_id = function_exists( 'get_queried_object_id' ) ? (int) get_queried_object_id() : 0;
+
+	if ( ! $post_id && isset( $GLOBALS['post'] ) && is_object( $GLOBALS['post'] ) ) {
+		$post_id = isset( $GLOBALS['post']->ID ) ? (int) $GLOBALS['post']->ID : 0;
+	}
+
+	$post = $post_id ? get_post( $post_id ) : false;
+
+	return ( $post && majestic_tube_is_legal_document( $post ) ) ? $post : false;
+}
+
+/**
+ * Fill in the site name wherever a legal page asks for it.
+ *
+ * The starter legal pages carry a literal [Site Name] rather than the site's
+ * actual name, so an editor reading the page can see at a glance which parts
+ * are a template and which parts they are responsible for. Expanding it at
+ * render time instead of baking the name into the stored content means it
+ * follows Settings -> General, and - because this is a filter rather than a
+ * content rewrite - it starts working on the pages earlier versions of the
+ * theme already created, without touching what is stored.
+ *
+ * An unset or blank site title deliberately leaves the placeholder visible.
+ * Substituting an empty string would publish "This site is operated by ." to
+ * the public, which is worse than showing an editor an unfilled gap.
+ *
+ * @param string $content Post content.
+ * @return string
+ */
+function majestic_tube_filter_legal_document_site_name( $content ) {
+	if ( ! is_string( $content ) || false === strpos( $content, '[Site Name]' ) ) {
+		return $content;
+	}
+
+	if ( ! majestic_tube_current_legal_document() ) {
+		return $content;
+	}
+
+	$name = trim( wp_strip_all_tags( (string) get_bloginfo( 'name' ) ) );
+
+	if ( '' === $name ) {
+		return $content;
+	}
+
+	return str_replace( '[Site Name]', esc_html( $name ), $content );
+}
+// Ahead of the contact filter, so a page that has been emptied of its contact
+// line still gets one, and both land before core's do_shortcode() pass.
+add_filter( 'the_content', 'majestic_tube_filter_legal_document_site_name', 8 );
+
+/**
  * Ensure an edited legal page still exposes the current WordPress admin email.
  * This is a front-end safety net; it does not write over page content.
  *
@@ -362,15 +434,7 @@ function majestic_tube_filter_legal_document_contact( $content ) {
 		return $content;
 	}
 
-	$post_id = function_exists( 'get_queried_object_id' ) ? (int) get_queried_object_id() : 0;
-
-	if ( ! $post_id && isset( $GLOBALS['post'] ) && is_object( $GLOBALS['post'] ) ) {
-		$post_id = isset( $GLOBALS['post']->ID ) ? (int) $GLOBALS['post']->ID : 0;
-	}
-
-	$post = $post_id ? get_post( $post_id ) : false;
-
-	if ( ! majestic_tube_is_legal_document( $post ) ) {
+	if ( ! majestic_tube_current_legal_document() ) {
 		return $content;
 	}
 

@@ -7,7 +7,7 @@
  * gated on their own switches, and the back-to-top link closes the page.
  *
  * @package Majestic Tube
- * @version 2.2.14
+ * @version 2.2.15
  */
 
 $footer_columns = (string) majestic_tube_get_option( 'wpst-options', 'footer-columns', 'four-columns-footer' );
