@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.18
+ * @version 2.2.19
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -205,7 +205,7 @@ function majestic_tube_get_legal_page( $definition ) {
 		if ( $configured_id ) {
 			$configured_page = get_post( $configured_id );
 
-			if ( $configured_page && isset( $configured_page->ID ) && ( ! isset( $configured_page->post_type ) || 'page' === $configured_page->post_type ) && majestic_tube_legal_page_is_viewable( $configured_page ) ) {
+			if ( $configured_page && isset( $configured_page->ID ) && ( ! isset( $configured_page->post_type ) || 'page' === $configured_page->post_type ) && majestic_tube_page_is_viewable( $configured_page ) ) {
 				return $configured_page;
 			}
 		}
@@ -226,7 +226,7 @@ function majestic_tube_get_legal_page( $definition ) {
  * @param object|false $page Page row.
  * @return bool
  */
-function majestic_tube_legal_page_is_viewable( $page ) {
+function majestic_tube_page_is_viewable( $page ) {
 	if ( ! $page || ! isset( $page->ID ) ) {
 		return false;
 	}
@@ -262,7 +262,7 @@ function majestic_tube_legal_page_is_viewable( $page ) {
 function majestic_tube_find_legal_page( $definition, $title = '' ) {
 	$page = majestic_tube_get_legal_page( $definition );
 
-	if ( majestic_tube_legal_page_is_viewable( $page ) ) {
+	if ( majestic_tube_page_is_viewable( $page ) ) {
 		return $page;
 	}
 
@@ -271,14 +271,14 @@ function majestic_tube_find_legal_page( $definition, $title = '' ) {
 	if ( $legacy_slug ) {
 		$legacy = get_page_by_path( $legacy_slug );
 
-		if ( majestic_tube_legal_page_is_viewable( $legacy ) ) {
+		if ( majestic_tube_page_is_viewable( $legacy ) ) {
 			return $legacy;
 		}
 	}
 
 	if ( '' !== $title ) {
 		foreach ( majestic_tube_legal_pages_by_title( $title ) as $by_title ) {
-			if ( majestic_tube_legal_page_is_viewable( $by_title ) ) {
+			if ( majestic_tube_page_is_viewable( $by_title ) ) {
 				return $by_title;
 			}
 		}
@@ -333,7 +333,7 @@ function majestic_tube_find_legal_copies( $definition, $title = '' ) {
 	$copies = array();
 
 	$take = function ( $page ) use ( &$copies ) {
-		if ( majestic_tube_legal_page_is_viewable( $page ) ) {
+		if ( majestic_tube_page_is_viewable( $page ) ) {
 			$copies[ (int) $page->ID ] = $page;
 		}
 	};
@@ -413,7 +413,7 @@ function majestic_tube_migrate_2257_page( $definition ) {
 	 * second copy. Leave the legacy page serving the document instead -
 	 * the status check counts it as found, so nothing else is created.
 	 */
-	if ( $canonical && isset( $canonical->ID ) && ! majestic_tube_legal_page_is_viewable( $canonical ) ) {
+	if ( $canonical && isset( $canonical->ID ) && ! majestic_tube_page_is_viewable( $canonical ) ) {
 		return $legacy;
 	}
 
@@ -549,7 +549,7 @@ function majestic_tube_get_or_create_legal_page( $title, $definition, $publish_u
 				? majestic_tube_migrate_2257_page( $definition )
 				: majestic_tube_get_legal_page( $definition );
 
-			if ( majestic_tube_legal_page_is_viewable( $page ) ) {
+			if ( majestic_tube_page_is_viewable( $page ) ) {
 				$page_id = (int) $page->ID;
 			} else {
 				$page_id = majestic_tube_create_page( $title, 'default', $definition['content'], $definition['slug'] );
@@ -808,7 +808,29 @@ function majestic_tube_create_page( $title, $template = '', $content = '', $slug
 	$existing  = get_page_by_path( $page_slug );
 
 	if ( $existing && isset( $existing->ID ) ) {
-		$page_id = (int) $existing->ID;
+		/*
+		 * A trashed row is not a page. Returning its ID reported trash as
+		 * created - the welcome screen listed pages nobody could open.
+		 * Untrash it instead; the administrator's content comes back and no
+		 * second copy is needed. A draft is reused untouched.
+		 */
+		if ( majestic_tube_page_is_viewable( $existing ) ) {
+			$page_id = (int) $existing->ID;
+		} elseif ( isset( $existing->post_status ) && 'trash' === $existing->post_status && function_exists( 'wp_untrash_post' ) ) {
+			wp_untrash_post( (int) $existing->ID );
+
+			$refreshed = get_post( (int) $existing->ID );
+
+			if ( $refreshed && isset( $refreshed->ID ) && majestic_tube_page_is_viewable( $refreshed ) ) {
+				$page_id = (int) $refreshed->ID;
+			} else {
+				// The slug is still occupied: inserting now would mint a
+				// suffixed duplicate, so report failure and retry later.
+				return 0;
+			}
+		} else {
+			$page_id = (int) $existing->ID;
+		}
 	} else {
 		/*
 		 * `page` is registered by core on init priority 0, and wp_insert_post()
@@ -897,7 +919,7 @@ function majestic_tube_setup_revision() {
 	 *
 	 * @param int $revision Current revision.
 	 */
-	return (int) apply_filters( 'majestic_tube_setup_revision', 3 );
+	return (int) apply_filters( 'majestic_tube_setup_revision', 4 );
 }
 
 /**
@@ -1233,16 +1255,19 @@ function majestic_tube_create_default_menu() {
 		);
 	}
 
-	// Match KingTube's default top-level navigation. Submit-a-video and account
-	// links live in the membership dropdown, not in the primary navigation.
-	foreach ( majestic_tube_directory_pages() as $title => $path ) {
-		$page = get_page_by_path( $path );
+	// All five theme pages belong on the main header menu: the video-submit
+	// and profile pages as well as the three directory pages. Pages that
+	// are still missing are skipped here; the setup creates them first, and
+	// the next run links whatever appears.
+	foreach ( majestic_tube_activation_pages() as $menu_title => $menu_template ) {
+		$item_page = get_page_by_path( sanitize_title( $menu_title ) );
 
-		if ( ! $page || ! isset( $page->ID ) || in_array( (int) $page->ID, $have_ids, true ) ) {
+		if ( ! majestic_tube_page_is_viewable( $item_page ) || in_array( (int) $item_page->ID, $have_ids, true ) ) {
 			continue;
 		}
 
-		majestic_tube_update_page_menu_item( $menu_id, $title, $page->ID );
+		majestic_tube_update_page_menu_item( $menu_id, $menu_title, $item_page->ID );
+		$have_ids[] = (int) $item_page->ID;
 	}
 
 	// Keep legal links out of the primary navigation. Existing custom footer
