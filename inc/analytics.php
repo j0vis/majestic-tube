@@ -93,6 +93,176 @@ function majestic_tube_get_client_ip() {
 }
 
 /**
+ * A stable, non-reversible stand-in for a visitor address.
+ *
+ * Every place the theme remembers a visitor stores this instead of the address
+ * itself: the theme has to recognise a returning visitor, not know where they
+ * are. The hash is keyed with the site's auth salt, which lives in wp-config.php
+ * and never in the database, so a copy of wp_postmeta or wp_options contains no
+ * address list that can be turned back into addresses without the server's
+ * secrets.
+ *
+ * The address is canonicalised through inet_pton() first, so the several legal
+ * spellings of one IPv6 address (::1, 0:0:0:0:0:0:0:1, ::0001) cannot each slip
+ * past a de-duplication window as though they were different visitors.
+ *
+ * Two consequences of being keyed and therefore only as stable as the salt:
+ * regenerating the salts in wp-config.php changes every fingerprint, so past
+ * votes and reports stop matching and each visitor may act once more; and a
+ * row written under the old salt stops being recognisable at all, which is why
+ * the cleanup below drops anything that is neither an address nor one of these.
+ * Rotating salts is worth that much, but it should be a decision rather than a
+ * surprise.
+ *
+ * The result is pseudonymous, not anonymous - one address always yields one
+ * fingerprint - so it remains personal data under GDPR. That is why the history
+ * expires instead of accumulating.
+ *
+ * @param string $ip Validated client IP.
+ * @return string 32 lowercase hex characters, or an empty string when there is no usable address.
+ */
+function majestic_tube_ip_fingerprint( $ip ) {
+	$ip = is_string( $ip ) ? trim( $ip ) : '';
+
+	if ( '' === $ip || ! filter_var( $ip, FILTER_VALIDATE_IP ) ) {
+		return '';
+	}
+
+	// inet_pton() returns false, quietly, for anything it cannot parse.
+	$packed = inet_pton( $ip );
+	$source = false === $packed ? $ip : $packed;
+
+	/**
+	 * Filter the stored stand-in for a visitor address.
+	 *
+	 * Return a stable value of your own - it is used as an array key in post
+	 * meta and must not contain anything a meta value can misread.
+	 *
+	 * @param string $fingerprint 32 hex characters.
+	 * @param string $ip          The validated address being fingerprinted.
+	 */
+	return substr( hash_hmac( 'sha256', $source, wp_salt( 'auth' ) ), 0, 32 );
+}
+
+/**
+ * Whether a stored identity is already one of our fingerprints.
+ *
+ * Used to tell our own keys from the raw addresses older releases stored.
+ *
+ * @param mixed $value Stored array key.
+ * @return bool
+ */
+function majestic_tube_is_fingerprint( $value ) {
+	return is_string( $value ) && 1 === preg_match( '/^[a-f0-9]{32}$/', $value );
+}
+
+/**
+ * The most recent visitors one video's IP history may hold.
+ *
+ * A busy video can be voted on from thousands of addresses. Past this many the
+ * oldest entries go, so one meta row cannot grow without bound.
+ */
+const MAJESTIC_TUBE_IP_HISTORY_MAX = 500;
+
+/**
+ * The meta keys that hold per-visitor history, and the window each one keeps.
+ *
+ * One place for both, so the check and the write cannot drift apart the way two
+ * independently hardcoded DAY_IN_SECONDS constants eventually would.
+ *
+ * @return array<string,int>
+ */
+function majestic_tube_ip_history_windows() {
+	$windows = array(
+		'voted_IP'     => DAY_IN_SECONDS,
+		'reported_ips' => DAY_IN_SECONDS,
+	);
+
+	/**
+	 * Filter how long a visitor stays on a video's per-visitor history.
+	 *
+	 * @param array<string,int> $windows Meta key => window in seconds.
+	 */
+	$windows = (array) apply_filters( 'majestic_tube_ip_history_windows', $windows );
+
+	$resolved = array();
+
+	foreach ( array( 'voted_IP', 'reported_ips' ) as $meta_key ) {
+		$resolved[ $meta_key ] = isset( $windows[ $meta_key ] ) ? max( 1, absint( $windows[ $meta_key ] ) ) : DAY_IN_SECONDS;
+	}
+
+	return $resolved;
+}
+
+/**
+ * How long one IP history meta key keeps its entries.
+ *
+ * @param string $meta_key IP history meta key.
+ * @return int Seconds.
+ */
+function majestic_tube_ip_history_window( $meta_key ) {
+	$windows = majestic_tube_ip_history_windows();
+
+	return isset( $windows[ $meta_key ] ) ? $windows[ $meta_key ] : DAY_IN_SECONDS;
+}
+
+/**
+ * Drop what has expired, re-hash what an older release stored raw, and cap.
+ *
+ * Shared by the write path and the scheduled sweep so the rules cannot differ.
+ *
+ * Rows written before keyed hashing held addresses verbatim. They are rehashed
+ * here rather than dropped, which does two things at once: a visitor who has
+ * already voted inside this window stays recognised instead of getting a
+ * second vote, and the plain-text address leaves the database the next time
+ * anyone acts on that video.
+ *
+ * @param array  $stored      History as read from post meta.
+ * @param int    $window      Window in seconds.
+ * @param int    $now         Timestamp to measure against. Defaults to now.
+ * @param string $fingerprint Optional visitor to record at the end.
+ * @param int    $stamp       Optional timestamp for that visitor.
+ * @return array<string,int>
+ */
+function majestic_tube_clean_ip_history( $stored, $window, $now = 0, $fingerprint = '', $stamp = 0 ) {
+	$now     = $now > 0 ? (int) $now : time();
+	$window  = max( 1, absint( $window ) );
+	$history = array();
+
+	foreach ( (array) $stored as $identity => $timestamp ) {
+		$timestamp = (int) $timestamp;
+
+		// Expiry: past its window an entry is deleted, not archived.
+		if ( $now - $timestamp >= $window ) {
+			continue;
+		}
+
+		$key = ( is_string( $identity ) && majestic_tube_is_fingerprint( $identity ) )
+			? $identity
+			: majestic_tube_ip_fingerprint( $identity );
+
+		// Neither an address nor one of ours: junk, so it goes too.
+		if ( '' === $key ) {
+			continue;
+		}
+
+		$history[ $key ] = $timestamp;
+	}
+
+	if ( '' !== $fingerprint ) {
+		$history[ $fingerprint ] = $stamp > 0 ? (int) $stamp : $now;
+	}
+
+	if ( count( $history ) > MAJESTIC_TUBE_IP_HISTORY_MAX ) {
+		// Oldest first, so the tail is the most recent and survives.
+		asort( $history );
+		$history = array_slice( $history, -MAJESTIC_TUBE_IP_HISTORY_MAX, null, true );
+	}
+
+	return $history;
+}
+
+/**
  * Read the current visitor's timestamp from a post meta IP history.
  *
  * Vote and report de-duplication intentionally store different meta keys, but
@@ -100,45 +270,65 @@ function majestic_tube_get_client_ip() {
  * one place prevents the two endpoints from drifting while preserving their
  * separate stored keys.
  *
- * @param int    $post_id Post ID.
+ * The lookup is by fingerprint, so nothing here needs the stored value to be a
+ * readable address, and the same key survives if the salt is ever rotated only
+ * in the sense that it stops matching - never that it starts leaking.
+ *
+ * @param int    $post_id  Post ID.
  * @param string $meta_key IP-history meta key.
- * @param int    $window  Window in seconds.
+ * @param int    $window   Window in seconds. 0 uses the key's own window.
  * @return bool
  */
-function majestic_tube_ip_was_recorded_recently( $post_id, $meta_key, $window ) {
-	$ip = majestic_tube_get_client_ip();
+function majestic_tube_ip_was_recorded_recently( $post_id, $meta_key, $window = 0 ) {
+	$fingerprint = majestic_tube_ip_fingerprint( majestic_tube_get_client_ip() );
 
-	if ( '' === $ip ) {
+	if ( '' === $fingerprint ) {
 		return false;
 	}
 
-	$history = get_post_meta( $post_id, $meta_key, true );
+	$history = get_post_meta( absint( $post_id ), $meta_key, true );
 
-	if ( ! is_array( $history ) || ! isset( $history[ $ip ] ) ) {
+	if ( ! is_array( $history ) || ! isset( $history[ $fingerprint ] ) ) {
 		return false;
 	}
 
-	return ( time() - (int) $history[ $ip ] ) < max( 1, absint( $window ) );
+	$window = $window > 0 ? max( 1, absint( $window ) ) : majestic_tube_ip_history_window( $meta_key );
+
+	return ( time() - (int) $history[ $fingerprint ] ) < $window;
 }
 
 /**
  * Record the current visitor in a post meta IP history.
  *
- * @param int    $post_id Post ID.
+ * Writes a keyed fingerprint rather than the address, and takes the chance to
+ * expire the row: every write drops what has aged out, converts any raw address
+ * an older release left behind, and caps the size.
+ *
+ * @param int    $post_id  Post ID.
  * @param string $meta_key IP-history meta key.
- * @return bool Whether a timestamp was stored.
+ * @param int    $window   Window in seconds. 0 uses the key's own window.
+ * @return bool Whether the history was written.
  */
-function majestic_tube_record_ip_history( $post_id, $meta_key ) {
-	$ip = majestic_tube_get_client_ip();
+function majestic_tube_record_ip_history( $post_id, $meta_key, $window = 0 ) {
+	$post_id     = absint( $post_id );
+	$fingerprint = majestic_tube_ip_fingerprint( majestic_tube_get_client_ip() );
 
-	if ( '' === $ip ) {
+	if ( ! $post_id || '' === $fingerprint ) {
 		return false;
 	}
 
-	$history = get_post_meta( $post_id, $meta_key, true );
-	$history = is_array( $history ) ? $history : array();
-	$history[ $ip ] = time();
-	update_post_meta( $post_id, $meta_key, $history );
+	$window = $window > 0 ? max( 1, absint( $window ) ) : majestic_tube_ip_history_window( $meta_key );
+	$stored = get_post_meta( $post_id, $meta_key, true );
+
+	$history = majestic_tube_clean_ip_history( $stored, $window, 0, $fingerprint );
+
+	// An emptied row is deleted rather than kept as an empty array: the point
+	// of the sweep is that the data stops existing, not that it stops being read.
+	if ( $history ) {
+		update_post_meta( $post_id, $meta_key, $history );
+	} else {
+		delete_post_meta( $post_id, $meta_key );
+	}
 
 	return true;
 }
@@ -178,15 +368,25 @@ function majestic_tube_view_dedup_window() {
  * Transient name holding one visitor's recent view history.
  *
  * The address is hashed rather than stored in the option name: transient names
- * are visible in wp_options, and a plain IP there is personal data that also
- * invites prefix collisions. wp_salt() is mixed in so the hash cannot be
- * reversed by looking up known addresses.
+ * are visible in wp_options, and a plain address there is personal data that
+ * also invites prefix collisions. The same keyed fingerprint the post meta
+ * history uses applies here, so the one visitor identity is the one the whole
+ * theme recognises. Views written under the old md5 key are simply not found
+ * and age out of wp_options on their own.
  *
  * @param string $ip Validated client IP.
  * @return string
  */
 function majestic_tube_view_dedup_key( $ip ) {
-	return 'mtviews_' . md5( $ip . wp_salt( 'nonce' ) );
+	$fingerprint = majestic_tube_ip_fingerprint( $ip );
+
+	// No usable address means the caller has already bailed out before here;
+	// the fallback only keeps the function total.
+	if ( '' === $fingerprint ) {
+		return 'mtviews_' . md5( (string) $ip );
+	}
+
+	return 'mtviews_' . $fingerprint;
 }
 
 /**
@@ -547,3 +747,110 @@ function majestic_tube_analytics_invalidate_on_delete( $post_id ) {
 }
 add_action( 'deleted_post', 'majestic_tube_analytics_invalidate_on_delete' );
 add_action( 'trashed_post', 'majestic_tube_analytics_invalidate_on_delete' );
+
+/**
+ * Cron hook that expires the per-visitor history.
+ *
+ * Named in a constant so the schedule, the callback and the cleanup all refer
+ * to the same string.
+ */
+const MAJESTIC_TUBE_IP_PRUNE_HOOK = 'majestic_tube_prune_ip_history';
+
+/**
+ * Expire stored visitor history on posts nobody interacts with again.
+ *
+ * Writing already expires a row, which covers every video still being voted on
+ * or reported. What it cannot reach is the video nobody touches again: its row
+ * would sit in wp_postmeta holding fingerprints that are pseudonymous personal
+ * data for as long as the post exists, with no write left to trigger a clean-up.
+ * That residue is what this sweep exists to collect.
+ *
+ * Runs once a day over a bounded batch per meta key, so a large library is
+ * walked rather than scanned. Anything the visitor has done since the last run
+ * pushes the rest forward a batch at a time.
+ *
+ * @return int Number of rows changed.
+ */
+function majestic_tube_prune_expired_ip_history() {
+	// Cron only. This walks posts, and nothing about a visitor's history
+	// belongs in a front-end page load or an admin screen.
+	if ( ! function_exists( 'wp_doing_cron' ) || ! wp_doing_cron() ) {
+		return 0;
+	}
+
+	/**
+	 * Filter how many posts each IP history meta key is swept per run.
+	 *
+	 * @param int $batch Post IDs per meta key.
+	 */
+	$batch = max( 1, absint( apply_filters( 'majestic_tube_ip_prune_batch', 200 ) ) );
+	$now   = time();
+	$rows  = 0;
+
+	foreach ( array_keys( majestic_tube_ip_history_windows() ) as $meta_key ) {
+		$window = majestic_tube_ip_history_window( $meta_key );
+
+		$post_ids = get_posts(
+			array(
+				'post_type'           => 'post',
+				'post_status'         => 'any',
+				'posts_per_page'      => $batch,
+				'fields'              => 'ids',
+				'no_found_rows'       => true,
+				'ignore_sticky_posts' => true,
+				'meta_key'            => $meta_key,
+			)
+		);
+
+		foreach ( $post_ids as $post_id ) {
+			$stored = get_post_meta( $post_id, $meta_key, true );
+
+			if ( ! is_array( $stored ) || ! $stored ) {
+				continue;
+			}
+
+			$history = majestic_tube_clean_ip_history( $stored, $window, $now );
+
+			// Only write when the sweep actually changed something.
+			if ( $history === $stored ) {
+				continue;
+			}
+
+			if ( $history ) {
+				update_post_meta( $post_id, $meta_key, $history );
+			} else {
+				delete_post_meta( $post_id, $meta_key );
+			}
+
+			++$rows;
+		}
+	}
+
+	return $rows;
+}
+add_action( MAJESTIC_TUBE_IP_PRUNE_HOOK, 'majestic_tube_prune_expired_ip_history' );
+
+/**
+ * Schedule the daily sweep when the theme is activated.
+ *
+ * @return void
+ */
+function majestic_tube_schedule_ip_history_prune() {
+	if ( ! wp_next_scheduled( MAJESTIC_TUBE_IP_PRUNE_HOOK ) ) {
+		wp_schedule_event( time() + HOUR_IN_SECONDS, 'daily', MAJESTIC_TUBE_IP_PRUNE_HOOK );
+	}
+}
+add_action( 'after_switch_theme', 'majestic_tube_schedule_ip_history_prune' );
+
+/**
+ * Drop the schedule when another theme takes over.
+ *
+ * Without this the event keeps firing for a theme that is no longer installed,
+ * which is what leaves sites with a cron entry pointing at nothing.
+ *
+ * @return void
+ */
+function majestic_tube_unschedule_ip_history_prune() {
+	wp_clear_scheduled_hook( MAJESTIC_TUBE_IP_PRUNE_HOOK );
+}
+add_action( 'switch_theme', 'majestic_tube_unschedule_ip_history_prune' );

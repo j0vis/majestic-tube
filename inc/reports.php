@@ -114,7 +114,8 @@ function majestic_tube_get_report_count( $post_id ) {
  * @return bool
  */
 function majestic_tube_has_already_reported( $post_id ) {
-	return majestic_tube_ip_was_recorded_recently( $post_id, 'reported_ips', DAY_IN_SECONDS );
+	// The window comes from the meta key, not from a constant repeated here.
+	return majestic_tube_ip_was_recorded_recently( $post_id, 'reported_ips' );
 }
 
 /**

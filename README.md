@@ -537,7 +537,7 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 - **Latest** shows recently published videos first.
 - **Most viewed** prioritizes view count.
 - **Longest** prioritizes duration.
-- **Popular** prioritizes the video rating percentage.
+- **Popular** shows the most liked videos. While the site has no likes at all it falls back to view count, so the tab is never empty.
 - **Random** changes the order on each visit.
 
 ### Video Page → Player
@@ -710,6 +710,12 @@ Every area named **code and ads** accepts this widget and nothing else, so any a
 - Something else
 
 Visitors may also include a short message. A visitor is asked not to report the same video again for 24 hours.
+
+#### What a visitor's address is used for
+
+Stopping one visitor from voting, viewing or reporting the same video several times needs to recognise a returning visitor, and nothing more. The theme stores a keyed fingerprint of the address — a one-way value derived with your site's own secret salt — next to a timestamp, never the address itself. Entries older than the 24-hour window are deleted, both on the next visit and by a daily housekeeping run, and each video keeps at most 500 of them.
+
+That makes the value pseudonymous rather than anonymous, so it still counts as personal data under GDPR: mention it in your Privacy Policy, which the theme installs as a starter page. The fingerprint only means the same thing while your salts stay the same, so regenerating the salts in `wp-config.php` resets the stored history rather than leaving it readable. Sites behind a CDN or proxy should filter `majestic_tube_client_ip` to the header the proxy overwrites; without that, every visitor shares one address and the de-duplication treats them as a single person.
 
 ### Review reported videos
 

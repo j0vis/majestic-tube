@@ -1082,7 +1082,7 @@
               <li><strong>Latest</strong> shows recently published videos first.</li>
               <li><strong>Most viewed</strong> prioritizes view count.</li>
               <li><strong>Longest</strong> prioritizes duration.</li>
-              <li><strong>Popular</strong> prioritizes the video rating percentage.</li>
+              <li><strong>Popular</strong> shows the most liked videos. While the site has no likes at all it falls back to view count, so the tab is never empty.</li>
               <li><strong>Random</strong> changes the order on each visit.</li>
             </ul>
           </div>
@@ -1211,7 +1211,7 @@
           <li>Choose a title, sort order, and number of videos.</li>
           <li>Choose <strong>Save</strong>.</li>
         </ol>
-        <p>Available sorting choices are Latest, Most viewed, and Random.</p>
+        <p>Available sorting choices are Latest, Most viewed, Longest, Popular, and Random.</p>
 
         <h3>Content Block widget</h3>
         <p>The <strong>Content Block</strong> widget is a general place for administrator-provided shortcodes and approved content markup. It can be targeted to all devices, desktop only, or mobile only.</p>
@@ -1261,6 +1261,10 @@
           <li>Something else</li>
         </ul>
         <p>Visitors may also include a short message. A visitor is asked not to report the same video again for 24 hours.</p>
+
+        <h4>What a visitor&rsquo;s address is used for</h4>
+        <p>Stopping one visitor from voting, viewing or reporting the same video several times needs to recognise a returning visitor, and nothing more. The theme stores a <strong>keyed fingerprint</strong> of the address &mdash; a one-way value derived with your site&rsquo;s own secret salt &mdash; next to a timestamp, never the address itself. Entries older than the 24-hour window are deleted, both on the next visit and by a daily housekeeping run, and each video keeps at most 500 of them.</p>
+        <p>That makes the value <strong>pseudonymous</strong> rather than anonymous, so it still counts as personal data under GDPR: mention it in your Privacy Policy, which the theme installs as a starter page. The fingerprint only means the same thing while your salts stay the same, so regenerating the salts in <code>wp-config.php</code> resets the stored history rather than leaving it readable. Sites behind a CDN or proxy should filter <code>majestic_tube_client_ip</code> to the header the proxy overwrites; without that, every visitor shares one address and the de-duplication treats them as a single person.</p>
 
         <h3>Review reported videos</h3>
       <ol class="steps">

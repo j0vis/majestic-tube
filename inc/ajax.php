@@ -125,9 +125,10 @@ add_action( 'wp_ajax_nopriv_post-views', 'majestic_tube_set_post_views' );
  */
 function majestic_tube_has_already_voted( $post_id ) {
 	// Original bug kept intentionally? No: (now - time)/60 vs 86400 was wrong
-	// in the original (compared minutes against a day). The shared helper keeps
-	// the corrected seconds-based 24h window in one place.
-	return majestic_tube_ip_was_recorded_recently( $post_id, 'voted_IP', DAY_IN_SECONDS );
+	// in the original (compared minutes against a day). The window itself now
+	// lives with the meta key it belongs to, so the check below and the write
+	// in majestic_tube_post_like() cannot disagree about how long a vote holds.
+	return majestic_tube_ip_was_recorded_recently( $post_id, 'voted_IP' );
 }
 
 /**
@@ -171,6 +172,11 @@ function majestic_tube_post_like() {
 
 	update_post_meta( $post_id, 'likes_count', $likes );
 	update_post_meta( $post_id, 'dislikes_count', $dislikes );
+
+	// The first vote on the site promotes the popular listing from ranking by
+	// views to ranking by likes, so the cached answer to "does this site have
+	// likes yet" is now stale.
+	delete_transient( 'majestic_tube_site_records_likes' );
 
 	$percentage  = majestic_tube_get_post_like_rate( $post_id );
 
@@ -220,7 +226,19 @@ function majestic_tube_get_post_data() {
 	$likes    = $stats['likes'];
 	$dislikes = $stats['dislikes'];
 	$total    = $likes + $dislikes;
-	$rate     = $stats['rate'];
+
+	/*
+	 * The percentage is the live ratio, not the stored `rate` meta. That meta
+	 * is only written by the vote handler above, so any post that arrived with
+	 * its rating already set - an import, a seed, a rating taken before this
+	 * handler existed - has none, and echoing it answered 0%. main.js feeds
+	 * this value straight into .video-rate-bar and the "75%" label on page
+	 * load, so a correct badge was overwritten with 0% a few seconds after the
+	 * page rendered. majestic_tube_get_post_like_rate() is the single
+	 * implementation every other rating surface uses, and it reads the same
+	 * counters, so the refresh can no longer disagree with the page.
+	 */
+	$rate     = majestic_tube_get_post_like_rate( $post_id );
 
 	// Flat payload: the original contract is { views, likes } at the top
 	// level. The extra keys are additive and ignored by older consumers.

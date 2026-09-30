@@ -526,6 +526,63 @@ function majestic_tube_filter_nav() {
 }
 
 /**
+ * Whether the site records likes at all.
+ *
+ * The popular listing sorts on a counter, and a counter only exists once
+ * somebody has used the like button. A freshly imported archive has videos,
+ * views and thumbnails but no votes yet, so ordering by likes matched nothing
+ * and the tab came up empty - on a site with hundreds of videos, which reads
+ * as a broken page rather than as "no votes yet". The answer is cached for an
+ * hour and cleared the moment the first vote lands, so the first vote is what
+ * promotes the tab to the ranking it was asking for.
+ *
+ * @return bool
+ */
+function majestic_tube_site_records_likes() {
+	$cache_key = 'majestic_tube_site_records_likes';
+	$cached    = get_transient( $cache_key );
+
+	if ( false !== $cached ) {
+		return 'yes' === $cached;
+	}
+
+	$voted = get_posts(
+		array(
+			'post_type'           => 'post',
+			'post_status'         => 'publish',
+			'posts_per_page'      => 1,
+			'fields'              => 'ids',
+			'no_found_rows'       => true,
+			'ignore_sticky_posts' => true,
+			'suppress_filters'    => false,
+			'meta_query'          => array(
+				array(
+					'key'     => 'likes_count',
+					'value'   => 0,
+					'compare' => '>',
+					'type'    => 'NUMERIC',
+				),
+			),
+		)
+	);
+
+	$has_likes = ! empty( $voted );
+
+	set_transient( $cache_key, $has_likes ? 'yes' : 'no', HOUR_IN_SECONDS );
+
+	/**
+	 * Filter whether the site has any recorded likes.
+	 *
+	 * The popular listing uses this to decide between ranking by likes and
+	 * ranking by views, so a site whose votes live in another table can point
+	 * it at them.
+	 *
+	 * @param bool $has_likes Whether at least one video has a vote.
+	 */
+	return (bool) apply_filters( 'majestic_tube_site_records_likes', $has_likes );
+}
+
+/**
  * Modify the main loop for the sort filters (original behavior).
  *
  * @param WP_Query $query Current query.
@@ -567,26 +624,27 @@ function majestic_tube_filter_query( $query ) {
 
 		case 'popular':
 			/*
-			 * Original behaviour: sort by the `rate` meta value, descending.
+			 * Popular means most liked, so the sort is on the likes count and
+			 * not on the `rate` percentage the original used. `rate` is an
+			 * approval ratio (1 like out of 1 vote is 100%), so a video with
+			 * a single vote outranked one with five hundred.
 			 *
-			 * The original also set a meta_query of
-			 * `rate NOT EXISTS OR rate EXISTS`, which is a tautology: every
-			 * post either has the key or it does not, so the clause matches
-			 * everything and filters nothing. Combined with the meta_key below
-			 * it made WordPress join wp_postmeta twice under two aliases for
-			 * no benefit (reports.php documents exactly this hazard). Posts
-			 * with no `rate` row are already excluded by the meta_key join,
-			 * which is the same set the tautology was trying to include, so
-			 * dropping it preserves the original result set.
+			 * The counter only exists once somebody votes, though, and an
+			 * unvoted archive has no `rate` rows at all - which is what
+			 * emptied this tab on a site with hundreds of imported videos.
+			 * When the site has no likes yet, the same question ("what has
+			 * the audience engaged with") has a different answer, so the tab
+			 * ranks by views until the first vote promotes it to likes.
 			 *
-			 * E3: on import-heavy archives the whole table shares one rate or
-			 * none at all, and an unbounded sort over millions of rows is the
-			 * most expensive query the theme can issue. Constraining the window
-			 * (default 30 days, filterable) both bounds the sort set and gives
-			 * the "popular" slot fresh content. An older archive that relies on
-			 * all-time ordering can filter the window down to zero.
+			 * E3 kept, but opt-in: on an import-heavy archive an unbounded
+			 * sort over millions of rows is expensive, so a site that wants
+			 * it can bound the set with this filter. It is off by default
+			 * because a window narrower than the archive empties the
+			 * listing outright - a library backdated by an import has no
+			 * posts in the last 30 days, so the page went blank with no
+			 * error and no explanation.
 			 */
-			$popular_days = (int) apply_filters( 'majestic_tube_popular_window_days', 30 );
+			$popular_days = (int) apply_filters( 'majestic_tube_popular_window_days', 0 );
 
 			if ( $popular_days > 0 ) {
 				$query->set(
@@ -600,7 +658,7 @@ function majestic_tube_filter_query( $query ) {
 				);
 			}
 
-			$query->set( 'meta_key', 'rate' );
+			$query->set( 'meta_key', majestic_tube_site_records_likes() ? 'likes_count' : 'post_views_count' );
 			$query->set( 'orderby', 'meta_value_num' );
 			$query->set( 'order', 'DESC' );
 			break;
@@ -608,12 +666,14 @@ function majestic_tube_filter_query( $query ) {
 		case 'random':
 			/*
 			 * E3: bare ORDER BY RAND() scans the whole result set on every
-			 * request, which is the classic large-table killer. Confining the
-			 * random draw to a recent window (default 90 days) keeps the scan
-			 * bounded while preserving the surprise; the window is filterable,
-			 * and setting it to zero restores the unbounded original behaviour.
+			 * request, which is the classic large-table killer, so the draw
+			 * can be confined to a recent window. The window is off by
+			 * default for the same reason as the popular one above: on a
+			 * backdated or dormant archive the narrower window returned an
+			 * empty page rather than a slower one. A site large enough to
+			 * need the guard turns it back on.
 			 */
-			$random_days = (int) apply_filters( 'majestic_tube_random_window_days', 90 );
+			$random_days = (int) apply_filters( 'majestic_tube_random_window_days', 0 );
 
 			if ( $random_days > 0 ) {
 				$query->set(
