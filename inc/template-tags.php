@@ -526,6 +526,171 @@ function majestic_tube_filter_nav() {
 }
 
 /**
+ * Default number of tags in the popular tags bar.
+ */
+const MAJESTIC_TUBE_POPULAR_TAGS_DEFAULT = 20;
+
+/**
+ * How many tags the popular tags bar should show.
+ *
+ * @return int
+ */
+function majestic_tube_popular_tags_limit() {
+	$limit = absint( majestic_tube_get_option( 'wpst-options', 'popular-tags-count', MAJESTIC_TUBE_POPULAR_TAGS_DEFAULT ) );
+
+	// A cleared or zeroed field means "use the default" rather than "print an
+	// empty bar". The bar exists to be useful, and an empty one is just a gap
+	// under the sort bar.
+	$limit = ( $limit > 0 ) ? $limit : MAJESTIC_TUBE_POPULAR_TAGS_DEFAULT;
+
+	/**
+	 * Filter how many tags the popular tags bar shows.
+	 *
+	 * @param int $limit Number of tags.
+	 */
+	return (int) apply_filters( 'majestic_tube_popular_tags_limit', $limit );
+}
+
+/**
+ * The most-used tags, in order, for the popular tags bar.
+ *
+ * The bar is printed under the sort bar on the front page, so it belongs to
+ * the hottest query a video site has. The list is fetched once and kept in the
+ * terms object cache under a key that embeds WordPress's own `last_changed`
+ * marker for that group - the same self-invalidating key the term directory
+ * pages use. A tag added, renamed, reassigned or removed by an import, a CLI
+ * run or the admin screen is therefore reflected on the next request without
+ * this function hooking anything, which also covers the bulk paths that an
+ * `edited_term` flush would miss.
+ *
+ * @param int $limit Number of tags. 0 uses the configured value.
+ * @return WP_Term[] Tags ordered by use, or an empty array on error.
+ */
+function majestic_tube_popular_tags( $limit = 0 ) {
+	$limit = $limit ? absint( $limit ) : majestic_tube_popular_tags_limit();
+
+	if ( ! taxonomy_exists( 'post_tag' ) ) {
+		return array();
+	}
+
+	$last_changed = wp_cache_get( 'last_changed', 'terms' );
+	$cache_key    = sprintf(
+		'popular_tags_%d_%s',
+		$limit,
+		preg_replace( '/[^A-Za-z0-9_.:-]/', '', (string) $last_changed )
+	);
+
+	$cached = wp_cache_get( $cache_key, MAJESTIC_TUBE_TERM_CACHE_GROUP );
+
+	if ( is_array( $cached ) ) {
+		return $cached;
+	}
+
+	$args = array(
+		'taxonomy'   => 'post_tag',
+		'hide_empty' => true,
+		'number'     => $limit,
+		/*
+		 * Sorted by how many videos carry the tag, then by name. The second
+		 * key is what stops two tags with the same count from swapping places
+		 * between requests - a bar that reshuffles itself on a reload reads
+		 * as broken rather than as a live ranking.
+		 */
+		'orderby'    => array(
+			'count' => 'DESC',
+			'name'  => 'ASC',
+		),
+	);
+
+	/**
+	 * Filter the query used to build the popular tags bar.
+	 *
+	 * @param array $args  Arguments passed to get_terms().
+	 * @param int   $limit Number of tags requested.
+	 */
+	$args = apply_filters( 'majestic_tube_popular_tags_args', $args, $limit );
+
+	$terms = get_terms( $args );
+
+	// An errored result is not cached, so a transient failure cannot stick.
+	if ( is_wp_error( $terms ) ) {
+		return array();
+	}
+
+	wp_cache_set( $cache_key, $terms, MAJESTIC_TUBE_TERM_CACHE_GROUP, MAJESTIC_TUBE_TERM_CACHE_TTL );
+
+	return $terms;
+}
+
+/**
+ * Display the popular tags bar, directly under the sort filter bar.
+ *
+ * The tag strip scrolls sideways by touch, by trackpad, and through the two
+ * arrow buttons. Those buttons are printed with the `hidden` attribute so a
+ * visitor without JavaScript is not shown two buttons that do nothing, and the
+ * script reveals them only once it has measured that the tags actually
+ * overflow the row.
+ *
+ * @return void
+ */
+function majestic_tube_tags_slider() {
+	if ( ! majestic_tube_option_is_on( 'show-popular-tags-slider' ) ) {
+		return;
+	}
+
+	$tags = majestic_tube_popular_tags();
+
+	// On a tag archive the tag being read is marked, the same way the sort bar
+	// marks the sort in use.
+	$current = is_tag() ? (int) get_queried_object_id() : 0;
+	$items   = '';
+
+	foreach ( $tags as $tag ) {
+		$link = get_term_link( $tag );
+
+		if ( is_wp_error( $link ) ) {
+			continue;
+		}
+
+		$items .= sprintf(
+			'<li><a href="%1$s" class="%2$s">%3$s<span class="screen-reader-text"> %4$s</span><span class="tags-slider-count">%5$s</span></a></li>',
+			esc_url( $link ),
+			esc_attr( (int) $tag->term_id === $current ? 'active' : '' ),
+			esc_html( $tag->name ),
+			esc_html( _n( 'video', 'videos', (int) $tag->count, 'majestic-tube' ) ),
+			esc_html( number_format_i18n( (int) $tag->count ) )
+		);
+	}
+
+	/*
+	 * Nothing worth drawing a row around: either the site has no tagged
+	 * videos at all, or every term it has came back without a usable link.
+	 * Either way the bar prints nothing - no heading, no empty shell, no gap
+	 * under the sort bar where a bar used to be.
+	 */
+	if ( ! $items ) {
+		return;
+	}
+
+	/*
+	 * $items is assembled entirely from escaped parts in the loop above, so it
+	 * is printed as markup rather than escaped a second time.
+	 */
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- built from escaped output above.
+	printf(
+		'<nav class="tags-slider" aria-label="%1$s" data-tags-slider>
+			<button type="button" class="tags-slider-nav tags-slider-prev" data-tags-slider-prev aria-label="%2$s" hidden><span aria-hidden="true">&larr;</span></button>
+			<ul class="tags-slider-track" data-tags-slider-track>%3$s</ul>
+			<button type="button" class="tags-slider-nav tags-slider-next" data-tags-slider-next aria-label="%4$s" hidden><span aria-hidden="true">&rarr;</span></button>
+		</nav>',
+		esc_attr__( 'Popular tags', 'majestic-tube' ),
+		esc_attr__( 'Scroll the tags back', 'majestic-tube' ),
+		$items,
+		esc_attr__( 'Scroll the tags forward', 'majestic-tube' )
+	);
+}
+
+/**
  * Whether the site records likes at all.
  *
  * The popular listing sorts on a counter, and a counter only exists once

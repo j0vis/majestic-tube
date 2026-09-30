@@ -6,7 +6,7 @@
  * skin.
  *
  * @package Majestic Tube
- * @version 2.2.12
+ * @version 2.2.13
  */
 
 /*
@@ -786,6 +786,169 @@ ol {
 	background: var(--mt-accent);
 	border-color: var(--mt-accent-text);
 	color: #fff;
+}
+
+/*
+ * Popular tags bar.
+ *
+ * A second navigation row under the sort bar. It scrolls sideways on its own
+ * - overflow plus scroll-snap does the whole job, so a visitor with no
+ * JavaScript still gets every tag, just by touch or trackpad instead of by
+ * button.
+ *
+ * The two arrow buttons are printed with the `hidden` attribute so nobody is
+ * shown a button that does nothing; the script reveals them only after it has
+ * measured that the tags actually overflow the row. The negative top margin
+ * pulls the bar up to the sort bar's border, because .filter-nav's own 22px
+ * bottom margin was designed for the gap that runs down to the video grid.
+ */
+.tags-slider {
+	display: flex;
+	align-items: center;
+	gap: 0.35rem;
+	min-width: 0;
+	margin: -10px 0 22px;
+}
+
+/*
+ * The scrolling element itself. It takes the free width so the arrows sit
+ * hard against each end, and its min-width:0 is what stops a long unbroken
+ * tag name from pushing the arrows off the row.
+ */
+.tags-slider-track {
+	display: flex;
+	flex: 1 1 auto;
+	gap: 0.35rem;
+	min-width: 0;
+	margin: 0;
+	padding: 2px 0;
+	list-style: none;
+	overflow-x: auto;
+	overflow-y: hidden;
+	scroll-snap-type: x proximity;
+	/*
+	 * Smooth scrolling, set here rather than passed to scrollBy() from the
+	 * script, so the reduced-motion block at the foot of this sheet switches
+	 * it off with everything else.
+	 */
+	scroll-behavior: smooth;
+	/* The row is one line of chips; a scrollbar under it reads as a bug. */
+	scrollbar-width: none;
+	-ms-overflow-style: none;
+	-webkit-overflow-scrolling: touch;
+}
+
+.tags-slider-track::-webkit-scrollbar {
+	display: none;
+}
+
+/*
+ * Chips must keep their natural width and snap to the leading edge, or the
+ * row would try to fit all twenty and shrink them into unreadable stubs.
+ */
+.tags-slider-track > li {
+	flex: 0 0 auto;
+	scroll-snap-align: start;
+}
+
+.tags-slider a {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4rem;
+	padding: 0.3rem 0.7rem;
+	border: 1px solid var(--mt-border);
+	border-radius: 999px;
+	background: var(--mt-surface);
+	color: var(--mt-text-body);
+	font-size: 0.8rem;
+	font-weight: 600;
+	white-space: nowrap;
+}
+
+.tags-slider a:hover,
+.tags-slider a:focus-visible {
+	background: var(--mt-surface-hover);
+	border-color: var(--mt-border-strong);
+	color: var(--mt-text);
+}
+
+.tags-slider a:focus-visible {
+	outline: 2px solid var(--mt-accent);
+	outline-offset: 2px;
+}
+
+.tags-slider a.active {
+	background: var(--mt-accent);
+	border-color: var(--mt-accent-text);
+	color: #fff;
+}
+
+.tags-slider-count {
+	padding: 0 0.4rem;
+	border-radius: 999px;
+	background: var(--mt-surface-hover);
+	color: var(--mt-text-muted);
+	font-size: 0.72rem;
+	font-weight: 700;
+	/* Counts line up in a column instead of dancing as the bar scrolls. */
+	font-variant-numeric: tabular-nums;
+}
+
+.tags-slider a:hover .tags-slider-count,
+.tags-slider a:focus-visible .tags-slider-count {
+	background: var(--mt-border);
+	color: var(--mt-text-body);
+}
+
+.tags-slider a.active .tags-slider-count {
+	/* A tint of the fill rather than the grey chip, which vanished on accent. */
+	background: rgba( 255, 255, 255, 0.22 );
+	color: #fff;
+}
+
+.tags-slider-nav {
+	flex: 0 0 auto;
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	width: 30px;
+	height: 30px;
+	padding: 0;
+	border: 1px solid var(--mt-border);
+	border-radius: 50%;
+	background: var(--mt-surface);
+	color: var(--mt-text-muted);
+	font-size: 0.95rem;
+	line-height: 1;
+	cursor: pointer;
+}
+
+/*
+ * The `hidden` the markup ships with. A bare `[hidden] { display: none }` from
+ * a reset loses to the display:inline-flex above, which is why it is restated
+ * here rather than assumed.
+ */
+.tags-slider-nav[hidden] {
+	display: none;
+}
+
+.tags-slider-nav:hover,
+.tags-slider-nav:focus-visible {
+	border-color: var(--mt-accent);
+	color: var(--mt-accent-text);
+}
+
+.tags-slider-nav:focus-visible {
+	outline: 2px solid var(--mt-accent);
+	outline-offset: 2px;
+}
+
+/* At the end of the row the arrow has nowhere left to go. */
+.tags-slider-nav[disabled] {
+	opacity: 0.35;
+	border-color: var(--mt-border);
+	color: var(--mt-text-muted);
+	cursor: default;
 }
 
 /* Video grid and cards -------------------------------------------------- */
@@ -2800,6 +2963,25 @@ ol {
 
 	.filter-nav a {
 		justify-content: center;
+	}
+
+	/*
+	 * The sort bar folds to two columns this narrow. The tag bar stays a
+	 * strip on purpose - twenty tags in two columns would push the video
+	 * grid a screen further down than the tags are worth - so it is only
+	 * tightened.
+	 */
+	.tags-slider {
+		margin: -8px 0 18px;
+	}
+
+	.tags-slider-track {
+		gap: 0.25rem;
+	}
+
+	.tags-slider a {
+		padding: 0.28rem 0.6rem;
+		font-size: 0.76rem;
 	}
 }
 

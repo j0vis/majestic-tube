@@ -44,7 +44,10 @@ $actor = get_queried_object();
 			</div>
 		</header>
 
-		<?php majestic_tube_filter_nav(); ?>
+		<?php
+		majestic_tube_filter_nav();
+		majestic_tube_tags_slider();
+		?>
 
 		<?php if ( have_posts() ) : ?>
 

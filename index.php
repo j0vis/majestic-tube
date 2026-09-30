@@ -48,7 +48,10 @@ get_header();
 			</header>
 		<?php endif; ?>
 
-		<?php majestic_tube_filter_nav(); ?>
+		<?php
+		majestic_tube_filter_nav();
+		majestic_tube_tags_slider();
+		?>
 
 		<?php if ( have_posts() ) : ?>
 

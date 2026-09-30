@@ -6,7 +6,7 @@
  * the shared `ajax-nonce` the original theme used.
  *
  * @package Majestic Tube
- * @version 2.2.12
+ * @version 2.2.13
  */
 
 ( function () {
@@ -2120,6 +2120,114 @@
 	}
 
 	/**
+	 * Wire up the popular tags bar.
+	 *
+	 * The bar scrolls on its own - overflow-x plus scroll-snap - so all this
+	 * adds is the two arrow buttons, and only once it has measured that the
+	 * tags actually overflow the row. The markup ships with both buttons
+	 * hidden, which is the state a visitor without JavaScript is left in: a
+	 * row that scrolls, and no control on it that does nothing.
+	 */
+	function initTagSlider() {
+		findAll( '[data-tags-slider]' ).forEach( function ( slider ) {
+			var track = slider.querySelector( '[data-tags-slider-track]' );
+			var prev = slider.querySelector( '[data-tags-slider-prev]' );
+			var next = slider.querySelector( '[data-tags-slider-next]' );
+
+			if ( ! track || ! prev || ! next ) {
+				return;
+			}
+
+			// An engine that cannot measure the row cannot be told whether
+			// there is anything to scroll, so it keeps the CSS-only bar.
+			if ( 'number' !== typeof track.scrollWidth ) {
+				return;
+			}
+
+			var rtl = 'rtl' === window.getComputedStyle( track ).direction;
+
+			/**
+			 * Whether the row has more track left to travel, and how far.
+			 *
+			 * @return {number} Remaining scroll distance.
+			 */
+			function maxScroll() {
+				return Math.max( 0, track.scrollWidth - track.clientWidth );
+			}
+
+			/**
+			 * Match each arrow to the end of the row it leads to.
+			 */
+			function update() {
+				var max = maxScroll();
+
+				// Browsers snap a scroll offset to whole device pixels while
+				// scrollWidth stays fractional, so the last pixel of travel
+				// is never quite the value the arithmetic expects. Without
+				// the tolerance the arrow one pixel from the end still looks
+				// like it has somewhere to go.
+				var atStart = rtl ? track.scrollLeft >= -1 : track.scrollLeft <= 1;
+				var atEnd = rtl ? track.scrollLeft <= -( max - 1 ) : track.scrollLeft >= max - 1;
+
+				prev.disabled = atStart;
+				next.disabled = atEnd;
+			}
+
+			/**
+			 * Move the row one click's worth in a direction.
+			 *
+			 * Slightly less than a full row, so the last chip lands
+			 * comfortably inside the row instead of flush against its edge.
+			 * No behaviour is passed: the sheet owns that, and the
+			 * reduced-motion rule turns it off with everything else.
+			 *
+			 * @param {number} direction -1 for back, 1 for forward.
+			 */
+			function nudge( direction ) {
+				var step = track.clientWidth * 0.8;
+
+				// Travelling forward in a right-to-left row moves towards the
+				// scroll origin, so the sign of the step flips with it.
+				track.scrollBy( { left: ( rtl ? -direction : direction ) * step } );
+			}
+
+			prev.addEventListener( 'click', function () {
+				nudge( -1 );
+			} );
+
+			next.addEventListener( 'click', function () {
+				nudge( 1 );
+			} );
+
+			track.addEventListener( 'scroll', update, { passive: true } );
+
+			/**
+			 * Show the arrows only while the tags overflow, and hide them
+			 * again when a resize or a short tag list leaves nothing to
+			 * scroll - a permanently dead pair of arrows reads as a bug.
+			 */
+			function sync() {
+				var overflowing = track.scrollWidth > track.clientWidth + 1;
+
+				prev.hidden = ! overflowing;
+				next.hidden = ! overflowing;
+
+				if ( overflowing ) {
+					update();
+				}
+			}
+
+			sync();
+
+			if ( 'undefined' !== typeof ResizeObserver ) {
+				new ResizeObserver( sync ).observe( track );
+			} else {
+				window.addEventListener( 'resize', sync, { passive: true } );
+			}
+		} );
+	}
+
+	/**
 	 * Show the back-to-top link once the visitor has scrolled past the fold.
 	 */
 	function initBackToTop() {
@@ -2150,6 +2258,7 @@
 	document.addEventListener( 'DOMContentLoaded', function () {
 		initMenuToggle();
 		initBackToTop();
+		initTagSlider();
 		countView();
 		initLikeButtons();
 		initReadMore();

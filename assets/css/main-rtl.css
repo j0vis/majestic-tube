@@ -172,6 +172,18 @@
 	border-radius: 7px 0 0 7px;
 }
 
+/* Popular tags bar ------------------------------------------------------- */
+/*
+ * The bar itself is laid out with logical properties in main.css, so there is
+ * nothing here to mirror. The two arrow glyphs are the exception: they point
+ * along the reading order, which runs the other way on this sheet, so they are
+ * flipped to keep "back" on the leading edge of the row.
+ */
+.tags-slider-prev span,
+.tags-slider-next span {
+	transform: scaleX( -1 );
+}
+
 /* Compact header --------------------------------------------------------- */
 /*
  * The rules the responsive layer of main.css adds that are direction-sensitive:

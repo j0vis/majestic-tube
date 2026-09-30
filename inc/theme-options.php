@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.2.12
+ * @version 2.2.13
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -268,6 +268,32 @@ function majestic_tube_options_map() {
 			'choices' => array(
 				'top'    => __( 'Above the grid', 'majestic-tube' ),
 				'bottom' => __( 'Below the grid', 'majestic-tube' ),
+			),
+		),
+		'show-popular-tags-slider'  => array(
+			/*
+			 * The tag bar is a second navigation row, and not every
+			 * archive wants one. It sits under the sort bar on the pages
+			 * that have a sort bar at all, so switching it off leaves the
+			 * page exactly as it was before the bar existed.
+			 */
+			'setting'     => 'majestic_tube_show_popular_tags_slider',
+			'default'     => 'on',
+			'type'        => 'onoff',
+			'label'       => __( 'Show the popular tags bar', 'majestic-tube' ),
+			'section'     => $home,
+			'description' => __( 'A horizontally scrolling bar of the most-used tags, printed directly under the Latest / Most viewed / Longest / Popular / Random sort bar. It shows on the homepage and on actor pages, and stays hidden on a site that has no tags yet.', 'majestic-tube' ),
+		),
+		'popular-tags-count'        => array(
+			'setting'     => 'majestic_tube_popular_tags_count',
+			'default'     => 20,
+			'type'        => 'number',
+			'label'       => __( 'Number of popular tags', 'majestic-tube' ),
+			'section'     => $home,
+			'input_attrs' => array(
+				'min'  => 5,
+				'max'  => 50,
+				'step' => 1,
 			),
 		),
 		/* ------------------------------------------------------------------

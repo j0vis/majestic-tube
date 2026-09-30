@@ -273,6 +273,19 @@ To change an image later, open the actor, choose **Edit Actor**, select a replac
 
 Add short, descriptive tags in the Video editor. The Tags page template presents all site tags as a cloud with video counts.
 
+### The popular tags bar
+
+The twenty most-used tags appear in a scrolling bar directly under the sort bar — Latest, Most viewed, Longest, Popular, Random — on the homepage and on actor pages. Each chip shows the tag and how many videos carry it, and opens that tag's archive. On a tag archive, the tag being read is highlighted.
+
+The bar scrolls by touch, by trackpad, and through the two arrow buttons at either end. The arrows only appear when the tags genuinely overflow the row, and each one goes inactive at the end it leads to. Without JavaScript the row still scrolls and the arrows are simply absent, so nobody is shown a control that does nothing.
+
+Turn it off, or change how many tags it shows, under `Customize → Homepage & Listings → Homepage`:
+
+- **Show the popular tags bar** switches the whole row on or off.
+- **Number of popular tags** sets the size of the bar, from 5 to 50. The default is 20.
+
+A site with no tagged videos shows no bar at all, rather than an empty row under the sort bar.
+
 ### Write the line on a category or actor card
 
 Every card on the Categories and Actors pages carries a line of text between the name and the video count. By default it is that term's own description, and nothing shows for a term you never wrote one for.
@@ -515,7 +528,7 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 
 | Panel | Section | What you can control |
 | --- | --- | --- |
-| Homepage & Listings | Homepage | How the homepage sorts its videos, how many show per page and per row, and the homepage title and where it sits. |
+| Homepage & Listings | Homepage | How the homepage sorts its videos, how many show per page and per row, the homepage title and where it sits, and the popular tags bar under the sort bar. |
 | Homepage & Listings | Homepage on Mobile | Videos per page and per row on phones and tablets. |
 | Homepage & Listings | Category, Tag & Actor Archives | How many categories sit in a row and how many show per page on the Categories page, videos per page on the other archives, whether the category and tag description goes above or below the list, and the line shown on each category and actor card. |
 | Video Page | Video Page Layout | Which of a post's two video fields the player uses (Video URL or embed code), the video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos. |
@@ -539,6 +552,13 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 - **Longest** prioritizes duration.
 - **Popular** shows the most liked videos. While the site has no likes at all it falls back to view count, so the tab is never empty.
 - **Random** changes the order on each visit.
+
+#### Popular tags bar
+
+- **Show the popular tags bar** switches the row of most-used tags on or off. It sits under the sort bar on the homepage and on actor pages.
+- **Number of popular tags** sets how many tags the bar shows, from 5 to 50. The default is 20.
+
+The bar is cached, and the cache key carries WordPress's own `last_changed` marker for tags, so a tag added, renamed or removed is picked up on the next request without the theme flushing anything by hand.
 
 ### Video Page → Player
 
