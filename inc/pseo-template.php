@@ -12,7 +12,7 @@
  * page and the reason those pages are `noindex`.
  *
  * @package Majestic Tube
- * @version 2.2.21
+ * @version 2.2.22
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -191,9 +191,11 @@ $parent = is_wp_error( $parent ) ? '' : $parent;
 			</section>
 		<?php endif; ?>
 
+		<?php if ( majestic_tube_browse_page_enabled() ) : ?>
 		<nav class="facet-browse-more" aria-label="<?php esc_attr_e( 'Browse more collections', 'majestic-tube' ); ?>">
 			<a href="<?php echo esc_url( home_url( '/browse/' ) ); ?>"><?php esc_html_e( 'Browse all collections', 'majestic-tube' ); ?></a>
 		</nav>
+		<?php endif; ?>
 
 	</main>
 </div>

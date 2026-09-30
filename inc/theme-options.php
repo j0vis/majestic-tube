@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.2.21
+ * @version 2.2.22
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -1411,6 +1411,16 @@ function majestic_tube_options_map() {
 			'description' => __( 'Extra markup printed before </body> for mobile visitors only.', 'majestic-tube' ),
 		),
 	);
+
+	/**
+	 * Filter the theme's option fields.
+	 *
+	 * Modules file their extra fields into the existing sections here, so the
+	 * Customizer and the option readers see one combined map.
+	 *
+	 * @param array $map_value Field id => definition.
+	 */
+	$map_value = (array) apply_filters( 'majestic_tube_options_map', $map_value );
 
 	$GLOBALS['majestic_tube_options_map_cache'] = $map_value;
 

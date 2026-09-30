@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAJESTIC_TUBE_VERSION', '2.2.21' );
+define( 'MAJESTIC_TUBE_VERSION', '2.2.22' );
 define( 'MAJESTIC_TUBE_DIR', get_template_directory() );
 define( 'MAJESTIC_TUBE_URI', get_template_directory_uri() );
 
@@ -51,6 +51,7 @@ require MAJESTIC_TUBE_DIR . '/inc/template-filters.php';
  * approved, and nothing else.
  */
 require MAJESTIC_TUBE_DIR . '/inc/pseo.php';
+require MAJESTIC_TUBE_DIR . '/inc/pseo-options.php';
 require MAJESTIC_TUBE_DIR . '/inc/pseo-stats.php';
 require MAJESTIC_TUBE_DIR . '/inc/pseo-meta.php';
 require MAJESTIC_TUBE_DIR . '/inc/pseo-render.php';
