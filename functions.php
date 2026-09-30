@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAJESTIC_TUBE_VERSION', '2.2.19' );
+define( 'MAJESTIC_TUBE_VERSION', '2.2.20' );
 define( 'MAJESTIC_TUBE_DIR', get_template_directory() );
 define( 'MAJESTIC_TUBE_URI', get_template_directory_uri() );
 
@@ -41,3 +41,17 @@ require MAJESTIC_TUBE_DIR . '/inc/pagination.php';
 require MAJESTIC_TUBE_DIR . '/inc/breadcrumbs.php';
 require MAJESTIC_TUBE_DIR . '/inc/widgets.php';
 require MAJESTIC_TUBE_DIR . '/inc/template-filters.php';
+
+/*
+ * Programmatic SEO. The modules are ordered by dependency: pseo.php owns the
+ * facet vocabulary, rewrites and the index gate; pseo-stats.php derives the
+ * values that make a facet specific; pseo-meta.php turns them into titles,
+ * descriptions and directives; pseo-render.php wires the queries, the browse
+ * spine and the breadcrumbs; pseo-sitemap.php submits whatever the gate
+ * approved, and nothing else.
+ */
+require MAJESTIC_TUBE_DIR . '/inc/pseo.php';
+require MAJESTIC_TUBE_DIR . '/inc/pseo-stats.php';
+require MAJESTIC_TUBE_DIR . '/inc/pseo-meta.php';
+require MAJESTIC_TUBE_DIR . '/inc/pseo-render.php';
+require MAJESTIC_TUBE_DIR . '/inc/pseo-sitemap.php';
