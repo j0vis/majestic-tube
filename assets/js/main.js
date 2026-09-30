@@ -128,9 +128,10 @@
 	 *
 	 * @param {URLSearchParams|FormData} body Request body.
 	 * @param {boolean} encoded Whether the body has an encoded content type.
+	 * @param {boolean} [retried] Whether this is already a nonce-refreshed replay.
 	 * @return {Promise<Object>} Parsed JSON response.
 	 */
-	function ajaxRequest( body, encoded ) {
+	function ajaxRequest( body, encoded, retried ) {
 		var options = {
 			method: 'POST',
 			credentials: 'same-origin',
@@ -147,13 +148,33 @@
 			// The original endpoints answer with a plain JSON object; a failed
 			// nonce check used to reply with the text "Busted!", so read the
 			// body as text first instead of assuming parseable JSON.
-			return response.text();
-		} ).then( function ( text ) {
+			return response.text().then( function ( text ) {
+				return { status: response.status, text: text };
+			} );
+		} ).then( function ( result ) {
+			var json;
+
 			try {
-				return JSON.parse( text );
+				json = JSON.parse( result.text );
 			} catch ( error ) {
-				return { success: false, message: text };
+				json = { success: false, message: result.text };
 			}
+
+			/*
+			 * 403 is how every endpoint answers a failed nonce check (and
+			 * nothing else the front end triggers). A page served from a
+			 * full-page cache can be older than the 12-24 hours a nonce lives,
+			 * so fetch fresh nonces and replay the request once rather than
+			 * fail the visitor with "Security check failed." over something
+			 * they cannot help.
+			 */
+			if ( ! retried && 403 === result.status ) {
+				return refreshNonces( body ).then( function () {
+					return ajaxRequest( body, encoded, true );
+				} );
+			}
+
+			return json;
 		} );
 	}
 
@@ -170,7 +191,54 @@
 			body.append( key, payload[ key ] );
 		} );
 
-		return ajaxRequest( body.toString(), true );
+		// Pass the live URLSearchParams, not body.toString(): a failed nonce
+		// check patches the body in place before replaying it, which a frozen
+		// string cannot absorb.
+		return ajaxRequest( body, true );
+	}
+
+	/**
+	 * Fetch live nonces and patch them into a request body and the page forms.
+	 *
+	 * The hidden nonce fields in a cached page go stale after 12-24 hours, so
+	 * after a failed security check the request body is patched in place (both
+	 * URLSearchParams and FormData expose has()/set()) and replayed. The form
+	 * fields are kept current too, so a rebuilt FormData is fresh as well.
+	 *
+	 * @param {URLSearchParams|FormData|string} [body] Request body to patch in place.
+	 * @return {Promise<void>} Resolved once fresh nonces are in place.
+	 */
+	function refreshNonces( body ) {
+		var refresh = new URLSearchParams();
+
+		refresh.append( 'action', 'majestic_tube_refresh_nonces' );
+
+		// The refresh call itself must never retry through ajaxRequest.
+		return ajaxRequest( refresh.toString(), true, true ).then( function ( json ) {
+			if ( ! json || ! json.ajaxNonce ) {
+				return;
+			}
+
+			data.nonce = json.ajaxNonce;
+
+			if ( body && typeof body.set === 'function' && typeof body.has === 'function' ) {
+				if ( body.has( 'nonce' ) ) {
+					body.set( 'nonce', json.ajaxNonce );
+				}
+
+				[ 'login-security', 'register-security', 'password-security' ].forEach( function ( field ) {
+					if ( body.has( field ) ) {
+						body.set( field, json.loginNonce );
+					}
+				} );
+			}
+
+			findAll( 'input[name="login-security"], input[name="register-security"], input[name="password-security"]' ).forEach( function ( input ) {
+				input.value = json.loginNonce;
+			} );
+		} ).catch( function () {
+			// The replay below surfaces the original error if this failed.
+		} );
 	}
 
 	/**

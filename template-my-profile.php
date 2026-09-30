@@ -25,12 +25,13 @@ if ( ! is_user_logged_in() ) {
 	return;
 }
 
-$current_user = wp_get_current_user();
-$errors       = array();
-$updated      = isset( $_GET['updated'] ) ? sanitize_key( wp_unslash( $_GET['updated'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$current_user   = wp_get_current_user();
+$errors         = array();
+$updated        = isset( $_GET['updated'] ) ? sanitize_key( wp_unslash( $_GET['updated'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended
+$request_method = isset( $_SERVER['REQUEST_METHOD'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REQUEST_METHOD'] ) ) : '';
 
 // Handle profile save.
-if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['majestic-tube-profile-nonce'] ) ) {
+if ( 'POST' === $request_method && isset( $_POST['majestic-tube-profile-nonce'] ) ) {
 
 	if ( wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['majestic-tube-profile-nonce'] ) ), 'majestic_tube_update_profile' ) ) {
 
@@ -39,15 +40,23 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['majestic-tube-profi
 		$pass2 = isset( $_POST['pass2'] ) ? (string) wp_unslash( $_POST['pass2'] ) : '';
 
 		if ( $pass1 || $pass2 ) {
-			if ( $pass1 === $pass2 ) {
-				wp_update_user(
+			if ( $pass1 !== $pass2 ) {
+				$errors[] = __( 'The passwords you entered do not match. Your password was not updated.', 'majestic-tube' );
+			} elseif ( strlen( $pass1 ) < 8 ) {
+				// Server-side twin of the minlength attribute below: the markup
+				// alone is advisory and is dropped by any direct form post.
+				$errors[] = __( 'The password must be at least 8 characters long.', 'majestic-tube' );
+			} else {
+				$result = wp_update_user(
 					array(
 						'ID'        => $current_user->ID,
 						'user_pass' => $pass1,
 					)
 				);
-			} else {
-				$errors[] = __( 'The passwords you entered do not match. Your password was not updated.', 'majestic-tube' );
+
+				if ( is_wp_error( $result ) ) {
+					$errors[] = $result->get_error_message();
+				}
 			}
 		}
 
@@ -59,24 +68,32 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['majestic-tube-profi
 		} elseif ( $email && email_exists( $email ) && email_exists( $email ) !== $current_user->ID ) {
 			$errors[] = __( 'This email is already used by another user. Try a different one.', 'majestic-tube' );
 		} elseif ( $email ) {
-			wp_update_user(
+			$result = wp_update_user(
 				array(
 					'ID'         => $current_user->ID,
 					'user_email' => $email,
 				)
 			);
+
+			if ( is_wp_error( $result ) ) {
+				$errors[] = $result->get_error_message();
+			}
 		}
 
 		// URL.
 		$url = isset( $_POST['url'] ) ? esc_url_raw( wp_unslash( $_POST['url'] ) ) : '';
 
 		if ( $url ) {
-			wp_update_user(
+			$result = wp_update_user(
 				array(
 					'ID'       => $current_user->ID,
 					'user_url' => $url,
 				)
 			);
+
+			if ( is_wp_error( $result ) ) {
+				$errors[] = $result->get_error_message();
+			}
 		}
 
 		// Names.
@@ -85,21 +102,28 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['majestic-tube-profi
 		$display    = isset( $_POST['display_name'] ) ? sanitize_text_field( wp_unslash( $_POST['display_name'] ) ) : '';
 		$desc       = isset( $_POST['description'] ) ? sanitize_textarea_field( wp_unslash( $_POST['description'] ) ) : '';
 
-		if ( $first_name ) {
+		// Presence, not truthiness: the fields are always posted, and an empty
+		// value is a deliberate "clear this" - a truthy check made names and
+		// bio impossible to empty once set.
+		if ( isset( $_POST['first-name'] ) ) {
 			update_user_meta( $current_user->ID, 'first_name', $first_name );
 		}
-		if ( $last_name ) {
+		if ( isset( $_POST['last-name'] ) ) {
 			update_user_meta( $current_user->ID, 'last_name', $last_name );
 		}
 		if ( $display ) {
-			wp_update_user(
+			$result = wp_update_user(
 				array(
 					'ID'           => $current_user->ID,
 					'display_name' => $display,
 				)
 			);
+
+			if ( is_wp_error( $result ) ) {
+				$errors[] = $result->get_error_message();
+			}
 		}
-		if ( $desc ) {
+		if ( isset( $_POST['description'] ) ) {
 			update_user_meta( $current_user->ID, 'description', $desc );
 		}
 
@@ -168,12 +192,12 @@ if ( 'POST' === $_SERVER['REQUEST_METHOD'] && isset( $_POST['majestic-tube-profi
 
 			<div class="form-field">
 				<label for="pass1"><?php esc_html_e( 'New password (leave blank to keep current)', 'majestic-tube' ); ?></label>
-				<input type="password" id="pass1" name="pass1" />
+				<input type="password" id="pass1" name="pass1" minlength="8" />
 			</div>
 
 			<div class="form-field">
 				<label for="pass2"><?php esc_html_e( 'Repeat new password', 'majestic-tube' ); ?></label>
-				<input type="password" id="pass2" name="pass2" />
+				<input type="password" id="pass2" name="pass2" minlength="8" />
 			</div>
 
 			<div class="form-field">

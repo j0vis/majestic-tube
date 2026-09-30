@@ -241,13 +241,17 @@ function majestic_tube_verify_captcha( $response ) {
  * string-valued `error` breaks existing membership forms silently.
  *
  * @param string $message Error message.
+ * @param int    $status  Optional HTTP status. 403 marks a failed security
+ *                        check so the front end can recover with a fresh
+ *                        nonce without parsing translated message text.
  */
-function majestic_tube_ajax_error( $message ) {
+function majestic_tube_ajax_error( $message, $status = 200 ) {
 	wp_send_json(
 		array(
 			'error'   => true,
 			'message' => '<div class="alert alert-danger">' . esc_html( $message ) . '</div>',
-		)
+		),
+		$status
 	);
 }
 
@@ -269,10 +273,35 @@ function majestic_tube_ajax_membership_success( $message, $tag = 'div' ) {
 }
 
 /**
+ * Hand out fresh front-end nonces (action: majestic_tube_refresh_nonces).
+ *
+ * A page held by a full-page cache keeps the nonces it was rendered with, and
+ * WordPress nonces expire after 12-24 hours, so on a cached site every AJAX
+ * form eventually submits a dead nonce and dies on its security check. The
+ * front end calls this endpoint when that happens to swap in live nonces and
+ * replay the request.
+ *
+ * The endpoint is open to logged-out visitors on purpose: the values it
+ * returns are the same public, logged-out nonces the cached page HTML already
+ * carried, and admin-ajax.php sends no CORS headers, so a foreign origin
+ * cannot read the response. It issues nothing that identifies a user.
+ */
+function majestic_tube_refresh_nonces() {
+	wp_send_json(
+		array(
+			'ajaxNonce'  => wp_create_nonce( 'ajax-nonce' ),
+			'loginNonce' => wp_create_nonce( 'ajax-login-nonce' ),
+		)
+	);
+}
+add_action( 'wp_ajax_majestic_tube_refresh_nonces', 'majestic_tube_refresh_nonces' );
+add_action( 'wp_ajax_nopriv_majestic_tube_refresh_nonces', 'majestic_tube_refresh_nonces' );
+
+/**
  * Handle login requests (original action: wpst_login_member).
  */
 function majestic_tube_ajax_login() {
-	check_ajax_referer( 'ajax-login-nonce', 'login-security', false ) || majestic_tube_ajax_error( __( 'Security check failed.', 'majestic-tube' ) );
+	check_ajax_referer( 'ajax-login-nonce', 'login-security', false ) || majestic_tube_ajax_error( __( 'Security check failed.', 'majestic-tube' ), 403 );
 
 	$login    = isset( $_POST['wpst_user_login'] ) ? sanitize_user( wp_unslash( $_POST['wpst_user_login'] ) ) : '';
 	$password = isset( $_POST['wpst_user_pass'] ) ? (string) wp_unslash( $_POST['wpst_user_pass'] ) : '';
@@ -301,7 +330,7 @@ add_action( 'wp_ajax_nopriv_wpst_login_member', 'majestic_tube_ajax_login' );
  * Handle registration requests (original action: wpst_register_member).
  */
 function majestic_tube_ajax_register() {
-	check_ajax_referer( 'ajax-login-nonce', 'register-security', false ) || majestic_tube_ajax_error( __( 'Security check failed.', 'majestic-tube' ) );
+	check_ajax_referer( 'ajax-login-nonce', 'register-security', false ) || majestic_tube_ajax_error( __( 'Security check failed.', 'majestic-tube' ), 403 );
 
 	if ( ! get_option( 'users_can_register' ) ) {
 		majestic_tube_ajax_error( __( 'Registration is disabled.', 'majestic-tube' ) );
@@ -322,6 +351,13 @@ function majestic_tube_ajax_register() {
 
 	if ( ! $login || ! $email || ! $password ) {
 		majestic_tube_ajax_error( __( 'All fields are required.', 'majestic-tube' ) );
+	}
+
+	// The 8-character floor the form advertises through minlength. That
+	// attribute is browser-side advice only and vanishes on any direct POST,
+	// so the real check lives here.
+	if ( strlen( $password ) < 8 ) {
+		majestic_tube_ajax_error( __( 'The password must be at least 8 characters long.', 'majestic-tube' ) );
 	}
 
 	if ( username_exists( $login ) ) {
@@ -354,7 +390,7 @@ add_action( 'wp_ajax_nopriv_wpst_register_member', 'majestic_tube_ajax_register'
  * Handle password reset requests (original action: wpst_reset_password).
  */
 function majestic_tube_ajax_reset_password() {
-	check_ajax_referer( 'ajax-login-nonce', 'password-security', false ) || majestic_tube_ajax_error( __( 'Security check failed.', 'majestic-tube' ) );
+	check_ajax_referer( 'ajax-login-nonce', 'password-security', false ) || majestic_tube_ajax_error( __( 'Security check failed.', 'majestic-tube' ), 403 );
 
 	$user_or_email = isset( $_POST['wpst_user_or_email'] ) ? sanitize_text_field( wp_unslash( $_POST['wpst_user_or_email'] ) ) : '';
 
@@ -362,37 +398,33 @@ function majestic_tube_ajax_reset_password() {
 		majestic_tube_ajax_error( __( 'Enter a username or email address.', 'majestic-tube' ) );
 	}
 
-	if ( is_email( $user_or_email ) ) {
-		$user = get_user_by( 'email', $user_or_email );
-	} else {
-		$user = get_user_by( 'login', $user_or_email );
+	/*
+	 * Hand the whole flow to core instead of rebuilding it here.
+	 * retrieve_password() resolves the user, honours the allow_password_reset
+	 * filter (membership plugins rely on it to keep some accounts from
+	 * resetting), generates the key and sends mail through the
+	 * retrieve_password_message / _title / _headers filters - all of which a
+	 * hand-rolled wp_mail() silently skipped.
+	 */
+	$result = retrieve_password( $user_or_email );
+
+	if ( true === $result ) {
+		majestic_tube_ajax_membership_success( __( 'A password reset link has been sent to your email address.', 'majestic-tube' ), 'p' );
 	}
 
-	if ( ! $user ) {
+	if ( is_wp_error( $result ) && 'invalidcombo' === $result->get_error_code() ) {
 		// Do not reveal whether the account exists, but retain the original
 		// `{ error: false, message: HTML }` success shape.
 		majestic_tube_ajax_membership_success( __( 'If an account exists, a reset link has been sent.', 'majestic-tube' ), 'p' );
 	}
 
-	$key = get_password_reset_key( $user );
-
-	if ( is_wp_error( $key ) ) {
-		majestic_tube_ajax_error( __( 'Could not create reset key. Please try again.', 'majestic-tube' ) );
+	if ( is_wp_error( $result ) && 'no_password_reset' === $result->get_error_code() ) {
+		// A deliberate block (allow_password_reset filter): say so plainly,
+		// the same way core's lost-password flow does.
+		majestic_tube_ajax_error( $result->get_error_message() );
 	}
 
-	$reset_url = network_site_url( "wp-login.php?action=rp&key=$key&login=" . rawurlencode( $user->user_login ), 'login' );
-
-	$subject = sprintf( '[%s] %s', wp_specialchars_decode( get_option( 'blogname' ), ENT_QUOTES ), __( 'Password Reset', 'majestic-tube' ) );
-	$body    = sprintf(
-		/* translators: 1: site name, 2: reset URL. */
-		__( 'Someone requested a password reset for %1$s. To set a new password, visit: %2$s', 'majestic-tube' ),
-		get_option( 'blogname' ),
-		$reset_url
-	);
-
-	wp_mail( $user->user_email, $subject, $body );
-
-	majestic_tube_ajax_membership_success( __( 'A password reset link has been sent to your email address.', 'majestic-tube' ), 'p' );
+	majestic_tube_ajax_error( __( 'Could not create reset key. Please try again.', 'majestic-tube' ) );
 }
 add_action( 'wp_ajax_nopriv_wpst_reset_password', 'majestic_tube_ajax_reset_password' );
 
