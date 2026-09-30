@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.16
+ * @version 2.2.17
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -196,20 +196,46 @@ function majestic_tube_get_legal_page( $definition ) {
 	}
 
 	// WordPress can point the privacy-policy setting at a custom page. Reuse
-	// that page instead of creating a second privacy document.
+	// that page instead of creating a second privacy document - but only
+	// when it is actually viewable. A trashed setting must fall through to
+	// the slug lookup, or the footer would link at a page nobody can open.
 	if ( 'privacy-policy' === $definition['slug'] ) {
 		$configured_id = absint( get_option( 'wp_page_for_privacy_policy' ) );
 
 		if ( $configured_id ) {
 			$configured_page = get_post( $configured_id );
 
-			if ( $configured_page && isset( $configured_page->ID ) && ( ! isset( $configured_page->post_type ) || 'page' === $configured_page->post_type ) ) {
+			if ( $configured_page && isset( $configured_page->ID ) && ( ! isset( $configured_page->post_type ) || 'page' === $configured_page->post_type ) && majestic_tube_legal_page_is_viewable( $configured_page ) ) {
 				return $configured_page;
 			}
 		}
 	}
 
 	return get_page_by_path( $definition['slug'] );
+}
+
+/**
+ * Whether a legal-page row is a page visitors can actually open.
+ *
+ * get_page_by_path() and get_page_by_title() match rows in any status, so a
+ * trashed or draft copy looks "found" unless somebody checks. Only publish
+ * (and private) count here. A row without a status field - which real
+ * WordPress always sets - is treated as viewable so unit stubs that predate
+ * the field keep working.
+ *
+ * @param object|false $page Page row.
+ * @return bool
+ */
+function majestic_tube_legal_page_is_viewable( $page ) {
+	if ( ! $page || ! isset( $page->ID ) ) {
+		return false;
+	}
+
+	if ( ! isset( $page->post_status ) ) {
+		return true;
+	}
+
+	return in_array( $page->post_status, array( 'publish', 'private' ), true );
 }
 
 /**
@@ -223,13 +249,20 @@ function majestic_tube_get_legal_page( $definition ) {
  * simply on its old name, and recreating it would leave the site with two
  * pages for one document.
  *
- * @param array $definition Legal page definition.
- * @return object|false Page object, or false when the page does not exist.
+ * Only viewable pages count: a trashed copy is reported missing so the
+ * welcome screen offers the restore, and the restore then untrashes that
+ * same copy instead of inserting a second one. An exact title match is the
+ * last resort, for the copy a previous duplicate left behind under a
+ * suffixed slug (2257-2) - finding it stops the third copy.
+ *
+ * @param array  $definition Legal page definition.
+ * @param string $title      Page title, for the renamed-copy fallback.
+ * @return object|false Page object, or false when no viewable page exists.
  */
-function majestic_tube_find_legal_page( $definition ) {
+function majestic_tube_find_legal_page( $definition, $title = '' ) {
 	$page = majestic_tube_get_legal_page( $definition );
 
-	if ( $page && isset( $page->ID ) ) {
+	if ( majestic_tube_legal_page_is_viewable( $page ) ) {
 		return $page;
 	}
 
@@ -238,8 +271,16 @@ function majestic_tube_find_legal_page( $definition ) {
 	if ( $legacy_slug ) {
 		$legacy = get_page_by_path( $legacy_slug );
 
-		if ( $legacy && isset( $legacy->ID ) ) {
+		if ( majestic_tube_legal_page_is_viewable( $legacy ) ) {
 			return $legacy;
+		}
+	}
+
+	if ( '' !== $title && function_exists( 'get_page_by_title' ) ) {
+		$by_title = get_page_by_title( $title, OBJECT, 'page' );
+
+		if ( majestic_tube_legal_page_is_viewable( $by_title ) ) {
+			return $by_title;
 		}
 	}
 
@@ -256,7 +297,7 @@ function majestic_tube_legal_page_status() {
 	$missing = array();
 
 	foreach ( majestic_tube_legal_pages() as $title => $definition ) {
-		$page = majestic_tube_find_legal_page( $definition );
+		$page = majestic_tube_find_legal_page( $definition, $title );
 
 		if ( $page && isset( $page->ID ) ) {
 			$found[ $title ] = (int) $page->ID;
@@ -292,6 +333,16 @@ function majestic_tube_migrate_2257_page( $definition ) {
 
 	$legacy_id = (int) $legacy->ID;
 
+	/*
+	 * A trashed or draft canonical still occupies the slug: renaming the
+	 * legacy page onto it would make WordPress mint a suffixed 2257-2
+	 * second copy. Leave the legacy page serving the document instead -
+	 * the status check counts it as found, so nothing else is created.
+	 */
+	if ( $canonical && isset( $canonical->ID ) && ! majestic_tube_legal_page_is_viewable( $canonical ) ) {
+		return $legacy;
+	}
+
 	if ( ! $canonical && function_exists( 'wp_update_post' ) ) {
 		// Supplying only the name preserves the page ID and all administrator
 		// edits to the title, content, status, and metadata.
@@ -318,21 +369,119 @@ function majestic_tube_migrate_2257_page( $definition ) {
 }
 
 /**
- * Get or create one built-in legal page, preserving existing page content.
+ * Repair a trashed, draft, or renamed legal-page copy instead of duplicating it.
+ *
+ * Deleting a page sends it to the trash, where the slug lookup cannot tell it
+ * apart from a page that never existed - so the old code inserted a fresh
+ * copy and the site ended up with two 18 USC 2257 pages. Trashing is also
+ * never a deliberate "keep" state for these infrastructure pages: the footer
+ * legal menu links at them, and a trashed target is a dead link.
  *
  * @param string $title      Page title/menu label.
  * @param array  $definition Legal page definition.
+ * @param bool   $publish    Publish drafts as well as untrashing. The welcome
+ *                           screen restore passes true (the administrator
+ *                           explicitly asked for the page back); background
+ *                           setup passes false and reuses a draft untouched.
+ * @return int Page ID of the repaired copy, or 0 when none exists.
+ */
+function majestic_tube_repair_unviewable_legal_page( $title, $definition, $publish = false ) {
+	$candidates = array();
+	$seen       = array();
+
+	foreach ( array( 'slug', 'legacy_slug' ) as $key ) {
+		if ( empty( $definition[ $key ] ) ) {
+			continue;
+		}
+
+		$found = get_page_by_path( $definition[ $key ] );
+
+		if ( $found && isset( $found->ID ) && ! isset( $seen[ (int) $found->ID ] ) ) {
+			$seen[ (int) $found->ID ] = true;
+			$candidates[]             = (int) $found->ID;
+		}
+	}
+
+	if ( '' !== $title && function_exists( 'get_page_by_title' ) ) {
+		$by_title = get_page_by_title( $title, OBJECT, 'page' );
+
+		if ( $by_title && isset( $by_title->ID ) && ! isset( $seen[ (int) $by_title->ID ] ) ) {
+			$candidates[] = (int) $by_title->ID;
+		}
+	}
+
+	foreach ( $candidates as $candidate_id ) {
+		$candidate = get_post( $candidate_id );
+
+		if ( ! $candidate || ! isset( $candidate->ID ) ) {
+			continue;
+		}
+
+		$status = isset( $candidate->post_status ) ? $candidate->post_status : '';
+
+		if ( 'trash' === $status && function_exists( 'wp_untrash_post' ) ) {
+			wp_untrash_post( $candidate_id );
+
+		$refreshed = get_post( $candidate_id );
+
+		if ( $refreshed && isset( $refreshed->ID ) ) {
+			$candidate = $refreshed;
+			$status    = isset( $candidate->post_status ) ? $candidate->post_status : '';
+		}
+		}
+
+		if ( $publish && in_array( $status, array( 'draft', 'pending' ), true ) && function_exists( 'wp_update_post' ) ) {
+			wp_update_post(
+				array(
+					'ID'          => $candidate_id,
+					'post_status' => 'publish',
+				),
+			true
+			);
+		}
+
+		// Whatever remains - untrashed, published, or a draft the caller
+		// chose not to publish - is the page. Returning it is what stops
+		// the insert below from minting the second copy.
+		return $candidate_id;
+	}
+
+	return 0;
+}
+
+/**
+ * Get or create one built-in legal page, preserving existing page content.
+ *
+ * A page that exists in any form - live, trashed, draft, or sitting under a
+ * suffixed slug from an earlier duplicate - is reused, never duplicated. Only
+ * a page that exists nowhere is created, and a created page is explicitly put
+ * on the default page template so it renders through page.php like any
+ * ordinary prose page.
+ *
+ * @param string $title               Page title/menu label.
+ * @param array  $definition          Legal page definition.
+ * @param bool   $publish_unviewable  Publish drafts as well as untrashing.
  * @return int Page ID, or 0 on failure.
  */
-function majestic_tube_get_or_create_legal_page( $title, $definition ) {
-	$page = ! empty( $definition['legacy_slug'] )
-		? majestic_tube_migrate_2257_page( $definition )
-		: majestic_tube_get_legal_page( $definition );
+function majestic_tube_get_or_create_legal_page( $title, $definition, $publish_unviewable = false ) {
+	$live = majestic_tube_find_legal_page( $definition, $title );
 
-	if ( $page && isset( $page->ID ) ) {
-		$page_id = (int) $page->ID;
+	if ( $live && isset( $live->ID ) ) {
+		$page_id = (int) $live->ID;
 	} else {
-		$page_id = majestic_tube_create_page( $title, '', $definition['content'], $definition['slug'] );
+		$page_id = majestic_tube_repair_unviewable_legal_page( $title, $definition, $publish_unviewable );
+
+		if ( ! $page_id ) {
+			$page = ! empty( $definition['legacy_slug'] )
+				? majestic_tube_migrate_2257_page( $definition )
+				: majestic_tube_get_legal_page( $definition );
+
+			if ( majestic_tube_legal_page_is_viewable( $page ) ) {
+				$page_id = (int) $page->ID;
+			} else {
+				$page_id = majestic_tube_create_page( $title, 'default', $definition['content'], $definition['slug'] );
+			}
+		}
 	}
 
 	if ( $page_id ) {
@@ -1309,7 +1458,7 @@ function majestic_tube_handle_legal_page_restore() {
 			continue;
 		}
 
-		if ( majestic_tube_get_or_create_legal_page( $title, $definitions[ $title ] ) ) {
+		if ( majestic_tube_get_or_create_legal_page( $title, $definitions[ $title ], true ) ) {
 			$restored[] = $title;
 		} else {
 			$failed[] = $title;
