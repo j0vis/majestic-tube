@@ -454,6 +454,7 @@
         <li><a href="#taxonomy">Actors and categories</a></li>
         <li><a href="#player">Player settings</a></li>
         <li><a href="#membership">Members and submissions</a></li>
+        <li><a href="#seo-workspace">SEO workspace</a></li>
         <li><a href="#customizer">Customizer settings</a></li>
         <li><a href="#appearance">Menus, widgets, and content</a></li>
         <li><a href="#reports">Reports and moderation</a></li>
@@ -587,6 +588,7 @@
           <li>Configure member registration if you plan to accept submissions.</li>
           <li>Review and customize the legal pages for your actual operation.</li>
           <li>Test search, video reports, password reset, and email delivery.</li>
+          <li>Open the SEO workspace: name the homepage for search and confirm the collection index has finished building.</li>
         </ul>
       </section>
 
@@ -622,7 +624,11 @@
               </tr>
               <tr>
                 <td><span class="path">Appearance → Customize</span></td>
-                <td>Control listings, the player, branding, sharing, submission rules, SEO fields, custom code, and mobile presentation.</td>
+                <td>Control listings, the player, branding, sharing, submission rules, social handles, verification tags, custom code, and mobile presentation.</td>
+              </tr>
+              <tr>
+                <td><span class="path">SEO</span></td>
+                <td>Everything about how the site appears in search: search appearance on videos and pages, collection wording, the collection index, CSV imports, and the homepage search details. See <a href="#seo-workspace">Theme-native SEO workspace</a>.</td>
               </tr>
               <tr>
                 <td><span class="path">Appearance → Menus</span></td>
@@ -894,7 +900,7 @@
           </table>
         </div>
         <p>Open a term, choose <strong>Edit</strong>, fill in either field, and save. The same two boxes are on the <strong>Add New</strong> form, so a term can be named correctly from the moment it exists rather than being backfilled later. If a term already has a written description, its opening words appear as grey placeholder text inside the Meta description box. That is a reminder, not a saved value &mdash; only what you type is stored.</p>
-        <p>A character counter sits under each box: grey when empty, green while you are inside the recommended length, red once you are past it. Roughly 60 characters for a title and 160 for a description. A title written beyond the point where Google truncates it has its tail thrown away, so the counter is there to catch that rather than to enforce a rule.</p>
+        <p>A character counter sits under each box. It is informational, not an SEO score or a hard limit. Search engines may rewrite or truncate titles and descriptions based on the query and device.</p>
         <p><strong>The title replaces the whole browser title; it is not added to one.</strong> Write <span class="path">Best comedy videos</span> and that is the entire tab &mdash; there is no <span class="path">Category Archives:</span> prefix in front of it and no site name after it. Put the site name in yourself if you want it there.</p>
         <p>Both fields are opt-in and silent. An empty field stores nothing at all, so an existing site keeps exactly the output it had before, there is no setting to switch on, and no page changes until you type something. Clearing a field later deletes it rather than leaving an empty value behind.</p>
         <p>The description deliberately reaches the search result <em>and</em> the Facebook and X cards. A description that only reached one of those three would still leave the share preview showing something else, which is the kind of mismatch nobody notices until it is pointed out.</p>
@@ -903,6 +909,7 @@
         </div>
         <p>Saving is nonce-verified and limited to users who can manage categories. WordPress&rsquo;s own <strong>Quick Edit</strong> and bulk actions do not post these fields, so they leave a term&rsquo;s saved title and description exactly as they were rather than silently wiping them.</p>
         <p>Fields are only attached to taxonomies that actually exist on your site, so a child theme that removed one is unaffected.</p>
+        <p>The collections the theme builds from your catalogue &mdash; Actors by category, Actor pairings and the rest &mdash; are worded in one place instead, in <a href="#seo-workspace">Theme-native SEO workspace</a>.</p>
 
         <h3>Find and fill in the missing ones</h3>
         <p>Naming sixty categories one screen at a time is a job nobody finishes, so the term list has two things that help.</p>
@@ -1102,8 +1109,135 @@
         <p>Set <strong>Enable spam protection</strong> to <strong>Off</strong>. The widget disappears from both forms and Cloudflare&rsquo;s script stops loading; your Turnstile keys stay saved, so switching back on needs no work.</p>
       </section>
 
-      <section id="customizer">
+      <section id="seo-workspace">
         <p class="eyebrow">Theme preferences</p>
+        <h2>Theme-native SEO workspace</h2>
+        <p class="section-intro">Majestic Tube has its own SEO workspace, so no plugin is required to describe your pages. Open <span class="path">SEO</span> in the WordPress dashboard, just below <span class="path">Appearance</span>. It is five tabs, and none of them asks you for a keyword or scores a page.</p>
+
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Tab</th>
+                <th scope="col">What it is for</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Overview</strong></td><td>How many eligible collection pages the discovery index holds, when it last finished, and a button to start or advance a build.</td></tr>
+              <tr><td><strong>Collections</strong></td><td>One row per generated collection: whether it is allowed in search results, how many pages it currently has, and a link into its wording.</td></tr>
+              <tr><td><strong>Templates</strong></td><td>The wording for one collection across every page that matches it, with a preview and ten restorable versions.</td></tr>
+              <tr><td><strong>Data sources</strong></td><td>Links to your own catalogue screens, plus a validated CSV import for term titles and descriptions.</td></tr>
+              <tr><td><strong>Settings</strong></td><td>The homepage search title and meta description, and a link back to the Customizer for social handles and verification tags.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The count on <strong>Overview</strong> is the number of eligible pages in the theme&rsquo;s own index. It is not a figure from Google, and nothing in this workspace connects to a Google account.</p>
+
+        <h3>Search appearance on a video or a page</h3>
+        <p>Videos and ordinary pages carry a <strong>Search appearance</strong> box beneath the editor. Leave it alone and the theme supplies the defaults &mdash; the post title for the browser tab, the opening of the content for the description. Type into either field to override it, and open <strong>Advanced</strong> for a noindex switch and a canonical URL override that normally stays empty.</p>
+        <p>Categories, tags, actors, studios and series keep their own per-term fields on the term screen, with the same automatic defaults and the bulk editor described in <a href="#taxonomy">Name a category, actor, or archive page for search engines</a>.</p>
+        <p>Search engines rewrite titles and truncate descriptions according to the query and the device. The character counters are informational. There is no score, no keyword density and no minimum word count anywhere in this workspace &mdash; a collection becomes a page because the videos exist, not because it reads long enough.</p>
+
+        <h3>What the four collections are</h3>
+        <p>Collections are landing pages the theme builds from combinations that already exist in your catalogue. Nothing is created as a post, and no second copy of your videos exists.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Collection</th>
+                <th scope="col">The page it builds</th>
+                <th scope="col">Videos it needs</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Actors by category</td><td><span class="path">/actor/amber-waves/comedy/</span></td><td>6</td></tr>
+              <tr><td>Actor pairings</td><td><span class="path">/actor/amber-waves/with/rio-santos/</span></td><td>4</td></tr>
+              <tr><td>Actors by duration</td><td><span class="path">/actor/amber-waves/length/short/</span></td><td>3</td></tr>
+              <tr><td>Categories by tag</td><td><span class="path">/category/comedy/featured/</span></td><td>5</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>A page is only built when that many published videos genuinely share the combination, so a combination nobody used never becomes an empty page for a crawler to find. A pairing always prints in the same order whichever actor a visitor arrives from, so the two directions of <span class="path">/actor/amber-waves/with/rio-santos/</span> are one page rather than two competing ones.</p>
+        <p>Studios and series are deliberately not collections here. They stay ordinary WordPress taxonomy archives, edited on their own term screens, and they remain in WordPress&rsquo;s taxonomy sitemap rather than being submitted a second time by the theme.</p>
+
+        <h3>Wording for a whole collection</h3>
+        <p><strong>Templates</strong> edits one collection at a time, and four fields do the work:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Field</th>
+                <th scope="col">Where it appears</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Visible heading</strong></td><td>The <span class="setting">h1</span> on the collection page.</td></tr>
+              <tr><td><strong>Visible introduction</strong></td><td>One optional line beneath the heading.</td></tr>
+              <tr><td><strong>Search title</strong></td><td>The browser tab, and the blue title on a Google result.</td></tr>
+              <tr><td><strong>Meta description</strong></td><td>The snippet under a Google result, and the text on a Facebook or X share card.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Every collection accepts <span class="setting">{site.name}</span> and <span class="setting">{video_count}</span>, plus the names of the terms in its URL. Each one adds its own:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Collection</th>
+                <th scope="col">Variables</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Actors by category</td><td><span class="setting">{actor.name}</span>, <span class="setting">{category.name}</span></td></tr>
+              <tr><td>Actor pairings</td><td><span class="setting">{actor.name}</span>, <span class="setting">{actor2.name}</span></td></tr>
+              <tr><td>Actors by duration</td><td><span class="setting">{actor.name}</span>, <span class="setting">{band.name}</span></td></tr>
+              <tr><td>Categories by tag</td><td><span class="setting">{category.name}</span>, <span class="setting">{tag.name}</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Click a variable to insert it into the field you were last typing in. Anything the theme does not recognise &mdash; a misspelled variable, an unbalanced brace &mdash; is rejected with a message instead of being saved, and no code of any kind is ever executed from a template. The preview is illustrative rather than a promise, because Google may show different text.</p>
+        <p>Saving changes every matching page at once, which is why the confirmation box is deliberate. <strong>Previous versions</strong> keeps the last ten saved templates per collection and restores any of them.</p>
+        <p>The same switch that holds the wording also decides whether the collection may appear in search results. Turning it off adds <span class="setting">noindex</span> to the collection&rsquo;s pages and drops it from browse listings and the XML sitemap &mdash; while every URL a visitor may already have bookmarked keeps working. An excluded collection is not deleted, and switching it back on restores it.</p>
+
+        <h3>The discovery index</h3>
+        <p>A page has to be known before anything can list it, so the theme keeps a rebuildable index of eligible collection pages in a database table of its own. <strong>Overview</strong> reports its size, when it last completed, and whether a build is part-way through.</p>
+        <p>The first build starts after an admin visit and proceeds in scheduled batches of ten terms. WordPress runs those tasks through <span class="setting">wp-cron.php</span>, which only fires when a request reaches the site &mdash; on a quiet site that can be days away. Install a real scheduler, or press <strong>Refresh collection index</strong> to advance a build by hand. A build never replaces a good index with a half-finished one: the last completed generation stays available throughout, and a failed build keeps the old one rather than clearing it. A daily pass marks the index as needing a rebuild, so a catalogue change made outside the theme&rsquo;s own hooks is still picked up.</p>
+        <p>Public browse pages and the sitemap read from that index with a bounded query instead of scanning every term on every request. This is also why a count on <strong>Overview</strong> settles a moment after you edit your catalogue rather than instantly &mdash; it is a batch job, and it says so.</p>
+
+        <h3>Importing term details from a CSV</h3>
+        <p><strong>Data sources &rarr; Import term search details</strong> accepts a file whose header row is exactly:</p>
+        <pre><code>taxonomy,slug,title,description</code></pre>
+        <ul>
+          <li>At most 100 rows and 256 KB per upload.</li>
+          <li>Every row must name an existing term you are allowed to edit; a missing one fails the whole file instead of half-importing it.</li>
+          <li><strong>Validate and preview</strong> lists every row before anything is written, and that preview expires after 15 minutes.</li>
+          <li>A blank title or description clears that override and returns the term to its automatic default.</li>
+          <li>Nothing is created or deleted: no terms, no videos, no URLs.</li>
+          <li>The import is refused outright while an SEO plugin owns these fields.</li>
+        </ul>
+        <p>Use it for the long tail &mdash; the forty tags nobody will ever open by hand &mdash; not as a way of bulk-generating text.</p>
+
+        <h3>Homepage search details</h3>
+        <p><strong>Settings</strong> holds two independent fields: a homepage search title and a homepage meta description. Leave either empty and the theme falls back to the site title, and to the visible homepage introduction written in the Customizer. The two stay separate on purpose: the introduction is page content a visitor reads, and the search description is only what a search engine may choose to show instead.</p>
+
+        <h3>When an SEO plugin is installed</h3>
+        <p>If Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework or Slim SEO is active, the theme detects it and stops printing titles and descriptions of its own:</p>
+        <ul>
+          <li>The per-term and per-post search fields disappear rather than fighting the plugin for the same <span class="setting">&lt;title&gt;</span> tag.</li>
+          <li>The CSV import is disabled, because it would write fields that plugin is not reading.</li>
+          <li>The template editor keeps working, because collection pages are the theme&rsquo;s own virtual URLs and the index behind them has to keep running either way.</li>
+        </ul>
+        <p>Nothing is deleted when a plugin is switched on or off, and switching the theme away leaves every saved value in the database. Only these screens, the virtual collection routes and the index belong to Majestic Tube, so they stop running when it is not the active theme.</p>
+
+        <h3>Coming from the old Customizer controls</h3>
+        <p>Collections you had switched off in an earlier release are carried into the new <strong>Collections</strong> tab still switched off, rather than quietly re-enabled. That happens once, the first time you open the admin after updating. Customizer settings that an earlier release had already deleted are gone for good and cannot be recovered.</p>
+        <div class="note">
+          Canonical URLs are self-referencing on real pagination, and a noindexed collection is left out of the sitemap entirely. Studio and series archives are not in the theme&rsquo;s own sitemap provider, so they are submitted once by WordPress rather than twice.
+        </div>
+      </section>
+
+      <section id="customizer">
+        <p class="eyebrow">Appearance and settings</p>
         <h2>Customizer Settings</h2>
         <p class="section-intro">Open <span class="path">Appearance &rarr; Customize</span>. The settings are grouped into panels, and each panel holds one or more sections. Every setting is filed under the page it affects, so the homepage and the listing archives sit in one place and the single video page sits in another.</p>
 
@@ -1132,7 +1266,7 @@
               <tr><td>Video Submission</td><td>The submission form, the links that lead to it, and which fields are required.</td></tr>
               <tr><td>Advertising</td><td>In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from <span class="path">Appearance &rarr; Widgets</span>.</td></tr>
               <tr><td rowspan="4">SEO &amp; Analytics</td><td>SEO &amp; Social</td><td>The Facebook app ID, the X/Twitter handle, the playable card URL, and verification tags.</td></tr>
-              <tr><td>Homepage SEO</td><td>Where the homepage title sits, and the description printed under it and again at the foot of the grid.</td></tr>
+              <tr><td>Homepage SEO</td><td>Where the visible homepage heading sits and the introduction printed once beneath it. Search metadata is in the <a href="#seo-workspace">SEO workspace</a>.</td></tr>
               <tr><td>Archive Page SEO</td><td>The line shown on each category and actor card, and whether the category and tag descriptions go above or below the list. The per-term titles and descriptions are not here &mdash; see <a href="#taxonomy">Name a category, actor, or archive page for search engines</a>.</td></tr>
               <tr><td>Custom Code</td><td>Analytics code in the page head, extra scripts before the closing body tag, and scripts for mobile visitors only.</td></tr>
             </tbody>
@@ -1255,7 +1389,7 @@
         <p>Leave the field empty to keep the large image card. The page you point at must be served over HTTPS, must return nothing but the player, and should stay under a few hundred kilobytes: X loads it in a card of roughly 435 pixels wide, so a full site template with a header, sidebar, and footer would look wrong inside the card.</p>
 
         <h3>SEO &amp; Analytics &rarr; Homepage SEO</h3>
-        <p>The two settings that decide what the front page says to a crawler. They used to sit in different panels &mdash; the title position with the homepage layout settings, the description among the social tags &mdash; so they are now together.</p>
+        <p>These controls set the visible homepage introduction and where it appears. The separate search title and meta description are under <span class="path">SEO &rarr; Settings</span> in the dashboard, covered in <a href="#seo-workspace">Theme-native SEO workspace</a>.</p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -1266,15 +1400,15 @@
             </thead>
             <tbody>
               <tr><td><strong>Homepage title position</strong></td><td>Whether the homepage title and its description sit above the video grid or below it.</td></tr>
-              <tr><td><strong>Homepage description</strong></td><td>A short paragraph describing the site, printed under that title and again at the very bottom of the homepage.</td></tr>
+              <tr><td><strong>Homepage description</strong></td><td>A short visible introduction, printed once beneath the homepage heading. It is the fallback meta description unless overridden in SEO &rarr; Settings.</td></tr>
             </tbody>
           </table>
         </div>
-        <p>Above the grid is the default, because it is the only position that prints the description twice: once near the title, where a crawler learns what the page is before it reaches the links, and once at the end, where it restates the page after the grid. Below the grid prints it once, at the bottom. Either way it is the same field, so the two copies cannot drift apart.</p>
-        <p>The homepage title itself is not here. It is a line of text in a layout, so it stays under <span class="path">Customize &rarr; Homepage &amp; Listings &rarr; Homepage</span>.</p>
+        <p>Above the grid is the default. Below the grid moves the heading and introduction together. Both positions print one heading and one introduction; duplicating a paragraph is not an automatic search benefit.</p>
+        <p>The visible homepage heading remains under <span class="path">Customize &rarr; Homepage &amp; Listings &rarr; Homepage</span>. It is meaningful page content, distinct from the browser/search title.</p>
 
         <h3>SEO &amp; Analytics &rarr; Archive Page SEO</h3>
-        <p>The wording on the category, tag and actor pages, gathered in one place because it is the only thing on those pages a search engine or a share card ever reads.</p>
+        <p>Shared archive-card wording and description placement. Individual terms have their own search fields; generated collections have templates in the <a href="#seo-workspace">Theme-native SEO workspace</a>.</p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -1629,6 +1763,29 @@
         </details>
 
         <details>
+          <summary>The collection index has not finished building</summary>
+          <div>
+            <p>The index is built by WordPress scheduled tasks in batches of ten terms, and those tasks only run when a request reaches the site. On a quiet site that can be days. Open <span class="path">SEO &rarr; Overview</span> and choose <strong>Refresh collection index</strong> as often as you like: each press advances the build by another batch and leaves the last completed generation serving pages throughout. A real scheduler for <span class="setting">wp-cron.php</span> saves you having to remember.</p>
+            <p>The same applies to a count sitting at zero on a site that certainly has videos. The first build only starts after your first visit to wp-admin with this version, and the Overview screen says so until it has run.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>A generated collection page returns not found</summary>
+          <div>
+            <p>A combination only becomes a page once enough published videos share it: 6 for an actor in a category, 4 for an actor pairing, 3 for a duration band, 5 for a tag in a category. Below that the URL is deliberately a not-found response rather than an empty listing. <span class="path">SEO &rarr; Collections</span> shows how many pages each collection currently has, and <span class="path">SEO &rarr; Overview</span> says when that count was last confirmed against your catalogue.</p>
+            <p>A collection you switched off from search results still serves visitors normally. If the URL fails for a visitor too, the combination has dropped below its threshold, or one of its terms has been renamed or deleted.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>The SEO menu is missing</summary>
+          <div>
+            <p>It sits with the other top-level menus for any user who can edit theme options. If you cannot see it, confirm Majestic Tube is the active theme and that your account still has that capability &mdash; a plugin that removes top-level menu items is the other thing worth ruling out.</p>
+          </div>
+        </details>
+
+        <details>
           <summary>A category page still shows the old title on Google</summary>
           <div>
             <p>The page itself is almost certainly correct &mdash; check it by viewing source and searching for <span class="path">&lt;title&gt;</span>. Google caches results and re-crawls on its own schedule, so a change can take days to appear, and the search snippet may keep the older description until it does. Use Search Console&rsquo;s <strong>URL Inspection &rarr; Request Indexing</strong> to ask for a fresh crawl. A caching plugin or page cache in front of WordPress is the other thing worth ruling out.</p>
@@ -1640,6 +1797,12 @@
       <section id="faq">
         <p class="eyebrow">Common questions</p>
         <h2>Frequently Asked Questions</h2>
+
+        <h3>Do I need an SEO plugin for this theme?</h3>
+        <p>No. Majestic Tube includes its own <a href="#seo-workspace">SEO workspace</a> &mdash; search appearance on videos and pages, collection wording, the collection index, CSV imports and the homepage search details &mdash; and nothing has to be installed for it to work. If you already run Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework or Slim SEO, the theme detects it and steps aside from titles and descriptions rather than competing for the same <span class="setting">&lt;title&gt;</span> tag. Switch the plugin off and your own fields take over again; nothing is deleted either way.</p>
+
+        <h3>Are there scores, keywords, or minimum word counts?</h3>
+        <p>No, and that is deliberate. Nothing in the workspace asks for a target keyword, counts keyword density, grades a page out of 100, or refuses text below a length. A collection becomes a page because the videos exist and enough of them share the combination; the wording fields describe what is already there rather than trying to reach a target. Search engines may still rewrite titles and truncate descriptions, which is why the counters are labelled as information and not as something to hit.</p>
 
         <h3>Can I use this on an existing WordPress site?</h3>
         <p>Yes. Back up the site first, install the theme, activate it, and preview the main pages before switching menus or publishing new content. Existing posts remain in WordPress, but some existing theme-specific menu and content settings may need to be assigned again.</p>
@@ -1776,6 +1939,10 @@
               <tr><td>Add an actor</td><td>Actors → Add Actor</td></tr>
               <tr><td>Add a category image</td><td>Videos → Video Categories → Edit Category</td></tr>
               <tr><td>Name a page for search engines</td><td>Videos → Video Categories → Edit Category</td></tr>
+              <tr><td>Name the homepage for search engines</td><td>SEO → Settings</td></tr>
+              <tr><td>Edit a collection&rsquo;s wording</td><td>SEO → Collections</td></tr>
+              <tr><td>Check or advance the collection index</td><td>SEO → Overview</td></tr>
+              <tr><td>Import term titles in bulk</td><td>SEO → Data sources</td></tr>
               <tr><td>Review visitor reports</td><td>Videos → Reported Videos</td></tr>
               <tr><td>Change theme settings</td><td>Appearance → Customize</td></tr>
               <tr><td>Manage navigation</td><td>Appearance → Menus</td></tr>

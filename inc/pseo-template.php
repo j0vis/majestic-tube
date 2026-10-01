@@ -12,7 +12,7 @@
  * page and the reason those pages are `noindex`.
  *
  * @package Majestic Tube
- * @version 2.2.25
+ * @version 2.2.26
  */
 
 defined( 'ABSPATH' ) || exit;

@@ -12,7 +12,7 @@
  * It is `noindex, follow`. It is not a ranking target; it is a map.
  *
  * @package Majestic Tube
- * @version 2.2.25
+ * @version 2.2.26
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -30,10 +30,9 @@ $per_page = 60;
 // URL on a map page is a dead end for a visitor and a crawl trap for a bot.
 $is_index = ! $group || ! isset( $groups[ $group ] );
 
-$facets      = $is_index ? array() : majestic_tube_browse_group_facets( $group, 0, $letter );
-$total       = count( $facets );
+$total       = $is_index ? 0 : majestic_tube_browse_group_count( $group, $letter );
 $total_pages = $total > $per_page ? (int) ceil( $total / $per_page ) : 1;
-$page_facets = array_slice( $facets, ( $paged - 1 ) * $per_page, $per_page );
+$page_facets = $is_index ? array() : majestic_tube_browse_group_facets( $group, $per_page, $letter, ( $paged - 1 ) * $per_page );
 ?>
 
 <div id="primary" class="content-area browse-area">
@@ -147,7 +146,7 @@ $page_facets = array_slice( $facets, ( $paged - 1 ) * $per_page, $per_page );
 					}
 
 					if ( $paged > 1 ) :
-						$prev = ( 1 === $paged ) ? $base : $base . 'page/' . ( $paged - 1 ) . '/';
+						$prev = ( 2 === $paged ) ? $base : $base . 'page/' . ( $paged - 1 ) . '/';
 						?>
 						<a class="browse-page-prev" rel="prev" href="<?php echo esc_url( $prev ); ?>"><?php esc_html_e( 'Previous', 'majestic-tube' ); ?></a>
 					<?php endif; ?>

@@ -10,7 +10,7 @@
  * (majestic_tube_disable_schema).
  *
  * @package Majestic Tube
- * @version 2.2.25
+ * @version 2.2.26
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -20,8 +20,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Each item is array( 'label' => string, 'url' => string ). The final item -
  * the current page - has an empty url, which the renderer prints as the
- * .breadcrumb-current span and the JSON-LD omits entirely (Google rejects
- * self-referencing trail items).
+ * .breadcrumb-current span. In JSON-LD that last node may omit its item URL.
  *
  * @return array<int, array{label:string,url:string}>
  */
@@ -132,9 +131,8 @@ function majestic_tube_should_output_schema() {
 /**
  * Print BreadcrumbList JSON-LD on every non-front-page view.
  *
- * The current item is omitted: Google's BreadcrumbList documentation wants
- * only ancestors in the trail, and a self-referencing last node makes the
- * graph fail the rich-results test.
+ * The current item is included with its name and position, but no item URL.
+ * This preserves the visible hierarchy on ordinary two-node archive trails.
  *
  * @return void
  */
@@ -147,7 +145,7 @@ function majestic_tube_output_breadcrumb_schema() {
 	$items = array_filter(
 		$items,
 		function ( $item ) {
-			return ! empty( $item['url'] ) && '' !== trim( (string) $item['label'] );
+			return '' !== trim( (string) $item['label'] );
 		}
 	);
 
@@ -160,12 +158,13 @@ function majestic_tube_output_breadcrumb_schema() {
 
 	foreach ( $items as $item ) {
 		$index++;
-		$positions[] = array(
+		$node = array(
 			'@type'    => 'ListItem',
 			'position' => $index,
 			'name'     => wp_strip_all_tags( (string) $item['label'] ),
-			'item'     => esc_url_raw( $item['url'] ),
 		);
+		if ( ! empty( $item['url'] ) ) { $node['item'] = esc_url_raw( $item['url'] ); }
+		$positions[] = $node;
 	}
 
 	$schema = array(
@@ -181,7 +180,7 @@ function majestic_tube_output_breadcrumb_schema() {
 	 */
 	$schema = (array) apply_filters( 'majestic_tube_breadcrumb_schema', $schema );
 
-	$json = wp_json_encode( $schema, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
+	$json = wp_json_encode( $schema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
 
 	if ( ! $json ) {
 		return;

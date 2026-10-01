@@ -30,9 +30,7 @@ get_header();
 		$title_position = majestic_tube_get_option( 'wpst-options', 'homepage-title-desc-position', 'top' );
 		$title_above    = ( 'top' === $title_position );
 
-		// SEO text: printed both under the homepage title and again at the foot
-		// of the page, so the description is present in the markup whichever
-		// end a reader or a crawler reaches first.
+		// One visible introduction. Repeating it does not add search value.
 		$seo_text = trim( (string) majestic_tube_get_option( 'wpst-options', 'seo-footer-text', '' ) );
 		?>
 
@@ -82,7 +80,7 @@ get_header();
 			?>
 			<header class="page-header homepage-title-block">
 				<?php if ( $homepage_title ) : ?>
-					<h2 class="homepage-title"><?php echo esc_html( $homepage_title ); ?></h2>
+					<h1 class="homepage-title"><?php echo esc_html( $homepage_title ); ?></h1>
 				<?php endif; ?>
 
 				<?php if ( '' !== $seo_text ) : ?>
@@ -93,29 +91,6 @@ get_header();
 		endif;
 		?>
 
-		<?php
-		/*
-		 * The same description again, at the very foot of the homepage and
-		 * below the pagination, so it is the last thing in the page content.
-		 *
-		 * Search engines weigh a description that bookends the listing: one
-		 * near the title tells a crawler what the page is before it reaches
-		 * the grid, and one at the end restates it after the links it has to
-		 * crawl. It is the same field, so the two copies cannot drift apart.
-		 *
-		 * Only needed when the title block sits at the top. When the title is
-		 * set to the bottom of the page, the description under that heading is
-		 * already the last thing in the content, and printing it again a few
-		 * lines later would read as a mistake rather than as intent.
-		 */
-		if ( '' !== $seo_text && $title_above ) :
-			?>
-			<footer class="homepage-seo-footer">
-				<p class="archive-description"><?php echo wp_kses_post( $seo_text ); ?></p>
-			</footer>
-			<?php
-		endif;
-		?>
 
 	</main>
 </div>

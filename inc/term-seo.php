@@ -24,7 +24,7 @@
  * than printing a second title and a second description into the same head.
  *
  * @package Majestic Tube
- * @version 2.2.25
+ * @version 2.2.26
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -234,12 +234,12 @@ function majestic_tube_term_seo_field( $term = null, $context = 'edit' ) {
 	$nonce = wp_nonce_field( 'majestic_tube_term_seo', 'majestic_tube_term_seo_nonce', true, false );
 
 	$title_field = $nonce . sprintf(
-		'<input type="text" name="majestic_tube_seo_title" id="majestic_tube_seo_title" class="majestic-tube-seo-field regular-text" data-max="60" value="%1$s" placeholder="%2$s" maxlength="120" autocomplete="off" />
+		'<input type="text" name="majestic_tube_seo_title" id="majestic_tube_seo_title" class="majestic-tube-seo-field regular-text" data-max="60" value="%1$s" placeholder="%2$s" autocomplete="off" />
 		 <span id="majestic_tube_seo_title-counter" class="description majestic-tube-seo-counter"></span>
 		 <p class="description">%3$s</p>',
 		esc_attr( $title ),
 		esc_attr( $placeholder ),
-		esc_html__( 'Shown in the browser tab and as the title on Google. Leave empty to keep the default. Around 60 characters fits on one line of results.', 'majestic-tube' )
+		esc_html__( 'Suggested search title and browser-tab title. Leave empty to use the automatic default. Search engines may rewrite or truncate it.', 'majestic-tube' )
 	);
 
 	$description_field = sprintf(
@@ -248,7 +248,7 @@ function majestic_tube_term_seo_field( $term = null, $context = 'edit' ) {
 		 <p class="description">%3$s</p>',
 		esc_attr( $description_placeholder ),
 		esc_textarea( $description ),
-		esc_html__( 'The two or three lines Google shows under the title, and the text Facebook and X share. Leave empty to keep the default. Around 160 characters.', 'majestic-tube' )
+		esc_html__( 'Suggested search snippet and social description. Leave empty to use the automatic default. Search engines may show different text.', 'majestic-tube' )
 	);
 
 	if ( 'edit' === $context ) {
@@ -310,10 +310,9 @@ function majestic_tube_term_seo_counter_script() {
 			if ( ! out ) {
 				return;
 			}
-			var max = parseInt( field.getAttribute( 'data-max' ), 10 ) || 160;
-			var used = field.value.length;
-			out.textContent = used + ' / ' + max + ' characters';
-			out.style.color = used === 0 ? '#646970' : ( used <= max ? '#1a7f37' : '#b32d2e' );
+			var used = Array.from( field.value ).length;
+			out.textContent = used + ' characters';
+			out.setAttribute( 'aria-live', 'polite' );
 		}
 		function bind( event ) {
 			var field = event.target;
@@ -451,10 +450,8 @@ add_filter( 'pre_get_document_title', 'majestic_tube_term_seo_document_title', 1
 /**
  * Use the editor's description for the search result.
  *
- * WordPress fills the description tag with the site tagline on an archive,
- * which is either empty or the same sentence on every category page. The
- * editor's text replaces it when there is one, and the core value stands
- * when there is not.
+ * Legacy array adapter for integrations. Core does not emit description
+ * tags; the shared theme wp_head renderer owns document descriptions.
  *
  * @param array  $meta      Meta keys and values.
  * @param string $meta_type One of blog, term, post or home.
@@ -484,7 +481,8 @@ function majestic_tube_term_seo_meta( $meta, $meta_type = '' ) {
 
 	return $meta;
 }
-add_filter( 'wp_meta', 'majestic_tube_term_seo_meta', 10, 2 );
+// Document descriptions are emitted by the shared wp_head renderer in seo.php.
+// wp_meta is a sidebar action, not a document metadata filter.
 
 /**
  * Use the editor's description for the Facebook and X cards too.

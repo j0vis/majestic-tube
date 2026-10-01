@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.2.25
+ * @version 2.2.26
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -114,7 +114,7 @@ function majestic_tube_option_sections() {
 			'title'       => __( 'Homepage SEO', 'majestic-tube' ),
 			'panel'       => 'seo',
 			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
-			'description' => __( 'The two controls that decide what the front page says to a crawler: where its title sits, and the description that bookends the grid. The homepage title itself is a layout choice and is set under Homepage &amp; Listings &rarr; Homepage.', 'majestic-tube' ),
+			'description' => __( 'The visible introduction and its position on the homepage. Search titles and meta descriptions are managed from the SEO menu in the dashboard; the visible homepage heading is under Homepage &amp; Listings &rarr; Homepage.', 'majestic-tube' ),
 		),
 		'archive_seo'  => array(
 			'title'       => __( 'Archive Page SEO', 'majestic-tube' ),
@@ -1328,27 +1328,17 @@ function majestic_tube_options_map() {
 			'description' => __( 'Printed verbatim inside <head>. Paste the full <meta> tag(s).', 'majestic-tube' ),
 		),
 		/* ------------------------------------------------------------------
-		 * Homepage SEO - the front page (2.2.25)
+		 * Homepage SEO - the front page (2.2.26)
 		 *
-		 * These two sat in different panels, and neither was where an
-		 * editor would look for them: the title position with the other
-		 * homepage layout settings, and the description among the social
-		 * tags, under a setting name ("footer text") that gave no hint of
-		 * where it prints. Between them they are the whole of what this
-		 * screen says to a crawler about the front page, so they now sit
-		 * together above the archive equivalents below.
+		 * Visible introduction and placement. Search metadata has its own
+		 * fields in the dashboard SEO workspace; the legacy storage keys
+		 * stay unchanged so existing homepage content is preserved.
 		 *
 		 * The stored values did not move with them. Only the section each
 		 * control renders in changed, so every site keeps what it had saved.
 		 * ------------------------------------------------------------------ */
 		'homepage-title-desc-position' => array(
-			/*
-			 * Above the grid by default, because that is the only position that
-			 * prints the description twice: once under the title and again at
-			 * the foot of the homepage. Below the grid it prints once, at the
-			 * bottom, which is the whole of what the block does. Sites that
-			 * already chose a position keep it; this only moves the default.
-			 */
+			// Preserve the saved placement; the introduction is printed once.
 			'setting' => 'majestic_tube_homepage_title_desc_position',
 			'default' => 'top',
 			'type'    => 'select',
@@ -1365,17 +1355,14 @@ function majestic_tube_options_map() {
 			'type'    => 'textarea',
 			'label'   => __( 'Homepage description', 'majestic-tube' ),
 			'section' => $home_seo,
-			'description' => __( 'A short paragraph describing the site. It is printed under the homepage title and again at the very bottom of the homepage, so the same words bookend the video grid for search engines. Despite the name this option comes from, it appears on the front page and not in the site footer. One or two sentences works best.', 'majestic-tube' ),
+			'description' => __( 'A short visible introduction under the homepage heading, printed once above or below the grid. It is also the fallback search description unless you supply one in SEO &rarr; Settings. Existing saved text is preserved.', 'majestic-tube' ),
 		),
 		/* ------------------------------------------------------------------
-		 * Archive page SEO - category, tag and actor pages (2.2.25)
+		 * Archive page SEO - category, tag and actor pages (2.2.26)
 		 *
-		 * These four sat with the archive layout settings, on the grounds that
-		 * they affect the same pages. They were moved to the SEO & Analytics
-		 * panel because they are the only things on those pages that search
-		 * engines and share cards ever read: the line under each name, and
-		 * where the description sits. Layout belongs under Homepage &
-		 * Listings; wording belongs here.
+		 * Shared card wording and archive description placement. Per-term
+		 * search overrides remain on term screens; collection templates live
+		 * in the dashboard SEO workspace.
 		 *
 		 * The stored values did not move with them. Only the section each
 		 * control renders in changed, so every site keeps what it had saved.

@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAJESTIC_TUBE_VERSION', '2.2.25' );
+define( 'MAJESTIC_TUBE_VERSION', '2.2.26' );
 define( 'MAJESTIC_TUBE_DIR', get_template_directory() );
 define( 'MAJESTIC_TUBE_URI', get_template_directory_uri() );
 
@@ -52,12 +52,15 @@ require MAJESTIC_TUBE_DIR . '/inc/template-filters.php';
  * spine and the breadcrumbs; pseo-sitemap.php submits whatever the gate
  * approved, and nothing else.
  *
- * Which kinds of page exist is decided by the catalogue, not by a setting.
- * A site owner who wants fewer generated pages adds videos; the thresholds
- * behind the gate are filters for anyone who needs them.
+ * Collections stay virtual and use the existing catalogue. The SEO workspace
+ * controls their wording and search eligibility; a background index powers
+ * bounded browse and sitemap reads without generating duplicate posts.
  */
 require MAJESTIC_TUBE_DIR . '/inc/pseo.php';
 require MAJESTIC_TUBE_DIR . '/inc/pseo-stats.php';
 require MAJESTIC_TUBE_DIR . '/inc/pseo-meta.php';
 require MAJESTIC_TUBE_DIR . '/inc/pseo-render.php';
 require MAJESTIC_TUBE_DIR . '/inc/pseo-sitemap.php';
+require MAJESTIC_TUBE_DIR . '/inc/seo.php';
+require MAJESTIC_TUBE_DIR . '/inc/seo-index.php';
+require MAJESTIC_TUBE_DIR . '/inc/seo-admin.php';

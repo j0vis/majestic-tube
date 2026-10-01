@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.25
+ * @version 2.2.26
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -1466,50 +1466,23 @@ function majestic_tube_retired_pseo_settings() {
 }
 
 /**
- * Delete the retired generated-pages settings.
- *
- * The switches and the title, description and intro format fields were
- * withdrawn from the Customizer: the pages they governed now come and go with
- * the catalogue behind them, and the wording a site owner cares about is set
- * per category, actor, tag, studio and series instead. Nothing reads these
- * values any more, so leaving them behind would only mean a database row
- * quietly disagreeing with the settings screen.
- *
- * Runs on admin_init rather than once at activation, because a theme update
- * is not a theme switch: there is no after_switch_theme to hang this on, and
- * a site that updates without ever visiting wp-admin should still be cleaned
- * the first time it does. Each key is read before it is removed, so the cost
- * after the first run is one theme-mod lookup per key and no write at all.
- *
- * Deleting a stored "off" is deliberate. A site that switched a kind off gets
- * that kind back, because the only way to thin the set now is the one the
- * theme always recommended: add videos, or filter the vocabulary in a child
- * theme.
- *
- * @return void
+ * Preserve old collection opt-outs on upgrades that skipped 2.2.26.
+ * Saved theme mods are retained for recovery; no activation deletes wording
+ * or automatically re-enables pages the owner excluded from search.
  */
 function majestic_tube_retire_pseo_settings() {
-
-	$removed = false;
-
-	foreach ( majestic_tube_retired_pseo_settings() as $setting ) {
-		if ( null !== get_theme_mod( $setting, null ) ) {
-			remove_theme_mod( $setting );
-			$removed = true;
+	// Preserve old controls for users upgrading past 2.2.26. Never delete or
+	// re-enable a stored opt-out merely because its UI moved.
+	if ( get_option( 'majestic_tube_seo_legacy_migrated', false ) ) { return; }
+	$collections = (array) get_option( 'majestic_tube_collections', array() );
+	foreach ( array( 'actor_category', 'actor_actor', 'actor_length', 'category_tag', 'studio', 'series' ) as $type ) {
+		$old = get_theme_mod( 'majestic_tube_generated_' . $type, null );
+		if ( 'off' === $old || 'off' === get_theme_mod( 'majestic_tube_generated_pages', null ) ) {
+			if ( ! isset( $collections[ $type ] ) ) { $collections[ $type ] = array( 'enabled' => false ); }
 		}
 	}
-
-	if ( ! $removed ) {
-		return;
-	}
-
-	/*
-	 * A page kind the site had switched off no longer has rewrite rules, so
-	 * its old addresses have been answering 404 since the switch was flipped.
-	 * With the value gone they resolve again, which is a routing change the
-	 * site has not been told about and cannot see in any settings screen.
-	 */
-	flush_rewrite_rules();
+	update_option( 'majestic_tube_collections', $collections, false );
+	update_option( 'majestic_tube_seo_legacy_migrated', true, false );
 }
 add_action( 'admin_init', 'majestic_tube_retire_pseo_settings' );
 
