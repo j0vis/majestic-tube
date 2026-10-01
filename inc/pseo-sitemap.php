@@ -20,7 +20,7 @@
  * stands down - two sitemaps covering the same URLs is worse than one.
  *
  * @package Majestic Tube
- * @version 2.2.24
+ * @version 2.2.25
  */
 
 defined( 'ABSPATH' ) || exit;

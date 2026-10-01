@@ -812,7 +812,7 @@
 
         <h3>Write the line on a category or actor card</h3>
         <p>Every card on the Categories and Actors pages carries a line of text between the name and the video count. By default it is that term's own description, and nothing shows for a term you never wrote one for.</p>
-        <p>You can replace that with a phrase of your own under <span class="path">Customize &rarr; Homepage &amp; Listings &rarr; Category, Tag &amp; Actor Archives</span>, using <strong>Category card text</strong> and <strong>Actor card text</strong>. The default reads <span class="path">Free "{description}" videos</span>, and the same idea is available separately for actors.</p>
+        <p>You can replace that with a phrase of your own under <span class="path">Customize &rarr; SEO &amp; Analytics &rarr; Archive Page SEO</span>, using <strong>Category card text</strong> and <strong>Actor card text</strong>. The default reads <span class="path">Free "{description}" videos</span>, and the same idea is available separately for actors.</p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -833,7 +833,7 @@
         <p>The line is clamped to two lines, and the card drops the blank title line that a grid card reserves, so filling this in does not make the cards any taller.</p>
 
         <h3>Choose how many categories sit in a row</h3>
-        <p><strong>Categories per row</strong>, in the same section, sets how many category cards line up on the Categories page. The number is the desktop figure; the theme steps it down on its own as the screen narrows, never showing fewer than two cards on a phone or three on a tablet, so a wide desktop value never squeezes the cards into unreadable slivers.</p>
+        <p><strong>Categories per row</strong>, under <span class="path">Customize &rarr; Homepage &amp; Listings &rarr; Category, Tag &amp; Actor Archives</span>, sets how many category cards line up on the Categories page. The number is the desktop figure; the theme steps it down on its own as the screen narrows, never showing fewer than two cards on a phone or three on a tablet, so a wide desktop value never squeezes the cards into unreadable slivers.</p>
 
         <h3>Browse categories, tags, and actors by letter</h3>
         <p>The Categories, Tags, and Actors pages all carry an alphabet bar above the listing. <strong>All</strong> shows the complete directory; each letter shows only the terms starting with it, along with how many there are. Only letters that actually have terms appear, so the bar never offers a letter that leads to an empty page.</p>
@@ -857,6 +857,58 @@
         <pre><code>add_filter( 'majestic_tube_term_fallback_mode', function ( $mode, $taxonomy ) {
     return 'actors' === $taxonomy ? 'random' : $mode;
 }, 10, 2 );</code></pre>
+
+        <h3>Name a category, actor, or archive page for search engines</h3>
+        <p>Every category, actor, tag, studio and series page is a real page that Google can rank and visitors can share. They were also the one kind of page in the theme with nowhere to describe them: the browser title was whatever WordPress assembled, and the meta description was the site tagline or nothing at all.</p>
+        <p>Each of those terms now carries two fields, set on the same screen where you already set the term image:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Field</th>
+                <th scope="col">Where it appears</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>SEO title</strong></td><td>The browser tab, and the blue title on a Google result.</td></tr>
+              <tr><td><strong>Meta description</strong></td><td>The two or three lines under a Google result, and the text on a Facebook or X share card.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The fields appear on all five kinds of term:</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Term</th>
+                <th scope="col">Screen</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>Category</td><td><span class="path">Videos &rarr; Video Categories</span></td></tr>
+              <tr><td>Tag</td><td><span class="path">Videos &rarr; Video Tags</span></td></tr>
+              <tr><td>Actor</td><td><span class="path">Actors</span></td></tr>
+              <tr><td>Studio</td><td><span class="path">Videos &rarr; Video Studios</span></td></tr>
+              <tr><td>Series</td><td><span class="path">Videos &rarr; Video Series</span></td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Open a term, choose <strong>Edit</strong>, fill in either field, and save. The same two boxes are on the <strong>Add New</strong> form, so a term can be named correctly from the moment it exists rather than being backfilled later. If a term already has a written description, its opening words appear as grey placeholder text inside the Meta description box. That is a reminder, not a saved value &mdash; only what you type is stored.</p>
+        <p>A character counter sits under each box: grey when empty, green while you are inside the recommended length, red once you are past it. Roughly 60 characters for a title and 160 for a description. A title written beyond the point where Google truncates it has its tail thrown away, so the counter is there to catch that rather than to enforce a rule.</p>
+        <p><strong>The title replaces the whole browser title; it is not added to one.</strong> Write <span class="path">Best comedy videos</span> and that is the entire tab &mdash; there is no <span class="path">Category Archives:</span> prefix in front of it and no site name after it. Put the site name in yourself if you want it there.</p>
+        <p>Both fields are opt-in and silent. An empty field stores nothing at all, so an existing site keeps exactly the output it had before, there is no setting to switch on, and no page changes until you type something. Clearing a field later deletes it rather than leaving an empty value behind.</p>
+        <p>The description deliberately reaches the search result <em>and</em> the Facebook and X cards. A description that only reached one of those three would still leave the share preview showing something else, which is the kind of mismatch nobody notices until it is pointed out.</p>
+        <div class="note">
+          If Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework or Slim SEO is active, the theme steps aside entirely: neither box appears, and no title or description is printed at all. Those plugins already ask the same questions on the same screen, and two sources of truth for a page title is worse than one.
+        </div>
+        <p>Saving is nonce-verified and limited to users who can manage categories. WordPress&rsquo;s own <strong>Quick Edit</strong> and bulk actions do not post these fields, so they leave a term&rsquo;s saved title and description exactly as they were rather than silently wiping them.</p>
+        <p>Fields are only attached to taxonomies that actually exist on your site, so a child theme that removed one is unaffected.</p>
+
+        <h3>Find and fill in the missing ones</h3>
+        <p>Naming sixty categories one screen at a time is a job nobody finishes, so the term list has two things that help.</p>
+        <p><strong>An SEO title column</strong> now sits on every term list, next to the name and the video count. It shows the title that term will actually use, with a green note underneath when its meta description is set too. A term you have finished reads differently from one you have not, which is the whole point. If you would rather not see it, switch it off under <strong>Screen Options</strong> at the top right of the list.</p>
+        <p><strong>Edit SEO title &amp; description</strong> appears in the term list&rsquo;s bulk actions. Tick the terms you want, choose it, and one screen opens holding all of them at once &mdash; every title and description box, already filled in with what is saved, with the fallback text greyed out behind each empty one. Write, press <strong>Save SEO details</strong>, and you are back on the list with a note saying how many terms were changed. Leaving a box empty clears that field, exactly as it does on a single term.</p>
+        <p>That screen is not in the menu on purpose. It is somewhere you arrive from carrying a selection, so a permanent entry promising something it cannot do on its own would be worse than none. One hundred terms is the most it will open at once.</p>
 
         <h3>Directory pages</h3>
         <p>The automatically created Actors, Categories, and Tags pages use portrait cards, images, and video counts. You can edit their introductory block editor content without changing the directory itself.</p>
@@ -1065,9 +1117,9 @@
               </tr>
             </thead>
             <tbody>
-              <tr><td rowspan="3">Homepage &amp; Listings</td><td>Homepage</td><td>How the homepage sorts its videos, how many show per page and per row, the homepage title and where it sits, and the popular tags bar under the sort bar.</td></tr>
+              <tr><td rowspan="3">Homepage &amp; Listings</td><td>Homepage</td><td>How the homepage sorts its videos, how many show per page and per row, the homepage title, and the popular tags bar under the sort bar.</td></tr>
               <tr><td>Homepage on Mobile</td><td>Videos per page and per row on phones and tablets.</td></tr>
-              <tr><td>Category, Tag &amp; Actor Archives</td><td>How many categories sit in a row and how many show per page on the Categories page, videos per page on the other archives, whether the category and tag description goes above or below the list, and the line shown on each category and actor card.</td></tr>
+              <tr><td>Category, Tag &amp; Actor Archives</td><td>How many categories sit in a row, how many show per page on the Categories page, and how many actors show per page on the Actors page.</td></tr>
               <tr><td rowspan="3">Video Page</td><td>Video Page Layout</td><td>Which of a post's two video fields the player uses (Video URL or embed code), the video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos.</td></tr>
               <tr><td>Player</td><td>Autoplay, the player engine, the quality selector, view counting, and the optional keyboard shortcuts, speed, resume and theater controls.</td></tr>
               <tr><td>Sharing</td><td>The share buttons printed under the player.</td></tr>
@@ -1079,7 +1131,9 @@
               <tr><td>Accounts &amp; Spam Protection</td><td>Member login and registration, and the Cloudflare Turnstile spam check with its two keys.</td></tr>
               <tr><td>Video Submission</td><td>The submission form, the links that lead to it, and which fields are required.</td></tr>
               <tr><td>Advertising</td><td>In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from <span class="path">Appearance &rarr; Widgets</span>.</td></tr>
-              <tr><td rowspan="2">SEO &amp; Analytics</td><td>SEO &amp; Social</td><td>The Facebook app ID, the X/Twitter handle, the playable card URL, verification tags, and the homepage intro text.</td></tr>
+              <tr><td rowspan="4">SEO &amp; Analytics</td><td>SEO &amp; Social</td><td>The Facebook app ID, the X/Twitter handle, the playable card URL, and verification tags.</td></tr>
+              <tr><td>Homepage SEO</td><td>Where the homepage title sits, and the description printed under it and again at the foot of the grid.</td></tr>
+              <tr><td>Archive Page SEO</td><td>The line shown on each category and actor card, and whether the category and tag descriptions go above or below the list. The per-term titles and descriptions are not here &mdash; see <a href="#taxonomy">Name a category, actor, or archive page for search engines</a>.</td></tr>
               <tr><td>Custom Code</td><td>Analytics code in the page head, extra scripts before the closing body tag, and scripts for mobile visitors only.</td></tr>
             </tbody>
           </table>
@@ -1193,12 +1247,52 @@
           <li>Add an X/Twitter site handle.</li>
           <li>Add an optional Twitter player URL, which upgrades the video preview card to the playable player card.</li>
           <li>Paste search engine verification tags.</li>
-          <li>Add optional homepage intro text.</li>
         </ul>
         <p>Majestic Tube also supplies social preview information and video structured data on individual video pages. If a major SEO plugin is active, the theme normally avoids duplicating its social output.</p>
+        <p>The browser title and meta description for your category, actor, tag, studio and series archive pages are not set here either. They belong to the page rather than to the site, so they are set on each term&rsquo;s own screen, next to its image. See <a href="#taxonomy">Name a category, actor, or archive page for search engines</a>.</p>
         <h4>Playable cards on X and Twitter</h4>
         <p>By default a shared video link produces the large image card. To get the playable card, fill in <span class="setting">Twitter player URL base</span> with the HTTPS address of a small, bare page of your own that embeds a video and reads the <span class="setting">?post=</span> query argument. The theme appends the video ID for you, so a base of <span class="path">https://example.com/player/</span> points that page at <span class="path">https://example.com/player/?post=123</span> for video 123, and the card becomes playable on the timeline.</p>
         <p>Leave the field empty to keep the large image card. The page you point at must be served over HTTPS, must return nothing but the player, and should stay under a few hundred kilobytes: X loads it in a card of roughly 435 pixels wide, so a full site template with a header, sidebar, and footer would look wrong inside the card.</p>
+
+        <h3>SEO &amp; Analytics &rarr; Homepage SEO</h3>
+        <p>The two settings that decide what the front page says to a crawler. They used to sit in different panels &mdash; the title position with the homepage layout settings, the description among the social tags &mdash; so they are now together.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Setting</th>
+                <th scope="col">What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Homepage title position</strong></td><td>Whether the homepage title and its description sit above the video grid or below it.</td></tr>
+              <tr><td><strong>Homepage description</strong></td><td>A short paragraph describing the site, printed under that title and again at the very bottom of the homepage.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Above the grid is the default, because it is the only position that prints the description twice: once near the title, where a crawler learns what the page is before it reaches the links, and once at the end, where it restates the page after the grid. Below the grid prints it once, at the bottom. Either way it is the same field, so the two copies cannot drift apart.</p>
+        <p>The homepage title itself is not here. It is a line of text in a layout, so it stays under <span class="path">Customize &rarr; Homepage &amp; Listings &rarr; Homepage</span>.</p>
+
+        <h3>SEO &amp; Analytics &rarr; Archive Page SEO</h3>
+        <p>The wording on the category, tag and actor pages, gathered in one place because it is the only thing on those pages a search engine or a share card ever reads.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Setting</th>
+                <th scope="col">What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Category card text</strong></td><td>The phrase under each category name on the Categories page. Blank falls back to each category&rsquo;s own description.</td></tr>
+              <tr><td><strong>Actor card text</strong></td><td>The same for actor cards. Blank falls back to each actor&rsquo;s own description.</td></tr>
+              <tr><td><strong>Category description position</strong></td><td>Whether a category&rsquo;s description sits above its video list or below it.</td></tr>
+              <tr><td><strong>Tag description position</strong></td><td>The same choice for tag pages.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>The two card-text fields take <span class="path">{name}</span>, <span class="path">{description}</span>, <span class="path">{count}</span> and <span class="path">{videos}</span>, and default to <span class="path">Free "{description}" videos</span> and <span class="path">Watch "{description}" videos</span>.</p>
+        <p>The browser title and meta description for an individual term are not here, for the reason given above: a page title belongs to the page.</p>
 
         <h3>SEO &amp; Analytics &rarr; Custom Code</h3>
         <p>Administrators can add analytics code to the page header and extra scripts near the end of the page. Paste complete snippets exactly as supplied by the service. Incorrect code can affect the entire site.</p>
@@ -1525,6 +1619,22 @@
             <p>Review your active SEO plugins. Majestic Tube normally steps aside when a supported SEO plugin already provides social metadata. If the preview looks wrong, update the image, clear the social platform’s cache, and re-save the video.</p>
           </div>
         </details>
+
+        <details>
+          <summary>The SEO title and description boxes are missing on a category or actor</summary>
+          <div>
+            <p>That is what an active SEO plugin looks like. Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework and Slim SEO all provide their own term-level fields, so Majestic Tube removes its own boxes and prints nothing rather than putting two competing titles in the same page head. Use the fields your SEO plugin provides, or deactivate it and use the theme’s.</p>
+            <p>The boxes are also absent on a taxonomy that does not exist on your site &mdash; the theme only attaches them to categories, tags, actors, studios and series that are actually registered.</p>
+          </div>
+        </details>
+
+        <details>
+          <summary>A category page still shows the old title on Google</summary>
+          <div>
+            <p>The page itself is almost certainly correct &mdash; check it by viewing source and searching for <span class="path">&lt;title&gt;</span>. Google caches results and re-crawls on its own schedule, so a change can take days to appear, and the search snippet may keep the older description until it does. Use Search Console&rsquo;s <strong>URL Inspection &rarr; Request Indexing</strong> to ask for a fresh crawl. A caching plugin or page cache in front of WordPress is the other thing worth ruling out.</p>
+            <p>If the field is filled in but the source shows the old title, remember that WordPress&rsquo;s <strong>Quick Edit</strong> and bulk tools do not post these fields, so they preserve what was saved &mdash; but a term deleted and recreated loses it along with everything else on that term.</p>
+          </div>
+        </details>
       </section>
 
       <section id="faq">
@@ -1665,6 +1775,7 @@
               <tr><td>Review submissions</td><td>Videos → All Videos → Pending</td></tr>
               <tr><td>Add an actor</td><td>Actors → Add Actor</td></tr>
               <tr><td>Add a category image</td><td>Videos → Video Categories → Edit Category</td></tr>
+              <tr><td>Name a page for search engines</td><td>Videos → Video Categories → Edit Category</td></tr>
               <tr><td>Review visitor reports</td><td>Videos → Reported Videos</td></tr>
               <tr><td>Change theme settings</td><td>Appearance → Customize</td></tr>
               <tr><td>Manage navigation</td><td>Appearance → Menus</td></tr>

@@ -20,7 +20,7 @@
  * for the same reason: hooks alone miss the paths that matter.
  *
  * @package Majestic Tube
- * @version 2.2.24
+ * @version 2.2.25
  */
 
 defined( 'ABSPATH' ) || exit;

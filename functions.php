@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAJESTIC_TUBE_VERSION', '2.2.24' );
+define( 'MAJESTIC_TUBE_VERSION', '2.2.25' );
 define( 'MAJESTIC_TUBE_DIR', get_template_directory() );
 define( 'MAJESTIC_TUBE_URI', get_template_directory_uri() );
 
@@ -35,6 +35,7 @@ require MAJESTIC_TUBE_DIR . '/inc/share.php';
 require MAJESTIC_TUBE_DIR . '/inc/schema.php';
 require MAJESTIC_TUBE_DIR . '/inc/term-images.php';
 require MAJESTIC_TUBE_DIR . '/inc/term-seo.php';
+require MAJESTIC_TUBE_DIR . '/inc/term-seo-bulk.php';
 require MAJESTIC_TUBE_DIR . '/inc/multithumbs.php';
 require MAJESTIC_TUBE_DIR . '/inc/widget-videos.php';
 require MAJESTIC_TUBE_DIR . '/inc/ajax-login-register.php';
@@ -50,9 +51,12 @@ require MAJESTIC_TUBE_DIR . '/inc/template-filters.php';
  * descriptions and directives; pseo-render.php wires the queries, the browse
  * spine and the breadcrumbs; pseo-sitemap.php submits whatever the gate
  * approved, and nothing else.
+ *
+ * Which kinds of page exist is decided by the catalogue, not by a setting.
+ * A site owner who wants fewer generated pages adds videos; the thresholds
+ * behind the gate are filters for anyone who needs them.
  */
 require MAJESTIC_TUBE_DIR . '/inc/pseo.php';
-require MAJESTIC_TUBE_DIR . '/inc/pseo-options.php';
 require MAJESTIC_TUBE_DIR . '/inc/pseo-stats.php';
 require MAJESTIC_TUBE_DIR . '/inc/pseo-meta.php';
 require MAJESTIC_TUBE_DIR . '/inc/pseo-render.php';

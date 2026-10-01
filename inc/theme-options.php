@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.2.24
+ * @version 2.2.25
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -110,6 +110,18 @@ function majestic_tube_option_sections() {
 			'panel'       => 'seo',
 			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
 		),
+		'home_seo'     => array(
+			'title'       => __( 'Homepage SEO', 'majestic-tube' ),
+			'panel'       => 'seo',
+			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
+			'description' => __( 'The two controls that decide what the front page says to a crawler: where its title sits, and the description that bookends the grid. The homepage title itself is a layout choice and is set under Homepage &amp; Listings &rarr; Homepage.', 'majestic-tube' ),
+		),
+		'archive_seo'  => array(
+			'title'       => __( 'Archive Page SEO', 'majestic-tube' ),
+			'panel'       => 'seo',
+			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
+			'description' => __( 'How the category, tag and actor pages describe themselves: the line on each card, and where the description sits. The browser title and meta description for an individual term are set on that term&rsquo;s own screen, next to its image.', 'majestic-tube' ),
+		),
 		'code'         => array(
 			'title'       => __( 'Custom Code', 'majestic-tube' ),
 			'panel'       => 'seo',
@@ -201,6 +213,8 @@ function majestic_tube_options_map() {
 	$submission   = 'submission';
 	$advertising  = 'advertising';
 	$seo          = 'seo';
+	$home_seo     = 'home_seo';
+	$archive_seo  = 'archive_seo';
 	$code         = 'code';
 
 	$map_value = array(
@@ -251,24 +265,6 @@ function majestic_tube_options_map() {
 			'type'    => 'text',
 			'label'   => __( 'Homepage title', 'majestic-tube' ),
 			'section' => $home,
-		),
-		'homepage-title-desc-position' => array(
-			/*
-			 * Above the grid by default, because that is the only position that
-			 * prints the description twice: once under the title and again at
-			 * the foot of the homepage. Below the grid it prints once, at the
-			 * bottom, which is the whole of what the block does. Sites that
-			 * already chose a position keep it; this only moves the default.
-			 */
-			'setting' => 'majestic_tube_homepage_title_desc_position',
-			'default' => 'top',
-			'type'    => 'select',
-			'label'   => __( 'Homepage title position', 'majestic-tube' ),
-			'section' => $home,
-			'choices' => array(
-				'top'    => __( 'Above the grid', 'majestic-tube' ),
-				'bottom' => __( 'Below the grid', 'majestic-tube' ),
-			),
 		),
 		'show-popular-tags-slider'  => array(
 			/*
@@ -348,50 +344,6 @@ function majestic_tube_options_map() {
 				'min'  => 1,
 				'max'  => 100,
 				'step' => 1,
-			),
-		),
-		'category-card-description' => array(
-			'setting'     => 'majestic_tube_category_card_description',
-			'default'     => 'Free {description} videos',
-			'type'        => 'text',
-			'label'       => __( 'Category card text', 'majestic-tube' ),
-			'section' => $archives,
-			'description' => __( 'A phrase shown on every category card, built from the tokens below. Leave it blank to use each category\'s own description instead.', 'majestic-tube' ),
-			'input_attrs' => array(
-				'placeholder' => 'Free {description} videos',
-			),
-		),
-		'actor-card-description'  => array(
-			'setting'     => 'majestic_tube_actor_card_description',
-			'default'     => 'Watch {description} videos',
-			'type'        => 'text',
-			'label'       => __( 'Actor card text', 'majestic-tube' ),
-			'section' => $archives,
-			'description' => __( 'The same idea for actor cards. Leave it blank to use each actor\'s own description instead.', 'majestic-tube' ),
-			'input_attrs' => array(
-				'placeholder' => 'Watch {description} videos',
-			),
-		),
-		'cat-desc-position'        => array(
-			'setting' => 'majestic_tube_cat_desc_position',
-			'default' => 'top',
-			'type'    => 'select',
-			'label'   => __( 'Category description position', 'majestic-tube' ),
-			'section' => $archives,
-			'choices' => array(
-				'top'    => __( 'Top', 'majestic-tube' ),
-				'bottom' => __( 'Bottom', 'majestic-tube' ),
-			),
-		),
-		'tag-desc-position'        => array(
-			'setting' => 'majestic_tube_tag_desc_position',
-			'default' => 'top',
-			'type'    => 'select',
-			'label'   => __( 'Tag description position', 'majestic-tube' ),
-			'section' => $archives,
-			'choices' => array(
-				'top'    => __( 'Top', 'majestic-tube' ),
-				'bottom' => __( 'Bottom', 'majestic-tube' ),
 			),
 		),
 		'actors-per-page'          => array(
@@ -1375,13 +1327,102 @@ function majestic_tube_options_map() {
 			'section' => $seo,
 			'description' => __( 'Printed verbatim inside <head>. Paste the full <meta> tag(s).', 'majestic-tube' ),
 		),
+		/* ------------------------------------------------------------------
+		 * Homepage SEO - the front page (2.2.25)
+		 *
+		 * These two sat in different panels, and neither was where an
+		 * editor would look for them: the title position with the other
+		 * homepage layout settings, and the description among the social
+		 * tags, under a setting name ("footer text") that gave no hint of
+		 * where it prints. Between them they are the whole of what this
+		 * screen says to a crawler about the front page, so they now sit
+		 * together above the archive equivalents below.
+		 *
+		 * The stored values did not move with them. Only the section each
+		 * control renders in changed, so every site keeps what it had saved.
+		 * ------------------------------------------------------------------ */
+		'homepage-title-desc-position' => array(
+			/*
+			 * Above the grid by default, because that is the only position that
+			 * prints the description twice: once under the title and again at
+			 * the foot of the homepage. Below the grid it prints once, at the
+			 * bottom, which is the whole of what the block does. Sites that
+			 * already chose a position keep it; this only moves the default.
+			 */
+			'setting' => 'majestic_tube_homepage_title_desc_position',
+			'default' => 'top',
+			'type'    => 'select',
+			'label'   => __( 'Homepage title position', 'majestic-tube' ),
+			'section' => $home_seo,
+			'choices' => array(
+				'top'    => __( 'Above the grid', 'majestic-tube' ),
+				'bottom' => __( 'Below the grid', 'majestic-tube' ),
+			),
+		),
 		'seo-footer-text'          => array(
 			'setting' => 'majestic_tube_seo_footer_text',
 			'default' => '',
 			'type'    => 'textarea',
 			'label'   => __( 'Homepage description', 'majestic-tube' ),
-			'section' => $seo,
+			'section' => $home_seo,
 			'description' => __( 'A short paragraph describing the site. It is printed under the homepage title and again at the very bottom of the homepage, so the same words bookend the video grid for search engines. Despite the name this option comes from, it appears on the front page and not in the site footer. One or two sentences works best.', 'majestic-tube' ),
+		),
+		/* ------------------------------------------------------------------
+		 * Archive page SEO - category, tag and actor pages (2.2.25)
+		 *
+		 * These four sat with the archive layout settings, on the grounds that
+		 * they affect the same pages. They were moved to the SEO & Analytics
+		 * panel because they are the only things on those pages that search
+		 * engines and share cards ever read: the line under each name, and
+		 * where the description sits. Layout belongs under Homepage &
+		 * Listings; wording belongs here.
+		 *
+		 * The stored values did not move with them. Only the section each
+		 * control renders in changed, so every site keeps what it had saved.
+		 * ------------------------------------------------------------------ */
+		'category-card-description' => array(
+			'setting'     => 'majestic_tube_category_card_description',
+			'default'     => 'Free {description} videos',
+			'type'        => 'text',
+			'label'       => __( 'Category card text', 'majestic-tube' ),
+			'section' => $archive_seo,
+			'description' => __( 'A phrase shown on every category card, built from the tokens below. Leave it blank to use each category\'s own description instead.', 'majestic-tube' ),
+			'input_attrs' => array(
+				'placeholder' => 'Free {description} videos',
+			),
+		),
+		'actor-card-description'  => array(
+			'setting'     => 'majestic_tube_actor_card_description',
+			'default'     => 'Watch {description} videos',
+			'type'        => 'text',
+			'label'       => __( 'Actor card text', 'majestic-tube' ),
+			'section' => $archive_seo,
+			'description' => __( 'The same idea for actor cards. Leave it blank to use each actor\'s own description instead.', 'majestic-tube' ),
+			'input_attrs' => array(
+				'placeholder' => 'Watch {description} videos',
+			),
+		),
+		'cat-desc-position'        => array(
+			'setting' => 'majestic_tube_cat_desc_position',
+			'default' => 'top',
+			'type'    => 'select',
+			'label'   => __( 'Category description position', 'majestic-tube' ),
+			'section' => $archive_seo,
+			'choices' => array(
+				'top'    => __( 'Top', 'majestic-tube' ),
+				'bottom' => __( 'Bottom', 'majestic-tube' ),
+			),
+		),
+		'tag-desc-position'        => array(
+			'setting' => 'majestic_tube_tag_desc_position',
+			'default' => 'top',
+			'type'    => 'select',
+			'label'   => __( 'Tag description position', 'majestic-tube' ),
+			'section' => $archive_seo,
+			'choices' => array(
+				'top'    => __( 'Top', 'majestic-tube' ),
+				'bottom' => __( 'Bottom', 'majestic-tube' ),
+			),
 		),
 		/* ------------------------------------------------------------------
 		 * Custom code

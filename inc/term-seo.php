@@ -24,7 +24,7 @@
  * than printing a second title and a second description into the same head.
  *
  * @package Majestic Tube
- * @version 2.2.24
+ * @version 2.2.25
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -144,6 +144,75 @@ function majestic_tube_term_seo_queried_term() {
 }
 
 /**
+ * The title WordPress would show if the editor had not written one.
+ *
+ * Shown as grey placeholder text inside the box, so the owner can see what
+ * they are replacing without having to leave the screen to check. Never
+ * stored: an empty field means "use this", not "use nothing".
+ *
+ * @param WP_Term|null $term Term being edited, or null on the add form.
+ * @return string
+ */
+function majestic_tube_term_seo_title_placeholder( $term = null ) {
+
+	$name = ( $term instanceof WP_Term ) ? trim( (string) $term->name ) : '';
+	$site = (string) get_bloginfo( 'name' );
+
+	return trim( $name . ( $name && $site ? ' - ' . $site : '' ) );
+}
+
+/**
+ * The description the theme would fall back to if none was written.
+ *
+ * The term's own description, trimmed to something that reads as a snippet
+ * rather than a paragraph.
+ *
+ * @param WP_Term|null $term Term being edited, or null on the add form.
+ * @return string
+ */
+function majestic_tube_term_seo_description_placeholder( $term = null ) {
+
+	if ( ! ( $term instanceof WP_Term ) ) {
+		return '';
+	}
+
+	$text = trim( wp_strip_all_tags( (string) $term->description ) );
+
+	return ( '' !== $text ) ? wp_trim_words( $text, 22, '...' ) : '';
+}
+
+/**
+ * Write both fields for one term.
+ *
+ * A field cleared in the editor deletes its meta rather than storing an empty
+ * string, so "unset" stays distinguishable from "set to nothing" - and so an
+ * untouched term stores nothing at all.
+ *
+ * Shared by the single-term form and the bulk editor, so the two can never
+ * disagree about what clearing a box means.
+ *
+ * @param int    $term_id     Term ID.
+ * @param string $title       Submitted title, already sanitized.
+ * @param string $description Submitted description, already sanitized.
+ * @return void
+ */
+function majestic_tube_term_seo_write( $term_id, $title, $description ) {
+
+	foreach (
+		array(
+			MAJESTIC_TUBE_TERM_SEO_TITLE       => trim( (string) $title ),
+			MAJESTIC_TUBE_TERM_SEO_DESCRIPTION => trim( (string) $description ),
+		) as $key => $value
+	) {
+		if ( '' === $value ) {
+			delete_term_meta( $term_id, $key );
+		} else {
+			update_term_meta( $term_id, $key, $value );
+		}
+	}
+}
+
+/**
  * The two fields, shared by the add and edit forms.
  *
  * The help text states what a search result actually rewards - a title that
@@ -156,14 +225,11 @@ function majestic_tube_term_seo_queried_term() {
  */
 function majestic_tube_term_seo_field( $term = null, $context = 'edit' ) {
 
-	$term_id      = ( $term instanceof WP_Term ) ? (int) $term->term_id : 0;
-	$title        = majestic_tube_term_seo_title( $term_id );
-	$description  = majestic_tube_term_seo_description( $term_id );
-	$name         = ( $term instanceof WP_Term ) ? $term->name : '';
-	$site         = get_bloginfo( 'name' );
-	$placeholder  = trim( $name . ( $name && $site ? ' - ' . $site : '' ) );
-	$term_text    = ( $term instanceof WP_Term ) ? trim( wp_strip_all_tags( (string) $term->description ) ) : '';
-	$description_placeholder = ( '' !== $term_text ) ? wp_trim_words( $term_text, 22, '...' ) : '';
+	$term_id                = ( $term instanceof WP_Term ) ? (int) $term->term_id : 0;
+	$title                  = majestic_tube_term_seo_title( $term_id );
+	$description            = majestic_tube_term_seo_description( $term_id );
+	$placeholder            = majestic_tube_term_seo_title_placeholder( $term );
+	$description_placeholder = majestic_tube_term_seo_description_placeholder( $term );
 
 	$nonce = wp_nonce_field( 'majestic_tube_term_seo', 'majestic_tube_term_seo_nonce', true, false );
 
@@ -313,8 +379,7 @@ add_action( 'init', 'majestic_tube_term_seo_edit_fields', 20 );
  * Nonce-verified, because the term hooks carry none of their own, and the
  * taxonomy is resolved from the term rather than trusted from $_POST, so a
  * crafted request cannot pin a title onto a term in a taxonomy that has no
- * fields. A field cleared in the editor deletes its meta rather than storing
- * an empty string, so "unset" stays distinguishable from "set to nothing".
+ * fields.
  *
  * @param int $term_id Term ID.
  */
@@ -348,18 +413,7 @@ function majestic_tube_term_seo_save( $term_id ) {
 	$title       = isset( $_POST['majestic_tube_seo_title'] ) ? sanitize_text_field( wp_unslash( $_POST['majestic_tube_seo_title'] ) ) : '';
 	$description = isset( $_POST['majestic_tube_seo_description'] ) ? sanitize_textarea_field( wp_unslash( $_POST['majestic_tube_seo_description'] ) ) : '';
 
-	foreach (
-		array(
-			MAJESTIC_TUBE_TERM_SEO_TITLE       => trim( $title ),
-			MAJESTIC_TUBE_TERM_SEO_DESCRIPTION => trim( $description ),
-		) as $key => $value
-	) {
-		if ( '' === $value ) {
-			delete_term_meta( $term_id, $key );
-		} else {
-			update_term_meta( $term_id, $key, $value );
-		}
-	}
+	majestic_tube_term_seo_write( $term_id, $title, $description );
 }
 add_action( 'created_term', 'majestic_tube_term_seo_save', 10, 1 );
 add_action( 'edited_term', 'majestic_tube_term_seo_save', 10, 1 );
@@ -473,3 +527,96 @@ function majestic_tube_term_seo_social_tags( $tags ) {
 }
 add_filter( 'majestic_tube_social_meta_tags', 'majestic_tube_term_seo_social_tags', 10 );
 add_filter( 'majestic_tube_twitter_meta_tags', 'majestic_tube_term_seo_social_tags', 10 );
+
+/**
+ * Add the SEO column to every term list.
+ *
+ * A term you have never described is invisible from the front end: it looks
+ * identical to one you have. The column is what turns "did I finish these?"
+ * into something answerable at a glance, which is the same question the bulk
+ * editor answers in bulk - so both live here.
+ *
+ * Registered on init like the fields themselves, because the taxonomy has to
+ * exist before its columns can be filtered.
+ *
+ * @return void
+ */
+function majestic_tube_term_seo_add_columns() {
+
+	foreach ( majestic_tube_term_seo_supported_taxonomies() as $taxonomy ) {
+		add_filter(
+			'manage_edit-' . $taxonomy . '_columns',
+			function ( $columns ) {
+				$columns['majestic_tube_seo'] = __( 'SEO title', 'majestic-tube' );
+
+				return $columns;
+			}
+		);
+
+		add_filter(
+			'manage_edit-' . $taxonomy . '_column_hideable',
+			function ( $columns ) {
+				$columns[] = 'majestic_tube_seo';
+
+				return $columns;
+			}
+		);
+
+		add_action(
+			'manage_' . $taxonomy . '_custom_column',
+			'majestic_tube_term_seo_column',
+			10,
+			3
+		);
+	}
+}
+add_action( 'init', 'majestic_tube_term_seo_add_columns', 20 );
+
+/**
+ * Render the SEO column for one term.
+ *
+ * Shows the title the term will actually use, and a second muted line for the
+ * description, so a half-finished term is visibly half-finished. A term with
+ * neither is left blank rather than filled with a dash: the point of the
+ * column is to answer a question, and a column of dashes answers "none of
+ * these" when the honest answer is often "most of these".
+ *
+ * @param string $output  Existing column output.
+ * @param string $column  Column key.
+ * @param int    $term_id Term ID.
+ * @return string
+ */
+function majestic_tube_term_seo_column( $output, $column, $term_id ) {
+
+	if ( 'majestic_tube_seo' !== $column ) {
+		return $output;
+	}
+
+	$title       = majestic_tube_term_seo_title( $term_id );
+	$description = majestic_tube_term_seo_description( $term_id );
+
+	$cells = array();
+
+	if ( '' !== $title ) {
+		$cells[] = esc_html( $title );
+	}
+
+	if ( '' !== $description ) {
+		$cells[] = sprintf(
+			'<span style="color:#1a7f37">%s</span>',
+			esc_html__( 'Meta description set', 'majestic-tube' )
+		);
+	}
+
+	if ( ! $cells ) {
+		return $output;
+	}
+
+	// The same three colours the character counter uses, so the list and the
+	// form cannot disagree about what "set" looks like.
+	$separator = ( '' !== $title && '' !== $description )
+		? '<br /><span style="color:#646970">'
+		: '<span style="color:#646970">';
+
+	return $output . implode( $separator, $cells ) . '</span>';
+}

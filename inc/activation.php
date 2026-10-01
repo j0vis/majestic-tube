@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.24
+ * @version 2.2.25
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -1433,6 +1433,85 @@ function majestic_tube_repair_page_templates() {
 }
 add_action( 'admin_init', 'majestic_tube_repair_page_templates', 25 );
 add_action( 'after_switch_theme', 'majestic_tube_repair_page_templates', 55 );
+
+/**
+ * The theme mods that used to drive the generated-pages settings.
+ *
+ * Kept as a list rather than computed, so that a key added years ago and
+ * removed from the Customizer months ago is still cleared.
+ *
+ * @return string[]
+ */
+function majestic_tube_retired_pseo_settings() {
+
+	$settings = array(
+		'majestic_tube_generated_pages',
+		'majestic_tube_generated_actor_category',
+		'majestic_tube_generated_actor_actor',
+		'majestic_tube_generated_actor_length',
+		'majestic_tube_generated_category_tag',
+		'majestic_tube_generated_studio',
+		'majestic_tube_generated_series',
+		'majestic_tube_generated_browse',
+		'majestic_tube_generated_sitemap',
+	);
+
+	foreach ( array( 'actor_category', 'actor_actor', 'actor_length', 'category_tag', 'studio', 'series' ) as $type ) {
+		$settings[] = 'majestic_tube_generated_title_' . $type;
+		$settings[] = 'majestic_tube_generated_desc_' . $type;
+		$settings[] = 'majestic_tube_generated_intro_' . $type;
+	}
+
+	return $settings;
+}
+
+/**
+ * Delete the retired generated-pages settings.
+ *
+ * The switches and the title, description and intro format fields were
+ * withdrawn from the Customizer: the pages they governed now come and go with
+ * the catalogue behind them, and the wording a site owner cares about is set
+ * per category, actor, tag, studio and series instead. Nothing reads these
+ * values any more, so leaving them behind would only mean a database row
+ * quietly disagreeing with the settings screen.
+ *
+ * Runs on admin_init rather than once at activation, because a theme update
+ * is not a theme switch: there is no after_switch_theme to hang this on, and
+ * a site that updates without ever visiting wp-admin should still be cleaned
+ * the first time it does. Each key is read before it is removed, so the cost
+ * after the first run is one theme-mod lookup per key and no write at all.
+ *
+ * Deleting a stored "off" is deliberate. A site that switched a kind off gets
+ * that kind back, because the only way to thin the set now is the one the
+ * theme always recommended: add videos, or filter the vocabulary in a child
+ * theme.
+ *
+ * @return void
+ */
+function majestic_tube_retire_pseo_settings() {
+
+	$removed = false;
+
+	foreach ( majestic_tube_retired_pseo_settings() as $setting ) {
+		if ( null !== get_theme_mod( $setting, null ) ) {
+			remove_theme_mod( $setting );
+			$removed = true;
+		}
+	}
+
+	if ( ! $removed ) {
+		return;
+	}
+
+	/*
+	 * A page kind the site had switched off no longer has rewrite rules, so
+	 * its old addresses have been answering 404 since the switch was flipped.
+	 * With the value gone they resolve again, which is a routing change the
+	 * site has not been told about and cannot see in any settings screen.
+	 */
+	flush_rewrite_rules();
+}
+add_action( 'admin_init', 'majestic_tube_retire_pseo_settings' );
 
 /**
  * Carry the original footer widget assignment over to this theme.
