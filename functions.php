@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAJESTIC_TUBE_VERSION', '2.2.23' );
+define( 'MAJESTIC_TUBE_VERSION', '2.2.24' );
 define( 'MAJESTIC_TUBE_DIR', get_template_directory() );
 define( 'MAJESTIC_TUBE_URI', get_template_directory_uri() );
 
@@ -34,6 +34,7 @@ require MAJESTIC_TUBE_DIR . '/inc/meta-social.php';
 require MAJESTIC_TUBE_DIR . '/inc/share.php';
 require MAJESTIC_TUBE_DIR . '/inc/schema.php';
 require MAJESTIC_TUBE_DIR . '/inc/term-images.php';
+require MAJESTIC_TUBE_DIR . '/inc/term-seo.php';
 require MAJESTIC_TUBE_DIR . '/inc/multithumbs.php';
 require MAJESTIC_TUBE_DIR . '/inc/widget-videos.php';
 require MAJESTIC_TUBE_DIR . '/inc/ajax-login-register.php';

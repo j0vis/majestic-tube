@@ -14,7 +14,7 @@
  * plugin owns the social tags.
  *
  * @package Majestic Tube
- * @version 2.2.23
+ * @version 2.2.24
  */
 
 defined( 'ABSPATH' ) || exit;

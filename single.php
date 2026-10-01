@@ -7,7 +7,7 @@
  * "report video" action.
  *
  * @package Majestic Tube
- * @version 2.2.23
+ * @version 2.2.24
  */
 
 get_header();

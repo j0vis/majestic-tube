@@ -34,7 +34,7 @@
  * size can retune the gate without editing the theme.
  *
  * @package Majestic Tube
- * @version 2.2.23
+ * @version 2.2.24
  */
 
 defined( 'ABSPATH' ) || exit;
