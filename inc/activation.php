@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.2.26
+ * @version 2.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -1433,58 +1433,6 @@ function majestic_tube_repair_page_templates() {
 }
 add_action( 'admin_init', 'majestic_tube_repair_page_templates', 25 );
 add_action( 'after_switch_theme', 'majestic_tube_repair_page_templates', 55 );
-
-/**
- * The theme mods that used to drive the generated-pages settings.
- *
- * Kept as a list rather than computed, so that a key added years ago and
- * removed from the Customizer months ago is still cleared.
- *
- * @return string[]
- */
-function majestic_tube_retired_pseo_settings() {
-
-	$settings = array(
-		'majestic_tube_generated_pages',
-		'majestic_tube_generated_actor_category',
-		'majestic_tube_generated_actor_actor',
-		'majestic_tube_generated_actor_length',
-		'majestic_tube_generated_category_tag',
-		'majestic_tube_generated_studio',
-		'majestic_tube_generated_series',
-		'majestic_tube_generated_browse',
-		'majestic_tube_generated_sitemap',
-	);
-
-	foreach ( array( 'actor_category', 'actor_actor', 'actor_length', 'category_tag', 'studio', 'series' ) as $type ) {
-		$settings[] = 'majestic_tube_generated_title_' . $type;
-		$settings[] = 'majestic_tube_generated_desc_' . $type;
-		$settings[] = 'majestic_tube_generated_intro_' . $type;
-	}
-
-	return $settings;
-}
-
-/**
- * Preserve old collection opt-outs on upgrades that skipped 2.2.26.
- * Saved theme mods are retained for recovery; no activation deletes wording
- * or automatically re-enables pages the owner excluded from search.
- */
-function majestic_tube_retire_pseo_settings() {
-	// Preserve old controls for users upgrading past 2.2.26. Never delete or
-	// re-enable a stored opt-out merely because its UI moved.
-	if ( get_option( 'majestic_tube_seo_legacy_migrated', false ) ) { return; }
-	$collections = (array) get_option( 'majestic_tube_collections', array() );
-	foreach ( array( 'actor_category', 'actor_actor', 'actor_length', 'category_tag', 'studio', 'series' ) as $type ) {
-		$old = get_theme_mod( 'majestic_tube_generated_' . $type, null );
-		if ( 'off' === $old || 'off' === get_theme_mod( 'majestic_tube_generated_pages', null ) ) {
-			if ( ! isset( $collections[ $type ] ) ) { $collections[ $type ] = array( 'enabled' => false ); }
-		}
-	}
-	update_option( 'majestic_tube_collections', $collections, false );
-	update_option( 'majestic_tube_seo_legacy_migrated', true, false );
-}
-add_action( 'admin_init', 'majestic_tube_retire_pseo_settings' );
 
 /**
  * Carry the original footer widget assignment over to this theme.

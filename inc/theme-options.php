@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.2.26
+ * @version 2.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -104,11 +104,6 @@ function majestic_tube_option_sections() {
 			'panel'       => 'ads',
 			'panel_title' => __( 'Advertising', 'majestic-tube' ),
 			'description' => __( 'The ad slots this theme prints itself are switched on here. The remaining page areas are managed from Appearance &rarr; Widgets.', 'majestic-tube' ),
-		),
-		'seo'          => array(
-			'title'       => __( 'SEO &amp; Social', 'majestic-tube' ),
-			'panel'       => 'seo',
-			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
 		),
 		'home_seo'     => array(
 			'title'       => __( 'Homepage SEO', 'majestic-tube' ),
@@ -212,7 +207,6 @@ function majestic_tube_options_map() {
 	$members      = 'members';
 	$submission   = 'submission';
 	$advertising  = 'advertising';
-	$seo          = 'seo';
 	$home_seo     = 'home_seo';
 	$archive_seo  = 'archive_seo';
 	$code         = 'code';
@@ -1285,47 +1279,6 @@ function majestic_tube_options_map() {
 			'label'   => __( 'Legacy footer content (mobile)', 'majestic-tube' ),
 			'section' => $advertising,
 			'customizer' => false,
-		),
-		/* ------------------------------------------------------------------
-		 * SEO and social metadata
-		 * ------------------------------------------------------------------ */
-		'facebook-app-id'          => array(
-			'setting'     => 'majestic_tube_facebook_app_id',
-			'default'     => '',
-			'type'        => 'text',
-			'label'       => __( 'Facebook app ID', 'majestic-tube' ),
-			'section' => $seo,
-			'description' => __( 'Optional. Leave this empty to omit the Facebook tag entirely.', 'majestic-tube' ),
-		),
-		'twitter-site'             => array(
-			'setting' => 'majestic_tube_twitter_site',
-			'default' => '',
-			'type'    => 'text',
-			'label'   => __( 'Twitter/x @handle for twitter:site', 'majestic-tube' ),
-			'section' => $seo,
-		),
-		/*
-		 * twitter:player card (2.1.0). A player card needs an HTTPS URL that
-		 * returns a bare HTML page with the video embedded, because the card
-		 * iframe is only ~435px wide. The theme cannot render one on its own
-		 * template reliably for every permalink structure, so the administrator
-		 * provides the base URL and the theme appends ?post={id}.
-		 */
-		'twitter-player-url'       => array(
-			'setting'     => 'majestic_tube_twitter_player_url',
-			'default'     => '',
-			'type'        => 'url',
-			'label'       => __( 'Twitter player URL base (optional)', 'majestic-tube' ),
-			'section' => $seo,
-			'description' => __( 'HTTPS URL of a page that embeds a video when given ?post={id}. Leave empty to keep the summary_large_image card.', 'majestic-tube' ),
-		),
-		'meta-verification'        => array(
-			'setting'     => 'majestic_tube_meta_verification',
-			'default'     => '',
-			'type'        => 'code',
-			'label'       => __( 'Search engine verification tags', 'majestic-tube' ),
-			'section' => $seo,
-			'description' => __( 'Printed verbatim inside <head>. Paste the full <meta> tag(s).', 'majestic-tube' ),
 		),
 		/* ------------------------------------------------------------------
 		 * Homepage SEO - the front page (2.2.26)

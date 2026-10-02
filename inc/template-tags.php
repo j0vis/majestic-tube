@@ -3,7 +3,7 @@
  * Template tags - WP-Script compatible helpers.
  *
  * @package Majestic Tube
- * @version 2.0.0
+ * @version 2.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -89,9 +89,9 @@ function majestic_tube_get_video_sources( $post_id = 0 ) {
 	 * choice (Appearance -> Customize -> Video Page -> Video Page Layout),
 	 * not a per-post one, and it is resolved here because this is the only
 	 * place the theme ranks the fields. Everything downstream - the player
-	 * branches in single.php, the quality menu, the og:video tags in
-	 * inc/meta-social.php - reads the type decided here, so one setting
-	 * moves all of them and every post on the site at once.
+	 * branches in single.php and the quality menu - reads the type decided
+	 * here, so one setting moves all of them and every post on the site at
+	 * once.
 	 *
 	 * The choice sets priority, not availability. A post that does not carry
 	 * the preferred field still plays from the other one: forcing `embed`

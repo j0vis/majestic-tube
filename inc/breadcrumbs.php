@@ -1,16 +1,14 @@
 <?php
 /**
- * Breadcrumb trail and BreadcrumbList structured data.
+ * Breadcrumb trail.
  *
- * The visual trail and the JSON-LD graph are built from one item list
- * (majestic_tube_get_breadcrumb_items()), so they can never describe
- * different paths. The JSON-LD is printed from wp_head on non-front-page
- * requests, which is where core's Yoast/Rank Math print theirs; both listen
- * for the same filter the plugins document for disabling theme schema
- * (majestic_tube_disable_schema).
+ * One item list (majestic_tube_get_breadcrumb_items()) feeds the visual trail
+ * the renderer prints. The BreadcrumbList JSON-LD graph that used to be
+ * printed alongside it is gone: structured data belongs to the SEO plugin the
+ * site runs, and two BreadcrumbList graphs on one page is worse than one.
  *
  * @package Majestic Tube
- * @version 2.2.26
+ * @version 2.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -20,7 +18,7 @@ defined( 'ABSPATH' ) || exit;
  *
  * Each item is array( 'label' => string, 'url' => string ). The final item -
  * the current page - has an empty url, which the renderer prints as the
- * .breadcrumb-current span. In JSON-LD that last node may omit its item URL.
+ * .breadcrumb-current span.
  *
  * @return array<int, array{label:string,url:string}>
  */
@@ -98,97 +96,3 @@ function majestic_tube_breadcrumbs() {
 
 	echo '</nav>';
 }
-
-/**
- * Whether the theme should print its JSON-LD graphs.
- *
- * Yoast, Rank Math and friends declare the same filter contract for their own
- * schema output; honoring one shared flag here keeps a site from emitting two
- * BreadcrumbList graphs on every page.
- *
- * @return bool
- */
-function majestic_tube_should_output_schema() {
-	$disabled = false;
-
-	foreach ( array_keys( majestic_tube_social_meta_plugins() ) as $plugin ) {
-		if ( majestic_tube_is_plugin_active( $plugin ) ) {
-			$disabled = true;
-			break;
-		}
-	}
-
-	/**
-	 * Filter whether Majestic Tube prints its own JSON-LD schema.
-	 *
-	 * Return true when an SEO plugin already owns structured data.
-	 *
-	 * @param bool $disabled True when an SEO plugin is active.
-	 */
-	return ! apply_filters( 'majestic_tube_disable_schema', $disabled );
-}
-
-/**
- * Print BreadcrumbList JSON-LD on every non-front-page view.
- *
- * The current item is included with its name and position, but no item URL.
- * This preserves the visible hierarchy on ordinary two-node archive trails.
- *
- * @return void
- */
-function majestic_tube_output_breadcrumb_schema() {
-	if ( is_front_page() || ! majestic_tube_should_output_schema() ) {
-		return;
-	}
-
-	$items = majestic_tube_get_breadcrumb_items();
-	$items = array_filter(
-		$items,
-		function ( $item ) {
-			return '' !== trim( (string) $item['label'] );
-		}
-	);
-
-	if ( count( $items ) < 2 ) {
-		return;
-	}
-
-	$positions = array();
-	$index     = 0;
-
-	foreach ( $items as $item ) {
-		$index++;
-		$node = array(
-			'@type'    => 'ListItem',
-			'position' => $index,
-			'name'     => wp_strip_all_tags( (string) $item['label'] ),
-		);
-		if ( ! empty( $item['url'] ) ) { $node['item'] = esc_url_raw( $item['url'] ); }
-		$positions[] = $node;
-	}
-
-	$schema = array(
-		'@context'        => 'https://schema.org',
-		'@type'           => 'BreadcrumbList',
-		'itemListElement' => $positions,
-	);
-
-	/**
-	 * Filter the BreadcrumbList schema before it is printed.
-	 *
-	 * @param array $schema Schema graph.
-	 */
-	$schema = (array) apply_filters( 'majestic_tube_breadcrumb_schema', $schema );
-
-	$json = wp_json_encode( $schema, JSON_HEX_TAG | JSON_HEX_AMP | JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES );
-
-	if ( ! $json ) {
-		return;
-	}
-
-	printf(
-		'<script type="application/ld+json">%s</script>' . "\n",
-		$json // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- JSON payload.
-	);
-}
-add_action( 'wp_head', 'majestic_tube_output_breadcrumb_schema', 6 );

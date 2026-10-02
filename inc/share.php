@@ -23,7 +23,7 @@
  * filter, which receives the finished link list before it is printed.
  *
  * @package Majestic Tube
- * @version 2.0.0
+ * @version 2.3.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -63,6 +63,31 @@ function majestic_tube_share_networks() {
 }
 
 /**
+ * The text a share link carries alongside the title.
+ *
+ * The excerpt when there is one, otherwise the post's own words, trimmed to the
+ * length a network link preview will show. This is a share link, not a search
+ * description: no SEO plugin is consulted and none is needed.
+ *
+ * @param WP_Post|null $post Post object.
+ * @return string
+ */
+function majestic_tube_share_description( $post ) {
+
+	if ( ! $post ) {
+		return '';
+	}
+
+	if ( ! empty( $post->post_excerpt ) ) {
+		return wp_trim_words( wp_strip_all_tags( $post->post_excerpt ), 55, '...' );
+	}
+
+	$content = apply_filters( 'the_content', $post->post_content ); // phpcs:ignore WordPress.NamingConventions.PrefixAllGlobals.NonPrefixedHooknameFound -- core filter.
+
+	return wp_trim_words( wp_strip_all_tags( strip_shortcodes( $content ) ), 55, '...' );
+}
+
+/**
  * Print the share block for a post.
  *
  * @param int $post_id Post ID.
@@ -78,7 +103,7 @@ function majestic_tube_share_buttons( $post_id = 0 ) {
 	$context = array(
 		'url'         => get_permalink( $post_id ),
 		'title'       => get_the_title( $post_id ),
-		'description' => majestic_tube_get_social_description( get_post( $post_id ) ),
+		'description' => majestic_tube_share_description( get_post( $post_id ) ),
 	);
 
 	$links = array();
