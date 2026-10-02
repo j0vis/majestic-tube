@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.4.0
+ * @version 2.4.1
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -104,6 +104,12 @@ function majestic_tube_option_sections() {
 			'panel'       => 'ads',
 			'panel_title' => __( 'Advertising', 'majestic-tube' ),
 			'description' => __( 'The ad slots this theme prints itself are switched on here. The remaining page areas are managed from Appearance &rarr; Widgets.', 'majestic-tube' ),
+		),
+		'links_bar'    => array(
+			'title'       => __( 'Friends &amp; Ad Links', 'majestic-tube' ),
+			'panel'       => 'ads',
+			'panel_title' => __( 'Advertising', 'majestic-tube' ),
+			'description' => __( 'A row of outbound text links - partner sites, ad zones - printed under the header on every page. The links themselves are a WordPress menu assigned under Appearance &rarr; Menus; this section decides whether the row prints and how it looks.', 'majestic-tube' ),
 		),
 		'home_seo'     => array(
 			'title'       => __( 'Homepage SEO', 'majestic-tube' ),
@@ -213,6 +219,7 @@ function majestic_tube_options_map() {
 	$members      = 'members';
 	$submission   = 'submission';
 	$advertising  = 'advertising';
+	$links_bar    = 'links_bar';
 	$home_seo     = 'home_seo';
 	$archive_seo  = 'archive_seo';
 	$video_seo    = 'video_seo';
@@ -1286,6 +1293,77 @@ function majestic_tube_options_map() {
 			'label'   => __( 'Legacy footer content (mobile)', 'majestic-tube' ),
 			'section' => $advertising,
 			'customizer' => false,
+		),
+		/* ------------------------------------------------------------------
+		 * Friends & ad links - the outbound text link strip
+		 *
+		 * The links are a WordPress menu, assigned under Appearance ->
+		 * Menus, so a partner can be added without an editor opening the
+		 * menu visitors navigate by. This section only decides whether the
+		 * row prints and how it is presented.
+		 *
+		 * Default on, but the row stays invisible until a menu is actually
+		 * assigned: majestic_tube_links_bar() returns early when the
+		 * location is empty, so an existing site sees no change on upgrade
+		 * and no empty bordered shell where the bar would be.
+		 * ------------------------------------------------------------------ */
+		'show-links-bar'           => array(
+			'setting'     => 'majestic_tube_show_links_bar',
+			'default'     => 'on',
+			'type'        => 'onoff',
+			'label'       => __( 'Show the friends and ad links row', 'majestic-tube' ),
+			'section'     => $links_bar,
+			'description' => __( 'Prints a row of outbound text links under the header, on every page. Assign a menu to <strong>Friends &amp; Ad Links</strong> under Appearance &rarr; Menus first - until you do, the row prints nothing.', 'majestic-tube' ),
+		),
+		'links-bar-label'          => array(
+			'setting'     => 'majestic_tube_links_bar_label',
+			'default'     => '',
+			'type'        => 'text',
+			'label'       => __( 'Row label', 'majestic-tube' ),
+			'section'     => $links_bar,
+			'description' => __( 'An optional heading printed before the links, such as &ldquo;Friends&rdquo;. Leave it blank and the row prints the links alone, still labelled &ldquo;Friends and partners&rdquo; for screen readers.', 'majestic-tube' ),
+			'input_attrs' => array(
+				'placeholder' => __( 'Friends', 'majestic-tube' ),
+			),
+		),
+		'links-bar-new-tab'        => array(
+			'setting'     => 'majestic_tube_links_bar_new_tab',
+			'default'     => 'on',
+			'type'        => 'onoff',
+			'label'       => __( 'Open links in a new tab', 'majestic-tube' ),
+			'section'     => $links_bar,
+			'description' => __( 'Every link in this row is an outbound partner or ad link, so the theme always adds <code>rel=&quot;sponsored nofollow noopener noreferrer&quot;</code> whether this is on or off. This switch only controls the new tab.', 'majestic-tube' ),
+		),
+		'links-bar-style'          => array(
+			'setting'     => 'majestic_tube_links_bar_style',
+			'default'     => 'plain',
+			'type'        => 'select',
+			'label'       => __( 'Row style', 'majestic-tube' ),
+			'section'     => $links_bar,
+			'description' => __( 'How the row is decorated. Stars, rockets and glam add an emoji in front of each link, cycling through their set; neon lights the text up instead. Plain is the quiet, undecorated row.', 'majestic-tube' ),
+			'choices'     => array(
+				'plain'   => __( 'Plain - text only', 'majestic-tube' ),
+				'stars'   => __( 'Stars and sparkles', 'majestic-tube' ),
+				'rockets' => __( 'Rockets and shooting stars', 'majestic-tube' ),
+				'glam'    => __( 'Glam - fire, crowns, jewels', 'majestic-tube' ),
+				'neon'    => __( 'Neon - glowing text', 'majestic-tube' ),
+			),
+		),
+		'links-bar-icons'          => array(
+			'setting'     => 'majestic_tube_links_bar_icons',
+			'default'     => 'on',
+			'type'        => 'onoff',
+			'label'       => __( 'Show the emoji on each link', 'majestic-tube' ),
+			'section'     => $links_bar,
+			'description' => __( 'Only affects the styles that carry emoji. If you type your own emoji at the start of a menu label the theme leaves it exactly as you wrote it and adds nothing in front of it.', 'majestic-tube' ),
+		),
+		'links-bar-shine'          => array(
+			'setting'     => 'majestic_tube_links_bar_shine',
+			'default'     => 'on',
+			'type'        => 'onoff',
+			'label'       => __( 'Shine sweep on hover', 'majestic-tube' ),
+			'section'     => $links_bar,
+			'description' => __( 'A highlight passes across a link as the pointer crosses it. The theme stops all of its animation for visitors whose system asks for reduced motion.', 'majestic-tube' ),
 		),
 		/* ------------------------------------------------------------------
 		 * Homepage SEO - the front page (2.2.26)

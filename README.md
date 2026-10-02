@@ -136,7 +136,7 @@ Majestic Tube uses familiar WordPress menus. The most important areas are listed
 | `Media` | Upload images and other media used by videos and site content. |
 | `Pages` | Edit the automatically created submission, profile, directory, and legal pages. |
 | `Appearance → Customize` | Control listings, the player, branding, sharing, submission rules, custom code, and mobile presentation. |
-| `Appearance → Menus` | Manage the Main Menu and Footer Legal Menu. |
+| `Appearance → Menus` | Manage the Main Menu, Footer Legal Menu, and the Friends & Ad Links row. |
 | `Appearance → Widgets` | Place video lists and optional content blocks in theme areas. |
 | `Settings → Reading` | Choose what appears on the homepage. |
 | `Settings → Discussion` | Control comments and discussion settings for videos. |
@@ -588,6 +588,7 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 | Site Features | Accounts & Spam Protection | Member login and registration, and the Cloudflare Turnstile spam check with its two keys. |
 | Site Features | Video Submission | The submission form, the links that lead to it, and which fields are required. |
 | Advertising | Advertising | In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from `Appearance → Widgets`. |
+| Advertising | Friends & Ad Links | The row of outbound partner and ad text links printed under the header. The links themselves are a menu, under `Appearance → Menus`. |
 | SEO & Analytics | Homepage SEO | Where the visible homepage heading sits and the introduction printed once beneath it. |
 | SEO & Analytics | Archive Page SEO | The line shown on each category and actor card, and whether the category and tag descriptions go above or below the list. The per-term titles and descriptions are not here — see below. |
 | SEO & Analytics | Custom Code | Analytics code in the page head, extra scripts before the closing body tag, and scripts for mobile visitors only. |
@@ -690,6 +691,43 @@ Advertising is unchanged by default. Turning on `Only load advertising after con
 >
 > Connecting a consent plugin is a one-line filter in a small snippet or a site-specific plugin. Let the consent plugin return `true` once advertising is allowed, and the theme will print its placements as normal. The filter is `majestic_tube_ads_allowed` and it receives the placement name as its second argument: in-feed, popunder, header, footer, under-player, video-sidebar, or player. It also works the other way round for a single placement, which is useful if one area should always be shown.
 
+### Advertising → Friends & Ad Links
+
+A row of outbound text links &mdash; partner sites, ad zones, anything outside your own catalogue &mdash; printed under the header on **every** page, including single video pages.
+
+The links are a real WordPress menu, so you add, remove and reorder them the usual way. This section only decides whether the row prints and how it looks.
+
+| Setting | What it does |
+| --- | --- |
+| **Show the friends and ad links row** | Prints the row. On by default, but it stays invisible until a menu is actually assigned. |
+| **Row label** | An optional heading printed before the links, such as &ldquo;Friends&rdquo;. Leave it blank and the links print alone. |
+| **Open links in a new tab** | Whether a link opens in a new tab. On by default. |
+| **Row style** | How the row is decorated. See below. |
+| **Show the emoji on each link** | Turns the preset&rsquo;s emoji on or off. |
+| **Shine sweep on hover** | A highlight passes across a link as the pointer crosses it. |
+
+#### Row styles
+
+| Style | What you get |
+| --- | --- |
+| **Plain** | Text only. The quiet default. |
+| **Stars and sparkles** | An emoji in front of each link, cycling through stars and sparkles. |
+| **Rockets and shooting stars** | The same, with a rocket set. Links lift slightly on hover, as though launching. |
+| **Glam** | Fire, crowns and jewels, with the heading in your accent colour. |
+| **Neon** | No emoji at all &mdash; the text itself takes a glow in your accent colour. |
+
+The emoji cycle through the preset&rsquo;s set rather than repeating one glyph, so a long row reads as decorated rather than stamped. The row label gets the first glyph of the same set.
+
+**Two details worth knowing.** If you type your own emoji at the start of a menu label, the theme adds nothing in front of it &mdash; two icons on one link looks like a fault, not a flourish. And the neon style deliberately carries no emoji, because a colour glow behind a colour emoji reads as a rendering problem rather than as design.
+
+The shine sweep, the icon tilt and the rocket lift are all switched off for visitors whose system asks for reduced motion. None of them carries meaning, so nothing is lost.
+
+**To fill it with links**, open `Appearance → Menus`, create or pick a menu, tick **Friends & Ad Links** in the *Menu Locations* column, and add your items. Nothing appears until both the menu is assigned and the row has at least one item &mdash; an assigned but empty menu prints nothing at all, not an empty bordered strip.
+
+Every link in this row is treated as advertising, and the theme adds `rel="sponsored nofollow noopener noreferrer"` to each one whether or not you set a rel yourself. That is not something the switch controls, and it cannot be turned off: the row exists for outbound and usually paid links, and none of it should pass ranking signal to the destination or read as an endorsement. The filter is scoped to this one menu location, so the Main Menu and Footer Legal Menu keep exactly the rel values you give them.
+
+The row is a `nav` landmark labelled by the row label, or by &ldquo;Friends and partners&rdquo; when the label is blank, so it is announced properly rather than being read as a stray line of text.
+
 ### SEO & Analytics → Homepage SEO
 
 These controls set the visible homepage introduction and where it appears. The search title and meta description are set in your SEO plugin.
@@ -740,6 +778,18 @@ The homepage has no widget area of its own, so there is nothing to hide on mobil
 
 Keep legal pages in the footer rather than crowding the primary navigation.
 
+### Friends & Ad Links menu
+
+1. Go to `Appearance → Menus`.
+2. Create a menu, or pick one you already have.
+3. Add your partner sites and ad destinations as custom links.
+4. In the **Menu Locations** column on the same screen, tick **Friends & Ad Links**.
+5. Choose **Save Menu**.
+
+That menu is then printed as a row of text links under the header on every page, and nowhere else. Whether the row shows, and its heading, are set under `Appearance → Customize → Advertising → Friends & Ad Links`.
+
+Keep it to outbound destinations. Anything that belongs in your own navigation is a better fit in the Main Menu above, and the theme marks every link in this row `sponsored nofollow` so it never passes ranking signal to the destination.
+
 ### Video list widget
 
 1. Open `Appearance → Widgets`.
@@ -754,7 +804,7 @@ Available sorting choices are Latest, Most viewed, and Random.
 
 The **Content Block** widget is a general place for administrator-provided shortcodes and approved content markup. It can be targeted to all devices, desktop only, or mobile only.
 
-Every area named **code and ads** accepts this widget and nothing else, so any ad tag, tracking snippet or raw embed goes in one of those. The single area named **Footer widgets** is the opposite: it accepts every standard widget, and that is where a link list, a friends-links block, a menu or a small logo belongs.
+Every area named **code and ads** accepts this widget and nothing else, so any ad tag, tracking snippet or raw embed goes in one of those. The single area named **Footer widgets** is the opposite: it accepts every standard widget, and that is where a link list, a menu or a small logo belongs. For a row of partner links directly under the header, use the **Friends & Ad Links** menu location instead.
 
 | Area on the Widgets screen | Where it appears |
 | --- | --- |

@@ -71,6 +71,15 @@
 	</div>
 
 	<?php
+	/*
+	 * Friends and ad links: a third navigation row, site-wide, sitting under
+	 * the logo / search / main menu row. It prints nothing unless the switch
+	 * is on and a menu is assigned to the location.
+	 */
+	majestic_tube_links_bar();
+	?>
+
+	<?php
 	// Header content is managed through the Widgets screen.
 	majestic_tube_content_location( 'header' );
 	?>

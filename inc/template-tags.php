@@ -718,6 +718,288 @@ function majestic_tube_tags_slider() {
 }
 
 /**
+ * Display the friends and ad links bar, directly under the header row.
+ *
+ * This is a site-wide strip of outbound text links - partner sites, ad zones,
+ * anything that lives outside the catalogue - and it is deliberately the third
+ * navigation row rather than part of the main menu. Keeping it separate means
+ * a partner can be added or removed without an editor ever having to open the
+ * menu a visitor actually navigates by, and it means the rel attributes below
+ * cannot leak onto the site's own pages.
+ *
+ * Prints nothing at all when the switch is off, no menu is assigned, or the
+ * assigned menu has no items. There is no empty shell and no border left
+ * behind, which is what an existing site sees after an upgrade.
+ *
+ * @return void
+ */
+function majestic_tube_links_bar() {
+	if ( ! majestic_tube_option_is_on( 'show-links-bar' ) ) {
+		return;
+	}
+
+	if ( ! has_nav_menu( 'majestic_tube_links_menu' ) ) {
+		return;
+	}
+
+	$style = majestic_tube_links_bar_style();
+
+	// Reset before the menu renders: the title filter below walks its icon
+	// set with this counter, and a page can print the bar more than once
+	// (a header on both a normal page and a print template, for one).
+	$GLOBALS['majestic_tube_links_bar_icon_index'] = 0;
+
+	/*
+	 * has_nav_menu() only reports that a menu is *assigned* to the location,
+	 * not that it still has items in it. A partner who unsets every item
+	 * leaves an assigned, empty menu, and printing the wrapper around the
+	 * empty list would leave a bordered strip with nothing in it. The same
+	 * reason the popular tags bar checks its own markup before it prints.
+	 */
+	ob_start();
+
+	wp_nav_menu(
+		array(
+			'theme_location' => 'majestic_tube_links_menu',
+			'menu_id'        => 'links-menu',
+			'menu_class'     => 'links-bar-menu',
+			'container'      => false,
+			'depth'          => 1,
+			'fallback_cb'    => false,
+			'items_wrap'     => '<ul id="%1$s" class="%2$s">%3$s</ul>',
+		)
+	);
+
+	$items = (string) ob_get_clean();
+
+	if ( false === strpos( $items, '<li' ) ) {
+		return;
+	}
+
+	$label = trim( (string) majestic_tube_get_option( 'wpst-options', 'links-bar-label', '' ) );
+
+	// The label is for assistive technology when the bar carries no visible
+	// heading, and for the nav landmark itself either way.
+	$aria_label = '' !== $label
+		? $label
+		: __( 'Friends and partners', 'majestic-tube' );
+
+	// data-style and data-shine are read by the stylesheet, which is the only
+	// place that knows how each preset should look. This function never emits
+	// style-specific markup.
+	$attributes = ' class="links-bar"'
+		. ' data-style="' . esc_attr( $style ) . '"'
+		. ( majestic_tube_option_is_on( 'links-bar-shine' ) ? ' data-shine="1"' : '' );
+
+	echo '<nav' . $attributes . ' aria-label="' . esc_attr( $aria_label ) . '">';
+
+	if ( '' !== $label ) {
+		$set  = majestic_tube_links_bar_icon_set( $style );
+		$mark = $set ? reset( $set ) : '';
+
+		echo '<span class="links-bar-label">';
+
+		if ( '' !== $mark ) {
+			// aria-hidden: the glyph repeats what the row is, and a screen
+			// reader announcing "sparkles Friends" helps nobody.
+			echo '<span class="links-bar-icon" aria-hidden="true">' . esc_html( $mark ) . '</span>';
+		}
+
+		echo esc_html( $label ) . '</span>';
+	}
+
+	// phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_nav_menu output, escaped by the walker.
+	echo $items;
+
+	echo '</nav>';
+}
+
+/**
+ * The visual preset for the friends and ad links row.
+ *
+ * @return string One of plain, stars, rockets, glam, neon.
+ */
+function majestic_tube_links_bar_style() {
+	$style = (string) majestic_tube_get_option( 'wpst-options', 'links-bar-style', 'plain' );
+	$sets  = array_keys( majestic_tube_links_bar_icon_sets() );
+
+	if ( ! in_array( $style, $sets, true ) ) {
+		$style = 'plain';
+	}
+
+	/**
+	 * Filter the friends and ad links row style preset.
+	 *
+	 * @param string $style Preset slug.
+	 */
+	return (string) apply_filters( 'majestic_tube_links_bar_style', $style );
+}
+
+/**
+ * The icon set for each preset.
+ *
+ * Emoji rather than an icon font: the theme loads no symbol font, and native
+ * glyphs add no font file and no request. The sets are deliberately neutral -
+ * this is a theme sold to whoever installs it, not to one audience - and the
+ * glamorous one is stars and jewels rather than anything explicit. An
+ * administrator who wants something else types their own emoji straight into
+ * a menu label and the theme leaves it alone.
+ *
+ * neon has no set on purpose: it is a glow effect with nothing in front of the
+ * text, because a glow behind an emoji reads as a rendering fault.
+ *
+ * @return array<string, string[]>
+ */
+function majestic_tube_links_bar_icon_sets() {
+	$sets = array(
+		'plain'   => array(),
+		'stars'   => array( '⭐', '✨', '🌟', '💫' ),
+		'rockets' => array( '🚀', '🛸', '🌠' ),
+		'glam'    => array( '🔥', '👑', '💎', '✨' ),
+		'neon'    => array(),
+	);
+
+	/**
+	 * Filter the icon set for each friends and ad links preset.
+	 *
+	 * @param array<string, string[]> $sets Preset slug => glyphs.
+	 */
+	return apply_filters( 'majestic_tube_links_bar_icon_sets', $sets );
+}
+
+/**
+ * The icon set for one preset.
+ *
+ * @param string $style Preset slug. Empty reads the current preset.
+ * @return string[]
+ */
+function majestic_tube_links_bar_icon_set( $style = '' ) {
+	$sets = majestic_tube_links_bar_icon_sets();
+	$style = $style ? $style : majestic_tube_links_bar_style();
+
+	return isset( $sets[ $style ] ) ? (array) $sets[ $style ] : array();
+}
+
+/**
+ * The next glyph from a set, cycling.
+ *
+ * A global counter rather than a static so the row can reset it and start over
+ * if it is ever printed twice in one request.
+ *
+ * @param string[] $set Icon set.
+ * @return string Empty when the set is empty.
+ */
+function majestic_tube_links_bar_next_icon( $set ) {
+	if ( ! $set ) {
+		return '';
+	}
+
+	$index = isset( $GLOBALS['majestic_tube_links_bar_icon_index'] )
+		? (int) $GLOBALS['majestic_tube_links_bar_icon_index']
+		: 0;
+
+	$GLOBALS['majestic_tube_links_bar_icon_index'] = $index + 1;
+
+	return (string) $set[ $index % count( $set ) ];
+}
+
+/**
+ * Whether a menu label already begins with a symbol the editor typed.
+ *
+ * Emoji, dingbats, arrows and misc symbols. If they put their own glyph in
+ * the label they meant it, and the theme should not stack a second one in
+ * front of it - two icons on one link looks like a fault, not a flourish.
+ *
+ * @param string $title Menu item title.
+ * @return bool
+ */
+function majestic_tube_links_bar_has_own_icon( $title ) {
+	return 1 === preg_match(
+		'/^[\x{1F000}-\x{1FAFF}\x{2600}-\x{27BF}\x{2B00}-\x{2BFF}\x{2190}-\x{21FF}\x{FE0F}]/u',
+		(string) $title
+	);
+}
+
+/**
+ * Put a decorative glyph in front of each friends and ad links item.
+ *
+ * Scoped to this menu location the same way the rel filter is, so no other
+ * menu in the theme picks up an icon it did not ask for.
+ *
+ * @param string  $title Item title.
+ * @param WP_Post $item  Menu item.
+ * @param stdClass $args  wp_nav_menu() arguments.
+ * @param int     $depth Menu depth.
+ * @return string
+ */
+function majestic_tube_links_bar_item_title( $title, $item, $args, $depth ) {
+	if ( ! is_object( $args ) || empty( $args->theme_location ) || 'majestic_tube_links_menu' !== $args->theme_location ) {
+		return $title;
+	}
+
+	// Top row only. A sub-item keeps the plain label it was written with.
+	if ( 0 !== (int) $depth ) {
+		return $title;
+	}
+
+	if ( ! majestic_tube_option_is_on( 'links-bar-icons' ) ) {
+		return $title;
+	}
+
+	if ( majestic_tube_links_bar_has_own_icon( $title ) ) {
+		return $title;
+	}
+
+	$icon = majestic_tube_links_bar_next_icon( majestic_tube_links_bar_icon_set() );
+
+	if ( '' === $icon ) {
+		return $title;
+	}
+
+	return '<span class="links-bar-icon" aria-hidden="true">' . esc_html( $icon ) . '</span>' . $title;
+}
+add_filter( 'nav_menu_item_title', 'majestic_tube_links_bar_item_title', 10, 4 );
+
+/**
+ * Force advertising rel attributes on the friends and ad links menu.
+ *
+ * Every link in this strip is outbound and usually paid for, so none of it
+ * should pass PageRank or be treated as an endorsement of the destination.
+ * The filter is scoped by theme_location rather than by a global flag, so the
+ * main menu and the footer menu keep whatever rel the editor gave them, and
+ * only this one location is rewritten.
+ *
+ * @param array    $atts Link attributes.
+ * @param WP_Post  $item Menu item.
+ * @param stdClass $args wp_nav_menu() arguments.
+ * @return array
+ */
+function majestic_tube_links_bar_link_attributes( $atts, $item, $args ) {
+	if ( ! is_object( $args ) || empty( $args->theme_location ) || 'majestic_tube_links_menu' !== $args->theme_location ) {
+		return $atts;
+	}
+
+	// Deduplicate: an editor may already have typed rel on the item.
+	$tokens = preg_split( '/\s+/', trim( isset( $atts['rel'] ) ? $atts['rel'] : '' ) );
+	$tokens = array_filter( $tokens );
+
+	foreach ( array( 'sponsored', 'nofollow', 'noopener', 'noreferrer' ) as $token ) {
+		if ( ! in_array( $token, $tokens, true ) ) {
+			$tokens[] = $token;
+		}
+	}
+
+	$atts['rel'] = implode( ' ', $tokens );
+
+	if ( majestic_tube_option_is_on( 'links-bar-new-tab' ) ) {
+		$atts['target'] = '_blank';
+	}
+
+	return $atts;
+}
+add_filter( 'nav_menu_link_attributes', 'majestic_tube_links_bar_link_attributes', 10, 3 );
+
+/**
  * Whether the site records likes at all.
  *
  * The popular listing sorts on a counter, and a counter only exists once

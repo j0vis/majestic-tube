@@ -73,6 +73,7 @@ function majestic_tube_setup() {
 		array(
 			'majestic_tube_main_menu'   => __( 'Main Menu', 'majestic-tube' ),
 			'majestic_tube_footer_menu' => __( 'Footer Menu', 'majestic-tube' ),
+			'majestic_tube_links_menu'  => __( 'Friends & Ad Links', 'majestic-tube' ),
 		)
 	);
 

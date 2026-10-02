@@ -951,6 +951,195 @@ ol {
 	cursor: default;
 }
 
+/*
+ * Friends and ad links bar.
+ *
+ * A third navigation row, in the header, under the logo / search / main menu
+ * row. It is a strip of outbound partner links rather than a way around the
+ * site, so it is visually quieter than the main menu: smaller type, a muted
+ * resting colour, and no pill treatment. It wraps instead of scrolling, because
+ * a partner list is short and a row that hides half its links behind an arrow
+ * reads as broken to anyone who does not find the arrow.
+ *
+ * The bar is a direct child of .site-header, so it re-states the same
+ * container width and horizontal padding as .header-inner (90em, 1rem) rather
+ * than inheriting them. Without that it would run the full width of the
+ * viewport while the menu above it stops at 90em, and the two rows would
+ * visibly disagree about where the content starts. The phone step below
+ * restates the padding the header row uses at the same breakpoint.
+ */
+.links-bar {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.35rem 1.1rem;
+	width: 100%;
+	max-width: 90em;
+	margin: 0 auto;
+	padding: 0.6rem 1rem;
+	border-top: 1px solid var(--mt-border);
+}
+
+.links-bar-label {
+	flex: 0 0 auto;
+	color: var(--mt-text);
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.06em;
+	text-transform: uppercase;
+}
+
+.links-bar-menu {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: baseline;
+	gap: 0.35rem 1.1rem;
+	margin: 0;
+	padding: 0;
+	list-style: none;
+}
+
+.links-bar-menu a {
+	color: var(--mt-text-muted);
+	font-size: 0.85rem;
+	text-decoration: none;
+}
+
+.links-bar-menu a:hover,
+.links-bar-menu a:focus-visible {
+	color: var(--mt-text);
+	text-decoration: underline;
+}
+
+.links-bar-menu a:focus-visible {
+	outline: 2px solid var(--mt-accent);
+	outline-offset: 2px;
+}
+
+/*
+ * Decoration: the emoji, and what each style preset does with it.
+ *
+ * The presets are entirely presentational. The markup carries a data-style
+ * attribute and nothing else, so adding a preset means adding a rule here and
+ * a choice in the Customizer - no new markup path to keep in step.
+ */
+.links-bar-icon {
+	display: inline-block;
+	margin-inline-end: 0.4em;
+	font-size: 0.95em;
+	line-height: 1;
+	vertical-align: -0.08em;
+	transition: transform 0.2s ease;
+}
+
+.links-bar-menu a:hover .links-bar-icon {
+	transform: scale(1.2) rotate(-6deg);
+}
+
+/* Stars: a warm gold resting tint on the heading. */
+.links-bar[data-style="stars"] .links-bar-label {
+	color: #d9a441;
+}
+
+/* Rockets: the link lifts, as though it had just launched. */
+.links-bar[data-style="rockets"] .links-bar-menu a,
+.links-bar[data-style="rockets"] .links-bar-menu a:hover {
+	transition: transform 0.2s ease;
+}
+
+.links-bar[data-style="rockets"] .links-bar-menu a:hover {
+	transform: translateY(-2px);
+}
+
+.links-bar[data-style="rockets"] .links-bar-menu a:hover .links-bar-icon {
+	transform: translateY(-3px) rotate(-14deg) scale(1.15);
+}
+
+/* Glam: the heading takes the accent, links warm up on hover. */
+.links-bar[data-style="glam"] .links-bar-label {
+	color: var(--mt-accent);
+}
+
+.links-bar[data-style="glam"] .links-bar-menu a:hover {
+	color: var(--mt-accent);
+}
+
+/*
+ * Neon: no emoji on purpose, because a glow behind a colour emoji reads as a
+ * rendering fault rather than as decoration. The accent is available as an
+ * rgb triple so the glow can be layered without hard-coding a hex here.
+ */
+.links-bar[data-style="neon"] .links-bar-menu a {
+	color: var(--mt-accent);
+	transition: text-shadow 0.2s ease;
+}
+
+.links-bar[data-style="neon"] .links-bar-menu a:hover,
+.links-bar[data-style="neon"] .links-bar-menu a:focus-visible {
+	text-shadow:
+		0 0 6px rgba(var(--mt-accent-rgb), 0.85),
+		0 0 14px rgba(var(--mt-accent-rgb), 0.5);
+}
+
+/*
+ * Shine sweep, opt-in via data-shine.
+ *
+ * The gradient is a fixed overlay rather than a background-image transition,
+ * which keeps it off the critical path: nothing is fetched, and the ::after
+ * is only painted while the pointer is over the link.
+ */
+.links-bar[data-shine] .links-bar-menu a {
+	position: relative;
+	overflow: hidden;
+}
+
+.links-bar[data-shine] .links-bar-menu a::after {
+	content: "";
+	position: absolute;
+	inset: 0;
+	transform: translateX(-100%);
+	background: linear-gradient(
+		90deg,
+		transparent,
+		rgba(255, 255, 255, 0.22),
+		transparent
+	);
+	pointer-events: none;
+}
+
+.links-bar[data-shine] .links-bar-menu a:hover::after {
+	transform: translateX(100%);
+	transition: transform 0.6s ease;
+}
+
+/*
+ * Reduced motion. The icon tilt, the rocket lift and the shine sweep are all
+ * decoration; none of them carries meaning, and all three are switched off
+ * here rather than being left to fight the visitor's own setting.
+ */
+@media (prefers-reduced-motion: reduce) {
+	.links-bar-icon,
+	.links-bar[data-style="rockets"] .links-bar-menu a,
+	.links-bar[data-style="neon"] .links-bar-menu a {
+		transition: none;
+	}
+
+	.links-bar-menu a:hover .links-bar-icon,
+	.links-bar[data-style="rockets"] .links-bar-menu a:hover,
+	.links-bar[data-style="rockets"] .links-bar-menu a:hover .links-bar-icon {
+		transform: none;
+	}
+
+	.links-bar[data-style="neon"] .links-bar-menu a:hover,
+	.links-bar[data-style="neon"] .links-bar-menu a:focus-visible {
+		text-shadow: none;
+	}
+
+	.links-bar[data-shine] .links-bar-menu a::after {
+		display: none;
+	}
+}
+
 /* Video grid and cards -------------------------------------------------- */
 
 /*
@@ -4137,6 +4326,11 @@ object {
 
 	.header-inner #site-navigation {
 		grid-area: 1 / 2;
+	}
+
+	/* Keeps the link row's left edge on the same line as the logo above it. */
+	.links-bar {
+		padding: 0.6rem 14px;
 	}
 
 	/*
