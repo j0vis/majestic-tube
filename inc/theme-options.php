@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.3.0
+ * @version 2.4.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -117,6 +117,12 @@ function majestic_tube_option_sections() {
 			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
 			'description' => __( 'How the category, tag and actor pages describe themselves: the line on each card, and where the description sits. The browser title and meta description for an individual term are set on that term&rsquo;s own screen, next to its image.', 'majestic-tube' ),
 		),
+		'video_seo'    => array(
+			'title'       => __( 'Video Structured Data', 'majestic-tube' ),
+			'panel'       => 'seo',
+			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
+			'description' => __( 'Marks up each video for Google Video search: a VideoObject block, the Open Graph video tags, and a video sitemap. These describe the video itself, which only this theme knows about - the browser title, meta description and canonical for a video page still come from your SEO plugin, exactly as everywhere else on the site.', 'majestic-tube' ),
+		),
 		'code'         => array(
 			'title'       => __( 'Custom Code', 'majestic-tube' ),
 			'panel'       => 'seo',
@@ -209,6 +215,7 @@ function majestic_tube_options_map() {
 	$advertising  = 'advertising';
 	$home_seo     = 'home_seo';
 	$archive_seo  = 'archive_seo';
+	$video_seo    = 'video_seo';
 	$code         = 'code';
 
 	$map_value = array(
@@ -1362,6 +1369,51 @@ function majestic_tube_options_map() {
 			'choices' => array(
 				'top'    => __( 'Top', 'majestic-tube' ),
 				'bottom' => __( 'Bottom', 'majestic-tube' ),
+			),
+		),
+		/* ------------------------------------------------------------------
+		 * Video structured data - the VideoObject block, the Open Graph
+		 * video tags, the video sitemap (2.4.0)
+		 *
+		 * A video theme is the only place that knows the runtime, the source
+		 * resolution ladder, the player markup and the actors taxonomy that
+		 * a VideoObject needs, and no general-purpose SEO plugin reads them.
+		 * That is why these live here rather than being left to the SEO
+		 * menu: they are video metadata, not search appearance. Titles,
+		 * descriptions and canonicals are untouched and still come from
+		 * the SEO plugin.
+		 *
+		 * Both switches are separate on purpose, so a site can keep its
+		 * video sitemap while turning off the in-page markup, or the
+		 * reverse.
+		 * ------------------------------------------------------------------ */
+		'enable-video-seo'         => array(
+			'setting'     => 'majestic_tube_enable_video_seo',
+			'default'     => 'on',
+			'type'        => 'onoff',
+			'label'       => __( 'Video structured data', 'majestic-tube' ),
+			'section'     => $video_seo,
+			'description' => __( 'Prints a VideoObject block and the Open Graph video tags on every video page, and adds a &ldquo;Video SEO&rdquo; column to the Videos list so you can see which videos are missing a duration, thumbnail or source. Turn this off if another plugin already prints video markup.', 'majestic-tube' ),
+		),
+		'video-sitemap-enabled'    => array(
+			'setting'     => 'majestic_tube_video_sitemap_enabled',
+			'default'     => 'on',
+			'type'        => 'onoff',
+			'label'       => __( 'Video sitemap', 'majestic-tube' ),
+			'section'     => $video_seo,
+			'description' => __( 'Serves a Google video sitemap at /video-sitemap.xml and advertises it in robots.txt. Submit the address to Google Search Console separately - the XML sitemap index does not cover it.', 'majestic-tube' ),
+		),
+		'video-sitemap-chunk-size' => array(
+			'setting'     => 'majestic_tube_video_sitemap_chunk_size',
+			'default'     => 1000,
+			'type'        => 'number',
+			'label'       => __( 'Videos per sitemap file', 'majestic-tube' ),
+			'section'     => $video_seo,
+			'description' => __( 'A large library is split across numbered files under the same address. Google allows 50,000 URLs per sitemap; smaller files are quicker to generate on shared hosting.', 'majestic-tube' ),
+			'input_attrs' => array(
+				'min'  => 100,
+				'max'  => 50000,
+				'step' => 100,
 			),
 		),
 		/* ------------------------------------------------------------------

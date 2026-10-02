@@ -18,7 +18,8 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Actors and categories](#taxonomy)
 - [Player settings](#player)
 - [Members and submissions](#membership)
-- [Theme-native SEO workspace](#seo-workspace)
+- [Search appearance](#search-appearance)
+- [Video structured data](#video-structured-data)
 - [Customizer settings](#customizer)
 - [Menus, widgets, and content](#appearance)
 - [Reports and moderation](#reports)
@@ -120,7 +121,7 @@ Complete these tasks before announcing the website.
 - [ ] Configure member registration if you plan to accept submissions.
 - [ ] Review and customize the legal pages for your actual operation.
 - [ ] Test search, video reports, password reset, and email delivery.
-- [ ] Open the SEO workspace: name the homepage for search and confirm the collection index has finished building.
+- [ ] Install an SEO plugin, then confirm it prints the titles, descriptions and social cards you expect.
 
 **Know where everything is**
 
@@ -134,8 +135,7 @@ Majestic Tube uses familiar WordPress menus. The most important areas are listed
 | `Actors` | Create actor names and assign a portrait to each actor. |
 | `Media` | Upload images and other media used by videos and site content. |
 | `Pages` | Edit the automatically created submission, profile, directory, and legal pages. |
-| `Appearance → Customize` | Control listings, the player, branding, sharing, submission rules, social handles, verification tags, custom code, and mobile presentation. |
-| `SEO` | Everything about how the site appears in search: search appearance on videos and pages, collection wording, the collection index, CSV imports, and the homepage search details. See [Theme-native SEO workspace](#seo-workspace). |
+| `Appearance → Customize` | Control listings, the player, branding, sharing, submission rules, custom code, and mobile presentation. |
 | `Appearance → Menus` | Manage the Main Menu and Footer Legal Menu. |
 | `Appearance → Widgets` | Place video lists and optional content blocks in theme areas. |
 | `Settings → Reading` | Choose what appears on the homepage. |
@@ -180,7 +180,7 @@ Use one of the following playback methods:
 | Video URL | The Video URL is preferred. Posts without one fall back to their embed code. |
 | Video embed code | The embed code is preferred. Posts without one fall back to their Video URL. |
 
-The setting only changes which field is preferred. Both are still saved on the post, so you can switch at any time without touching a single video, and a video that is missing the field you picked still plays from the other one rather than showing an empty player. The choice is also what the `og:video` and `twitter:player` tags and the schema.org `VideoObject` markup describe, so social previews match what a visitor sees.
+The setting only changes which field is preferred. Both are still saved on the post, so you can switch at any time without touching a single video, and a video that is missing the field you picked still plays from the other one rather than showing an empty player. The same choice decides which of the two the theme describes in its `VideoObject` markup, so what a search engine and a social network are told about the video matches what a visitor actually watches. See [Video Structured Data](#video-structured-data).
 
 ### Video information fields
 
@@ -342,57 +342,6 @@ To go back to empty placeholders, add this to a small plugin:
 To make actor cards random too, or categories use the most recent video, use the mode filter:
 
 `add_filter( 'majestic_tube_term_fallback_mode', function ( $mode, $taxonomy ) { return 'actors' === $taxonomy ? 'random' : $mode; }, 10, 2 );`
-
-### Name a category, actor, or archive page for search engines
-
-Every category, actor, tag, studio and series page is a real page that Google can rank and visitors can share. They were also the one kind of page in the theme with nowhere to describe them: the browser title was whatever WordPress assembled, and the meta description was the site tagline or nothing at all.
-
-Each of those terms now carries two fields, set on the same screen where you already set the term image:
-
-| Field | Where it appears |
-| --- | --- |
-| **SEO title** | The browser tab, and the blue title on a Google result |
-| **Meta description** | The two or three lines under a Google result, and the text on a Facebook or X share card |
-
-The fields appear on all five kinds of term:
-
-| Term | Screen |
-| --- | --- |
-| Category | `Videos → Video Categories` |
-| Tag | `Videos → Video Tags` |
-| Actor | `Actors` |
-| Studio | `Videos → Video Studios` |
-| Series | `Videos → Video Series` |
-
-Open a term, choose **Edit**, fill in either field, and save. The same two boxes are on the **Add New** form, so a term can be named correctly from the moment it exists rather than being backfilled later. If a term already has a written description, its opening words appear as grey placeholder text inside the Meta description box. That is a reminder, not a saved value — only what you type is stored.
-
-A character counter sits under each box. It is informational, not an SEO score or a hard limit. Search engines may rewrite or truncate titles and descriptions based on the query and device.
-
-**The title replaces the whole browser title; it is not added to one.** Write `Best comedy videos` and that is the entire tab — there is no `Category Archives:` prefix in front of it and no site name after it. Put the site name in yourself if you want it there.
-
-Both fields are opt-in and silent. An empty field stores nothing at all, so an existing site keeps exactly the output it had before, there is no setting to switch on, and no page changes until you type something. Clearing a field later deletes it rather than leaving an empty value behind.
-
-The description deliberately reaches the search result *and* the Facebook and X cards. A description that only reached one of those three would still leave the share preview showing something else, which is the kind of mismatch nobody notices until it is pointed out.
-
-> **Note**
->
-> If Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework or Slim SEO is active, the theme steps aside entirely: neither box appears, and no title or description is printed at all. Those plugins already ask the same questions on the same screen, and two sources of truth for a page title is worse than one.
-
-Saving is nonce-verified and limited to users who can manage categories. WordPress's own **Quick Edit** and bulk actions do not post these fields, so they leave a term's saved title and description exactly as they were rather than silently wiping them.
-
-Fields are only attached to taxonomies that actually exist on your site, so a child theme that removed one is unaffected.
-
-The collections the theme builds from your catalogue — Actors by category, Actor pairings and the rest — are worded in one place instead, in [Theme-native SEO workspace](#seo-workspace).
-
-### Find and fill in the missing ones
-
-Naming sixty categories one screen at a time is a job nobody finishes, so the term list has two things that help.
-
-**An SEO title column** now sits on every term list, next to the name and the video count. It shows the title that term will actually use, with a green note underneath when its meta description is set too. A term you have finished reads differently from one you have not, which is the whole point. If you would rather not see it, switch it off under **Screen Options** at the top right of the list.
-
-**Edit SEO title & description** appears in the term list's bulk actions. Tick the terms you want, choose it, and one screen opens holding all of them at once — every title and description box, already filled in with what is saved, with the fallback text greyed out behind each empty one. Write, press **Save SEO details**, and you are back on the list with a note saying how many terms were changed. Leaving a box empty clears that field, exactly as it does on a single term.
-
-That screen is not in the menu on purpose. It is somewhere you arrive from carrying a selection, so a permanent entry promising something it cannot do on its own would be worse than none. One hundred terms is the most it will open at once.
 
 ### Directory pages
 
@@ -576,113 +525,48 @@ Set **Enable spam protection** to **Off**. The widget disappears from both forms
 
 **Theme preferences**
 
-## Theme-native SEO workspace
+## Search appearance
 
-Majestic Tube has its own SEO workspace, so no plugin is required to describe your pages. Open **SEO** in the WordPress dashboard, just below **Appearance**. It is five tabs, and none of them asks you for a keyword or scores a page.
+Majestic Tube does not print page titles, meta descriptions, robots directives or canonical URLs. Search appearance belongs to the SEO plugin you run, and two sources of truth for a page title is worse than one.
 
-| Tab | What it is for |
+Install an SEO plugin and configure it there: it holds the browser title, the meta description, the social preview cards, and any noindex directive or canonical URL you want on a page or a term.
+
+Video structured data is the one exception, and it is described under [Video Structured Data](#video-structured-data) below. In short, the theme marks up each video as a `VideoObject` and publishes a video sitemap, because a video page is the one place the theme knows things a general-purpose SEO plugin has no way to read: the runtime, which file or embed the player is using, and who is in it.
+
+What the theme still owns is the wording visitors read on the page, and all of it stays in the Customizer:
+
+| Customizer section | What it controls |
 | --- | --- |
-| **Overview** | How many eligible collection pages the discovery index holds, when it last finished, and a button to start or advance a build. |
-| **Collections** | One row per generated collection: whether it is allowed in search results, how many pages it currently has, and a link into its wording. |
-| **Templates** | The wording for one collection across every page that matches it, with a preview and ten restorable versions. |
-| **Data sources** | Links to your own catalogue screens, plus a validated CSV import for term titles and descriptions. |
-| **Settings** | The homepage search title and meta description, and a link back to the Customizer for social handles and verification tags. |
+| `SEO & Analytics → Homepage SEO` | Where the visible homepage heading sits, and the introduction printed once beneath it. |
+| `SEO & Analytics → Archive Page SEO` | The line shown on each category and actor card, and whether category and tag descriptions sit above or below the list. |
+| `SEO & Analytics → Video Structured Data` | The `VideoObject` markup, the video social tags, and the video sitemap. |
+| `SEO & Analytics → Custom Code` | Analytics code in the page head, and extra scripts before the closing body tag. |
 
-The count on **Overview** is the number of eligible pages in the theme's own index. It is not a figure from Google, and nothing in this workspace connects to a Google account.
+Nothing you saved in an earlier release is deleted when you upgrade. The old SEO settings stay in the database, unread, and the SEO plugin takes over from there.
 
-### Search appearance on a video or a page
+## Video Structured Data
 
-Videos and ordinary pages carry a **Search appearance** box beneath the editor. Leave it alone and the theme supplies the defaults — the post title for the browser tab, the opening of the content for the description. Type into either field to override it, and open **Advanced** for a noindex switch and a canonical URL override that normally stays empty.
+A video page can be ranked two different ways: as an ordinary web page, and as a video in Google Video search. The second one needs a `VideoObject` block, and it needs the details only a video theme holds — how long the video runs, whether it plays from your own file or someone else's embed, and who appears in it. That is what `SEO & Analytics → Video Structured Data` turns on.
 
-Categories, tags, actors, studios and series keep their own per-term fields on the term screen, with the same automatic defaults and the bulk editor described in [Name a category, actor, or archive page for search engines](#name-a-category-actor-or-archive-page-for-search-engines).
-
-Search engines rewrite titles and truncate descriptions according to the query and the device. The character counters are informational. There is no score, no keyword density and no minimum word count anywhere in this workspace — a collection becomes a page because the videos exist, not because it reads long enough.
-
-### What the four collections are
-
-Collections are landing pages the theme builds from combinations that already exist in your catalogue. Nothing is created as a post, and no second copy of your videos exists.
-
-| Collection | The page it builds | Videos it needs |
-| --- | --- | --- |
-| Actors by category | `/actor/amber-waves/comedy/` | 6 |
-| Actor pairings | `/actor/amber-waves/with/rio-santos/` | 4 |
-| Actors by duration | `/actor/amber-waves/length/short/` | 3 |
-| Categories by tag | `/category/comedy/featured/` | 5 |
-
-A page is only built when that many published videos genuinely share the combination, so a combination nobody used never becomes an empty page for a crawler to find. A pairing always prints in the same order whichever actor a visitor arrives from, so the two directions of `/actor/amber-waves/with/rio-santos/` are one page rather than two competing ones.
-
-Studios and series are deliberately not collections here. They stay ordinary WordPress taxonomy archives, edited on their own term screens, and they remain in WordPress's taxonomy sitemap rather than being submitted a second time by the theme.
-
-### Wording for a whole collection
-
-**Templates** edits one collection at a time, and four fields do the work:
-
-| Field | Where it appears |
+| Setting | What it does |
 | --- | --- |
-| **Visible heading** | The `<h1>` on the collection page. |
-| **Visible introduction** | One optional line beneath the heading. |
-| **Search title** | The browser tab, and the blue title on a Google result. |
-| **Meta description** | The snippet under a Google result, and the text on a Facebook or X share card. |
+| **Video structured data** | Prints the `VideoObject` block and the `og:video` tags on every video page, and adds a **Video SEO** column to the Videos list. |
+| **Video sitemap** | Serves a video sitemap at `/video-sitemap.xml` and advertises it in `robots.txt`. |
+| **Videos per sitemap file** | How many URLs go in one sitemap file. 1,000 by default. |
 
-Every collection accepts `{site.name}` and `{video_count}`, plus the names of the terms in its URL. Each one adds its own:
+The two switches are independent, so you can keep the sitemap while turning off the in-page markup, or the other way round. Both default to on, and neither touches the title, description or canonical your SEO plugin prints.
 
-| Collection | Variables |
-| --- | --- |
-| Actors by category | `{actor.name}`, `{category.name}` |
-| Actor pairings | `{actor.name}`, `{actor2.name}` |
-| Actors by duration | `{actor.name}`, `{band.name}` |
-| Categories by tag | `{category.name}`, `{tag.name}` |
+**A `Video SEO` column appears on the Videos list.** It shows `OK` for a video with everything Google needs, `OK (embed)` for one that plays from a third-party player, or `Missing: duration, thumbnail, source` for a video that will be left out of the sitemap. A video missing any of those three is skipped rather than submitted half-finished, because a page with no markup can still rank as a web page, whereas a broken one is a quality signal.
 
-Click a variable to insert it into the field you were last typing in. Anything the theme does not recognise — a misspelled variable, an unbalanced brace — is rejected with a message instead of being saved, and no code of any kind is ever executed from a template. The preview is illustrative rather than a promise, because Google may show different text.
+**Submit the video sitemap separately.** The address is `/video-sitemap.xml`, and it is not covered by the XML sitemap index, so add it in Google Search Console as its own sitemap. A large library is split across numbered files under that same address.
 
-Saving changes every matching page at once, which is why the confirmation box is deliberate. **Previous versions** keeps the last ten saved templates per collection and restores any of them.
-
-The same switch that holds the wording also decides whether the collection may appear in search results. Turning it off adds `noindex` to the collection's pages and drops it from browse listings and the XML sitemap — while every URL a visitor may already have bookmarked keeps working. An excluded collection is not deleted, and switching it back on restores it.
-
-Canonical URLs are self-referencing on real pagination, and a noindexed collection is left out of the sitemap entirely. Studio and series archives are not in the theme's own sitemap provider, so they are submitted once by WordPress rather than twice.
-
-### The discovery index
-
-A page has to be known before anything can list it, so the theme keeps a rebuildable index of eligible collection pages in a database table of its own. **Overview** reports its size, when it last completed, and whether a build is part-way through.
-
-The first build starts after an admin visit and proceeds in scheduled batches of ten terms. WordPress runs those tasks through `wp-cron.php`, which only fires when a request reaches the site — on a quiet site that can be days away. Install a real scheduler, or press **Refresh collection index** to advance a build by hand. A build never replaces a good index with a half-finished one: the last completed generation stays available throughout, and a failed build keeps the old one rather than clearing it. A daily pass marks the index as needing a rebuild, so a catalogue change made outside the theme's own hooks is still picked up.
-
-Public browse pages and the sitemap read from that index with a bounded query instead of scanning every term on every request. This is also why a count on **Overview** settles a moment after you edit your catalogue rather than instantly — it is a batch job, and it says so.
-
-### Importing term details from a CSV
-
-**Data sources → Import term search details** accepts a file whose header row is exactly:
+**Embedded videos have a limit worth knowing about.** If your videos play from another domain's player, the page can still rank as a normal web page, but Google cannot count the video as part of your site's library, so it will not appear in Google Video results. Serving the file yourself, or embedding a player from your own domain, is the only way to qualify. The theme reports how much of your catalogue is affected if you have WP-CLI available:
 
 ```
-taxonomy,slug,title,description
+wp majestic-tube audit
 ```
 
-- At most 100 rows and 256 KB per upload.
-- Every row must name an existing term you are allowed to edit; a missing one fails the whole file instead of half-importing it.
-- **Validate and preview** lists every row before anything is written, and that preview expires after 15 minutes.
-- A blank title or description clears that override and returns the term to its automatic default.
-- Nothing is created or deleted: no terms, no videos, no URLs.
-- The import is refused outright while an SEO plugin owns these fields.
-
-Use it for the long tail — the forty tags nobody will ever open by hand — not as a way of bulk-generating text.
-
-### Homepage search details
-
-**Settings** holds two independent fields: a homepage search title and a homepage meta description. Leave either empty and the theme falls back to the site title, and to the visible homepage introduction written in the Customizer. The two stay separate on purpose: the introduction is page content a visitor reads, and the search description is only what a search engine may choose to show instead.
-
-### When an SEO plugin is installed
-
-If Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework or Slim SEO is active, the theme detects it and stops printing titles and descriptions of its own:
-
-- The per-term and per-post search fields disappear rather than fighting the plugin for the same `<title>` tag.
-- The CSV import is disabled, because it would write fields that plugin is not reading.
-- The template editor keeps working, because collection pages are the theme's own virtual URLs and the index behind them has to keep running either way.
-
-Nothing is deleted when a plugin is switched on or off, and switching the theme away leaves every saved value in the database. Only these screens, the virtual collection routes and the index belong to Majestic Tube, so they stop running when it is not the active theme.
-
-### Coming from the old Customizer controls
-
-Collections you had switched off in an earlier release are carried into the new **Collections** tab still switched off, rather than quietly re-enabled. That happens once, the first time you open the admin after updating. Customizer settings that an earlier release had already deleted are gone for good and cannot be recovered.
+It lists how many videos are submittable, which fields are missing, and which domains the embeds come from. It needs WP-CLI on the server; the **Video SEO** column shows the same information without it.
 
 ## Customizer Settings
 
@@ -704,10 +588,10 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 | Site Features | Accounts & Spam Protection | Member login and registration, and the Cloudflare Turnstile spam check with its two keys. |
 | Site Features | Video Submission | The submission form, the links that lead to it, and which fields are required. |
 | Advertising | Advertising | In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from `Appearance → Widgets`. |
-| SEO & Analytics | SEO & Social | The Facebook app ID, the X/Twitter handle, the playable card URL, and verification tags. |
-| SEO & Analytics | Homepage SEO | Where the visible homepage heading sits and the introduction printed once beneath it. Search metadata is in the [SEO workspace](#seo-workspace). |
+| SEO & Analytics | Homepage SEO | Where the visible homepage heading sits and the introduction printed once beneath it. |
 | SEO & Analytics | Archive Page SEO | The line shown on each category and actor card, and whether the category and tag descriptions go above or below the list. The per-term titles and descriptions are not here — see below. |
 | SEO & Analytics | Custom Code | Analytics code in the page head, extra scripts before the closing body tag, and scripts for mobile visitors only. |
+| SEO & Analytics | Video Structured Data | The `VideoObject` markup on video pages, the video social tags, and the video sitemap. |
 
 #### Homepage sort options
 
@@ -806,31 +690,14 @@ Advertising is unchanged by default. Turning on `Only load advertising after con
 >
 > Connecting a consent plugin is a one-line filter in a small snippet or a site-specific plugin. Let the consent plugin return `true` once advertising is allowed, and the theme will print its placements as normal. The filter is `majestic_tube_ads_allowed` and it receives the placement name as its second argument: in-feed, popunder, header, footer, under-player, video-sidebar, or player. It also works the other way round for a single placement, which is useful if one area should always be shown.
 
-### SEO & Analytics → SEO & Social
-
-- Add an optional Facebook app ID.
-- Add an X/Twitter site handle.
-- Add an optional Twitter player URL, which upgrades the video preview card to the playable player card.
-- Paste search engine verification tags.
-
-Majestic Tube also supplies social preview information and video structured data on individual video pages. If a major SEO plugin is active, the theme normally avoids duplicating its social output.
-
-The browser title and meta description for your category, actor, tag, studio and series archive pages are not set here either. They belong to the page rather than to the site, so they are set on each term's own screen, next to its image. See [Name a category, actor, or archive page for search engines](#name-a-category-actor-or-archive-page-for-search-engines).
-
-#### Playable cards on X and Twitter
-
-By default a shared video link produces the large image card. To get the playable card, fill in `Twitter player URL base` with the HTTPS address of a small, bare page of your own that embeds a video and reads the `?post=` query argument. The theme appends the video ID for you, so a base of `https://example.com/player/` points that page at `https://example.com/player/?post=123` for video 123, and the card becomes playable on the timeline.
-
-Leave the field empty to keep the large image card. The page you point at must be served over HTTPS, must return nothing but the player, and should stay under a few hundred kilobytes: X loads it in a card of roughly 435 pixels wide, so a full site template with a header, sidebar, and footer would look wrong inside the card.
-
 ### SEO & Analytics → Homepage SEO
 
-These controls set the visible homepage introduction and where it appears. The separate search title and meta description are under [SEO → Settings](#seo-workspace) in the dashboard.
+These controls set the visible homepage introduction and where it appears. The search title and meta description are set in your SEO plugin.
 
 | Setting | What it does |
 | --- | --- |
 | **Homepage title position** | Whether the homepage title and its description sit above the video grid or below it. |
-| **Homepage description** | A short visible introduction, printed once beneath the homepage heading. It is the fallback meta description unless overridden in SEO → Settings. |
+| **Homepage description** | A short visible introduction, printed once beneath the homepage heading. |
 
 Above the grid is the default. Below the grid moves the heading and introduction together. Both positions print one heading and one introduction; duplicating a paragraph is not an automatic search benefit.
 
@@ -838,7 +705,7 @@ The visible homepage heading remains under `Customize → Homepage & Listings �
 
 ### SEO & Analytics → Archive Page SEO
 
-Shared archive-card wording and description placement. Individual terms have their own search fields; generated collections have templates in the [Theme-native SEO workspace](#seo-workspace).
+Shared archive-card wording and description placement. The browser title and meta description for an individual term belong to your SEO plugin.
 
 | Setting | What it does |
 | --- | --- |
@@ -848,8 +715,6 @@ Shared archive-card wording and description placement. Individual terms have the
 | **Tag description position** | The same choice for tag pages. |
 
 The two card-text fields take `{name}`, `{description}`, `{count}` and `{videos}`, and default to `Free "{description}" videos` and `Watch "{description}" videos`.
-
-The browser title and meta description for an individual term are not here, for the reason given above: a page title belongs to the page.
 
 ### SEO & Analytics → Custom Code
 
@@ -1102,49 +967,13 @@ Front-end submissions are intentionally moderated. Open `Videos`, select the pen
 - Add at least one widget and save.
 - Remember that the sidebar belongs to individual video pages, not the homepage or normal archives.
 
-#### Social previews are missing or duplicated
-
-Review your active SEO plugins. Majestic Tube normally steps aside when a supported SEO plugin already provides social metadata. If the preview looks wrong, update the image, clear the social platform’s cache, and re-save the video.
-
-#### The SEO title and description boxes are missing on a category or actor
-
-That is what an active SEO plugin looks like. Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework and Slim SEO all provide their own term-level fields, so Majestic Tube removes its own boxes and prints nothing rather than putting two competing titles in the same page head. Use the fields your SEO plugin provides, or deactivate it and use the theme's.
-
-The boxes are also absent on a taxonomy that does not exist on your site — the theme only attaches them to categories, tags, actors, studios and series that are actually registered.
-
-#### The collection index has not finished building
-
-The index is built by WordPress scheduled tasks in batches of ten terms, and those tasks only run when a request reaches the site. On a quiet site that can be days. Open `SEO → Overview` and choose **Refresh collection index** as often as you like: each press advances the build by another batch and leaves the last completed generation serving pages throughout. A real scheduler for `wp-cron.php` saves you having to remember.
-
-The same applies to a count sitting at zero on a site that certainly has videos. The first build only starts after your first visit to wp-admin with this version, and it says so on the Overview screen until it has run.
-
-#### A generated collection page returns not found
-
-A combination only becomes a page once enough published videos share it: 6 for an actor in a category, 4 for an actor pairing, 3 for a duration band, 5 for a tag in a category. Below that the URL is deliberately a not-found response rather than an empty listing. `SEO → Collections` shows how many pages each collection currently has, and `SEO → Overview` says when that count was last confirmed against your catalogue.
-
-A collection you switched off from search results still serves visitors normally. If the URL fails for a visitor too, the combination has dropped below its threshold, or one of its terms has been renamed or deleted.
-
-#### The SEO menu is missing
-
-It sits with the other top-level menus for any user who can edit theme options. If you cannot see it, confirm Majestic Tube is the active theme and that your account still has that capability — a plugin that removes top-level menu items is the other thing worth ruling out.
-
-#### A category page still shows the old title on Google
-
-The page itself is almost certainly correct — check it by viewing source and searching for `<title>`. Google caches results and re-crawks on its own schedule, so a change can take days to appear, and the search snippet may keep the older description until it does. Use Search Console's **URL Inspection → Request Indexing** to ask for a fresh crawl. A caching plugin or page cache in front of WordPress is the other thing worth ruling out.
-
-If the field is filled in but the source shows the old title, the SEO title may have been cleared by a bulk action: WordPress's **Quick Edit** and bulk tools do not post these fields, so they preserve what was saved, but a term deleted and recreated loses it along with everything else on that term.
-
-**Common questions**
-
 ## Frequently Asked Questions
 
 ### Do I need an SEO plugin for this theme?
 
-No. Majestic Tube includes its own [SEO workspace](#seo-workspace) — search appearance on videos and pages, collection wording, the collection index, CSV imports and the homepage search details — and nothing has to be installed for it to work. If you already run Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework or Slim SEO, the theme detects it and steps aside from titles and descriptions rather than competing for the same `<title>` tag. Switch the plugin off and your own fields take over again; nothing is deleted either way.
+Yes. Majestic Tube prints no titles, meta descriptions, robots directives or canonical URLs, so an SEO plugin is what puts those on the page. It is also where you set a title or description for an individual category, actor, tag, studio or series term. The theme keeps only the wording a visitor reads on the page, which stays in the Customizer.
 
-### Are there scores, keywords, or minimum word counts?
-
-No, and that is deliberate. Nothing in the workspace asks for a target keyword, counts keyword density, grades a page out of 100, or refuses text below a length. A collection becomes a page because the videos exist and enough of them share the combination; the wording fields describe what is already there rather than trying to reach a target. Search engines may still rewrite titles and truncate descriptions, which is why the counters are labelled as information and not as something to hit.
+The one thing the theme does add is video structured data — a `VideoObject` block and a video sitemap — because a video theme is the only place that knows a video's runtime, source and cast. See [Video Structured Data](#video-structured-data). It is switched off in one click if your SEO plugin already covers it.
 
 ### Can I use this on an existing WordPress site?
 
@@ -1197,10 +1026,6 @@ The theme prints that snippet once per page from the end of the page, which is w
 ### How do I make my ads wait for a cookie banner?
 
 Turn on `Only load advertising after consent`, then let your consent plugin return `true` through the `majestic_tube_ads_allowed` filter once the visitor has accepted. Until then, every placement prints nothing. Remember to clear any page cache afterwards, since cached HTML may still contain the earlier ad markup.
-
-### My shared link shows an image card, not a playable one
-
-Fill in `Twitter player URL base` with the HTTPS address of your own bare player page, and make sure that page really does embed a video when given `?post=`. Social networks cache their previews for a long time, so expect an existing post to keep its old card for a while.
 
 ### Should I count a view when someone only opens the page?
 
@@ -1282,12 +1107,9 @@ Its license notice is bundled with the theme in the assets folder. No fonts are 
 | Review submissions | Videos → All Videos → Pending |
 | Add an actor | Actors → Add Actor |
 | Add a category image | Videos → Video Categories → Edit Category |
-| Name a page for search engines | Videos → Video Categories → Edit Category |
-| Name the homepage for search engines | SEO → Settings |
-| Edit a collection's wording | SEO → Collections |
-| Check or advance the collection index | SEO → Overview |
-| Import term titles in bulk | SEO → Data sources |
 | Review visitor reports | Videos → Reported Videos |
+| Check a video's SEO data | Videos → All Videos, the **Video SEO** column |
+| Submit videos to Google | `example.com/video-sitemap.xml` in Search Console |
 | Change theme settings | Appearance → Customize |
 | Manage navigation | Appearance → Menus |
 | Manage content areas | Appearance → Widgets |
