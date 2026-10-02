@@ -22,6 +22,67 @@
 	// How far outside the viewport a card starts being prepared.
 	var ROOT_MARGIN = '250px 0px';
 
+	/*
+	 * The player controls are assembled here rather than printed by a template,
+	 * so they cannot call majestic_tube_icon(). They draw the same masked icons
+	 * instead, from the same allowlist, and the off switch travels with them in
+	 * the localised options. Absent means on, so a payload cached from before
+	 * the flag existed still renders the full set.
+	 */
+	var iconsEnabled = options.icons !== false;
+
+	var ICON_NAMES = [
+		'check',
+		'clock',
+		'close',
+		'expand',
+		'eye',
+		'gauge',
+		'image',
+		'play',
+		'sliders',
+		'star'
+	];
+
+	/**
+	 * One of the theme's icons, ready to be appended.
+	 *
+	 * The name is checked against ICON_NAMES before it becomes a class name,
+	 * mirroring what the PHP helper does. Nothing reaches this from user input
+	 * today, but the check costs nothing and keeps a future call site from
+	 * turning a name into markup.
+	 *
+	 * @param {string} name Icon name.
+	 * @return {?Element} The icon element, or null when it is not being drawn.
+	 */
+	function icon( name ) {
+		if ( ! iconsEnabled || -1 === ICON_NAMES.indexOf( name ) ) {
+			return null;
+		}
+
+		var element = document.createElement( 'i' );
+
+		element.className = 'mt-icon mt-icon-' + name;
+		element.setAttribute( 'aria-hidden', 'true' );
+
+		return element;
+	}
+
+	/**
+	 * Put an icon at the front of a control that already has its text.
+	 *
+	 * @param {Element} control Element to prepend to.
+	 * @param {string}  name    Icon name.
+	 * @return {void}
+	 */
+	function prependIcon( control, name ) {
+		var element = icon( name );
+
+		if ( element ) {
+			control.insertBefore( element, control.firstChild );
+		}
+	}
+
 	/**
 	 * Query helpers.
 	 *
@@ -1329,12 +1390,27 @@
 		button.type = 'button';
 		button.className = 'mt-quality-toggle';
 		button.setAttribute( 'aria-expanded', 'false' );
-		button.textContent = ( i18n.quality || 'Quality' ) + ': ' + sources[ 0 ].label;
+
+		/**
+		 * Rewrite the toggle's text, keeping the icon in front of it.
+		 *
+		 * Assigning textContent would throw the icon away, so the label is set
+		 * first and the icon put back after.
+		 *
+		 * @param {string} label Text for the toggle.
+		 * @return {void}
+		 */
+		function setLabel( label ) {
+			button.textContent = label;
+			prependIcon( button, 'sliders' );
+		}
+
+		setLabel( ( i18n.quality || 'Quality' ) + ': ' + sources[ 0 ].label );
 
 		menu.className = 'mt-quality-menu';
 		menu.setAttribute( 'hidden', '' );
 
-		sources.forEach( function ( source ) {
+		sources.forEach( function ( source, sourceIndex ) {
 			var item = document.createElement( 'button' );
 
 			item.type = 'button';
@@ -1342,15 +1418,31 @@
 			item.textContent = source.label;
 			item.setAttribute( 'data-url', source.url );
 
+			/*
+			 * Every row carries a check, and only the active one lets it show.
+			 * Drawing it on all of them and hiding the rest is what keeps the
+			 * labels in a column: if the mark were added on selection, the row
+			 * that won would be the one that shifted sideways.
+			 */
+			prependIcon( item, 'check' );
+
+			if ( 0 === sourceIndex ) {
+				item.classList.add( 'is-active' );
+				item.setAttribute( 'aria-current', 'true' );
+			}
+
 			item.addEventListener( 'click', function () {
 				switchQuality( player, source );
-				button.textContent = ( i18n.quality || 'Quality' ) + ': ' + source.label;
+				setLabel( ( i18n.quality || 'Quality' ) + ': ' + source.label );
 				menu.setAttribute( 'hidden', '' );
 				button.setAttribute( 'aria-expanded', 'false' );
 
 				findAll( '.mt-quality-item', menu ).forEach( function ( other ) {
 					other.classList.toggle( 'is-active', other === item );
+					other.removeAttribute( 'aria-current' );
 				} );
+
+				item.setAttribute( 'aria-current', 'true' );
 			} );
 
 			menu.appendChild( item );
@@ -1612,6 +1704,7 @@
 		button.setAttribute( 'aria-expanded', 'false' );
 		button.setAttribute( 'aria-label', i18n.speed || 'Speed' );
 		button.textContent = speeds[ index ] + 'x';
+		prependIcon( button, 'gauge' );
 
 		menu.className = 'mt-speed-menu';
 		menu.setAttribute( 'hidden', '' );
@@ -1629,6 +1722,10 @@
 			item.textContent = speed + 'x';
 			item.setAttribute( 'data-speed', speed );
 
+			// The active row is the only one that shows its check; the rest
+			// keep the same width so the speeds stay in a column.
+			prependIcon( item, 'check' );
+
 			if ( speedIndex === index ) {
 				item.classList.add( 'is-active' );
 				item.setAttribute( 'aria-current', 'true' );
@@ -1637,6 +1734,7 @@
 			item.addEventListener( 'click', function () {
 				setRate( player, speed );
 				button.textContent = speed + 'x';
+				prependIcon( button, 'gauge' );
 				writeStore( 'majestic_tube_speed', String( speed ) );
 
 				findAll( '.mt-speed-item', menu ).forEach( function ( other ) {
@@ -1689,6 +1787,7 @@
 		button.type = 'button';
 		button.className = 'mt-theater-toggle';
 		button.setAttribute( 'aria-pressed', 'false' );
+		prependIcon( button, 'expand' );
 
 		function label( on ) {
 			button.setAttribute( 'aria-pressed', on ? 'true' : 'false' );
@@ -1950,11 +2049,25 @@
 			resume.type = 'button';
 			resume.className = 'mt-resume-play';
 			resume.textContent = ( i18n.resume || 'Resume' ) + ' ' + formatTime( time );
+			prependIcon( resume, 'play' );
 
 			dismiss.type = 'button';
 			dismiss.className = 'mt-resume-dismiss';
 			dismiss.setAttribute( 'aria-label', i18n.dismiss || 'Dismiss' );
-			dismiss.textContent = '×';
+
+			/*
+			 * The dismiss button used to print a multiplication sign, which is
+			 * a glyph rather than a shape: it sat on the baseline, sat at a
+			 * different weight from the label beside it, and looked like a
+			 * font failure on a machine without the character. The same close
+			 * mark the header uses is drawn here instead, and the character
+			 * stays only for a site that has turned icons off.
+			 */
+			if ( icon( 'close' ) ) {
+				prependIcon( dismiss, 'close' );
+			} else {
+				dismiss.textContent = '×';
+			}
 
 			resume.addEventListener( 'click', function () {
 				setTime( player, time );

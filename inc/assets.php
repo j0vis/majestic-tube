@@ -274,6 +274,16 @@ function majestic_tube_enqueue_assets() {
 				'thumbnailsRatio'  => $ratio,
 				'rotateThumbs'     => majestic_tube_option_is_on( 'enable-thumbnails-rotation' ),
 				'qualitySelector'  => majestic_tube_option_is_on( 'videojs-quality-selector' ),
+
+				/*
+				 * The player controls are built in script rather than printed by a
+				 * template, so they cannot ask majestic_tube_icons_enabled()
+				 * themselves. The answer is handed over here instead, and main.js
+				 * omits every icon it would otherwise draw when it is off. Defaults
+				 * to on when the key is missing, so a stale cached payload from
+				 * before this flag existed still gets the full set.
+				 */
+				'icons'            => majestic_tube_icons_enabled(),
 				'nativePlayer'     => majestic_tube_option_is_on( 'use-native-player' ),
 				'autoplay'         => majestic_tube_option_is_on( 'autoplay-video-player' ),
 

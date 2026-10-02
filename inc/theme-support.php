@@ -146,6 +146,16 @@ function majestic_tube_body_classes( $classes ) {
 		$classes[] = 'hfeed';
 	}
 
+	/*
+	 * One class for the whole icon set. Doing it here rather than in each
+	 * template means the switch is read once per page, and turning it off
+	 * hides every icon at the same instant instead of leaving one surface
+	 * behind that forgot to ask.
+	 */
+	if ( ! majestic_tube_icons_enabled() ) {
+		$classes[] = 'no-icons';
+	}
+
 	return $classes;
 }
 add_filter( 'body_class', 'majestic_tube_body_classes' );

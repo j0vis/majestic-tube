@@ -68,11 +68,11 @@ function majestic_tube_pagination_markup( $pages, $range = 4, $current = 0, $lin
 	$output = '<div class="pagination"><ul>';
 
 	if ( $current > 2 && $current > $range + 1 && $showitems < $pages ) {
-		$output .= '<li><a href="' . $link( 1 ) . '">' . esc_html__( 'First', 'majestic-tube' ) . '</a></li>';
+		$output .= '<li><a href="' . $link( 1 ) . '" class="pagination-edge">' . majestic_tube_get_icon( 'chevron-left', 'pagination-double' ) . esc_html__( 'First', 'majestic-tube' ) . '</a></li>';
 	}
 
 	if ( $current > 1 && $showitems < $pages ) {
-		$output .= '<li><a href="' . $link( $current - 1 ) . '">' . esc_html__( 'Previous', 'majestic-tube' ) . '</a></li>';
+		$output .= '<li><a href="' . $link( $current - 1 ) . '" rel="prev">' . majestic_tube_get_icon( 'chevron-left' ) . esc_html__( 'Previous', 'majestic-tube' ) . '</a></li>';
 	}
 
 	for ( $page = 1; $page <= $pages; $page++ ) {
@@ -86,11 +86,11 @@ function majestic_tube_pagination_markup( $pages, $range = 4, $current = 0, $lin
 	}
 
 	if ( $current < $pages && $showitems < $pages ) {
-		$output .= '<li><a href="' . $link( $current + 1 ) . '">' . esc_html__( 'Next', 'majestic-tube' ) . '</a></li>';
+		$output .= '<li><a href="' . $link( $current + 1 ) . '" rel="next">' . esc_html__( 'Next', 'majestic-tube' ) . majestic_tube_get_icon( 'chevron-right' ) . '</a></li>';
 	}
 
 	if ( $current < $pages - 1 && $current + $range - 1 < $pages && $showitems < $pages ) {
-		$output .= "<li><a href='" . $link( $pages ) . "'>" . esc_html__( 'Last', 'majestic-tube' ) . '</a></li>';
+		$output .= '<li><a href="' . $link( $pages ) . '" class="pagination-edge">' . esc_html__( 'Last', 'majestic-tube' ) . majestic_tube_get_icon( 'chevron-right', 'pagination-double' ) . '</a></li>';
 	}
 
 	$output .= '</ul></div>';

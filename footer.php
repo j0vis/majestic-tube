@@ -97,7 +97,7 @@ $footer_logo    = (string) majestic_tube_get_option( 'wpst-options', 'image-logo
 	</footer><!-- #colophon -->
 
 	<a href="#" id="back-to-top" class="back-to-top" aria-label="<?php esc_attr_e( 'Back to top', 'majestic-tube' ); ?>">
-		<span aria-hidden="true">&uarr;</span>
+		<?php majestic_tube_icon( 'arrow-up' ); ?>
 	</a>
 
 <?php wp_footer(); ?>

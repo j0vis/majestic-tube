@@ -18,6 +18,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Actors and categories](#taxonomy)
 - [Player settings](#player)
 - [Members and submissions](#membership)
+- [Icons](#icons)
 - [Search appearance](#search-appearance)
 - [Video structured data](#video-structured-data)
 - [Customizer settings](#customizer)
@@ -525,6 +526,33 @@ Set **Enable spam protection** to **Off**. The widget disappears from both forms
 
 **Theme preferences**
 
+## Icons
+
+The theme draws its own icons and ships them in the stylesheet. There is no icon font to load, nothing to keep up to date, and no plugin required.
+
+Each icon is an SVG **mask**, so it paints in whatever colour surrounds it. One shape works in the light skin, the dark skin, on the accent-coloured buttons and on the muted metadata row, without a second copy of it for each.
+
+They appear on the search button, the mobile menu toggle, the sort tabs, the video card and video page metadata, the like, dislike, share and report buttons, the category, actor and tag labels, the video tags list, pagination, and the back-to-top button.
+
+### On the cards and in the player
+
+A thumbnail badge used to be a bare number, so a grid read as a column of unexplained figures until someone worked out which was which. Each badge now carries the mark that says what it is — an eye for the view count, a clock for the length, a star for the rating — and the sidebar widget and the category directories are marked the same way. A card with no picture shows a frame above its "No image" caption rather than an empty rectangle that looked like a thumbnail still loading.
+
+The player controls are the same idea applied to the chrome: the quality selector carries sliders, the speed control a dial, the theater toggle the expand mark the header menu already uses, and the resume pill a play and a close. Inside the quality and speed menus the current choice is ticked, and the tick is reserved on every row so the options stay in a column instead of the one you just picked shifting sideways.
+
+These controls are built by `assets/js/main.js` rather than printed by a template, so they take their icons through their own allowlist and read the same **Show icons** switch through the localised options. With the switch off they fall back to text alone, and the dismiss button returns to a character in place of the close mark.
+
+To turn icons off site-wide, set **Customize → Site Features → Header, Footer & Search → Show icons throughout the site** to **Off**. Everything falls back to the words alone, which is the right choice for a site that has been styling the old `fa fa-*` classes through a child theme.
+
+A child theme can add one of its own:
+
+```php
+echo majestic_tube_get_icon( 'star' );               // the shape
+echo majestic_tube_get_icon( 'heart', 'my-class' ); // with an extra class
+```
+
+An icon name the theme does not ship returns an empty string rather than an empty box, so a typo degrades to no icon instead of a gap. The full list is `majestic_tube_icon_names()`.
+
 ## Search appearance
 
 Majestic Tube does not print page titles, meta descriptions, robots directives or canonical URLs. Search appearance belongs to the SEO plugin you run, and two sources of truth for a page title is worse than one.
@@ -584,7 +612,7 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 | Site Design | Logo | An image or text logo, its font, size, dimensions and spacing, a copy in the footer, and the favicon. |
 | Site Design | Player Watermark | A logo overlaid on the player, with its size, colour treatment and corner. |
 | Site Design | Thumbnails | Thumbnail aspect ratio, image fit, image quality, and the hover rotation on video cards. |
-| Site Features | Header, Footer & Search | The search bar, the number of footer columns, the copyright bar and its text, and the admin bar. |
+| Site Features | Header, Footer & Search | The search bar, whether the theme draws its own icons, the number of footer columns, the copyright bar and its text, and the admin bar. |
 | Site Features | Accounts & Spam Protection | Member login and registration, and the Cloudflare Turnstile spam check with its two keys. |
 | Site Features | Video Submission | The submission form, the links that lead to it, and which fields are required. |
 | Advertising | Advertising | In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from `Appearance → Widgets`. |

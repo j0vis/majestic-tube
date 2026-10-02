@@ -513,14 +513,15 @@ function majestic_tube_filter_nav() {
 
 	echo '<nav class="filter-nav" aria-label="' . esc_attr__( 'Video filters', 'majestic-tube' ) . '"><ul>';
 
-	foreach ( $filters as $slug => $filter ) {
-			printf(
-				'<li><a href="%1$s" class="%2$s">%3$s</a></li>',
-				esc_url( add_query_arg( 'filter', $slug, $base_url ) ),
-				esc_attr( $slug === $current ? 'active' : '' ),
-				esc_html( $filter['label'] )
-			);
-		}
+foreach ( $filters as $slug => $filter ) {
+		printf(
+			'<li><a href="%1$s" class="%2$s">%3$s%4$s</a></li>',
+			esc_url( add_query_arg( 'filter', $slug, $base_url ) ),
+			esc_attr( $slug === $current ? 'active' : '' ),
+			majestic_tube_sort_icon( $slug ), // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped in the helper.
+			esc_html( $filter['label'] )
+		);
+	}
 
 	echo '</ul></nav>';
 }

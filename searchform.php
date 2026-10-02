@@ -13,6 +13,14 @@
 	</label>
 	<button type="submit" class="search-submit">
 		<span class="screen-reader-text"><?php esc_html_e( 'Search', 'majestic-tube' ); ?></span>
-		<span aria-hidden="true">⌕</span>
+		<?php
+		/*
+		 * The magnifier used to be the Unicode character U+2315, which most
+		 * systems render at a different weight and baseline than everything
+		 * around it, and some not at all. A masked shape sits on the same
+		 * optical grid as the rest of the set.
+		 */
+		majestic_tube_icon( 'search' );
+		?>
 	</button>
 </form>

@@ -138,6 +138,9 @@
 }
 
 .mt-quality-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
 	background: transparent;
 	border: 0;
 	color: #fff;
@@ -174,7 +177,9 @@
 }
 
 .mt-quality-item {
-	display: block;
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
 	width: 100%;
 	background: transparent;
 	border: 0;
@@ -184,6 +189,20 @@
 	text-align: left;
 	padding: 0.5rem 0.9rem;
 	cursor: pointer;
+}
+
+/*
+ * Every quality row carries a check and only the current one lets it show.
+ * The mark is drawn on all of them so the labels keep the same left edge: it
+ * is added when a row is chosen, and a row that gained an icon on selection
+ * would be the one that moved.
+ */
+.mt-quality-item .mt-icon {
+	opacity: 0;
+}
+
+.mt-quality-item.is-active .mt-icon {
+	opacity: 1;
 }
 
 .mt-quality-item:hover,
@@ -231,6 +250,9 @@
 }
 
 .mt-speed-toggle {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
 	background: transparent;
 	border: 0;
 	color: #fff;
@@ -268,7 +290,9 @@
 }
 
 .mt-speed-item {
-	display: block;
+	display: flex;
+	align-items: center;
+	gap: 0.5em;
 	width: 100%;
 	background: transparent;
 	border: 0;
@@ -279,6 +303,15 @@
 	text-align: left;
 	padding: 0.45rem 0.9rem;
 	cursor: pointer;
+}
+
+/* The same reserved check as the quality menu, for the same reason. */
+.mt-speed-item .mt-icon {
+	opacity: 0;
+}
+
+.mt-speed-item.is-active .mt-icon {
+	opacity: 1;
 }
 
 .mt-speed-item:hover,
@@ -328,6 +361,9 @@
 }
 
 .mt-resume-play {
+	display: inline-flex;
+	align-items: center;
+	gap: 0.4em;
 	background: transparent;
 	border: 0;
 	color: #fff;
@@ -344,6 +380,9 @@
 }
 
 .mt-resume-dismiss {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
 	background: transparent;
 	border: 0;
 	color: rgba(255, 255, 255, 0.6);
@@ -382,14 +421,17 @@
 	z-index: 4;
 }
 
-.mt-theater-toggle::before {
-	content: '';
-	display: block;
-	width: 0.95rem;
-	height: 0.7rem;
-	border: 2px solid currentColor;
-	border-radius: 2px;
+/* The mark nearly fills the button, as the drawn rectangle it replaced did. */
+.mt-theater-toggle .mt-icon {
+	font-size: 0.9rem;
 }
+
+/*
+ * The theater mark used to be drawn here, out of a bordered rectangle, which
+ * was both a weaker signal than a shape and one more thing to keep in step
+ * with the set. It is the theme's own `expand` icon now, appended by main.js,
+ * and this file only has to centre whatever it is handed.
+ */
 
 .mt-theater-toggle:hover,
 .mt-theater-toggle:focus {

@@ -134,7 +134,7 @@ function majestic_tube_render_term_card( $term, $taxonomy ) {
 			<?php if ( $portrait ) : ?>
 				<img src="<?php echo esc_url( $portrait ); ?>" alt="<?php echo esc_attr( $term->name ); ?>" loading="lazy" width="320" height="180" />
 			<?php else : ?>
-				<span class="video-card-placeholder"></span>
+				<span class="video-card-placeholder"><?php majestic_tube_icon( 'image' ); ?></span>
 			<?php endif; ?>
 		</a>
 		<header class="video-card-header">
@@ -155,6 +155,7 @@ function majestic_tube_render_term_card( $term, $taxonomy ) {
 			 * the page and only showed once hovering a card lifted it clear.
 			 */ ?>
 			<span class="term-card-count">
+				<?php majestic_tube_icon( 'film' ); ?>
 				<?php
 				printf(
 					/* translators: %s: video count. */

@@ -50,6 +50,16 @@
 				aria-label="<?php esc_attr_e( 'Toggle navigation', 'majestic-tube' ); ?>"
 			>
 				<span class="screen-reader-text"><?php esc_html_e( 'Toggle navigation', 'majestic-tube' ); ?></span>
+				<?php
+				/*
+				 * The toggle is one control that opens and closes, so it draws
+				 * the bars while closed and the cross while open. CSS swaps
+				 * them on aria-expanded; both are in the markup so there is no
+				 * flash of the wrong one on a slow connection.
+				 */
+				majestic_tube_icon( 'menu', 'menu-toggle-open' );
+				majestic_tube_icon( 'close', 'menu-toggle-close' );
+				?>
 			</button>
 			<?php
 			wp_nav_menu(

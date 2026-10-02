@@ -141,7 +141,7 @@ function majestic_tube_share_buttons( $post_id = 0 ) {
 	?>
 	<div class="video-share">
 		<button type="button" class="button video-share-toggle">
-			<i class="fa fa-share-alt" aria-hidden="true"></i> <?php esc_html_e( 'Share', 'majestic-tube' ); ?>
+			<?php majestic_tube_icon( 'share' ); ?> <?php esc_html_e( 'Share', 'majestic-tube' ); ?>
 		</button>
 		<div class="sharing-buttons">
 			<?php foreach ( $links as $link ) : ?>

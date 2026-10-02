@@ -119,6 +119,7 @@ if ( 1 === (int) majestic_tube_get_option( 'wpst-options', 'videos-per-row-mobil
 				</div>
 			<?php else : ?>
 				<div class="post-thumbnail-container no-thumb">
+					<?php majestic_tube_icon( 'image' ); ?>
 					<span><?php esc_html_e( 'No image', 'majestic-tube' ); ?></span>
 				</div>
 			<?php endif; ?>
@@ -127,16 +128,33 @@ if ( 1 === (int) majestic_tube_get_option( 'wpst-options', 'videos-per-row-mobil
 				<span class="hd-video video-card-hd"><?php esc_html_e( 'HD', 'majestic-tube' ); ?></span>
 			<?php endif; ?>
 
+			<?php
+			/*
+			 * The badges say what they are without a legend: an eye is a view
+			 * count and a clock is a length, and neither word has to be read
+			 * first. Each is a masked icon beside its number, so it paints in
+			 * the badge's own white and costs no request.
+			 */
+			?>
 			<?php if ( $views ) : ?>
-				<span class="views video-card-views"><?php echo esc_html( majestic_tube_get_human_number( $views ) ); ?></span>
+				<span class="views video-card-views">
+					<?php majestic_tube_icon( 'eye' ); ?>
+					<?php echo esc_html( majestic_tube_get_human_number( $views ) ); ?>
+				</span>
 			<?php endif; ?>
 
 			<?php if ( $duration ) : ?>
-				<span class="duration video-card-duration"><?php echo esc_html( $duration ); ?></span>
+				<span class="duration video-card-duration">
+					<?php majestic_tube_icon( 'clock' ); ?>
+					<?php echo esc_html( $duration ); ?>
+				</span>
 			<?php endif; ?>
 
 			<?php if ( $rate ) : ?>
-				<span class="rating video-card-rating"><?php echo esc_html( $rate ); ?>%</span>
+				<span class="rating video-card-rating">
+					<?php majestic_tube_icon( 'star' ); ?>
+					<?php echo esc_html( $rate ); ?>%
+				</span>
 			<?php endif; ?>
 		</div>
 

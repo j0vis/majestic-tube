@@ -361,7 +361,7 @@ function majestic_tube_report_button( $post_id = 0 ) {
 	?>
 	<div class="video-report">
 		<button type="button" class="video-report-toggle" aria-expanded="false" aria-controls="video-report-panel-<?php echo esc_attr( $post_id ); ?>">
-			<?php esc_html_e( 'Report this video', 'majestic-tube' ); ?>
+			<?php majestic_tube_icon( 'flag' ); ?> <?php esc_html_e( 'Report this video', 'majestic-tube' ); ?>
 			<?php if ( $count && current_user_can( 'edit_post', $post_id ) ) : ?>
 				<span class="video-report-count"><?php echo esc_html( number_format_i18n( $count ) ); ?></span>
 			<?php endif; ?>

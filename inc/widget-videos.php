@@ -83,13 +83,22 @@ class MajesticTube_Video_Widget extends WP_Widget {
 					$duration = majestic_tube_get_video_duration( majestic_tube_get_duration_seconds( get_the_ID() ) );
 
 					if ( $duration ) {
-						printf( '<span class="video-card-duration">%s</span>', esc_html( $duration ) );
+						/*
+						 * The widget draws the same duration badge the grid card
+						 * does, so it takes the same icon: one shape, one place
+						 * that decides how it looks.
+						 */
+						printf(
+							'<span class="video-card-duration">%1$s%2$s</span>',
+							majestic_tube_get_icon( 'clock' ),
+							esc_html( $duration )
+						);
 					}
 					?>
 				</a>
 				<div class="majestic-tube-widget-video-info">
 					<a class="majestic-tube-widget-title" href="<?php the_permalink(); ?>"><?php the_title(); ?></a>
-					<span class="majestic-tube-widget-views"><?php echo esc_html( majestic_tube_get_human_number( majestic_tube_get_post_views( get_the_ID() ) ) ); ?></span>
+					<span class="majestic-tube-widget-views"><?php majestic_tube_icon( 'eye' ); ?><?php echo esc_html( majestic_tube_get_human_number( majestic_tube_get_post_views( get_the_ID() ) ) ); ?></span>
 				</div>
 			</li>
 			<?php

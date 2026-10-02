@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.4.1
+ * @version 2.4.2
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -973,6 +973,14 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Display the search bar', 'majestic-tube' ),
 			'section' => $chrome,
+		),
+		'show-icons'               => array(
+			'setting'     => 'majestic_tube_show_icons',
+			'default'     => 'on',
+			'type'        => 'onoff',
+			'label'       => __( 'Show icons throughout the site', 'majestic-tube' ),
+			'section'     => $chrome,
+			'description' => __( 'The theme draws its own icons - the search button, the sort tabs, the play, like, share and report buttons, the video cards. They are part of the stylesheet, so they cost no request and need no plugin. Switch this off to print the words alone.', 'majestic-tube' ),
 		),
 		'footer-columns'           => array(
 			'setting' => 'majestic_tube_footer_columns',

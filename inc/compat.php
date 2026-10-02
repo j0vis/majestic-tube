@@ -187,9 +187,10 @@ if ( ! function_exists( 'wpst_cats_tags' ) ) {
 		if ( $categories && majestic_tube_option_is_on( 'show-categories-video-about' ) ) {
 			foreach ( (array) $categories as $category ) {
 				printf(
-					'<a href="%1$s" class="label" title="%2$s"><i class="fa fa-folder"></i> %2$s</a>',
+					'<a href="%1$s" class="label" title="%2$s">%3$s %2$s</a>',
 					esc_url( get_category_link( $category->term_id ) ),
-					esc_attr( $category->name )
+					esc_attr( $category->name ),
+					majestic_tube_get_icon( 'folder' )
 				);
 			}
 		}
@@ -203,9 +204,10 @@ if ( ! function_exists( 'wpst_cats_tags' ) ) {
 				}
 
 				printf(
-					'<a href="%1$s" class="label" title="%2$s"><i class="fa fa-star"></i> %2$s</a>',
+					'<a href="%1$s" class="label" title="%2$s">%3$s %2$s</a>',
 					esc_url( $link ),
-					esc_attr( $actor->name )
+					esc_attr( $actor->name ),
+					majestic_tube_get_icon( 'star' )
 				);
 			}
 		}
@@ -213,9 +215,10 @@ if ( ! function_exists( 'wpst_cats_tags' ) ) {
 		if ( $tags && majestic_tube_option_is_on( 'show-tags-video-about' ) ) {
 			foreach ( (array) $tags as $tag ) {
 				printf(
-					'<a href="%1$s" class="label" title="%2$s"><i class="fa fa-tag"></i> %2$s</a>',
+					'<a href="%1$s" class="label" title="%2$s">%3$s %2$s</a>',
 					esc_url( get_tag_link( $tag->term_id ) ),
-					esc_attr( $tag->name )
+					esc_attr( $tag->name ),
+					majestic_tube_get_icon( 'tag' )
 				);
 			}
 		}
@@ -275,7 +278,7 @@ if ( ! function_exists( 'wpst_get_post_like_link' ) ) {
 			return '';
 		}
 
-		return '<span class="post-like"><a class="button" href="#post-' . absint( $post_id ) . '" data-post_id="' . absint( $post_id ) . '" data-post_like="like"><span class="like" title="' . esc_attr__( 'I like it', 'majestic-tube' ) . '"><i class="fa fa-heart"></i> ' . esc_html__( 'Like it', 'majestic-tube' ) . '</span></a></span>';
+		return '<span class="post-like"><a class="button" href="#post-' . absint( $post_id ) . '" data-post_id="' . absint( $post_id ) . '" data-post_like="like"><span class="like" title="' . esc_attr__( 'I like it', 'majestic-tube' ) . '">' . majestic_tube_get_icon( 'heart' ) . ' ' . esc_html__( 'Like it', 'majestic-tube' ) . '</span></a></span>';
 	}
 }
 

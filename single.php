@@ -159,14 +159,14 @@ while ( have_posts() ) :
 						 * rhythm as the counters whether or not either is enabled.
 						 */
 						?>
-						<time class="video-date" datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php echo esc_html( get_the_date() ); ?></time>
+						<time class="video-date" datetime="<?php echo esc_attr( get_the_date( DATE_W3C ) ); ?>"><?php majestic_tube_icon( 'calendar' ); ?><?php echo esc_html( get_the_date() ); ?></time>
 
 						<?php if ( $show_views ) : ?>
-							<span class="video-views"><span><?php echo esc_html( majestic_tube_get_human_number( $views ) ); ?></span> <?php esc_html_e( 'views', 'majestic-tube' ); ?></span>
+							<span class="video-views"><span><?php echo esc_html( majestic_tube_get_human_number( $views ) ); ?></span> <?php majestic_tube_icon( 'eye' ); ?> <?php esc_html_e( 'views', 'majestic-tube' ); ?></span>
 						<?php endif; ?>
 
 						<?php if ( $show_rating ) : ?>
-							<span class="likes"><span class="likes_count"><?php echo esc_html( number_format_i18n( $likes ) ); ?></span> <?php esc_html_e( 'likes', 'majestic-tube' ); ?></span>
+							<span class="likes"><span class="likes_count"><?php echo esc_html( number_format_i18n( $likes ) ); ?></span> <?php majestic_tube_icon( 'heart' ); ?> <?php esc_html_e( 'likes', 'majestic-tube' ); ?></span>
 						<?php endif; ?>
 					</div>
 
@@ -198,10 +198,10 @@ while ( have_posts() ) :
 									}
 									?>
 								</span>
-								<button type="button" class="button post-dislike" data-post_id="<?php echo esc_attr( get_the_ID() ); ?>" data-post_like="dislike">
-									<i class="fa fa-thumbs-down" aria-hidden="true"></i> <?php esc_html_e( 'Dislike', 'majestic-tube' ); ?>
-									<span class="dislike-count"><?php echo esc_html( number_format_i18n( $dislikes ) ); ?></span>
-								</button>
+							<button type="button" class="button post-dislike" data-post_id="<?php echo esc_attr( get_the_ID() ); ?>" data-post_like="dislike">
+								<?php majestic_tube_icon( 'thumbs-down' ); ?> <?php esc_html_e( 'Dislike', 'majestic-tube' ); ?>
+								<span class="dislike-count"><?php echo esc_html( number_format_i18n( $dislikes ) ); ?></span>
+							</button>
 							</div>
 						<?php endif; ?>
 
@@ -239,11 +239,19 @@ while ( have_posts() ) :
 				if ( majestic_tube_option_is_on( 'display-tracking-button' ) && '' !== $tracking_button ) :
 					$tracking_icon = (string) majestic_tube_get_option( 'wpst-options', 'tracking-button-icon', 'download' );
 					$tracking_text = (string) majestic_tube_get_option( 'wpst-options', 'tracking-button-text', '' );
-					?>
-					<a class="button" id="tracking-url" href="<?php echo esc_url( $tracking_button ); ?>" title="<?php echo esc_attr( get_the_title() ); ?>" target="_blank" rel="nofollow noopener">
-						<i class="fa fa-<?php echo esc_attr( $tracking_icon ); ?>" aria-hidden="true"></i>
-						<?php echo esc_html( $tracking_text ? $tracking_text : __( 'Watch the full video', 'majestic-tube' ) ); ?>
-					</a>
+					?><a class="button" id="tracking-url" href="<?php echo esc_url( $tracking_button ); ?>" title="<?php echo esc_attr( get_the_title() ); ?>" target="_blank" rel="nofollow noopener">
+								<?php
+								/*
+								 * The icon is one of five names from the
+								 * Outbound button icon setting. An older site may
+								 * have stored a name from a version that offered
+								 * others, so the helper returns nothing for one it
+								 * does not know and the button keeps its label.
+								 */
+								majestic_tube_icon( $tracking_icon );
+								?>
+								<?php echo esc_html( $tracking_text ? $tracking_text : __( 'Watch the full video', 'majestic-tube' ) ); ?>
+							</a>
 				<?php endif; ?>
 
 				<?php
