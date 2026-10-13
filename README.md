@@ -628,7 +628,7 @@ Two optional tags in the same section declare what the site is, and both are off
 
 Google reads either value as the same explicit-content signal, which is why one of the two is enough for search: it asks SafeSearch to filter the site. Neither is a noindex directive — a page labeled this way can still be indexed, and it is `noindex` that keeps a page out of the index. Both are independent of the Basic SEO switch and of the plugin step-aside, because no SEO plugin emits them.
 
-Nothing you saved in an earlier release is deleted when you upgrade. Settings from earlier releases stay in the database, unread.
+Nothing you saved in an earlier release is deleted when you upgrade. Settings from earlier releases stay in the database, unread. The one setting that is handed over rather than left behind is the browser-tab icon: an icon set in an earlier release is moved into WordPress's **Site Icon** on update, so the tab icon a site had is the one it keeps. If the image is hosted somewhere the site cannot reach, the dashboard says which address it was and points at the screen where the icon belongs.
 
 ## Video Structured Data
 
@@ -737,7 +737,7 @@ The bar is cached, and the cache key carries WordPress's own `last_changed` mark
 - Optionally show the logo in the footer.
 - Optionally place a logo watermark over the video player.
 
-The browser-tab icon is not here: it is WordPress's own **Site Icon**, under `Appearance → Customize → Site Identity → Site Icon`. That is the only place it lives, so there is nothing to keep in sync.
+The browser-tab icon is not here: it is WordPress's own **Site Icon**, under `Appearance → Customize → Site Identity → Site Icon`. That is the only place it lives, so there is nothing to keep in sync. A browser-tab icon set in an earlier release is moved there for you when you update; if the image cannot be fetched, the dashboard tells you to upload it once instead.
 
 #### Typography
 

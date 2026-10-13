@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.5.0
+ * @version 2.5.1
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -871,9 +871,10 @@ function majestic_tube_options_map() {
 		 * already owns this picture under Appearance -> Customize -> Site
 		 * Identity -> Site Icon, and the theme printing a second <link rel="icon">
 		 * made two sources of truth for one image, with whichever tag landed last
-		 * winning. The setting stays registered so a stored value is not lost and
-		 * an older release that downgrades still reads it, but a fresh install is
-		 * never offered the field and defers to the Site Icon.
+		 * winning. A site that had already set it has the value moved into the
+		 * Site Icon on upgrade - see inc/site-icon.php - while the setting stays
+		 * registered, so an older release that downgrades still reads it and a
+		 * fresh install is never offered the field at all.
 		 */
 		'favicon'                  => array(
 			'setting'    => 'majestic_tube_favicon',

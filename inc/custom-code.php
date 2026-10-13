@@ -5,14 +5,15 @@
  * The original settings screen let administrators paste a favicon, search-engine
  * verification tags, analytics snippets and extra JS. Majestic Tube exposes
  * those same fields natively and prints them from wp_head and wp_footer —
- * except the favicon, which now belongs to WordPress's own Site Icon setting.
+ * except the favicon, which belongs to WordPress's own Site Icon setting and is
+ * moved there on upgrade - see inc/site-icon.php.
  *
  * Output is administrator-supplied markup: it is sanitized on input (unfiltered
  * for users with unfiltered_html, wp_kses_post otherwise) and printed verbatim,
  * exactly like the original theme and like the ad zones.
  *
  * @package Majestic Tube
- * @version 2.5.0
+ * @version 2.5.1
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -43,8 +44,9 @@ function majestic_tube_output_code_option( $option_key, $label ) {
  * source of truth for the browser-tab icon, competing with WordPress's own
  * Site Icon (Appearance -> Customize -> Site Identity -> Site Icon); core
  * prints that one from wp_head, and the theme stepping aside is what makes it
- * the winner. A stored value is left untouched in the database, so nothing an
- * administrator entered is destroyed by this.
+ * the winner. A stored value is moved into that Site Icon on upgrade and is
+ * left in the database as well, so nothing an administrator entered is
+ * destroyed by this.
  *
  * @return void
  */
