@@ -36,12 +36,12 @@
 				},
 				{
 					"slug": "text-muted",
-					"color": "#6b7280",
+					"color": "#666d79",
 					"name": "Text muted"
 				},
 				{
 					"slug": "accent",
-					"color": "#0f8a99",
+					"color": "#0e7b8a",
 					"name": "Accent"
 				}
 			]
@@ -118,11 +118,11 @@
 		"elements": {
 			"link": {
 				"color": {
-					"text": "var(--mt-text)"
+					"text": "var(--mt-accent-text)"
 				},
 				":hover": {
 					"color": {
-						"text": "var(--mt-accent)"
+						"text": "var(--mt-accent-text-hover)"
 					}
 				}
 			},
@@ -133,7 +133,8 @@
 			},
 			"button": {
 				"color": {
-					"background": "var(--mt-accent)",						"text": "#ffffff"
+					"background": "var(--mt-accent)",
+					"text": "var(--mt-accent-fg)"
 				},
 				"border": {
 					"radius": "var(--mt-radius)"

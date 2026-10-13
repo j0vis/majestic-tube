@@ -7,7 +7,7 @@
  * do not mistake the theme's widget chrome for a specific promotional format.
  *
  * @package Majestic Tube
- * @version 2.2.26
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -184,11 +184,23 @@ class Majestic_Tube_Content_Widget extends WP_Widget {
  * Buffering lets placement helpers distinguish an area containing widgets from
  * an area whose device-targeted widgets all returned no output.
  *
+ * A legal page prints no widget area at all, and the refusal lives here rather
+ * than at each call site because this is where every area arrives: the
+ * placement helper, the video sidebar and the player overlay all pass through
+ * it, so those requests are covered even if one of those placements is reached
+ * by a route it would not normally take. A consent page - the submission page,
+ * whose own body asks the visitor to accept the terms - is treated the same
+ * way, because an ad tag beside such a question reads as the site's own
+ * answer. majestic_tube_widget_areas_withheld() owns that judgment, so the
+ * rule has one definition for the whole theme. The areas are withheld rather
+ * than hidden, so nothing from them reaches the page, while the header, menus,
+ * footer legal links and copyright the theme prints itself are unchanged.
+ *
  * @param string $area_id Registered widget-area id.
  * @return string
  */
 function majestic_tube_widget_area_content( $area_id ) {
-	if ( ! is_active_sidebar( $area_id ) ) {
+	if ( majestic_tube_widget_areas_withheld() || ! is_active_sidebar( $area_id ) ) {
 		return '';
 	}
 

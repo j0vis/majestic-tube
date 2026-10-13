@@ -454,7 +454,7 @@
         <li><a href="#taxonomy">Actors and categories</a></li>
         <li><a href="#player">Player settings</a></li>
         <li><a href="#membership">Members and submissions</a></li>
-        <li><a href="#seo-workspace">SEO workspace</a></li>
+        <li><a href="#seo-workspace">Search appearance</a></li>
         <li><a href="#customizer">Customizer settings</a></li>
         <li><a href="#appearance">Menus, widgets, and content</a></li>
         <li><a href="#reports">Reports and moderation</a></li>
@@ -485,7 +485,7 @@
           <li><strong>Ratings appeared as 0%.</strong> Imported posts store their rating as a pair of values, which the theme was not reading, so every imported video showed no rating. The theme now reads them, and the first visitor vote builds on the imported score instead of replacing it with 100%.</li>
           <li><strong>Hover previews showed one broken image.</strong> Extra preview images are stored as a single comma-separated value, while the theme read them as one URL per stored value. A comma is a legal URL character, so the whole string survived as one unusable address. Both storage shapes are now handled, including removing a single preview from the editor.</li>
         </ul>
-        <p>The 18 USC 2257 page is also now repaired automatically if it goes missing from the footer menu, so a deleted or renamed legal link comes back on its own.</p>
+        <p>The <strong>18 U.S.C. &sect; 2257</strong> page is also now repaired automatically if it goes missing from the footer menu, so a deleted or renamed legal link comes back on its own. The page is named the way the statute is written, and an update renames the page and its footer link in place &mdash; same page, same address, same content.</p>
 
         <div class="note">
           <strong>Upgrading from 2.1.7:</strong> replace the theme folder. Your settings carry over. If you were using reCAPTCHA, create a Turnstile widget and paste its two keys into <span class="path">Appearance &rarr; Customize &rarr; Site Features &rarr; Accounts &amp; Spam Protection</span> &mdash; the old reCAPTCHA keys are no longer used.
@@ -555,7 +555,7 @@
         <ul>
           <li>A main navigation menu, assigned to the theme’s main menu location.</li>
           <li>Pages for <strong>Submit a Video</strong>, <strong>Profile</strong>, <strong>Actors</strong>, <strong>Categories</strong>, and <strong>Tags</strong>.</li>
-          <li>Starter pages for <strong>18 USC 2257</strong>, <strong>DMCA</strong>, and <strong>Privacy Policy</strong>.</li>
+          <li>Starter pages for <strong>18 U.S.C. &sect; 2257</strong>, <strong>DMCA</strong>, and <strong>Privacy Policy</strong>.</li>
           <li>A separate footer menu containing the built-in legal links when an appropriate menu location is available.</li>
         </ul>
 
@@ -579,7 +579,7 @@
 
         <ul class="checklist">
           <li>Activate Majestic Tube and visit the welcome screen.</li>
-          <li>Set the site title, tagline, logo, and main colour.</li>
+          <li>Set the site title, tagline, logo, and main color.</li>
           <li>Choose the homepage video sort and the number of videos displayed.</li>
           <li>Create video categories, tags, and actors.</li>
           <li>Add images to important categories and actors.</li>
@@ -588,7 +588,7 @@
           <li>Configure member registration if you plan to accept submissions.</li>
           <li>Review and customize the legal pages for your actual operation.</li>
           <li>Test search, video reports, password reset, and email delivery.</li>
-          <li>Open the SEO workspace: name the homepage for search and confirm the collection index has finished building.</li>
+          <li>Check <span class="path">Appearance &rarr; Customize &rarr; SEO &amp; Analytics &rarr; Basic SEO</span>: it is on by default, and an SEO plugin takes over automatically if you install one.</li>
         </ul>
       </section>
 
@@ -624,11 +624,11 @@
               </tr>
               <tr>
                 <td><span class="path">Appearance → Customize</span></td>
-                <td>Control listings, the player, branding, sharing, submission rules, social handles, verification tags, custom code, and mobile presentation.</td>
+                <td>Control listings, the player, branding, sharing, submission rules, search appearance, verification tags, custom code, and mobile presentation.</td>
               </tr>
               <tr>
-                <td><span class="path">SEO</span></td>
-                <td>Everything about how the site appears in search: search appearance on videos and pages, collection wording, the collection index, CSV imports, and the homepage search details. See <a href="#seo-workspace">Theme-native SEO workspace</a>.</td>
+                <td><span class="path">Appearance &rarr; Customize &rarr; SEO &amp; Analytics</span></td>
+                <td>Search appearance the theme supplies itself, the video structured data and sitemap, analytics code, and the optional adult content labels. See <a href="#seo-workspace">Search appearance</a>.</td>
               </tr>
               <tr>
                 <td><span class="path">Appearance → Menus</span></td>
@@ -835,7 +835,7 @@
             </tbody>
           </table>
         </div>
-        <p>So <span class="path">{count} {videos} starring {name}</span> gives &ldquo;42 videos starring Amber Waves&rdquo;, and on a term with a single video it gives &ldquo;1 video starring&hellip;&rdquo;. An unrecognised token is left in place rather than silently deleted, so a typo is visible on the page instead of quietly producing a half-written sentence. Clear the box to go back to each term's own description.</p>
+        <p>So <span class="path">{count} {videos} starring {name}</span> gives &ldquo;42 videos starring Amber Waves&rdquo;, and on a term with a single video it gives &ldquo;1 video starring&hellip;&rdquo;. An unrecognized token is left in place rather than silently deleted, so a typo is visible on the page instead of quietly producing a half-written sentence. Clear the box to go back to each term's own description.</p>
         <p>The line is clamped to two lines, and the card drops the blank title line that a grid card reserves, so filling this in does not make the cards any taller.</p>
 
         <h3>Choose how many categories sit in a row</h3>
@@ -864,58 +864,12 @@
     return 'actors' === $taxonomy ? 'random' : $mode;
 }, 10, 2 );</code></pre>
 
-        <h3>Name a category, actor, or archive page for search engines</h3>
-        <p>Every category, actor, tag, studio and series page is a real page that Google can rank and visitors can share. They were also the one kind of page in the theme with nowhere to describe them: the browser title was whatever WordPress assembled, and the meta description was the site tagline or nothing at all.</p>
-        <p>Each of those terms now carries two fields, set on the same screen where you already set the term image:</p>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Field</th>
-                <th scope="col">Where it appears</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td><strong>SEO title</strong></td><td>The browser tab, and the blue title on a Google result.</td></tr>
-              <tr><td><strong>Meta description</strong></td><td>The two or three lines under a Google result, and the text on a Facebook or X share card.</td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>The fields appear on all five kinds of term:</p>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Term</th>
-                <th scope="col">Screen</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Category</td><td><span class="path">Videos &rarr; Video Categories</span></td></tr>
-              <tr><td>Tag</td><td><span class="path">Videos &rarr; Video Tags</span></td></tr>
-              <tr><td>Actor</td><td><span class="path">Actors</span></td></tr>
-              <tr><td>Studio</td><td><span class="path">Videos &rarr; Video Studios</span></td></tr>
-              <tr><td>Series</td><td><span class="path">Videos &rarr; Video Series</span></td></tr>
-            </tbody>
-          </table>
-        </div>
-        <p>Open a term, choose <strong>Edit</strong>, fill in either field, and save. The same two boxes are on the <strong>Add New</strong> form, so a term can be named correctly from the moment it exists rather than being backfilled later. If a term already has a written description, its opening words appear as grey placeholder text inside the Meta description box. That is a reminder, not a saved value &mdash; only what you type is stored.</p>
-        <p>A character counter sits under each box. It is informational, not an SEO score or a hard limit. Search engines may rewrite or truncate titles and descriptions based on the query and device.</p>
-        <p><strong>The title replaces the whole browser title; it is not added to one.</strong> Write <span class="path">Best comedy videos</span> and that is the entire tab &mdash; there is no <span class="path">Category Archives:</span> prefix in front of it and no site name after it. Put the site name in yourself if you want it there.</p>
-        <p>Both fields are opt-in and silent. An empty field stores nothing at all, so an existing site keeps exactly the output it had before, there is no setting to switch on, and no page changes until you type something. Clearing a field later deletes it rather than leaving an empty value behind.</p>
-        <p>The description deliberately reaches the search result <em>and</em> the Facebook and X cards. A description that only reached one of those three would still leave the share preview showing something else, which is the kind of mismatch nobody notices until it is pointed out.</p>
+        <h3>How an archive page describes itself in search</h3>
+        <p>Every category, tag, actor, studio and series page is a real page that a search engine can rank and a visitor can share, and each one already carries its own name and description on its term screen. The theme uses both: the term name is the heading and the browser title, and the term description is the meta description, so a category you have described is not described with the site tagline.</p>
+        <p>There is deliberately no separate SEO title or meta description field on a term screen. The term's own name and description are what change what search shows, and they are the same words a visitor reads on the page - there is no second, invisible version of the page to keep in step, and no bulk editor to fill in fields nothing displays.</p>
         <div class="note">
-          If Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework or Slim SEO is active, the theme steps aside entirely: neither box appears, and no title or description is printed at all. Those plugins already ask the same questions on the same screen, and two sources of truth for a page title is worse than one.
+          If you run an SEO plugin, the per-term title and description fields come from the plugin, and the theme steps aside from describing archives altogether. See <a href="#seo-workspace">Search appearance</a>.
         </div>
-        <p>Saving is nonce-verified and limited to users who can manage categories. WordPress&rsquo;s own <strong>Quick Edit</strong> and bulk actions do not post these fields, so they leave a term&rsquo;s saved title and description exactly as they were rather than silently wiping them.</p>
-        <p>Fields are only attached to taxonomies that actually exist on your site, so a child theme that removed one is unaffected.</p>
-        <p>The collections the theme builds from your catalogue &mdash; Actors by category, Actor pairings and the rest &mdash; are worded in one place instead, in <a href="#seo-workspace">Theme-native SEO workspace</a>.</p>
-
-        <h3>Find and fill in the missing ones</h3>
-        <p>Naming sixty categories one screen at a time is a job nobody finishes, so the term list has two things that help.</p>
-        <p><strong>An SEO title column</strong> now sits on every term list, next to the name and the video count. It shows the title that term will actually use, with a green note underneath when its meta description is set too. A term you have finished reads differently from one you have not, which is the whole point. If you would rather not see it, switch it off under <strong>Screen Options</strong> at the top right of the list.</p>
-        <p><strong>Edit SEO title &amp; description</strong> appears in the term list&rsquo;s bulk actions. Tick the terms you want, choose it, and one screen opens holding all of them at once &mdash; every title and description box, already filled in with what is saved, with the fallback text greyed out behind each empty one. Write, press <strong>Save SEO details</strong>, and you are back on the list with a note saying how many terms were changed. Leaving a box empty clears that field, exactly as it does on a single term.</p>
-        <p>That screen is not in the menu on purpose. It is somewhere you arrive from carrying a selection, so a permanent entry promising something it cannot do on its own would be worse than none. One hundred terms is the most it will open at once.</p>
 
         <h3>Directory pages</h3>
         <p>The automatically created Actors, Categories, and Tags pages use portrait cards, images, and video counts. You can edit their introductory block editor content without changing the directory itself.</p>
@@ -1000,8 +954,8 @@
         <p>Positions are stored per video, so watching three videos and coming back to each of them behaves the way you would expect.</p>
 
         <h4>Theater mode</h4>
-        <p>Theater mode dims the page around the player rather than hiding it, and it deliberately does <em>not</em> lock scrolling: the description and comments below the video stay reachable, because a visitor who came to read the page as well as watch the video has been trapped rather than helped. The choice is remembered in that visitor&rsquo;s browser, like the colour scheme in 2.1.6, and nothing is stored on your server.</p>
-        <p>The player controls keep the same dark chrome in both colour schemes, on purpose. A control that changed colour with the site would flicker the moment someone switched skins mid-video, and the player is a black box either way.</p>
+        <p>Theater mode dims the page around the player rather than hiding it, and it deliberately does <em>not</em> lock scrolling: the description and comments below the video stay reachable, because a visitor who came to read the page as well as watch the video has been trapped rather than helped. The choice is remembered in that visitor&rsquo;s browser, like the color scheme in 2.1.6, and nothing is stored on your server.</p>
+        <p>The player controls keep the same dark chrome in both color schemes, on purpose. A control that changed color with the site would flicker the moment someone switched skins mid-video, and the player is a black box either way.</p>
         <div class="note">
           <strong>For developers:</strong> each of the four has a filter &mdash; <span class="setting">majestic_tube_player_hotkeys_enabled</span>, <span class="setting">majestic_tube_player_speed_enabled</span>, <span class="setting">majestic_tube_player_resume_enabled</span>, and <span class="setting">majestic_tube_player_theater_enabled</span> &mdash; plus <span class="setting">majestic_tube_player_speeds</span> to change the speed list. All are documented in the theme&rsquo;s <code>inc/theme-options.php</code>.
         </div>
@@ -1031,17 +985,17 @@
 
         <h3>Allow or prevent registration</h3>
         <p>WordPress controls whether registration is available. Go to <span class="path">Settings → General</span> and review <strong>Membership</strong> and <strong>New User Default Role</strong>. For a moderated video site, use a cautious default role and review new accounts.</p>
+        <p>The login, registration, and submission forms also carry a required terms checkbox by default, which links your Terms of Use and Privacy Policy pages. The switch that prints it sits under <span class="path">Site Features → Accounts &amp; Spam Protection</span>, and <a href="#legal">Legal and Policy Pages</a> describes what the checkbox does.</p>
 
         <h3>Member menu</h3>
-        <p>When membership is enabled, the Main Menu includes:</p>
+        <p>When membership is enabled, a signed-in member gets a <strong>My Account</strong> item in the Main Menu that opens a dropdown holding:</p>
         <ul>
-          <li><strong>My Account</strong></li>
           <li><strong>Submit a Video</strong></li>
           <li><strong>My Channel</strong></li>
           <li><strong>My Profile</strong></li>
           <li><strong>Logout</strong></li>
         </ul>
-        <p>Administrators can hide the Submit a Video, My Profile, and My Channel links in the Customizer.</p>
+        <p>These are account links, so they live under My Account rather than beside Home and the directory pages — the theme's own menu setup does not add Submit a Video or Profile as top-level items. A signed-out visitor sees a <strong>Login</strong> item in their place. Administrators can hide the Submit a Video, My Profile, and My Channel links in the Customizer.</p>
 
         <h3>Edit a member profile</h3>
         <ol class="steps">
@@ -1056,12 +1010,15 @@
         <ol class="steps">
           <li>Sign in as a member.</li>
           <li>Open <span class="path">My Account → Submit a Video</span>.</li>
-          <li>Complete the title, description, playback source, thumbnail, duration, category, tags, and actors as needed.</li>
+          <li>Complete the title, description, playback source, duration, category, tags, and actors as needed.</li>
+          <li>Paste one thumbnail URL, or several &mdash; one URL per line &mdash; to rotate through while the pointer rests on the card.</li>
+          <li>Paste a preview video URL (mp4, webm, gif, or webp) when you would rather the card play that on hover than rotate thumbnails.</li>
           <li>For duration, enter hours, minutes, and seconds using the three boxes.</li>
           <li>Complete the verification when spam protection is enabled.</li>
           <li>Choose <strong>Submit video</strong>.</li>
         </ol>
         <p>New submissions are saved for moderation and do not appear publicly until an administrator publishes them.</p>
+        <p>A submission only needs the parts it has: one thumbnail URL, a list of them, or a preview video. When a list of thumbnails is submitted and the single Thumbnail URL box is left empty, the first URL in the list becomes the video&rsquo;s main thumbnail, which is what the card paints before the pointer reaches it. A preview video outranks the rotation thumbnails: a card with one plays its preview on hover instead of rotating through them.</p>
 
         <h3>Configure required submission fields</h3>
         <p>Go to <span class="path">Appearance → Customize → Site Features → Video Submission</span>. You can make the following fields required or optional:</p>
@@ -1071,6 +1028,8 @@
           <li>Video URL</li>
           <li>Embed code</li>
           <li>Thumbnail URL</li>
+          <li>Extra thumbnails</li>
+          <li>Preview video</li>
           <li>Tags</li>
           <li>Actors</li>
           <li>Duration</li>
@@ -1103,137 +1062,104 @@
           <li>The widget&rsquo;s token is sent to Cloudflare&rsquo;s <span class="setting">siteverify</span> endpoint from the server, along with the visitor&rsquo;s IP address. A token that does not verify stops the sign-up or the submission.</li>
           <li>Tokens are good once. If a visitor fails for an unrelated reason &mdash; a username already taken, say &mdash; the theme clears the challenge and hands them a fresh one instead of leaving them with a form that can never succeed.</li>
           <li>The sign-up form sits in a modal, so the widget is mounted only once that panel is actually open. A challenge mounted into a hidden panel measures itself as zero and never recovers.</li>
+          <li>Every form keeps the room the widget needs, whether protection is off, on, or still loading. The widget is 65px tall and arrives after the page has rendered, so the space is reserved up front: switching protection on never moves a submit button, and the widget landing never shifts the field beside it. The sign-up, login, comment and submission forms all reserve the same room; only sign-up and submission are guarded.</li>
         </ul>
 
         <h3>Turn protection off</h3>
-        <p>Set <strong>Enable spam protection</strong> to <strong>Off</strong>. The widget disappears from both forms and Cloudflare&rsquo;s script stops loading; your Turnstile keys stay saved, so switching back on needs no work.</p>
+        <p>Set <strong>Enable spam protection</strong> to <strong>Off</strong>. The widget disappears from both forms, the room it sat in stays reserved, and Cloudflare&rsquo;s script stops loading; your Turnstile keys stay saved, so switching back on needs no work.</p>
       </section>
 
       <section id="seo-workspace">
         <p class="eyebrow">Theme preferences</p>
-        <h2>Theme-native SEO workspace</h2>
-        <p class="section-intro">Majestic Tube has its own SEO workspace, so no plugin is required to describe your pages. Open <span class="path">SEO</span> in the WordPress dashboard, just below <span class="path">Appearance</span>. It is five tabs, and none of them asks you for a keyword or scores a page.</p>
+        <h2>Search appearance</h2>
+        <p class="section-intro">Two sources of truth for one page title is worse than one, so the rule is simple: an SEO plugin wins whenever one is active. When none is, the theme describes the site itself from <span class="path">Appearance &rarr; Customize &rarr; SEO &amp; Analytics &rarr; Basic SEO</span>, and nothing has to be installed for that to work.</p>
 
+        <h3>What the theme prints with no SEO plugin installed</h3>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th scope="col">Tab</th>
-                <th scope="col">What it is for</th>
+                <th scope="col">Tag</th>
+                <th scope="col">Where it comes from</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><strong>Overview</strong></td><td>How many eligible collection pages the discovery index holds, when it last finished, and a button to start or advance a build.</td></tr>
-              <tr><td><strong>Collections</strong></td><td>One row per generated collection: whether it is allowed in search results, how many pages it currently has, and a link into its wording.</td></tr>
-              <tr><td><strong>Templates</strong></td><td>The wording for one collection across every page that matches it, with a preview and ten restorable versions.</td></tr>
-              <tr><td><strong>Data sources</strong></td><td>Links to your own catalogue screens, plus a validated CSV import for term titles and descriptions.</td></tr>
-              <tr><td><strong>Settings</strong></td><td>The homepage search title and meta description, and a link back to the Customizer for social handles and verification tags.</td></tr>
+              <tr><td><span class="setting">&lt;title&gt;</span></td><td>WordPress itself, from the theme's <span class="setting">title-tag</span> support. The theme filters the parts on the front page if you write a homepage search title; it never prints a second title tag.</td></tr>
+              <tr><td><span class="setting">meta description</span></td><td>The excerpt, then the body text, then the site tagline. The homepage has a field of its own.</td></tr>
+              <tr><td><span class="setting">rel="canonical"</span></td><td>WordPress prints one on a video or a page. The theme adds one on archive pages, including page two, which canonicalises to itself rather than to page one. Search results and 404s get none.</td></tr>
+              <tr><td>Open Graph and Twitter cards</td><td>Title, description, URL, type, site name, locale, and an image: the video's own picture on a video page, a term image on an archive, then your logo, then the Site Icon.</td></tr>
+              <tr><td><span class="setting">robots</span></td><td>WordPress, unchanged.</td></tr>
             </tbody>
           </table>
         </div>
-        <p>The count on <strong>Overview</strong> is the number of eligible pages in the theme&rsquo;s own index. It is not a figure from Google, and nothing in this workspace connects to a Google account.</p>
+        <p>A shared video link therefore produces a card with a picture and a sentence rather than a bare URL, and an archive page says what it is instead of showing the site tagline.</p>
 
-        <h3>Search appearance on a video or a page</h3>
-        <p>Videos and ordinary pages carry a <strong>Search appearance</strong> box beneath the editor. Leave it alone and the theme supplies the defaults &mdash; the post title for the browser tab, the opening of the content for the description. Type into either field to override it, and open <strong>Advanced</strong> for a noindex switch and a canonical URL override that normally stays empty.</p>
-        <p>Categories, tags, actors, studios and series keep their own per-term fields on the term screen, with the same automatic defaults and the bulk editor described in <a href="#taxonomy">Name a category, actor, or archive page for search engines</a>.</p>
-        <p>Search engines rewrite titles and truncate descriptions according to the query and the device. The character counters are informational. There is no score, no keyword density and no minimum word count anywhere in this workspace &mdash; a collection becomes a page because the videos exist, not because it reads long enough.</p>
-
-        <h3>What the four collections are</h3>
-        <p>Collections are landing pages the theme builds from combinations that already exist in your catalogue. Nothing is created as a post, and no second copy of your videos exists.</p>
+        <h3>Basic SEO settings</h3>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th scope="col">Collection</th>
-                <th scope="col">The page it builds</th>
-                <th scope="col">Videos it needs</th>
+                <th scope="col">Setting</th>
+                <th scope="col">What it does</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td>Actors by category</td><td><span class="path">/actor/amber-waves/comedy/</span></td><td>6</td></tr>
-              <tr><td>Actor pairings</td><td><span class="path">/actor/amber-waves/with/rio-santos/</span></td><td>4</td></tr>
-              <tr><td>Actors by duration</td><td><span class="path">/actor/amber-waves/length/short/</span></td><td>3</td></tr>
-              <tr><td>Categories by tag</td><td><span class="path">/category/comedy/featured/</span></td><td>5</td></tr>
+              <tr><td><strong>Basic SEO</strong></td><td>Whether the theme prints its own description, archive canonical and social cards. On by default.</td></tr>
+              <tr><td><strong>Homepage search title</strong></td><td>What the browser tab and the search result say for the front page. Blank falls back to the site title.</td></tr>
+              <tr><td><strong>Homepage meta description</strong></td><td>The text under the front page title in a result, and on a share card. Blank falls back to the site tagline. It is deliberately separate from the visible homepage introduction, which a visitor reads.</td></tr>
+              <tr><td><strong>Adult content rating tag</strong></td><td>Adds the explicit-content rating tag Google documents. Off by default.</td></tr>
+              <tr><td><strong>RTA label</strong></td><td>Adds the Restricted To Adults label, verbatim, which is what parental-control and filtering software looks for. Off by default.</td></tr>
             </tbody>
           </table>
         </div>
-        <p>A page is only built when that many published videos genuinely share the combination, so a combination nobody used never becomes an empty page for a crawler to find. A pairing always prints in the same order whichever actor a visitor arrives from, so the two directions of <span class="path">/actor/amber-waves/with/rio-santos/</span> are one page rather than two competing ones.</p>
-        <p>Studios and series are deliberately not collections here. They stay ordinary WordPress taxonomy archives, edited on their own term screens, and they remain in WordPress&rsquo;s taxonomy sitemap rather than being submitted a second time by the theme.</p>
+        <p>The browser title is never printed twice. The homepage search title replaces the parts WordPress assembled, so the tag stays single and the site-name separator keeps working on every other page.</p>
 
-        <h3>Wording for a whole collection</h3>
-        <p><strong>Templates</strong> edits one collection at a time, and four fields do the work:</p>
+        <h3>Labeling an adult site</h3>
+        <p>Two optional tags declare what the site is. Both are off by default, and both keep working if you later install an SEO plugin, because no general-purpose plugin emits them:</p>
         <div class="table-wrap">
           <table>
             <thead>
               <tr>
-                <th scope="col">Field</th>
-                <th scope="col">Where it appears</th>
+                <th scope="col">Setting</th>
+                <th scope="col">The tag it prints</th>
               </tr>
             </thead>
             <tbody>
-              <tr><td><strong>Visible heading</strong></td><td>The <span class="setting">h1</span> on the collection page.</td></tr>
-              <tr><td><strong>Visible introduction</strong></td><td>One optional line beneath the heading.</td></tr>
-              <tr><td><strong>Search title</strong></td><td>The browser tab, and the blue title on a Google result.</td></tr>
-              <tr><td><strong>Meta description</strong></td><td>The snippet under a Google result, and the text on a Facebook or X share card.</td></tr>
+              <tr><td><strong>Adult content rating tag</strong></td><td><span class="setting">&lt;meta name="rating" content="adult"&gt;</span></td></tr>
+              <tr><td><strong>RTA label</strong></td><td><span class="setting">&lt;meta name="RATING" content="RTA-5042-1996-1400-1577-RTA"&gt;</span></td></tr>
             </tbody>
           </table>
         </div>
-        <p>Every collection accepts <span class="setting">{site.name}</span> and <span class="setting">{video_count}</span>, plus the names of the terms in its URL. Each one adds its own:</p>
-        <div class="table-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th scope="col">Collection</th>
-                <th scope="col">Variables</th>
-              </tr>
-            </thead>
-            <tbody>
-              <tr><td>Actors by category</td><td><span class="setting">{actor.name}</span>, <span class="setting">{category.name}</span></td></tr>
-              <tr><td>Actor pairings</td><td><span class="setting">{actor.name}</span>, <span class="setting">{actor2.name}</span></td></tr>
-              <tr><td>Actors by duration</td><td><span class="setting">{actor.name}</span>, <span class="setting">{band.name}</span></td></tr>
-              <tr><td>Categories by tag</td><td><span class="setting">{category.name}</span>, <span class="setting">{tag.name}</span></td></tr>
-            </tbody>
-          </table>
+        <p>Google reads either value as the same explicit-content signal, so one of the two is enough for search: it asks SafeSearch to filter the site. Enable both only if the filters you rely on look for different ones.</p>
+        <div class="note">
+          Neither tag is a noindex directive. A page labeled this way can still be indexed and still appear in results &mdash; it is <span class="setting">noindex</span> that keeps a page out of the index, and that comes from your SEO plugin, not from here.
         </div>
-        <p>Click a variable to insert it into the field you were last typing in. Anything the theme does not recognise &mdash; a misspelled variable, an unbalanced brace &mdash; is rejected with a message instead of being saved, and no code of any kind is ever executed from a template. The preview is illustrative rather than a promise, because Google may show different text.</p>
-        <p>Saving changes every matching page at once, which is why the confirmation box is deliberate. <strong>Previous versions</strong> keeps the last ten saved templates per collection and restores any of them.</p>
-        <p>The same switch that holds the wording also decides whether the collection may appear in search results. Turning it off adds <span class="setting">noindex</span> to the collection&rsquo;s pages and drops it from browse listings and the XML sitemap &mdash; while every URL a visitor may already have bookmarked keeps working. An excluded collection is not deleted, and switching it back on restores it.</p>
 
-        <h3>The discovery index</h3>
-        <p>A page has to be known before anything can list it, so the theme keeps a rebuildable index of eligible collection pages in a database table of its own. <strong>Overview</strong> reports its size, when it last completed, and whether a build is part-way through.</p>
-        <p>The first build starts after an admin visit and proceeds in scheduled batches of ten terms. WordPress runs those tasks through <span class="setting">wp-cron.php</span>, which only fires when a request reaches the site &mdash; on a quiet site that can be days away. Install a real scheduler, or press <strong>Refresh collection index</strong> to advance a build by hand. A build never replaces a good index with a half-finished one: the last completed generation stays available throughout, and a failed build keeps the old one rather than clearing it. A daily pass marks the index as needing a rebuild, so a catalogue change made outside the theme&rsquo;s own hooks is still picked up.</p>
-        <p>Public browse pages and the sitemap read from that index with a bounded query instead of scanning every term on every request. This is also why a count on <strong>Overview</strong> settles a moment after you edit your catalogue rather than instantly &mdash; it is a batch job, and it says so.</p>
-
-        <h3>Importing term details from a CSV</h3>
-        <p><strong>Data sources &rarr; Import term search details</strong> accepts a file whose header row is exactly:</p>
-        <pre><code>taxonomy,slug,title,description</code></pre>
+        <h3>What the theme does not do</h3>
         <ul>
-          <li>At most 100 rows and 256 KB per upload.</li>
-          <li>Every row must name an existing term you are allowed to edit; a missing one fails the whole file instead of half-importing it.</li>
-          <li><strong>Validate and preview</strong> lists every row before anything is written, and that preview expires after 15 minutes.</li>
-          <li>A blank title or description clears that override and returns the term to its automatic default.</li>
-          <li>Nothing is created or deleted: no terms, no videos, no URLs.</li>
-          <li>The import is refused outright while an SEO plugin owns these fields.</li>
+          <li>It does not set a title or description for an individual video, page or term. Those come from your SEO plugin, or stay as the post title and the term's own name and description.</li>
+          <li>It does not score pages, ask for a keyword, or measure keyword density.</li>
+          <li>It does not add a noindex switch, redirect rules, breadcrumb trails in search results, or a sitemap of everything.</li>
         </ul>
-        <p>Use it for the long tail &mdash; the forty tags nobody will ever open by hand &mdash; not as a way of bulk-generating text.</p>
-
-        <h3>Homepage search details</h3>
-        <p><strong>Settings</strong> holds two independent fields: a homepage search title and a homepage meta description. Leave either empty and the theme falls back to the site title, and to the visible homepage introduction written in the Customizer. The two stay separate on purpose: the introduction is page content a visitor reads, and the search description is only what a search engine may choose to show instead.</p>
+        <p>Those are the things an SEO plugin is for, and installing one is a supported answer rather than a workaround.</p>
 
         <h3>When an SEO plugin is installed</h3>
-        <p>If Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework or Slim SEO is active, the theme detects it and stops printing titles and descriptions of its own:</p>
+        <p>If Yoast, Rank Math, All in One SEO, SEOPress, The SEO Framework or Slim SEO is active, the theme detects it and stops describing pages of its own:</p>
         <ul>
-          <li>The per-term and per-post search fields disappear rather than fighting the plugin for the same <span class="setting">&lt;title&gt;</span> tag.</li>
-          <li>The CSV import is disabled, because it would write fields that plugin is not reading.</li>
-          <li>The template editor keeps working, because collection pages are the theme&rsquo;s own virtual URLs and the index behind them has to keep running either way.</li>
+          <li>No meta description, no archive canonical and no social cards are printed, because the plugin prints its own and two answers to one question is worse than one.</li>
+          <li>The homepage search title stands down, so the plugin's title is the only one.</li>
+          <li>The content-rating labels above keep printing, because they are a labeling signal rather than search appearance.</li>
         </ul>
-        <p>Nothing is deleted when a plugin is switched on or off, and switching the theme away leaves every saved value in the database. Only these screens, the virtual collection routes and the index belong to Majestic Tube, so they stop running when it is not the active theme.</p>
+        <p>Nothing is deleted when a plugin is switched on or off. Turn Basic SEO off by hand instead if you run an SEO plugin the theme does not recognize, and it will stop describing pages without needing to be on that list.</p>
 
-        <h3>Coming from the old Customizer controls</h3>
-        <p>Collections you had switched off in an earlier release are carried into the new <strong>Collections</strong> tab still switched off, rather than quietly re-enabled. That happens once, the first time you open the admin after updating. Customizer settings that an earlier release had already deleted are gone for good and cannot be recovered.</p>
-        <div class="note">
-          Canonical URLs are self-referencing on real pagination, and a noindexed collection is left out of the sitemap entirely. Studio and series archives are not in the theme&rsquo;s own sitemap provider, so they are submitted once by WordPress rather than twice.
-        </div>
+        <h3>Video structured data</h3>
+        <p>A video page can be ranked two ways: as an ordinary web page, and as a video in Google Video search. The second one needs a <span class="setting">VideoObject</span> block and details only a video theme holds &mdash; how long the video runs, whether it plays from your own file or someone else's embed, and who appears in it. That is what <span class="path">SEO &amp; Analytics &rarr; Video Structured Data</span> turns on, and it keeps working while an SEO plugin is running, because no general-purpose plugin reads those fields.</p>
+        <ul>
+          <li><strong>Video structured data</strong> prints the <span class="setting">VideoObject</span> block and the <span class="setting">og:video</span> tags, and adds a <strong>Video SEO</strong> column to the Videos list.</li>
+          <li><strong>Video sitemap</strong> serves <span class="path">/video-sitemap.xml</span> and advertises it in <span class="setting">robots.txt</span>. Submit it in Search Console as its own sitemap; the XML sitemap index does not cover it.</li>
+          <li><strong>Videos per sitemap file</strong> splits a large library across numbered files under the same address. 1,000 by default.</li>
+        </ul>
+        <p>A video missing a duration, a thumbnail or a source is skipped rather than submitted half-finished: a page with no markup can still rank as a web page, whereas a broken one is a quality signal. The <strong>Video SEO</strong> column shows which videos fall into that group. Videos played from another domain's player can still rank as web pages, but Google cannot count them as part of your video inventory, so they will not appear in Video results.</p>
       </section>
 
       <section id="customizer">
@@ -1257,17 +1183,18 @@
               <tr><td rowspan="3">Video Page</td><td>Video Page Layout</td><td>Which of a post's two video fields the player uses (Video URL or embed code), the video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos.</td></tr>
               <tr><td>Player</td><td>Autoplay, the player engine, the quality selector, view counting, and the optional keyboard shortcuts, speed, resume and theater controls.</td></tr>
               <tr><td>Sharing</td><td>The share buttons printed under the player.</td></tr>
-              <tr><td rowspan="4">Site Design</td><td>Colours &amp; Typography</td><td>Light or dark skin, the header toggle, the accent colour, whether to ignore the site background image, and the site font.</td></tr>
-              <tr><td>Logo</td><td>An image or text logo, its font, size, dimensions and spacing, a copy in the footer, and the favicon.</td></tr>
-              <tr><td>Player Watermark</td><td>A logo overlaid on the player, with its size, colour treatment and corner.</td></tr>
+              <tr><td rowspan="4">Site Design</td><td>Colors &amp; Typography</td><td>Light or dark skin, the header toggle, the accent color and the readable link, text and icon tones derived from it, whether to ignore the site background image, and the site font.</td></tr>
+              <tr><td>Logo</td><td>An image or text logo, its font, size, dimensions and spacing, and a copy in the footer.</td></tr>
+              <tr><td>Player Watermark</td><td>A logo overlaid on the player, with its size, color treatment and corner.</td></tr>
               <tr><td>Thumbnails</td><td>Thumbnail aspect ratio, image fit, image quality, and the hover rotation on video cards.</td></tr>
-              <tr><td rowspan="3">Site Features</td><td>Header, Footer &amp; Search</td><td>The search bar, the number of footer columns, the copyright bar and its text, and the admin bar.</td></tr>
-              <tr><td>Accounts &amp; Spam Protection</td><td>Member login and registration, and the Cloudflare Turnstile spam check with its two keys.</td></tr>
+              <tr><td rowspan="3">Site Features</td><td>Header, Footer &amp; Search</td><td>The search bar, the number of footer columns, the copyright bar and its text, the admin bar, and the cookie notice with its wording.</td></tr>
+              <tr><td>Accounts &amp; Spam Protection</td><td>Member login and registration, the Cloudflare Turnstile spam check with its two keys, and the terms checkbox asked for on the login, registration and submission forms.</td></tr>
               <tr><td>Video Submission</td><td>The submission form, the links that lead to it, and which fields are required.</td></tr>
               <tr><td>Advertising</td><td>In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from <span class="path">Appearance &rarr; Widgets</span>.</td></tr>
-              <tr><td rowspan="4">SEO &amp; Analytics</td><td>SEO &amp; Social</td><td>The Facebook app ID, the X/Twitter handle, the playable card URL, and verification tags.</td></tr>
-              <tr><td>Homepage SEO</td><td>Where the visible homepage heading sits and the introduction printed once beneath it. Search metadata is in the <a href="#seo-workspace">SEO workspace</a>.</td></tr>
-              <tr><td>Archive Page SEO</td><td>The line shown on each category and actor card, and whether the category and tag descriptions go above or below the list. The per-term titles and descriptions are not here &mdash; see <a href="#taxonomy">Name a category, actor, or archive page for search engines</a>.</td></tr>
+              <tr><td rowspan="5">SEO &amp; Analytics</td><td>Basic SEO</td><td>The search appearance the theme supplies itself, for a site that runs no SEO plugin: the homepage search title and meta description, the archive canonical and social cards, and the two optional adult content labels. Switched off automatically while a supported SEO plugin is active. See <a href="#seo-workspace">Search appearance</a>.</td></tr>
+              <tr><td>Homepage SEO</td><td>Where the visible homepage heading sits and the introduction printed once beneath it.</td></tr>
+              <tr><td>Archive Page SEO</td><td>The line shown on each category and actor card, and whether the category and tag descriptions go above or below the list.</td></tr>
+              <tr><td>Video Structured Data</td><td>The <span class="setting">VideoObject</span> markup on video pages, the video social tags, and the video sitemap.</td></tr>
               <tr><td>Custom Code</td><td>Analytics code in the page head, extra scripts before the closing body tag, and scripts for mobile visitors only.</td></tr>
             </tbody>
           </table>
@@ -1308,16 +1235,16 @@
         <h3>Site Design</h3>
         <ul>
           <li>Enable a custom background.</li>
-          <li>Choose the main accent colour.</li>
-          <li>Set the site's default colour scheme: Light, Dark, or Follow system.</li>
+          <li>Choose the main accent color.</li>
+          <li>Set the site's default color scheme: Light, Dark, or Follow system.</li>
           <li>Optionally show a light/dark toggle in the header so visitors can switch.</li>
           <li>Pick the site font: the bundled Inter, or the visitor's own system font.</li>
           <li>Use an uploaded logo or a text logo with an icon.</li>
           <li>Adjust logo font, size, dimensions, and spacing.</li>
           <li>Optionally show the logo in the footer.</li>
           <li>Optionally place a logo watermark over the video player.</li>
-          <li>Set a favicon for browser tabs and bookmarks.</li>
         </ul>
+        <p>The browser-tab icon is not here: it is WordPress's own <strong>Site Icon</strong>, under <span class="path">Appearance → Customize → Site Identity → Site Icon</span>. That is the only place it lives, so there is nothing to keep in sync.</p>
 
         <h4>Typography</h4>
         <p>The theme ships one font of its own: <strong>Inter</strong>, self-hosted in two subset files that weigh about 130 KB together. A page therefore makes no request to a third-party font host — no extra DNS lookup, no referrer leak, no cookie-consent question — and every visitor sees the same letterforms instead of Segoe UI on Windows, San Francisco on macOS and Roboto on Android. The variable file covers the whole regular-to-bold range in one download, and the Latin Extended subset is only fetched once a page really renders a character from it.</p>
@@ -1325,21 +1252,37 @@
         <p>The text logo has its own choice: <strong>Inter</strong> (the default), <strong>System UI</strong>, <strong>System serif</strong> (Georgia, Times New Roman, Noto Serif), and <strong>System monospace</strong> (Menlo, Consolas, DejaVu Sans Mono). The three system voices are installed fonts rather than downloaded ones, so each looks slightly different per operating system — that is expected, not a glitch.</p>
 
 
-        <h4>Colour scheme and dark mode</h4>
-        <p>Go to <span class="path">Appearance &rarr; Customize &rarr; Site Design &rarr; Colours &amp; Typography</span>. Two settings control the skin.</p>
+        <h4>Color scheme and dark mode</h4>
+        <p>Go to <span class="path">Appearance &rarr; Customize &rarr; Site Design &rarr; Colors &amp; Typography</span>. Two settings control the skin.</p>
         <ul>
-          <li><strong>Colour scheme</strong> chooses what the site uses by default.</li>
+          <li><strong>Color scheme</strong> chooses what the site uses by default.</li>
           <li><strong>Show the light/dark toggle in the header</strong> adds a small round button to the header so visitors can switch for themselves. It is off by default.</li>
         </ul>
-        <p><strong>Light</strong> is the classic Majestic Tube surface. <strong>Dark</strong> is a near-black companion built for evening viewing: the same layout, the same accent, retuned borders and text colours so nothing turns into unreadable grey-on-black. <strong>Follow system</strong> renders whatever the visitor's own operating system asks for and needs no script and no stored value &mdash; the browser decides, and the page is correct before any of the theme's JavaScript runs.</p>
-        <p>The accent colour, background, and every other control in the <span class="setting">Site Design</span> panel apply to both skins, so a dark site is the same site rather than a separate design.</p>
+        <p><strong>Light</strong> is the classic Majestic Tube surface. <strong>Dark</strong> is a near-black companion built for evening viewing: the same layout, the same accent, and retuned borders and text colors so nothing turns into unreadable gray-on-black &mdash; including the accent itself, which is brightened for the dark surface so a link reads as well on near-black as it does on white. <strong>Follow system</strong> renders whatever the visitor's own operating system asks for and needs no script and no stored value &mdash; the browser decides, and the page is correct before any of the theme's JavaScript runs.</p>
+        <p>The accent color, background, and every other control in the <span class="setting">Site Design</span> panel apply to both skins, so a dark site is the same site rather than a separate design.</p>
         <div class="note">
-          A visitor's choice is stored in their own browser and is never sent to the server. No cookie is set, nothing is written to the database, and a visitor who has never chosen anything simply gets the site default. Clearing site data, or opening a private window, returns them to the default &mdash; which is usually the right behaviour.
+          A visitor's choice is stored in their own browser and is never sent to the server. No cookie is set, nothing is written to the database, and a visitor who has never chosen anything simply gets the site default. Clearing site data, or opening a private window, returns them to the default &mdash; which is usually the right behavior.
         </div>
         <p>With the toggle on, the button cycles <strong>Light</strong> and <strong>Dark</strong>. If the site default is <strong>Follow system</strong>, it cycles all three, so a visitor can leave it back on automatic. The button's label, tooltip, and screen-reader text all name the scheme it will switch to, so it stays usable without relying on the glyph.</p>
-        <p>A short script in the page head applies the stored choice before the first paint, so a dark-mode visitor never sees a flash of the light skin on the way in. On a site set to Light with the toggle switched off, the theme prints nothing for any of this. Where a browser refuses local storage &mdash; private browsing, a strict cookie policy, a partitioned frame &mdash; the script steps aside quietly and the site default stands, so the page is still readable.</p>
+        <p>A short script in the page head applies the stored choice before the first paint, so a dark-mode visitor never sees a flash of the light skin on the way in. The theme prints nothing for any of this while the toggle is switched off, whatever the site is set to: the button is the only place the choice is made or shown, so with no button there is nothing to honor.</p>
+        <p>A stored choice is recorded against the default it was made under, so changing <strong>Color scheme</strong> takes effect for everyone &mdash; including the browser that already had a choice stored. A choice made against the old default is dropped rather than left silently deciding what the page looks like; the visitor picks again in one click. The cycle the button steps through is built from the site&rsquo;s own scheme too, so a site set to <strong>Follow system</strong> keeps its third step after a visitor has used the button rather than losing it.</p>
+        <p>Where a browser refuses local storage &mdash; private browsing, a strict cookie policy, a partitioned frame &mdash; the script steps aside quietly and the site default stands, so the page is still readable.</p>
         <div class="note">
           <strong>For developers:</strong> the <span class="setting">majestic_tube_color_scheme</span> filter changes the default scheme, and <span class="setting">majestic_tube_theme_toggle_enabled</span> decides whether the toggle is rendered. Both live in <code>inc/theme-options.php</code>.
+        </div>
+
+        <h4>Accent color</h4>
+        <p>There is one accent to choose, and it is the color of the button fills, the active sort tab, the play badge over a thumbnail, the like and dislike buttons, the sort icons and every link. Everything else about it is derived, because one value cannot do every job well: a color dark enough to carry white button text is too dark to read as a link on a near-black page, and a color bright enough to read there is far too pale under white text.</p>
+        <p>So the theme works the shades out from the single color you pick and measures each one against the surface it will be painted on:</p>
+        <ul>
+          <li><strong>The fill</strong> keeps your color exactly, with white text on it where white is readable and the theme's near-black ink where it is not.</li>
+          <li><strong>Links, text and icons</strong> get a tone deepened for the light skin until it clears 5:1, and brightened for the dark skin until it clears 7:1.</li>
+          <li><strong>Hover states</strong> step further away from their surface than the resting state, so hovering always means more contrast rather than less.</li>
+          <li><strong>The player</strong> takes a bright version of the same color, because its chrome stays black over video in both skins: a progress bar in the fill color would disappear over a bright frame.</li>
+        </ul>
+        <p>The upshot is that whatever you pick stays consistent across the buttons, the links, the text and the icons in both skins, and stays readable &mdash; including a very pale or a very dark choice, where the theme moves the shade rather than leaving unreadable text on the page. None of the derived shades are stored anywhere: change the accent and every tone moves with it.</p>
+        <div class="note">
+          <strong>For developers:</strong> the derived values are printed as CSS custom properties on <code>:root</code> by <code>inc/custom-code.php</code> &mdash; <code>--mt-accent</code>, <code>--mt-accent-fg</code>, <code>--mt-accent-hover</code>, <code>--mt-accent-text</code>, <code>--mt-accent-text-hover</code> and <code>--mt-accent-on-dark</code> &mdash; and each role is documented beside the tokens in <code>assets/css/main.css</code>. The <code>majestic_tube_brand_css</code> filter can add to or replace any declaration in that block.
         </div>
 
         <h3>Video Page &rarr; Sharing</h3>
@@ -1371,25 +1314,35 @@
         </div>
         <h4>Advertising and cookie consent</h4>
         <p>Advertising is unchanged by default. Turning on <span class="setting">Only load advertising after consent</span> makes the theme print nothing at all for any of its placements, in-feed, popunder, header, footer, under-player, video-sidebar, and player, until a cookie banner or consent management platform says the visitor has agreed. The theme never records or asks for consent itself, so the switch stays off until you connect a solution that does.</p>
+        <p>This switch is about the visitor&rsquo;s choice. Where the page itself is the question the rule is different, and it is always on: no placement of any kind prints on a legal page or beside the submission form, whether or not this switch is set. See <a href="#legal">What a legal page does not carry</a>.</p>
+        <p>The theme can also print a cookie notice of its own: <span class="setting">Show a cookie notice</span> under <span class="path">Site Features → Header, Footer &amp; Search</span>. It tells visitors the site uses cookies and links your Terms of Use, Privacy Policy, and Cookie Policy pages. It records nothing on your server and does <strong>not</strong> hold advertising back &mdash; the switch above is what does that, and it still needs a consent solution to report the visitor&rsquo;s choice.</p>
         <div class="note">
           Connecting a consent plugin is a one-line filter in a small snippet or a site-specific plugin. Let the consent plugin return <span class="setting">true</span> once advertising is allowed, and the theme will print its placements as normal. The filter is <span class="setting">majestic_tube_ads_allowed</span> and it receives the placement name as its second argument: in-feed, popunder, header, footer, under-player, video-sidebar, or player. It also works the other way round for a single placement, which is useful if one area should always be shown.
         </div>
 
-        <h3>SEO &amp; Analytics &rarr; SEO &amp; Social</h3>
-        <ul>
-          <li>Add an optional Facebook app ID.</li>
-          <li>Add an X/Twitter site handle.</li>
-          <li>Add an optional Twitter player URL, which upgrades the video preview card to the playable player card.</li>
-          <li>Paste search engine verification tags.</li>
-        </ul>
-        <p>Majestic Tube also supplies social preview information and video structured data on individual video pages. If a major SEO plugin is active, the theme normally avoids duplicating its social output.</p>
-        <p>The browser title and meta description for your category, actor, tag, studio and series archive pages are not set here either. They belong to the page rather than to the site, so they are set on each term&rsquo;s own screen, next to its image. See <a href="#taxonomy">Name a category, actor, or archive page for search engines</a>.</p>
-        <h4>Playable cards on X and Twitter</h4>
-        <p>By default a shared video link produces the large image card. To get the playable card, fill in <span class="setting">Twitter player URL base</span> with the HTTPS address of a small, bare page of your own that embeds a video and reads the <span class="setting">?post=</span> query argument. The theme appends the video ID for you, so a base of <span class="path">https://example.com/player/</span> points that page at <span class="path">https://example.com/player/?post=123</span> for video 123, and the card becomes playable on the timeline.</p>
-        <p>Leave the field empty to keep the large image card. The page you point at must be served over HTTPS, must return nothing but the player, and should stay under a few hundred kilobytes: X loads it in a card of roughly 435 pixels wide, so a full site template with a header, sidebar, and footer would look wrong inside the card.</p>
+        <h3>SEO &amp; Analytics &rarr; Basic SEO</h3>
+        <p>This is the search appearance the theme supplies by itself, for a site that runs no SEO plugin. All of it switches off the moment Yoast, Rank Math, All in One SEO, SEOPress, The SEO Framework or Slim SEO is detected, and the rating labels below stay independent of that switch.</p>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th scope="col">Setting</th>
+                <th scope="col">What it does</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td><strong>Basic SEO</strong></td><td>Whether the theme prints its own meta description, archive canonical and social cards. On by default.</td></tr>
+              <tr><td><strong>Homepage search title</strong></td><td>The browser tab and the search result for the front page. Blank falls back to the site title.</td></tr>
+              <tr><td><strong>Homepage meta description</strong></td><td>The text under the front page title in a result, and on a share card. Blank falls back to the site tagline.</td></tr>
+              <tr><td><strong>Adult content rating tag</strong></td><td>The explicit-content rating tag Google documents. Off by default, and not a noindex directive.</td></tr>
+              <tr><td><strong>RTA label</strong></td><td>The Restricted To Adults label, verbatim, for parental-control and filtering software. Off by default.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p>Search-engine verification tags, which used to sit in this panel, are under <a href="#customizer">Custom Code</a> with the rest of the head snippets.</p>
 
         <h3>SEO &amp; Analytics &rarr; Homepage SEO</h3>
-        <p>These controls set the visible homepage introduction and where it appears. The separate search title and meta description are under <span class="path">SEO &rarr; Settings</span> in the dashboard, covered in <a href="#seo-workspace">Theme-native SEO workspace</a>.</p>
+        <p>These controls set the visible homepage introduction and where it appears. The search title and meta description are under <a href="#seo-workspace">Basic SEO</a>, or in your SEO plugin if you run one.</p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -1400,7 +1353,7 @@
             </thead>
             <tbody>
               <tr><td><strong>Homepage title position</strong></td><td>Whether the homepage title and its description sit above the video grid or below it.</td></tr>
-              <tr><td><strong>Homepage description</strong></td><td>A short visible introduction, printed once beneath the homepage heading. It is the fallback meta description unless overridden in SEO &rarr; Settings.</td></tr>
+              <tr><td><strong>Homepage description</strong></td><td>A short visible introduction, printed once beneath the homepage heading. It is the fallback meta description unless the homepage meta description under Basic SEO overrides it.</td></tr>
             </tbody>
           </table>
         </div>
@@ -1408,7 +1361,7 @@
         <p>The visible homepage heading remains under <span class="path">Customize &rarr; Homepage &amp; Listings &rarr; Homepage</span>. It is meaningful page content, distinct from the browser/search title.</p>
 
         <h3>SEO &amp; Analytics &rarr; Archive Page SEO</h3>
-        <p>Shared archive-card wording and description placement. Individual terms have their own search fields; generated collections have templates in the <a href="#seo-workspace">Theme-native SEO workspace</a>.</p>
+        <p>Shared archive-card wording and description placement. A term's own name and description are edited on that term's screen, beside its image; the archive's browser title and meta description come from <a href="#seo-workspace">Basic SEO</a>, or from your SEO plugin if you run one.</p>
         <div class="table-wrap">
           <table>
             <thead>
@@ -1426,7 +1379,7 @@
           </table>
         </div>
         <p>The two card-text fields take <span class="path">{name}</span>, <span class="path">{description}</span>, <span class="path">{count}</span> and <span class="path">{videos}</span>, and default to <span class="path">Free "{description}" videos</span> and <span class="path">Watch "{description}" videos</span>.</p>
-        <p>The browser title and meta description for an individual term are not here, for the reason given above: a page title belongs to the page.</p>
+        <p>The browser title and meta description for an individual term are not here either: they are the term's own name and description, or the fields your SEO plugin adds to that term screen.</p>
 
         <h3>SEO &amp; Analytics &rarr; Custom Code</h3>
         <p>Administrators can add analytics code to the page header and extra scripts near the end of the page. Paste complete snippets exactly as supplied by the service. Incorrect code can affect the entire site.</p>
@@ -1484,6 +1437,9 @@
             </tbody>
           </table>
         </div>
+        <p>No area in this table appears on the theme&rsquo;s legal pages. A policy, a takedown procedure or a recordkeeping notice prints none of them, so nothing placed here &mdash; not even an ad tag &mdash; reaches those pages; see <a href="#legal">Legal and Policy Pages</a>. Your widget settings are untouched, so the same areas resume on every other page.</p>
+        <p>The placements the theme prints itself follow the same rule. The in-feed block, the popunder / interstitial snippet and a snippet set on an individual video are printed by the advertising module rather than by a widget area, and that rule is asked where the module prints &mdash; so no ad of any kind reaches a legal page or the submission form, whichever placement it came from. A placement added later is covered by the same check rather than by remembering to add one.</p>
+        <p>The same treatment covers the surfaces where a visitor is asked to accept something rather than to read something. While the video submission form is on the page, its Code and ads areas and Footer widgets columns are withheld exactly as they are on a legal page, and the login/registration panel and the theme&rsquo;s own cookie notice carry no area at all. See <a href="#accepting-the-terms-and-the-cookie-notice">Accepting the terms, and the cookie notice</a>.</p>
 
         <div class="warning">
           Content Block markup is intended for trusted administrators. Review all third-party embed and tracking snippets before activating them, and comply with the service’s terms and your privacy obligations.
@@ -1512,7 +1468,7 @@
         <p>Visitors may also include a short message. A visitor is asked not to report the same video again for 24 hours.</p>
 
         <h4>What a visitor&rsquo;s address is used for</h4>
-        <p>Stopping one visitor from voting, viewing or reporting the same video several times needs to recognise a returning visitor, and nothing more. The theme stores a <strong>keyed fingerprint</strong> of the address &mdash; a one-way value derived with your site&rsquo;s own secret salt &mdash; next to a timestamp, never the address itself. Entries older than the 24-hour window are deleted, both on the next visit and by a daily housekeeping run, and each video keeps at most 500 of them.</p>
+        <p>Stopping one visitor from voting, viewing or reporting the same video several times needs to recognize a returning visitor, and nothing more. The theme stores a <strong>keyed fingerprint</strong> of the address &mdash; a one-way value derived with your site&rsquo;s own secret salt &mdash; next to a timestamp, never the address itself. Entries older than the 24-hour window are deleted, both on the next visit and by a daily housekeeping run, and each video keeps at most 500 of them.</p>
         <p>That makes the value <strong>pseudonymous</strong> rather than anonymous, so it still counts as personal data under GDPR: mention it in your Privacy Policy, which the theme installs as a starter page. The fingerprint only means the same thing while your salts stay the same, so regenerating the salts in <code>wp-config.php</code> resets the stored history rather than leaving it readable. Sites behind a CDN or proxy should filter <code>majestic_tube_client_ip</code> to the header the proxy overwrites; without that, every visitor shares one address and the de-duplication treats them as a single person.</p>
 
         <h3>Review reported videos</h3>
@@ -1530,7 +1486,7 @@
         <h2>Legal and Policy Pages</h2>
         <p>Activation creates starter pages for:</p>
         <ul>
-          <li>18 USC 2257</li>
+          <li>18 U.S.C. &sect; 2257</li>
           <li>DMCA</li>
           <li>Privacy Policy</li>
         </ul>
@@ -1546,8 +1502,28 @@
           <li><strong>It tells you what it did.</strong> If a page could not be created &mdash; most often because the database user is not allowed to create pages &mdash; the screen says so and names the page, rather than reporting a success that did not happen.</li>
         </ul>
         <p>A page still sitting on the original <span class="path">18-usc-2257</span> address counts as present, not missing, and a site using WordPress&rsquo;s own custom privacy page counts as having its privacy page.</p>
+        <p>The 2257 document is named <strong>18 U.S.C. &sect; 2257</strong>, the way the statute is written: that is the title at the top of the policy and the label on the footer link to it. An update renames a page an earlier version created under its former name (<span class="path">18 USC 2257</span>), and relabels the footer link that came with it. The rename is deliberately narrow &mdash; the page keeps its ID, its <span class="path">18-usc-2257</span> address, its content, its author and its comments, and only its title and the theme&rsquo;s own link label change. It also only touches a name the theme itself shipped: a page you have named yourself keeps the name you gave it, and the theme still recognizes it as the same document rather than creating a second one beside it.</p>
+        <p>WordPress creates its own <strong>Privacy Policy</strong> page as a draft when a site is installed. The theme adopts that page rather than making a second one, and publishes it &mdash; on activation and again if the footer repair runs &mdash; because the footer legal menu links it, and a link to a draft is a link visitors cannot open. No duplicate is created.</p>
 
-        <h3>The 18 USC 2257 page and which role your site is in</h3>
+        <h3>What a legal page does not carry</h3>
+        <p>A legal page is a document a visitor may be shown, or asked to accept, on its own terms, so the theme keeps three things off it.</p>
+        <p><strong>No widget areas.</strong> The 2257 page, the DMCA page, the privacy policy, and any page whose slug or title reads as one of those carry none of the Code and ads areas and no Footer widgets columns. Anything placed in those areas &mdash; an ad tag, a tracking script, a promo block &mdash; is withheld rather than hidden, so none of it reaches the page. What the theme prints itself is unchanged: the header, the menus, the footer legal links and the copyright line all appear as usual.</p>
+        <p><strong>No advertising of any kind.</strong> The placements the theme controls itself &mdash; the in-feed block in the video grid, the popunder / interstitial snippet, a snippet set on an individual video, and the legacy ad fields an older version of the theme used &mdash; are all printed through one shared function, and that function asks the same question the areas ask. A legal page therefore carries no advertising from any placement, including one a child theme adds through the same helper. On every other page each of these placements answers to its own switch and code, exactly as it did before.</p>
+        <p><strong>No template notice.</strong> Earlier versions ended each legal page with a bolded <strong>Template notice</strong> paragraph written for you, the administrator. It sat inside the page body, so a visitor reading the policy was told by the policy itself that it was a template. The pages this version creates do not carry it, and an update to this version removes it &mdash; and the horizontal rule that introduced it &mdash; from the pages an earlier version created, leaving the wording you wrote around it exactly as it is. A page you have renamed or moved so the theme no longer recognizes it is left alone; if you see the paragraph there, delete it by hand. The warning belongs in this document and on the welcome screen, not on a page your visitors read.</p>
+        <p>Neither change affects what the pages say: they remain starting points you are responsible for reviewing, not legal advice.</p>
+
+        <h3 id="accepting-the-terms-and-the-cookie-notice">Accepting the terms, and the cookie notice</h3>
+        <p>Two more surfaces ask a visitor to accept something, and both are treated the way a legal page is: nothing an administrator placed in a Code and ads area appears beside the question, and neither does anything the theme prints itself &mdash; the in-feed block, the popunder / interstitial snippet or a per-video snippet. Advertising of any kind is withheld beside the question, not only the widget areas.</p>
+        <p><strong>The terms checkbox.</strong> The login form, the registration form, and the front-end video submission form each carry a required checkbox naming the documents being accepted &mdash; <em>I have read and accept the Terms of Use and Privacy Policy.</em> It links the pages your site actually publishes: a Terms of Use page if you have one (<span class="setting">terms</span>, <span class="setting">terms-of-use</span>, <span class="setting">terms-and-conditions</span>, or <span class="setting">terms-of-service</span>), your Privacy Policy page, and a Cookie Policy page if you have one. A page still sitting in draft does not count, because a link to a page visitors cannot open is not something anyone can accept.</p>
+        <p>Turn the checkbox off, or back on, at <span class="path">Appearance → Customize → Site Features → Accounts &amp; Spam Protection</span> → <span class="setting">Ask visitors to accept the terms</span>. It is on by default &mdash; the theme asks for acceptance as soon as it gives a visitor something to accept &mdash; and it decides both halves of the rule: the checkbox is printed <em>and</em> a form submitted without it is refused. A site that publishes neither a terms page nor a privacy policy prints no checkbox and enforces nothing: the theme will not ask a visitor to accept a document that does not exist.</p>
+        <p>The checkbox is not decoration. The <span class="setting">required</span> attribute stops a browser from sending an empty form, and the handler asks again on the server, so a login, a registration or a video submission that arrives without the acceptance is refused with <em>Please accept the terms to continue.</em> The server check is the one that decides, because an attribute in the markup reaches only forms the browser built. The case you will notice is a page cached before you switched this on: the visitor submits, reads that sentence, reloads, and gets the form with the checkbox on it.</p>
+        <p><strong>The cookie notice.</strong> Turn on <span class="setting">Show a cookie notice</span> at <span class="path">Appearance → Customize → Site Features → Header, Footer &amp; Search</span> and the theme prints a dismissible bar along the bottom of the page: your wording, or the sentence it ships, together with links to the same documents the checkbox names. Write your own words in <span class="setting">Cookie notice text</span> and the links are still printed beneath them.</p>
+        <p>The dismissal is kept in the visitor&rsquo;s own browser, in local storage, exactly like the color scheme choice. The notice sets no cookie, writes nothing to your database, and sends no choice to your server &mdash; so a visitor who clears their site data sees the bar once more, and where a browser refuses storage the bar simply never appears. It is off until you turn it on, because a cookie notice is your site&rsquo;s public copy and a theme update should not add any.</p>
+        <div class="note">
+          The notice tells; it does not hold anything back, and it is not a consent management platform. To keep advertising off until a visitor has accepted, use <span class="setting">Only load advertising after consent</span> under Advertising with a solution that reports the choice back.
+        </div>
+
+        <h3>The 18 U.S.C. &sect; 2257 page and which role your site is in</h3>
         <p>The starter 2257 page is written for a site that <strong>distributes material produced by other people</strong> &mdash; the posture this theme&rsquo;s video submission and membership features normally put an operator in. It describes the <em>secondary producer</em> role under 18 U.S.C. &sect; 2257 and 28 C.F.R. part 75 in general terms, and it does not assert that your site holds any particular obligation.</p>
         <p>It also does not decide the question for you, and the page says so. If you produce any of the material on your site yourself &mdash; filming, directing, commissioning, or otherwise originating it &mdash; the obligations attach to the <strong>primary producer</strong> instead, and the generic secondary-producer wording is not sufficient. Rewrite the page to match your actual position, or get counsel to do it.</p>
         <p>Only new installs receive this wording. A site that was activated with an earlier version keeps the page it already has; edit it by hand to match.</p>
@@ -1587,6 +1563,7 @@
 
         <h3>Footer legal menu</h3>
         <p>The legal pages are normally kept separate from the Main Menu. Review the footer menu after editing page titles or slugs. If you intentionally use a different footer menu, make sure the legal links are still present.</p>
+        <p>The row is centered on the page, on the same axis as the copyright line below it, and stays centered whichever direction the site reads in. A long footer menu wraps onto a second line rather than scrolling sideways, and the widget columns above it keep their own left-aligned text.</p>
       </section>
 
       <section id="maintenance">
@@ -1750,46 +1727,48 @@
         <details>
           <summary>Social previews are missing or duplicated</summary>
           <div>
-            <p>Review your active SEO plugins. Majestic Tube normally steps aside when a supported SEO plugin already provides social metadata. If the preview looks wrong, update the image, clear the social platform’s cache, and re-save the video.</p>
+            <p>A card with no picture and no sentence means nothing is describing the page. Open <span class="path">Customize &rarr; SEO &amp; Analytics &rarr; Basic SEO</span> and confirm <strong>Basic SEO</strong> is on, then check that the site has a Site Icon or a logo to fall back to when a video has no picture.</p>
+            <p>If you run an SEO plugin, the card is the plugin's and this section is switched off by design. Duplicate tags are the symptom of two sources answering the same question: deactivate one or confirm the plugin was detected at all &mdash; an unrecognized plugin has to be turned off by hand here.</p>
           </div>
         </details>
 
         <details>
-          <summary>The SEO title and description boxes are missing on a category or actor</summary>
+          <summary>There are no SEO title or meta description boxes on a category or actor</summary>
           <div>
-            <p>That is what an active SEO plugin looks like. Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework and Slim SEO all provide their own term-level fields, so Majestic Tube removes its own boxes and prints nothing rather than putting two competing titles in the same page head. Use the fields your SEO plugin provides, or deactivate it and use the theme’s.</p>
-            <p>The boxes are also absent on a taxonomy that does not exist on your site &mdash; the theme only attaches them to categories, tags, actors, studios and series that are actually registered.</p>
+            <p>That is by design. The theme has no per-term search fields: a term's own name is its heading and its browser title, and its description is its meta description. Write those where you already write them, on the term screen next to its image.</p>
+            <p>An SEO plugin is what adds separate per-term title and description fields, and it is also what takes over search appearance for the whole site when it is active. See <a href="#seo-workspace">Search appearance</a>.</p>
           </div>
         </details>
 
         <details>
-          <summary>The collection index has not finished building</summary>
+          <summary>The homepage or an archive shows the site tagline instead of its own words</summary>
           <div>
-            <p>The index is built by WordPress scheduled tasks in batches of ten terms, and those tasks only run when a request reaches the site. On a quiet site that can be days. Open <span class="path">SEO &rarr; Overview</span> and choose <strong>Refresh collection index</strong> as often as you like: each press advances the build by another batch and leaves the last completed generation serving pages throughout. A real scheduler for <span class="setting">wp-cron.php</span> saves you having to remember.</p>
-            <p>The same applies to a count sitting at zero on a site that certainly has videos. The first build only starts after your first visit to wp-admin with this version, and the Overview screen says so until it has run.</p>
+            <p>The fallback chain ends in the tagline on purpose, so a page with nothing written for it still says something. Give the page its own words and it will use them: the homepage meta description under <span class="path">Basic SEO</span> for the front page, the post excerpt or body text for a video, and the term description for a category, tag or actor.</p>
+            <p>If <strong>Basic SEO</strong> is off, or an SEO plugin is active, no description is printed by the theme at all.</p>
           </div>
         </details>
 
         <details>
-          <summary>A generated collection page returns not found</summary>
+          <summary>A shared link shows a bare URL with no card</summary>
           <div>
-            <p>A combination only becomes a page once enough published videos share it: 6 for an actor in a category, 4 for an actor pairing, 3 for a duration band, 5 for a tag in a category. Below that the URL is deliberately a not-found response rather than an empty listing. <span class="path">SEO &rarr; Collections</span> shows how many pages each collection currently has, and <span class="path">SEO &rarr; Overview</span> says when that count was last confirmed against your catalogue.</p>
-            <p>A collection you switched off from search results still serves visitors normally. If the URL fails for a visitor too, the combination has dropped below its threshold, or one of its terms has been renamed or deleted.</p>
+            <p>Most often the page has no picture to offer: the card falls back through the video's own image, a term image, your logo, and finally the Site Icon, and stops with a plain text card if none of them exist. Set a Site Icon under <span class="path">Appearance &rarr; Customize &rarr; Site Identity</span> as a baseline.</p>
+            <p>Facebook and X cache cards aggressively, so a card that was cached before the image existed keeps showing the old one until the cache clears.</p>
           </div>
         </details>
 
         <details>
-          <summary>The SEO menu is missing</summary>
+          <summary>Where did the SEO menu go?</summary>
           <div>
-            <p>It sits with the other top-level menus for any user who can edit theme options. If you cannot see it, confirm Majestic Tube is the active theme and that your account still has that capability &mdash; a plugin that removes top-level menu items is the other thing worth ruling out.</p>
+            <p>There is no separate <span class="path">SEO</span> menu in this release. Search appearance lives under <span class="path">Appearance &rarr; Customize &rarr; SEO &amp; Analytics</span>, in the <strong>Basic SEO</strong> section, next to the rest of the settings it belongs with.</p>
+            <p>A site upgrading from an earlier release keeps everything it had saved. Settings that an earlier release removed stay in the database, unread, and are not deleted.</p>
           </div>
         </details>
 
         <details>
-          <summary>A category page still shows the old title on Google</summary>
+          <summary>A page still shows the old title or description on Google</summary>
           <div>
-            <p>The page itself is almost certainly correct &mdash; check it by viewing source and searching for <span class="path">&lt;title&gt;</span>. Google caches results and re-crawls on its own schedule, so a change can take days to appear, and the search snippet may keep the older description until it does. Use Search Console&rsquo;s <strong>URL Inspection &rarr; Request Indexing</strong> to ask for a fresh crawl. A caching plugin or page cache in front of WordPress is the other thing worth ruling out.</p>
-            <p>If the field is filled in but the source shows the old title, remember that WordPress&rsquo;s <strong>Quick Edit</strong> and bulk tools do not post these fields, so they preserve what was saved &mdash; but a term deleted and recreated loses it along with everything else on that term.</p>
+            <p>The page itself is almost certainly correct &mdash; check it by viewing source and searching for <span class="path">&lt;title&gt;</span> and <span class="path">description</span>. Google caches results and re-crawls on its own schedule, so a change can take days to appear, and the snippet may keep the older description until it does. Use Search Console's <strong>URL Inspection &rarr; Request Indexing</strong> to ask for a fresh crawl.</p>
+            <p>Search engines also rewrite titles and truncate descriptions to fit the query and the device, so what they show is a suggestion based on the page rather than a promise. A caching plugin or page cache in front of WordPress is the other thing worth ruling out.</p>
           </div>
         </details>
       </section>
@@ -1799,10 +1778,15 @@
         <h2>Frequently Asked Questions</h2>
 
         <h3>Do I need an SEO plugin for this theme?</h3>
-        <p>No. Majestic Tube includes its own <a href="#seo-workspace">SEO workspace</a> &mdash; search appearance on videos and pages, collection wording, the collection index, CSV imports and the homepage search details &mdash; and nothing has to be installed for it to work. If you already run Yoast, Rank Math, SEOPress, All in One SEO, The SEO Framework or Slim SEO, the theme detects it and steps aside from titles and descriptions rather than competing for the same <span class="setting">&lt;title&gt;</span> tag. Switch the plugin off and your own fields take over again; nothing is deleted either way.</p>
+        <p>No. The theme prints its own meta description, archive canonicals and social cards from <span class="path">Customize &rarr; SEO &amp; Analytics &rarr; Basic SEO</span>, and it is on by default, so a fresh site is describable without installing anything. Install a plugin only when you want more than that &mdash; per-post keywords, a score, redirects, a noindex switch per page &mdash; and the theme steps aside for Yoast, Rank Math, All in One SEO, SEOPress, The SEO Framework and Slim SEO automatically, so it never prints a competing tag. See <a href="#seo-workspace">Search appearance</a>.</p>
 
         <h3>Are there scores, keywords, or minimum word counts?</h3>
-        <p>No, and that is deliberate. Nothing in the workspace asks for a target keyword, counts keyword density, grades a page out of 100, or refuses text below a length. A collection becomes a page because the videos exist and enough of them share the combination; the wording fields describe what is already there rather than trying to reach a target. Search engines may still rewrite titles and truncate descriptions, which is why the counters are labelled as information and not as something to hit.</p>
+        <p>No, and that is deliberate. Nothing here asks for a target keyword, counts keyword density, grades a page out of 100, or refuses text below a length. The fields describe what is already on the page rather than trying to reach a target. Search engines may still rewrite titles and truncate descriptions, which is why nothing is presented as something to hit.</p>
+
+        <h3>What does the theme load on a page?</h3>
+        <p>As little as it can, and only when it is needed. Every page loads one stylesheet and one deferred script, with no jQuery. The bundled webfont is only requested while a font option still selects it; the player stylesheet and Video.js load only on a video page using the enhanced player; Turnstile loads only while spam protection is on with both of its keys filled in.</p>
+        <p>The theme also loads the first card image &mdash; or the player poster on a video page &mdash; eagerly and at high priority, because that is the picture the browser scores as the largest contentful paint, and it announces a video page&rsquo;s poster from the head so the download starts while the stylesheet is still arriving. Every later image stays lazy.</p>
+        <p>WordPress&rsquo;s own emoji stylesheet and detection script are removed from the front end, since a video site does not need two requests per page to render a smiley. The admin screens keep theirs, and the removal is filterable.</p>
 
         <h3>Can I use this on an existing WordPress site?</h3>
         <p>Yes. Back up the site first, install the theme, activate it, and preview the main pages before switching menus or publishing new content. Existing posts remain in WordPress, but some existing theme-specific menu and content settings may need to be assigned again.</p>
@@ -1843,8 +1827,11 @@
         <h3>How do I make my ads wait for a cookie banner?</h3>
         <p>Turn on <span class="setting">Only load advertising after consent</span>, then let your consent plugin return <span class="setting">true</span> through the <span class="setting">majestic_tube_ads_allowed</span> filter once the visitor has accepted. Until then, every placement prints nothing. Remember to clear any page cache afterwards, since cached HTML may still contain the earlier ad markup.</p>
 
+        <h3>Does the theme&rsquo;s own cookie notice hold ads back?</h3>
+        <p>No. The notice is a sentence, a dismiss control, and links to your policy pages. It records nothing on your server and changes nothing about advertising. Advertising is held back by <span class="setting">Only load advertising after consent</span>, which needs a consent solution to report the visitor&rsquo;s choice.</p>
+
         <h3>My shared link shows an image card, not a playable one</h3>
-        <p>Fill in <span class="setting">Twitter player URL base</span> with the HTTPS address of your own bare player page, and make sure that page really does embed a video when given <span class="setting">?post=</span>. Social networks cache their previews for a long time, so expect an existing post to keep its old card for a while.</p>
+        <p>A playable card needs an embeddable player URL, and the theme adds the player fields only when the video plays from an embed code. A self-hosted file therefore produces a large image card, which is the correct result rather than a setting you are missing. Social networks also cache previews for a long time, so an existing post keeps its old card until the cache clears.</p>
 
         <h3>Should I count a view when someone only opens the page?</h3>
         <p>That is the default, and it matches the original theme. Turn on <span class="setting">Count a view only after playback starts</span> to record the view after three seconds of playback instead, which gives a much truer number. The switch affects new views only, so existing totals stay as they are.</p>
@@ -1856,13 +1843,13 @@
         <p>They are off until you turn them on, under <span class="path">Appearance &rarr; Customize &rarr; Video Page &rarr; Player</span>. That is deliberate: a theme update should not start intercepting a visitor&rsquo;s keystrokes or add buttons to a page they already got used to. Turn on the ones you want, one at a time or together.</p>
 
         <h3>Do the resume position and theater mode store anything about my visitors?</h3>
-        <p>No. The playback position, the chosen speed, and whether theater mode is on are all kept in the visitor&rsquo;s own browser, exactly like the colour scheme choice in 2.1.6. Nothing is sent to your server, no cookie is set, and nothing is written to the database or any report. Clearing site data, or opening a private window, simply returns a visitor to your defaults.</p>
+        <p>No. The playback position, the chosen speed, and whether theater mode is on are all kept in the visitor&rsquo;s own browser, exactly like the color scheme choice in 2.1.6. Nothing is sent to your server, no cookie is set, and nothing is written to the database or any report. Clearing site data, or opening a private window, simply returns a visitor to your defaults.</p>
 
         <h3>Why is a password or report action unavailable?</h3>
         <p>Sign in when required, disable conflicting caching or security restrictions, and confirm JavaScript is enabled. A visitor may also be prevented from voting or reporting the same item again within the applicable time window.</p>
 
         <h3>Can I have a dark site?</h3>
-        <p>Yes. Set <span class="setting">Colour scheme</span> to <strong>Dark</strong> under <span class="path">Appearance &rarr; Customize &rarr; Site Design &rarr; Colours &amp; Typography</span>. Set it to <strong>Follow system</strong> instead and each visitor gets the skin their own device already asks for, which is usually the friendliest default for a video site people watch at night.</p>
+        <p>Yes. Set <span class="setting">Color scheme</span> to <strong>Dark</strong> under <span class="path">Appearance &rarr; Customize &rarr; Site Design &rarr; Colors &amp; Typography</span>. Set it to <strong>Follow system</strong> instead and each visitor gets the skin their own device already asks for, which is usually the friendliest default for a video site people watch at night.</p>
         <p>To let visitors override it, also turn on <span class="setting">Show the light/dark toggle in the header</span>. Their choice is remembered per browser and never reaches your server, so it costs you nothing in stored data and reports no personal preference.</p>
 
         <h3>Does the dark mode slow the page down?</h3>
@@ -1938,11 +1925,9 @@
               <tr><td>Review submissions</td><td>Videos → All Videos → Pending</td></tr>
               <tr><td>Add an actor</td><td>Actors → Add Actor</td></tr>
               <tr><td>Add a category image</td><td>Videos → Video Categories → Edit Category</td></tr>
-              <tr><td>Name a page for search engines</td><td>Videos → Video Categories → Edit Category</td></tr>
-              <tr><td>Name the homepage for search engines</td><td>SEO → Settings</td></tr>
-              <tr><td>Edit a collection&rsquo;s wording</td><td>SEO → Collections</td></tr>
-              <tr><td>Check or advance the collection index</td><td>SEO → Overview</td></tr>
-              <tr><td>Import term titles in bulk</td><td>SEO → Data sources</td></tr>
+              <tr><td>Describe a category in search</td><td>Videos → Video Categories → Edit Category</td></tr>
+              <tr><td>Name the homepage for search engines</td><td>Appearance → Customize → SEO &amp; Analytics → Basic SEO</td></tr>
+              <tr><td>Label the site as adult content</td><td>Appearance → Customize → SEO &amp; Analytics → Basic SEO</td></tr>
               <tr><td>Review visitor reports</td><td>Videos → Reported Videos</td></tr>
               <tr><td>Change theme settings</td><td>Appearance → Customize</td></tr>
               <tr><td>Manage navigation</td><td>Appearance → Menus</td></tr>

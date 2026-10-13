@@ -7,7 +7,7 @@
  */
 ?>
 <?php
-// The colour scheme sits on the root element rather than the body, so that
+// The color scheme sits on the root element rather than the body, so that
 // color-scheme covers the canvas, the scrollbar and native form controls and
 // not just the painted content. A small script in the head may replace it with
 // this visitor's own stored choice before the first paint.
@@ -28,7 +28,7 @@
 	<div class="header-inner site-branding row">
 		<div class="logo">
 			<?php
-			// Honours the original use-logo-image / image-logo-file / icon-logo /
+			// Honors the original use-logo-image / image-logo-file / icon-logo /
 			// text-logo options, then the WordPress custom logo, then the title.
 			majestic_tube_site_logo();
 			?>
@@ -82,9 +82,10 @@
 
 	<?php
 	/*
-	 * Friends and ad links: a third navigation row, site-wide, sitting under
-	 * the logo / search / main menu row. It prints nothing unless the switch
-	 * is on and a menu is assigned to the location.
+	 * Friends and ad links: a third navigation row, sitting under the logo /
+	 * search / main menu row. It prints on the site's index only - that rule is
+	 * inside the function, not here - and then only when the switch is on and a
+	 * menu is assigned to the location.
 	 */
 	majestic_tube_links_bar();
 	?>

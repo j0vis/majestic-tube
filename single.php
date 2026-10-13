@@ -34,7 +34,7 @@ while ( have_posts() ) :
 	?>
 
 	<div id="primary" class="content-area single-content-area">
-		<div class="single-video-layout<?php echo $show_video_sidebar ? ' has-video-sidebar' : ''; ?>">
+		<div class="single-video-layout<?php echo $show_video_sidebar ? ' has-video-sidebar' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static class name. ?>">
 			<main id="main" class="site-main" role="main">
 
 			<?php

@@ -21,8 +21,15 @@
  * in this module prints nothing until a consent plugin flips the
  * majestic_tube_ads_allowed filter.
  *
+ * Every placement above is printed by majestic_tube_content_block(), which
+ * asks the question the widget areas ask: on a legal page, or beside a surface
+ * that asks the visitor to accept something, no advertising of any kind
+ * reaches the page - not a widget area, not the in-feed block, not the
+ * popunder, and not a legacy option key or a per-video snippet printed
+ * through the same function.
+ *
  * @package Majestic Tube
- * @version 2.2.26
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -238,6 +245,14 @@ function majestic_tube_get_popunder_ad() {
  * the document exists. The output is the administrator's markup, sanitized on
  * input and passed through the same content filters as every other placement.
  *
+ * This placement is not a widget area, so it never passed through
+ * majestic_tube_widget_area_content() and the withheld rule did not reach it: a
+ * popunder still opened over a policy page while every Code and ads area on
+ * that page printed nothing. The rule now reaches it because the markup is
+ * printed by majestic_tube_content_block(), which asks it for every placement;
+ * it is deliberately not repeated here, because a placement that asks twice is
+ * how the next one comes to ask not at all.
+ *
  * @return void
  */
 function majestic_tube_output_popunder_ad() {
@@ -250,7 +265,8 @@ function majestic_tube_output_popunder_ad() {
 	if ( '' === $code || ! majestic_tube_ads_allowed( 'popunder' ) ) {
 		return;
 	}
-	majestic_tube_content_block( $code, array( 'majestic-tube-content-block--popunder' ), 'popunder-ad-code' );
+
+	majestic_tube_content_block( $code, array( 'majestic-tube-content-block--popunder' ), 'popunder-ad-code' );
 }
 add_action( 'wp_footer', 'majestic_tube_output_popunder_ad', 25 );
 
@@ -280,7 +296,8 @@ function majestic_tube_rotate_ad( $codes, $placement = '' ) {
 	}
 
 	$index = (int) ( ( time() + crc32( (string) $placement ) ) / DAY_IN_SECONDS ) % count( $candidates );
-	/**
+
+	/**
 	 * Filter the rotation choice.
 	 *
 	 * @param string   $code      The selected code blob.
@@ -321,12 +338,25 @@ function majestic_tube_prepare_content( $content, $context = '' ) {
 /**
  * Print a neutral content block.
  *
+ * This is the printer every placement in this module ends up in: the popunder,
+ * the in-feed block, a legacy option key rendered by majestic_tube_ad(), and a
+ * per-video snippet rendered by majestic_tube_under_player_content(). The
+ * withheld rule is asked here, where the markup is made, for the same reason
+ * majestic_tube_widget_area_content() asks it for the widget areas: one answer
+ * the whole theme shares, rather than each placement remembering to ask. A
+ * legal page and the surfaces that ask a visitor to accept something therefore
+ * carry no advertising from any placement, including one added later.
+ *
  * @param string       $content Administrator-provided markup.
  * @param array|string $classes Extra CSS classes.
  * @param string       $context Optional placement or legacy key.
  * @return bool Whether something was printed.
  */
 function majestic_tube_content_block( $content, $classes = array(), $context = '' ) {
+	if ( majestic_tube_widget_areas_withheld() ) {
+		return false;
+	}
+
 	$content = majestic_tube_prepare_content( $content, $context );
 
 	if ( '' === trim( $content ) ) {
@@ -375,6 +405,10 @@ function majestic_tube_ad( $key, $class = '' ) {
 
 /**
  * Render a neutral content widget area.
+ *
+ * Legal and consent pages print none of these areas: the refusal is in
+ * majestic_tube_widget_area_content(), which every widget area passes through,
+ * so this helper simply finds nothing to print and reports false.
  *
  * @param string       $location Content area key.
  * @param array|string $classes  Extra CSS classes.

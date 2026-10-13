@@ -31,7 +31,16 @@ body {
 	text-align: right;
 }
 
-.site-footer,
-.site-info {
+/*
+ * Widget text stays right-aligned in a right-to-left reading order, but the
+ * legal row and the copyright line are centered in both directions: this file
+ * loads after main.css, so the shared rule has to be split rather than left to
+ * the cascade.
+ */
+.site-footer {
 	text-align: right;
+}
+
+.site-info {
+	text-align: center;
 }

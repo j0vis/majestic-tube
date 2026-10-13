@@ -3,7 +3,7 @@
  * Script and style enqueuing.
  *
  * @package Majestic Tube
- * @version 2.2.26
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -103,9 +103,35 @@ function majestic_tube_enqueue_assets() {
 	$ctpl_install = majestic_tube_is_ctpl_active();
 	$post_id      = is_single() ? (int) get_queried_object_id() : 0;
 
-	// Main stylesheet (style.css header + component styles). Asset filemtimes
-	// prevent a browser/CDN from continuing to serve the previous dark pass.
-	wp_enqueue_style( 'majestic-tube-style', get_stylesheet_uri(), array(), majestic_tube_asset_version( 'style.css' ) );
+	/*
+	 * style.css is enqueued only when it is a *child* theme's stylesheet.
+	 *
+	 * This theme's own style.css holds the theme header and nothing else - every
+	 * front-end rule is in main.css - so enqueueing it cost a render-blocking
+	 * request for a file with no CSS in it, on every page. A child theme's
+	 * style.css is the opposite: that is where a child theme is expected to put
+	 * its rules, and get_stylesheet_uri() points at it, so it is still loaded
+	 * whenever one is active. Nothing else depends on the parent handle, so
+	 * main.css simply stops waiting for a sheet that is not there.
+	 */
+	$style_deps = array();
+
+	if ( get_stylesheet_directory() !== get_template_directory() ) {
+		$child_style = get_stylesheet_directory() . '/style.css';
+		$style_deps  = array();
+
+		wp_enqueue_style(
+			'majestic-tube-style',
+			get_stylesheet_uri(),
+			array(),
+			file_exists( $child_style ) ? MAJESTIC_TUBE_VERSION . '.' . filemtime( $child_style ) : MAJESTIC_TUBE_VERSION
+		);
+
+		$style_deps[] = 'majestic-tube-style';
+	}
+
+	// Asset filemtimes prevent a browser/CDN from continuing to serve the previous
+	// dark pass.
 
 	/*
 	 * The bundled webfont. Enqueued first so its @font-face rules are declared
@@ -114,7 +140,7 @@ function majestic_tube_enqueue_assets() {
 	 *
 	 * This is the theme's own copy of Inter, not a third-party font host, so a
 	 * page makes no extra DNS lookup and leaks no Referer - and because it is a
-	 * normal enqueued stylesheet the URL honours the asset-version cache buster.
+	 * normal enqueued stylesheet the URL honors the asset-version cache buster.
 	 */
 	if ( majestic_tube_uses_bundled_font() ) {
 		wp_enqueue_style(
@@ -126,13 +152,32 @@ function majestic_tube_enqueue_assets() {
 	}
 
 	// main.css also carries the theme's design tokens, and it depends on the
-	// @font-face declarations above when the bundled family is in use.
+	// @font-face declarations above when the bundled family is in use, and on a
+	// child theme's stylesheet when one is present.
+	$main_deps = $style_deps;
+
+	if ( majestic_tube_uses_bundled_font() ) {
+		$main_deps[] = 'majestic-tube-fonts';
+	}
+
 	wp_enqueue_style(
 		'majestic-tube-main',
 		MAJESTIC_TUBE_URI . '/assets/css/main.css',
-		majestic_tube_uses_bundled_font() ? array( 'majestic-tube-style', 'majestic-tube-fonts' ) : array( 'majestic-tube-style' ),
+		$main_deps,
 		majestic_tube_asset_version( 'assets/css/main.css' )
 	);
+
+	/*
+	 * Icons a child theme registered, generated from the shape it supplied.
+	 * Printed as inline styles on the same handle so it lands after main.css
+	 * and therefore wins over the theme's own mask for a name that collides -
+	 * which is how a child theme replaces a shape rather than only adding one.
+	 */
+	$icons_css = majestic_tube_registered_icons_css();
+
+	if ( '' !== $icons_css ) {
+		wp_add_inline_style( 'majestic-tube-main', $icons_css );
+	}
 
 	// RTL stylesheets (base + component overrides).
 	if ( is_rtl() ) {
@@ -142,7 +187,7 @@ function majestic_tube_enqueue_assets() {
 		wp_enqueue_style(
 			'majestic-tube-rtl-style',
 			MAJESTIC_TUBE_URI . '/rtl.css',
-			array( 'majestic-tube-style' ),
+			$style_deps,
 			majestic_tube_asset_version( 'rtl.css' )
 		);
 		wp_enqueue_style(
@@ -457,6 +502,101 @@ function majestic_tube_preload_font( $resources ) {
 	return $resources;
 }
 add_filter( 'wp_preload_resources', 'majestic_tube_preload_font' );
+
+/**
+ * Start the player poster loading from the head on a video page.
+ *
+ * The poster is the largest thing painted on a video page before playback, so
+ * it is the element the browser scores as the largest contentful paint. Left to
+ * itself the browser only discovers it when it reaches the <video> tag in the
+ * body, by which time the head is parsed and the parser has been handed a
+ * preload="auto" video file to compete with. Announcing the poster in the head
+ * starts that one request as early as the player is known to need it.
+ *
+ * Two conditions keep it honest, because a preloaded picture that is never
+ * painted is a slower page rather than a faster one. The view has to be a
+ * single post - the player is printed by single.php, so a static page carrying
+ * video fields has nothing to show - and the source has to be a self-hosted
+ * file, because an embedded player paints its own poster inside the iframe.
+ *
+ * Printed at priority 1 rather than through wp_preload_resources(), which needs
+ * WordPress 6.8; the theme still supports 6.5, and a plain preload link is the
+ * same markup either way.
+ *
+ * @return void
+ */
+function majestic_tube_preload_poster() {
+	if ( ! is_single() || ! function_exists( 'majestic_tube_get_video_sources' ) || ! function_exists( 'majestic_tube_get_poster_url' ) ) {
+		return;
+	}
+
+	$post_id = (int) get_queried_object_id();
+
+	if ( ! $post_id ) {
+		return;
+	}
+
+	$sources = majestic_tube_get_video_sources( $post_id );
+
+	if ( ! $sources || 'self-hosted' !== $sources['type'] ) {
+		return;
+	}
+
+	$poster = (string) majestic_tube_get_poster_url( $post_id );
+
+	if ( '' === $poster ) {
+		return;
+	}
+
+	printf(
+		'<link rel="preload" as="image" href="%s" fetchpriority="high" />' . "\n",
+		esc_url( $poster )
+	);
+}
+/*
+ * Priority 1 puts the link before the stylesheets, which wp_print_styles()
+ * prints on wp_head priority 8, so the poster request is already running while
+ * the render-blocking CSS is fetched.
+ */
+add_action( 'wp_head', 'majestic_tube_preload_poster', 1 );
+
+/**
+ * Drop core's emoji assets from the front end.
+ *
+ * WordPress prints an emoji stylesheet and a detection script into the head of
+ * every page so that a smiley written as :smile: can be swapped for an image,
+ * and so that emoji have a picture fallback on the systems whose fonts lack
+ * them. On a video site both are dead weight: the content is titles, categories
+ * and descriptions, and a literal emoji typed into one is drawn by the
+ * visitor's own font on every platform this theme supports. Removing the two
+ * hooks removes an inline style block and the emoji script and module from
+ * every page load.
+ *
+ * The admin screens are deliberately left alone - they render their own icons
+ * and are not what a visitor waits for - and the filter below exists for a site
+ * whose content genuinely depends on the fallback image (very old Android and
+ * Windows 7 are the documented cases).
+ *
+ * @return void
+ */
+function majestic_tube_trim_emoji_assets() {
+	if ( is_admin() ) {
+		return;
+	}
+
+	/**
+	 * Filter whether core's emoji assets are removed from the front end.
+	 *
+	 * @param bool $trim Defaults to true.
+	 */
+	if ( ! apply_filters( 'majestic_tube_trim_emoji_assets', true ) ) {
+		return;
+	}
+
+	remove_action( 'wp_head', 'print_emoji_detection_script', 7 );
+	remove_action( 'wp_print_styles', 'print_emoji_styles' );
+}
+majestic_tube_trim_emoji_assets();
 
 /**
  * Opt in to the Speculative Loading API (WordPress 6.8+).

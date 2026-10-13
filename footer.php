@@ -22,7 +22,7 @@ $footer_logo    = (string) majestic_tube_get_option( 'wpst-options', 'image-logo
 			majestic_tube_content_location( 'footer' );
 			?>
 
-			<?php if ( is_active_sidebar( 'majestic-tube-footer' ) ) : ?>
+			<?php if ( ! majestic_tube_widget_areas_withheld() && is_active_sidebar( 'majestic-tube-footer' ) ) : ?>
 				<div class="footer-widgets <?php echo esc_attr( $footer_columns ? $footer_columns : 'four-columns-footer' ); ?>">
 					<?php dynamic_sidebar( 'majestic-tube-footer' ); ?>
 				</div>
@@ -33,7 +33,7 @@ $footer_logo    = (string) majestic_tube_get_option( 'wpst-options', 'image-logo
 			<?php
 			/*
 			 * Footer logo: the original prints the same image used for the
-			 * header logo, greyscaled.
+			 * header logo, grayscaled.
 			 */
 			if ( $footer_logo && majestic_tube_option_is_on( 'logo-footer' ) ) :
 				?>

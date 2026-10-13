@@ -12,7 +12,7 @@
  * in another. See majestic_tube_option_sections() for the full structure.
  *
  * @package Majestic Tube
- * @version 2.4.2
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -64,8 +64,8 @@ function majestic_tube_option_sections() {
 			'panel'       => 'video',
 			'panel_title' => __( 'Video Page', 'majestic-tube' ),
 		),
-		'colours'      => array(
-			'title'       => __( 'Colours &amp; Typography', 'majestic-tube' ),
+		'colors'      => array(
+			'title'       => __( 'Colors &amp; Typography', 'majestic-tube' ),
 			'panel'       => 'design',
 			'panel_title' => __( 'Site Design', 'majestic-tube' ),
 		),
@@ -109,25 +109,31 @@ function majestic_tube_option_sections() {
 			'title'       => __( 'Friends &amp; Ad Links', 'majestic-tube' ),
 			'panel'       => 'ads',
 			'panel_title' => __( 'Advertising', 'majestic-tube' ),
-			'description' => __( 'A row of outbound text links - partner sites, ad zones - printed under the header on every page. The links themselves are a WordPress menu assigned under Appearance &rarr; Menus; this section decides whether the row prints and how it looks.', 'majestic-tube' ),
+			'description' => __( 'A row of outbound text links - partner sites, ad zones - printed under the header on the index page, and on no other page. The links themselves are a WordPress menu assigned under Appearance &rarr; Menus; this section decides whether the row prints and how it looks.', 'majestic-tube' ),
+		),
+		'basic_seo'    => array(
+			'title'       => __( 'Basic SEO', 'majestic-tube' ),
+			'panel'       => 'seo',
+			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
+			'description' => __( 'The search appearance the theme can supply by itself, for a site that runs no SEO plugin: a homepage search title, the meta description, the canonical for archives, and the social card a shared link shows. All of it is switched off automatically while Yoast, Rank Math, All in One SEO, SEOPress, The SEO Framework or Slim SEO is active, because that plugin already answers these questions and two answers in one page head is worse than one.', 'majestic-tube' ),
 		),
 		'home_seo'     => array(
 			'title'       => __( 'Homepage SEO', 'majestic-tube' ),
 			'panel'       => 'seo',
 			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
-			'description' => __( 'The visible introduction and its position on the homepage. Search titles and meta descriptions are managed from the SEO menu in the dashboard; the visible homepage heading is under Homepage &amp; Listings &rarr; Homepage.', 'majestic-tube' ),
+			'description' => __( 'The visible introduction and its position on the homepage. The visible homepage heading is under Homepage &amp; Listings &rarr; Homepage; the browser title and meta description for the front page are under Basic SEO.', 'majestic-tube' ),
 		),
 		'archive_seo'  => array(
 			'title'       => __( 'Archive Page SEO', 'majestic-tube' ),
 			'panel'       => 'seo',
 			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
-			'description' => __( 'How the category, tag and actor pages describe themselves: the line on each card, and where the description sits. The browser title and meta description for an individual term are set on that term&rsquo;s own screen, next to its image.', 'majestic-tube' ),
+			'description' => __( 'How the category, tag and actor pages describe themselves: the line on each card, and where the description sits. Each term&rsquo;s own words are edited on its own screen, next to its image.', 'majestic-tube' ),
 		),
 		'video_seo'    => array(
 			'title'       => __( 'Video Structured Data', 'majestic-tube' ),
 			'panel'       => 'seo',
 			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
-			'description' => __( 'Marks up each video for Google Video search: a VideoObject block, the Open Graph video tags, and a video sitemap. These describe the video itself, which only this theme knows about - the browser title, meta description and canonical for a video page still come from your SEO plugin, exactly as everywhere else on the site.', 'majestic-tube' ),
+			'description' => __( 'Marks up each video for Google Video search: a VideoObject block, the Open Graph video tags, and a video sitemap. These describe the video itself, which only this theme knows about - the browser title, meta description and canonical for a video page come from Basic SEO, or from your SEO plugin when one is running.', 'majestic-tube' ),
 		),
 		'code'         => array(
 			'title'       => __( 'Custom Code', 'majestic-tube' ),
@@ -211,7 +217,7 @@ function majestic_tube_options_map() {
 	$single       = 'single';
 	$player       = 'player';
 	$social       = 'social';
-	$colours      = 'colours';
+	$colors      = 'colors';
 	$logo         = 'logo';
 	$watermark    = 'watermark';
 	$thumbnails   = 'thumbnails';
@@ -220,6 +226,7 @@ function majestic_tube_options_map() {
 	$submission   = 'submission';
 	$advertising  = 'advertising';
 	$links_bar    = 'links_bar';
+	$basic_seo    = 'basic_seo';
 	$home_seo     = 'home_seo';
 	$archive_seo  = 'archive_seo';
 	$video_seo    = 'video_seo';
@@ -689,14 +696,14 @@ function majestic_tube_options_map() {
 			'customizer' => false,
 		),
 		/* ------------------------------------------------------------------
-		 * Site design - colour scheme and body font
+		 * Site design - color scheme and body font
 		 * ------------------------------------------------------------------ */
 		'color-scheme'             => array(
 			'setting'     => 'majestic_tube_color_scheme',
 			'default'     => 'light',
 			'type'        => 'select',
-			'label'       => __( 'Colour scheme', 'majestic-tube' ),
-			'section' => $colours,
+			'label'       => __( 'Color scheme', 'majestic-tube' ),
+			'section' => $colors,
 			'description' => __( 'The skin the site uses by default. "Follow system" follows each visitor\'s operating-system setting and needs no script. Visitors can still override this with the header toggle, and that choice is stored only in their own browser.', 'majestic-tube' ),
 			'choices'     => array(
 				'light'  => __( 'Light', 'majestic-tube' ),
@@ -709,30 +716,32 @@ function majestic_tube_options_map() {
 			'default' => 'off',
 			'type'    => 'onoff',
 			'label'   => __( 'Show the light/dark toggle in the header', 'majestic-tube' ),
-			'section' => $colours,
+			'section' => $colors,
 		),
 		'main-color'               => array(
 			'setting' => 'majestic_tube_main_color',
-			'default' => '#0f8a99',
+			// Deep enough to carry white button text at 4.98:1; the theme derives
+			// every other shade of it from this one value.
+			'default' => '#0e7b8a',
 			'type'    => 'color',
-			'label'   => __( 'Accent colour', 'majestic-tube' ),
-			'section' => $colours,
-			'description' => __( 'The highlight colour: buttons, links, the active menu item, and the play badge over a thumbnail.', 'majestic-tube' ),
+			'label'   => __( 'Accent color', 'majestic-tube' ),
+			'section' => $colors,
+			'description' => __( 'The highlight color, and the only one you have to choose: buttons and badges are filled with it, and the theme derives a readable link, text and icon tone from it for the light skin and for the dark skin. The video player keeps its own bright version of the same color, because it stays black whatever the skin is.', 'majestic-tube' ),
 		),
 		'custom-background'        => array(
 			'setting' => 'majestic_tube_custom_background',
 			'default' => 'off',
 			'type'    => 'onoff',
 			'label'   => __( 'Ignore the site background image', 'majestic-tube' ),
-			'section' => $colours,
-			'description' => __( 'Turn this on to drop any background image set under Appearance &rarr; Customize &rarr; Background. The theme then paints its own flat background colour instead. Leave it off to let that image show through.', 'majestic-tube' ),
+			'section' => $colors,
+			'description' => __( 'Turn this on to drop any background image set under Appearance &rarr; Customize &rarr; Background. The theme then paints its own flat background color instead. Leave it off to let that image show through.', 'majestic-tube' ),
 		),
 		'site-font-family'         => array(
 			'setting'     => 'majestic_tube_site_font_family',
 			'default'     => 'Inter',
 			'type'        => 'select',
 			'label'       => __( 'Site font', 'majestic-tube' ),
-			'section' => $colours,
+			'section' => $colors,
 			'description' => __( 'Inter is bundled with the theme, so every visitor - Windows, macOS, Android, iOS - sees the same letterforms. The system option renders in whatever interface font the visitor already has, which costs no download but looks different on each platform.', 'majestic-tube' ),
 			'choices'     => array(
 				'Inter'     => __( 'Inter (bundled with the theme)', 'majestic-tube' ),
@@ -857,13 +866,22 @@ function majestic_tube_options_map() {
 			'label'   => __( 'Show the logo in the footer', 'majestic-tube' ),
 			'section' => $logo,
 		),
+		/*
+		 * Retired from the Customizer, and no longer printed either. WordPress
+		 * already owns this picture under Appearance -> Customize -> Site
+		 * Identity -> Site Icon, and the theme printing a second <link rel="icon">
+		 * made two sources of truth for one image, with whichever tag landed last
+		 * winning. The setting stays registered so a stored value is not lost and
+		 * an older release that downgrades still reads it, but a fresh install is
+		 * never offered the field and defers to the Site Icon.
+		 */
 		'favicon'                  => array(
-			'setting' => 'majestic_tube_favicon',
-			'default' => '',
-			'type'    => 'file',
-			'label'   => __( 'Browser tab icon (favicon)', 'majestic-tube' ),
-			'section' => $logo,
-			'description' => __( 'The small picture visitors see on the browser tab. Leave it blank to keep the icon set under Appearance &rarr; Customize &rarr; Site Identity &rarr; Site Icon.', 'majestic-tube' ),
+			'setting'    => 'majestic_tube_favicon',
+			'default'    => '',
+			'type'       => 'file',
+			'label'      => __( 'Browser tab icon (favicon)', 'majestic-tube' ),
+			'section'    => $logo,
+			'customizer' => false,
 		),
 		/* ------------------------------------------------------------------
 		 * Site design - logo overlaid on the player
@@ -1030,12 +1048,44 @@ function majestic_tube_options_map() {
 			'label'   => __( 'Enable membership (login/register)', 'majestic-tube' ),
 			'section' => $members,
 		),
+		/*
+		 * Consent (2.5.0). The terms checkbox on the login, registration and
+		 * video submission forms, and the cookie notice. On by default: the theme
+		 * asks for acceptance the moment it gives a visitor something to accept,
+		 * and both halves of that - the checkbox and the documents it links - come
+		 * from the pages the site publishes. A site with no terms and no privacy
+		 * policy gets no question, whatever this switch says.
+		 */
+		'ask-to-accept-terms'      => array(
+			'setting'     => 'majestic_tube_ask_to_accept_terms',
+			'default'     => 'on',
+			'type'        => 'onoff',
+			'label'       => __( 'Ask visitors to accept the terms', 'majestic-tube' ),
+			'description' => __( 'Prints a required terms checkbox on the login, registration and video submission forms, and refuses a submission that arrives without it. The checkbox links the Terms of Use and Privacy Policy pages when the site has them; with neither published, no checkbox is printed. The login and registration panel and the submission page also print no Code and ads area while this is on, so no ad or code block appears beside the question.', 'majestic-tube' ),
+			'section' => $members,
+		),
+		'cookie-notice'            => array(
+			'setting'     => 'majestic_tube_cookie_notice',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'Show a cookie notice', 'majestic-tube' ),
+			'description' => __( 'A dismissible bar that tells visitors the site uses cookies and links the pages that explain them. The dismissal is kept in the visitor&rsquo;s own browser - the theme sets no cookie of its own - and the notice never records a choice on your server or changes which ads print. Turn on <strong>Only load advertising after consent</strong> under Advertising to hold ads back until a consent plugin says otherwise.', 'majestic-tube' ),
+			'section' => $chrome,
+		),
+		'cookie-notice-text'       => array(
+			'setting'     => 'majestic_tube_cookie_notice_text',
+			'default'     => '',
+			'type'        => 'textarea',
+			'label'       => __( 'Cookie notice text', 'majestic-tube' ),
+			'description' => __( 'Leave blank for the wording this theme ships. The links to your Terms of Use, Privacy Policy and Cookie Policy are printed under whatever you write here, so the notice always points at the pages it refers to.', 'majestic-tube' ),
+			'section'     => $chrome,
+		),
 		'enable-captcha'           => array(
 			'setting'     => 'majestic_tube_enable_captcha',
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Enable spam protection', 'majestic-tube' ),
-			'description' => __( 'Asks visitors to prove they are human with Cloudflare Turnstile on the sign-up and video submission forms. Nothing is shown until this is on, and both Turnstile keys below must be filled in.', 'majestic-tube' ),
+			'description' => __( 'Asks visitors to prove they are human with Cloudflare Turnstile on the sign-up and video submission forms. Both Turnstile keys below must be filled in. The room the widget needs is reserved in those forms, and on the login and comment forms, whether or not this is on, so switching protection on never moves a button or changes a form&rsquo;s height. Neither the login form nor the comment form is guarded: the theme asks for a token on sign-up and submission only.', 'majestic-tube' ),
 			'section' => $members,
 		),
 		'turnstile-site-key'      => array(
@@ -1118,6 +1168,20 @@ function majestic_tube_options_map() {
 			'default' => 'off',
 			'type'    => 'onoff',
 			'label'   => __( 'Thumbnail link required', 'majestic-tube' ),
+			'section' => $submission,
+		),
+		'video-submit-thumbs-required' => array(
+			'setting' => 'majestic_tube_submit_thumbs_required',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Extra thumbnails required', 'majestic-tube' ),
+			'section' => $submission,
+		),
+		'video-submit-trailer-required' => array(
+			'setting' => 'majestic_tube_submit_trailer_required',
+			'default' => 'off',
+			'type'    => 'onoff',
+			'label'   => __( 'Preview video required', 'majestic-tube' ),
 			'section' => $submission,
 		),
 		'video-submit-tags-required' => array(
@@ -1308,7 +1372,9 @@ function majestic_tube_options_map() {
 		 * The links are a WordPress menu, assigned under Appearance ->
 		 * Menus, so a partner can be added without an editor opening the
 		 * menu visitors navigate by. This section only decides whether the
-		 * row prints and how it is presented.
+		 * row prints and how it is presented; where it prints is not a
+		 * setting: a strip of outbound advertising links belongs on the
+		 * site's index, and prints on no other page.
 		 *
 		 * Default on, but the row stays invisible until a menu is actually
 		 * assigned: majestic_tube_links_bar() returns early when the
@@ -1321,7 +1387,7 @@ function majestic_tube_options_map() {
 			'type'        => 'onoff',
 			'label'       => __( 'Show the friends and ad links row', 'majestic-tube' ),
 			'section'     => $links_bar,
-			'description' => __( 'Prints a row of outbound text links under the header, on every page. Assign a menu to <strong>Friends &amp; Ad Links</strong> under Appearance &rarr; Menus first - until you do, the row prints nothing.', 'majestic-tube' ),
+			'description' => __( 'Prints a row of outbound text links under the header on the index page, and on no other page. Assign a menu to <strong>Friends &amp; Ad Links</strong> under Appearance &rarr; Menus first - until you do, the row prints nothing.', 'majestic-tube' ),
 		),
 		'links-bar-label'          => array(
 			'setting'     => 'majestic_tube_links_bar_label',
@@ -1329,7 +1395,7 @@ function majestic_tube_options_map() {
 			'type'        => 'text',
 			'label'       => __( 'Row label', 'majestic-tube' ),
 			'section'     => $links_bar,
-			'description' => __( 'An optional heading printed before the links, such as &ldquo;Friends&rdquo;. Leave it blank and the row prints the links alone, still labelled &ldquo;Friends and partners&rdquo; for screen readers.', 'majestic-tube' ),
+			'description' => __( 'An optional heading printed before the links, such as &ldquo;Friends&rdquo;. Leave it blank and the row prints the links alone, still labeled &ldquo;Friends and partners&rdquo; for screen readers.', 'majestic-tube' ),
 			'input_attrs' => array(
 				'placeholder' => __( 'Friends', 'majestic-tube' ),
 			),
@@ -1374,11 +1440,62 @@ function majestic_tube_options_map() {
 			'description' => __( 'A highlight passes across a link as the pointer crosses it. The theme stops all of its animation for visitors whose system asks for reduced motion.', 'majestic-tube' ),
 		),
 		/* ------------------------------------------------------------------
+		 * Basic SEO - the search appearance the theme supplies itself (2.5.0)
+		 *
+		 * On by default so a fresh install is describable without installing
+		 * anything else, and switched off wholesale while an SEO plugin is
+		 * active - see inc/basic-seo.php for the detection behind that.
+		 *
+		 * The two content-rating labels at the end are deliberately outside
+		 * that switch: no SEO plugin emits them, so a site that runs one can
+		 * still declare itself adult.
+		 * ------------------------------------------------------------------ */
+		'enable-basic-seo'         => array(
+			'setting'     => 'majestic_tube_enable_basic_seo',
+			'default'     => 'on',
+			'type'        => 'onoff',
+			'label'       => __( 'Basic SEO', 'majestic-tube' ),
+			'section'     => $basic_seo,
+			'description' => __( 'Prints a meta description, a canonical on archive pages, and the Open Graph and Twitter card a shared link needs. Switched off for you while a known SEO plugin is active; turn it off by hand if you run one the theme does not recognize.', 'majestic-tube' ),
+		),
+		'home-seo-title'           => array(
+			'setting'     => 'majestic_tube_home_seo_title',
+			'default'     => '',
+			'type'        => 'text',
+			'label'       => __( 'Homepage search title', 'majestic-tube' ),
+			'section'     => $basic_seo,
+			'description' => __( 'The browser tab, and the blue title on a search result, for the front page. Leave it empty for the site title.', 'majestic-tube' ),
+		),
+		'home-seo-description'     => array(
+			'setting'     => 'majestic_tube_home_seo_description',
+			'default'     => '',
+			'type'        => 'textarea',
+			'label'       => __( 'Homepage meta description', 'majestic-tube' ),
+			'section'     => $basic_seo,
+			'description' => __( 'What a search engine may show under the front page title, and the text on a Facebook or X share card. Leave it empty for the site tagline. It is kept apart from the visible homepage introduction on purpose: one is read by a visitor, the other only by a machine.', 'majestic-tube' ),
+		),
+		'adult-content-rating'     => array(
+			'setting'     => 'majestic_tube_adult_content_rating',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'Adult content rating tag', 'majestic-tube' ),
+			'section'     => $basic_seo,
+			'description' => __( 'Puts the rating tag Google documents for explicit content in the head of every page. It asks SafeSearch to filter the site; it is not a noindex directive, so it does not by itself keep a page out of the index.', 'majestic-tube' ),
+		),
+		'rta-label'                => array(
+			'setting'     => 'majestic_tube_rta_label',
+			'default'     => 'off',
+			'type'        => 'onoff',
+			'label'       => __( 'RTA label', 'majestic-tube' ),
+			'section'     => $basic_seo,
+			'description' => __( 'Prints the Restricted To Adults label exactly as rtalabel.org prescribes it, which is what parental-control and filtering software looks for. Google reads it as the same explicit-content signal as the rating tag above, so one of the two is enough for search - enable both only if the filters you rely on look for different ones.', 'majestic-tube' ),
+		),
+		/* ------------------------------------------------------------------
 		 * Homepage SEO - the front page (2.2.26)
 		 *
 		 * Visible introduction and placement. Search metadata has its own
-		 * fields in the dashboard SEO workspace; the legacy storage keys
-		 * stay unchanged so existing homepage content is preserved.
+		 * fields under Basic SEO; the legacy storage keys stay unchanged so
+		 * existing homepage content is preserved.
 		 *
 		 * The stored values did not move with them. Only the section each
 		 * control renders in changed, so every site keeps what it had saved.
@@ -1401,14 +1518,16 @@ function majestic_tube_options_map() {
 			'type'    => 'textarea',
 			'label'   => __( 'Homepage description', 'majestic-tube' ),
 			'section' => $home_seo,
-			'description' => __( 'A short visible introduction under the homepage heading, printed once above or below the grid. It is also the fallback search description unless you supply one in SEO &rarr; Settings. Existing saved text is preserved.', 'majestic-tube' ),
+			'description' => __( 'A short visible introduction under the homepage heading, printed once above or below the grid. It is also the fallback search description unless you supply one under Basic SEO. Existing saved text is preserved.', 'majestic-tube' ),
 		),
 		/* ------------------------------------------------------------------
 		 * Archive page SEO - category, tag and actor pages (2.2.26)
 		 *
-		 * Shared card wording and archive description placement. Per-term
-		 * search overrides remain on term screens; collection templates live
-		 * in the dashboard SEO workspace.
+		 * Shared card wording and archive description placement. A term's own
+		 * name and description are edited on that term's own screen, beside
+		 * its image; there are no per-term search overrides to keep in step,
+		 * and an archive's browser title and meta description come from Basic
+		 * SEO, or from the SEO plugin if one is running.
 		 *
 		 * The stored values did not move with them. Only the section each
 		 * control renders in changed, so every site keeps what it had saved.
@@ -1519,7 +1638,7 @@ function majestic_tube_options_map() {
 			'type'        => 'code',
 			'label'       => __( 'Other scripts', 'majestic-tube' ),
 			'section' => $code,
-			'description' => __( 'Extra markup printed before </body>.', 'majestic-tube' ),
+			'description' => __( 'Extra markup printed before <code>&lt;/body&gt;</code>.', 'majestic-tube' ),
 		),
 		'mobile-scripts'           => array(
 			'setting'     => 'majestic_tube_mobile_scripts',
@@ -1527,7 +1646,7 @@ function majestic_tube_options_map() {
 			'type'        => 'code',
 			'label'       => __( 'Mobile scripts', 'majestic-tube' ),
 			'section' => $code,
-			'description' => __( 'Extra markup printed before </body> for mobile visitors only.', 'majestic-tube' ),
+			'description' => __( 'Extra markup printed before <code>&lt;/body&gt;</code> for mobile visitors only.', 'majestic-tube' ),
 		),
 	);
 
@@ -1556,7 +1675,7 @@ define( 'MAJESTIC_TUBE_LEGACY_OPTION', 'wpst-options' );
  *
  * A site that installed the theme before the Customizer settings existed
  * still has its settings in this database row. Reading it as a fallback means
- * such a site keeps its ad codes, colours and network switches.
+ * such a site keeps its ad codes, colors and network switches.
  *
  * @param string $field_id Field id.
  * @param mixed  $default  Default when the key is absent.
@@ -1604,7 +1723,7 @@ function majestic_tube_get_option( $option_group, $field_id, $default = false ) 
 
 	// A mapped key: the Customizer wins, then the value stored in the
 	// wpst-options row, then the declared default. An explicitly saved empty
-	// string is honoured (it means "the administrator cleared this zone").
+	// string is honored (it means "the administrator cleared this zone").
 	if ( isset( $map[ $field_id ] ) ) {
 		$saved = get_theme_mod( $map[ $field_id ]['setting'], null );
 
@@ -1616,7 +1735,7 @@ function majestic_tube_get_option( $option_group, $field_id, $default = false ) 
 	}
 
 	// A key this theme no longer models but an earlier install may still
-	// have stored: honour the value in the wpst-options row, otherwise fall
+	// have stored: honor the value in the wpst-options row, otherwise fall
 	// back to the caller's default.
 	return majestic_tube_get_legacy_option( $field_id, $default );
 }
@@ -1824,11 +1943,11 @@ function majestic_tube_sanitize_ad_code( $value ) {
 }
 
 /**
- * The colour scheme the site renders in by default.
+ * The color scheme the site renders in by default.
  *
  * One of "light", "dark" or "system". Anything else - a hand-edited option
  * row, a filter returning nonsense - falls back to "light" so a bad value can
- * never leave the page with no usable colours.
+ * never leave the page with no usable colors.
  *
  * @return string
  */
@@ -1840,7 +1959,7 @@ function majestic_tube_color_scheme() {
 	}
 
 	/**
-	 * Filters the default colour scheme.
+	 * Filters the default color scheme.
 	 *
 	 * @param string $scheme One of light, dark, system.
 	 */
@@ -1856,7 +1975,7 @@ function majestic_tube_color_scheme() {
  */
 function majestic_tube_theme_toggle_enabled() {
 	/**
-	 * Filters whether the header colour-scheme toggle is rendered.
+	 * Filters whether the header color-scheme toggle is rendered.
 	 *
 	 * @param bool $enabled Whether to render the toggle.
 	 */
@@ -1872,27 +1991,59 @@ function majestic_tube_theme_toggle_enabled() {
  * painted - to put the stored value on the root element. Without them a
  * visitor who chose dark would see one light frame on every page load.
  *
- * The stored value never leaves the visitor's browser, and the script is
- * skipped entirely on a site that neither offers the toggle nor differs from
- * the default, so it costs nothing there.
+ * A stored choice is a choice *against* a default, so the scheme the visitor
+ * chose against is stored beside it and compared here. Without that the
+ * choice outlives the default it was made under, and an administrator who
+ * switches the site from dark to light keeps seeing the dark skin in the one
+ * browser that ever pressed the button - the setting looking broken, with
+ * nothing on screen to say why and no way to find the stored value. A choice
+ * made against the default that is still in force is honored as before; one
+ * made against a default that has since changed is dropped, and the visitor
+ * chooses again in one click.
+ *
+ * The script is printed only while the toggle is rendered, because that button
+ * is the only place the choice is shown or changed. A site that does not offer
+ * the toggle has no override to honor: a stored value that survives from a
+ * release - or from a site that did offer the toggle once - is left unread
+ * rather than applied, so a preference nobody can see never decides what a
+ * page looks like. (It stays in the browser, so re-enabling the toggle brings
+ * the visitor's own choice back rather than silently discarding it.) That
+ * gate used to be "light and no toggle", which is not the same test: on a dark
+ * site it applied the value with no control on screen, and it made the answer
+ * depend on a setting the visitor cannot see - the same browser rendered light
+ * and dark differently according to a switch that is not theirs.
+ *
+ * The stored value never leaves the visitor's browser.
  *
  * @return void
  */
 function majestic_tube_color_scheme_script() {
-	if ( 'light' === majestic_tube_color_scheme() && ! majestic_tube_theme_toggle_enabled() ) {
+	if ( ! majestic_tube_theme_toggle_enabled() ) {
 		return;
 	}
 	?>
 	<script>
 	( function () {
-		var key = 'majestic_tube_theme';
+		var key   = 'majestic_tube_theme';
+		var base  = 'majestic_tube_theme_base';
+		var site  = <?php echo wp_json_encode( majestic_tube_color_scheme() ); ?>;
 		var valid = { light: 1, dark: 1, system: 1 };
 
 		try {
 			var stored = window.localStorage.getItem( key );
+			var chosen = window.localStorage.getItem( base );
 
-			if ( stored && valid[ stored ] ) {
+			// Kept only while it is a choice against the default still in force.
+			if ( stored && valid[ stored ] && site === chosen ) {
 				document.documentElement.setAttribute( 'data-theme', stored );
+				return;
+			}
+
+			// A stale pair, or one from a page that no longer offers the
+			// toggle: neither is allowed to outlive its reason.
+			if ( stored || chosen ) {
+				window.localStorage.removeItem( key );
+				window.localStorage.removeItem( base );
 			}
 		} catch ( e ) {
 			// Private browsing or a blocked storage partition. The site's
@@ -1910,6 +2061,12 @@ add_action( 'wp_head', 'majestic_tube_color_scheme_script', 1 );
  * All three glyphs are printed and CSS reveals the one matching data-state, so
  * the button is legible before the script runs. The initial state matches the
  * site default, which the head script may already have overridden.
+ *
+ * data-default carries the site's own scheme, which is not the same thing as
+ * data-state once anything has moved: data-state is what is on screen and is
+ * rewritten by the head script and by the click handler, while data-default is
+ * the fixed answer the visitor's stored choice is recorded against and the
+ * cycle is built from.
  *
  * @return void
  */
@@ -1929,8 +2086,9 @@ function majestic_tube_theme_toggle() {
 		class="majestic-tube-theme-toggle"
 		data-majestic-tube-theme-toggle
 		data-state="<?php echo esc_attr( majestic_tube_color_scheme() ); ?>"
-		aria-label="<?php esc_attr_e( 'Switch colour scheme', 'majestic-tube' ); ?>"
-		title="<?php esc_attr_e( 'Switch colour scheme', 'majestic-tube' ); ?>"
+		data-default="<?php echo esc_attr( majestic_tube_color_scheme() ); ?>"
+		aria-label="<?php esc_attr_e( 'Switch color scheme', 'majestic-tube' ); ?>"
+		title="<?php esc_attr_e( 'Switch color scheme', 'majestic-tube' ); ?>"
 	>
 		<span class="mt-theme-icon mt-theme-icon-light" aria-hidden="true">&#9788;</span>
 		<span class="mt-theme-icon mt-theme-icon-dark" aria-hidden="true">&#9789;</span>

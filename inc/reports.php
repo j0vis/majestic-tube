@@ -7,7 +7,7 @@
  * dashboard widget for editors.
  *
  * @package Majestic Tube
- * @version 2.0.0
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -512,7 +512,20 @@ function majestic_tube_render_reports_page() {
 			<tbody>
 				<?php
 				foreach ( $post_ids as $post_id ) :
-					$post     = get_post( $post_id );
+					$post = get_post( $post_id );
+
+					/*
+					 * The ID list is cached for ten minutes, so a video deleted
+					 * or trashed in that window is still on it while
+					 * get_post() now returns null. Reading ->post_status off
+					 * that null is a fatal on PHP 8 and took the whole
+					 * moderation screen down with it, so the row is skipped.
+					 * The cache clears itself on the next expiry.
+					 */
+					if ( ! $post ) {
+						continue;
+					}
+
 					$last     = majestic_tube_get_last_report( $post_id );
 					$reason   = ( $last && isset( $reasons[ $last['reason'] ] ) ) ? $reasons[ $last['reason'] ] : __( 'Not specified', 'majestic-tube' );
 					$message  = ( $last && ! empty( $last['message'] ) ) ? $last['message'] : '';

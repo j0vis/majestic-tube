@@ -2,7 +2,7 @@
 /**
  * Post types and taxonomies - WP-Script Majestic Tube compatible data model.
  *
- * Videos are regular posts ("post" type) relabelled as Videos, exactly like
+ * Videos are regular posts ("post" type) relabeled as Videos, exactly like
  * the original theme, so all WP-Script plugins and tools keep working.
  *
  * @package Majestic Tube

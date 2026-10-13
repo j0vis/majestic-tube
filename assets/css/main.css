@@ -28,7 +28,7 @@
  * with a real 100-900 axis: there is no weight the browser would have to fake,
  * and letting it fake one produced smeared bold on systems that lacked a face.
  *
- * Colour is a two-scheme system. Every colour token below is declared twice: a
+ * Color is a two-scheme system. Every color token below is declared twice: a
  * plain value first, then a light-dark() pair. An engine that does not
  * understand light-dark() keeps the plain declaration and simply renders the
  * light skin, which is exactly what it did before dark mode existed. An engine
@@ -52,29 +52,60 @@
 	--mt-text: light-dark( #202124, #e7eaed );
 	--mt-text-body: #303238;
 	--mt-text-body: light-dark( #303238, #d8dce1 );
-	--mt-text-muted: #6b7280;
-	--mt-text-muted: light-dark( #6b7280, #98a1ab );
+	/*
+	 * Muted copy sits on the page background as often as it sits on a card -
+	 * breadcrumbs, meta lines, the menu button - so the light value is deep
+	 * enough to clear 4.5:1 against --mt-bg and not only against a white card.
+	 */
+	--mt-text-muted: #666d79;
+	--mt-text-muted: light-dark( #666d79, #98a1ab );
 	--mt-border: #e3e6ea;
 	--mt-border: light-dark( #e3e6ea, #272d35 );
 	--mt-border-subtle: #e5e5e5;
 	--mt-border-subtle: light-dark( #e5e5e5, #232830 );
 	--mt-border-strong: #cfd4da;
 	--mt-border-strong: light-dark( #cfd4da, #384049 );
-	--mt-accent: #0f8a99;
-	--mt-accent-rgb: 15, 138, 153;
-	--mt-accent-dark: #096b78;
-	--mt-accent-dark: light-dark( #096b78, #5ccfe0 );
+	/*
+	 * The accent, in the roles it actually plays.
+	 *
+	 * One value cannot serve them all. A teal dark enough to carry white text
+	 * is too dark to read as a link on a near-black surface, and a teal bright
+	 * enough to read there is far too pale under white text. So each role has
+	 * its own token, and each one is chosen to clear 4.5:1 against whatever it
+	 * is painted on, in both skins:
+	 *
+	 *   --mt-accent             fill behind text: buttons, badges, active tabs
+	 *   --mt-accent-fg          the text painted on that fill
+	 *   --mt-accent-hover       the fill on hover, still legible under -fg
+	 *   --mt-accent-text        the accent used as text or as an icon
+	 *   --mt-accent-text-hover  the same, on hover
+	 *   --mt-accent-rgb         the fill as a triple, for glows and shadows
+	 *   --mt-accent-on-dark     text and icons over the always-black player
+	 *
+	 * inc/custom-code.php re-derives every one of them from the "Accent color"
+	 * option, so an administrator who picks any color still gets a legible
+	 * button, a legible link and a visible focus ring in both skins. These are
+	 * the defaults; they are the output of that same derivation for the shipped
+	 * accent, and they are what a page falls back to before the option block
+	 * arrives.
+	 */
+	--mt-accent: #0e7b8a;
+	--mt-accent-rgb: 14, 123, 138;
+	--mt-accent-fg: #ffffff;
+	--mt-accent-hover: #0d7381;
+	--mt-accent-text: #0d7381;
+	--mt-accent-text: light-dark( #0d7381, #15b9cf );
+	--mt-accent-text-hover: #0b626e;
+	--mt-accent-text-hover: light-dark( #0b626e, #17c9e2 );
+	--mt-accent-on-dark: #15b9cf;
 
 	/*
-	 * Accent used as text rather than as a button fill.
-	 *
-	 * The teal is dark enough to sit under white button text but too dark to
-	 * read as a link on a near-black surface, so link and heading accents get
-	 * their own token instead of the whole theme being re-tinted. Button fills
-	 * are unchanged in both skins.
+	 * The name the hovered accent used to be declared under. It is kept, and
+	 * kept in step with --mt-accent-text-hover, because a child theme's rules
+	 * may reference it; nothing in this theme does any more.
 	 */
-	--mt-accent-text: #0f8a99;
-	--mt-accent-text: light-dark( #0f8a99, #4ec9db );
+	--mt-accent-dark: #0b626e;
+	--mt-accent-dark: light-dark( #0b626e, #17c9e2 );
 
 	--mt-success: #16834b;
 	--mt-success: light-dark( #16834b, #45c97e );
@@ -143,7 +174,7 @@
 /*
  * The two skins, and the switch between them.
  *
- * Only color-scheme changes here. Because every colour token is a light-dark()
+ * Only color-scheme changes here. Because every color token is a light-dark()
  * pair, that single property is the whole difference between the light and the
  * dark rendering, and the switch costs nothing at paint time.
  *
@@ -151,7 +182,7 @@
  * the browser already knows the operating-system preference, so a visitor whose
  * machine is set to dark gets the dark skin on the very first paint with no
  * flash and no JavaScript. The small inline script in the head only runs to
- * honour a visitor's explicit override, which is stored locally and never sent
+ * honor a visitor's explicit override, which is stored locally and never sent
  * to the server.
  */
 [data-theme="light"] {
@@ -276,7 +307,7 @@ a {
 
 a:hover,
 a:focus {
-	color: var(--mt-accent-dark);
+	color: var(--mt-accent-text-hover);
 }
 
 img,
@@ -382,7 +413,7 @@ ol {
 
 /*
  * The logo icon is masked SVG rather than a glyph, so it is drawn in the logo's
- * own colour and needs no icon font. The four shapes are the only ones the Icon
+ * own color and needs no icon font. The four shapes are the only ones the Icon
  * logo option offers, and they now come from the shared set at the top of this
  * file rather than carrying a second copy of each path here.
  */
@@ -426,7 +457,7 @@ ol {
  *
  * Every icon is an SVG mask rather than a glyph. A mask keeps only the
  * alpha channel, so one element paints any icon in its own currentColor and
- * the colour tokens below keep working without a second copy of every icon
+ * the color tokens below keep working without a second copy of every icon
  * for the light and dark skins. It also means the set is never missing: the
  * theme ships the shapes, so no visitor needs an icon font, and nothing
  * depends on a font that may be blocked, substituted or out of date.
@@ -450,7 +481,7 @@ ol {
 	--mt-icon-download: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z'/%3E%3C/svg%3E");
 	--mt-icon-folder: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M10 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2h-8l-2-2z'/%3E%3C/svg%3E");
 	--mt-icon-tag: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21.41 11.58l-9-9C12.05 2.22 11.55 2 11 2H4c-1.1 0-2 .9-2 2v7c0 .55.22 1.05.59 1.42l9 9c.36.36.86.58 1.41.58s1.05-.22 1.41-.59l7-7c.37-.36.59-.86.59-1.41s-.23-1.06-.59-1.42zM5.5 7C4.67 7 4 6.33 4 5.5S4.67 4 5.5 4 7 4.67 7 5.5 6.33 7 5.5 7z'/%3E%3C/svg%3E");
-	--mt-icon-film: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M1.5 4A1.5 1.5 0 0 0 0 5.5v13A1.5 1.5 0 0 0 1.5 20h21a1.5 1.5 0 0 0 1.5-1.5v-13A1.5 1.5 0 0 0 22.5 4h-21zM3 6.2h4v11.6H3V6.2zM17 6.2h4v11.6h-4V6.2zM8.4 6.2h2.6v2.6H8.4V6.2zm4.6 0h2.6v2.6H13V6.2zm-4.6 4.5h2.6v2.6H8.4v-2.6zm4.6 0h2.6v2.6H13v-2.6zm-4.6 4.5h2.6v2.6H8.4v-2.6zm4.6 0h2.6v2.6H13v-2.6z'/%3E%3C/svg%3E");
+	--mt-icon-film: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M18 4l2 4h-3l-2-4h-2l2 4h-3l-2-4H8l2 4H7L5 4H4c-1.1 0-1.99.9-1.99 2L2 18c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V4h-4z'/%3E%3C/svg%3E");
 	--mt-icon-video: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M17 10.5V7c0-.55-.45-1-1-1H4c-.55 0-1 .45-1 1v10c0 .55.45 1 1 1h12c.55 0 1-.45 1-1v-3.5l4 4v-11l-4 4z'/%3E%3C/svg%3E");
 	--mt-icon-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z'/%3E%3C/svg%3E");
 	--mt-icon-sliders: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M3 17v2h6v-2H3zM3 5v2h10V5H3zm10 16v-2h8v-2h-8v-2h-2v6h2zM7 9v2H3v2h4v2h2V9H7zm14 4v-2H11v2h10zm-6-4h2V7h4V5h-4V3h-2v6z'/%3E%3C/svg%3E");
@@ -488,10 +519,10 @@ ol {
  * The box, without the paint.
  *
  * Width and height are 1em so an icon tracks the font size of whatever contains
- * it. The colour is deliberately *not* set here: the paint lives in the named
+ * it. The color is deliberately *not* set here: the paint lives in the named
  * rule below, beside the mask it belongs to. An `mt-icon` element carrying a
  * name this stylesheet does not define is then invisible rather than a solid
- * block of colour, which is the difference between a missing icon and a visible
+ * block of color, which is the difference between a missing icon and a visible
  * defect on the page.
  */
 .mt-icon {
@@ -900,7 +931,7 @@ span > .mt-icon:first-child {
 
 /*
  * The search button is a fixed 42px square with no text of its own, so the icon
- * is centred by the grid on the button and sized against it directly.
+ * is centered by the grid on the button and sized against it directly.
  */
 .search-submit .mt-icon {
 	font-size: 1.15rem;
@@ -939,9 +970,20 @@ span > .mt-icon:first-child {
 }
 
 .filter-nav a:hover .filter-nav-icon,
-.filter-nav a:focus-visible .filter-nav-icon,
+.filter-nav a:focus-visible .filter-nav-icon {
+	color: var(--mt-accent-text);
+}
+
+/*
+ * The active tab paints the accent as its own background, so the icon has to
+ * take the label's color and not the accent. An accent-colored icon on an
+ * accent-colored pill is invisible, which is exactly what happened the moment
+ * a visitor clicked a sort tab: the mark disappeared and only the word stayed.
+ * inherit() follows the link's own color, which the active rule already sets
+ * to white.
+ */
 .filter-nav a.active .filter-nav-icon {
-	color: var(--mt-accent);
+	color: inherit;
 }
 
 /*
@@ -982,13 +1024,16 @@ span > .mt-icon:first-child {
 	gap: 0.35em;
 }
 
+/*
+ * The icon and the label are the same unit, so the icon takes the label's
+ * color and nothing else. Dimming it here looked like a nice touch and
+ * measured at 2.8:1 in the light skin, because it dragged the accent color
+ * toward the background while the text beside it stayed at full strength -
+ * the mark ended up less legible than the word it belongs to. The hover rule
+ * that used to undo it is gone with it: there is nothing left to undo.
+ */
 .tags-list .label .mt-icon {
 	font-size: 0.9em;
-	opacity: 0.75;
-}
-
-.tags-list .label:hover .mt-icon {
-	opacity: 1;
 }
 
 /* The like button sits beside the dislike button, so they match. */
@@ -1000,7 +1045,7 @@ span > .mt-icon:first-child {
 
 /*
  * Back to top is a round accent button whose only content is this icon, so it is
- * centred by the existing flex rule and sized to about two thirds of the circle.
+ * centered by the existing flex rule and sized to about two thirds of the circle.
  */
 .back-to-top .mt-icon {
 	font-size: 1.15rem;
@@ -1108,6 +1153,7 @@ span > .mt-icon:first-child {
 .menu-toggle {
 	display: none;
 	align-items: center;
+	justify-content: center;
 	gap: 0.4rem;
 	padding: 0.5rem 0.75rem;
 	background: var(--mt-surface);
@@ -1161,16 +1207,16 @@ span > .mt-icon:first-child {
 	background: var(--mt-accent);
 	border: 1px solid var(--mt-accent);
 	border-radius: 0 7px 7px 0;
-	color: #fff;
+	color: var(--mt-accent-fg);
 	font-weight: 700;
 	cursor: pointer;
 }
 
 .search-submit:hover,
 .search-submit:focus {
-	background: var(--mt-accent-dark);
-	border-color: var(--mt-accent-dark);
-	color: #fff;
+	background: var(--mt-accent-hover);
+	border-color: var(--mt-accent-hover);
+	color: var(--mt-accent-fg);
 }
 
 /* Layout and widgets --------------------------------------------------- */
@@ -1208,7 +1254,7 @@ span > .mt-icon:first-child {
 /*
  * Laid out with flex and a gap rather than as one inline run of text. The trail
  * is a sequence of separate pieces - link, separator, link, current page - and
- * running them together left the separator flush against both neighbours, which
+ * running them together left the separator flush against both neighbors, which
  * read as "Home/Videos/Title". A flex row puts equal air around each piece and
  * keeps the whole trail wrap-safe on narrow screens.
  */
@@ -1329,7 +1375,7 @@ span > .mt-icon:first-child {
 .filter-nav a.active {
 	background: var(--mt-accent);
 	border-color: var(--mt-accent-text);
-	color: #fff;
+	color: var(--mt-accent-fg);
 }
 
 /*
@@ -1424,7 +1470,7 @@ span > .mt-icon:first-child {
 .tags-slider a.active {
 	background: var(--mt-accent);
 	border-color: var(--mt-accent-text);
-	color: #fff;
+	color: var(--mt-accent-fg);
 }
 
 .tags-slider-count {
@@ -1445,7 +1491,7 @@ span > .mt-icon:first-child {
 }
 
 .tags-slider a.active .tags-slider-count {
-	/* A tint of the fill rather than the grey chip, which vanished on accent. */
+	/* A tint of the fill rather than the gray chip, which vanished on accent. */
 	background: rgba( 255, 255, 255, 0.22 );
 	color: #fff;
 }
@@ -1501,7 +1547,7 @@ span > .mt-icon:first-child {
  * A third navigation row, in the header, under the logo / search / main menu
  * row. It is a strip of outbound partner links rather than a way around the
  * site, so it is visually quieter than the main menu: smaller type, a muted
- * resting colour, and no pill treatment. It wraps instead of scrolling, because
+ * resting color, and no pill treatment. It wraps instead of scrolling, because
  * a partner list is short and a row that hides half its links behind an arrow
  * reads as broken to anyone who does not find the arrow.
  *
@@ -1601,20 +1647,20 @@ span > .mt-icon:first-child {
 
 /* Glam: the heading takes the accent, links warm up on hover. */
 .links-bar[data-style="glam"] .links-bar-label {
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 }
 
 .links-bar[data-style="glam"] .links-bar-menu a:hover {
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 }
 
 /*
- * Neon: no emoji on purpose, because a glow behind a colour emoji reads as a
+ * Neon: no emoji on purpose, because a glow behind a color emoji reads as a
  * rendering fault rather than as decoration. The accent is available as an
  * rgb triple so the glow can be layered without hard-coding a hex here.
  */
 .links-bar[data-style="neon"] .links-bar-menu a {
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 	transition: text-shadow 0.2s ease;
 }
 
@@ -1827,7 +1873,7 @@ span > .mt-icon:first-child {
 	padding: 0.15rem 0.4rem;
 	background: var(--mt-accent);
 	border-radius: 4px;
-	color: #fff;
+	color: var(--mt-accent-fg);
 	font-size: 0.7rem;
 	font-weight: 800;
 	line-height: 1.4;
@@ -1857,7 +1903,7 @@ span > .mt-icon:first-child {
 /*
  * The badge marks are drawn a shade under full strength so the number stays
  * the thing being read. The icons inherit the badge's white, so there is no
- * second colour to keep in step with the theme.
+ * second color to keep in step with the theme.
  */
 .views .mt-icon,
 .video-card-views .mt-icon,
@@ -1885,6 +1931,7 @@ span > .mt-icon:first-child {
 	top: 8px;
 	right: 8px;
 	background: var(--mt-accent);
+	color: var(--mt-accent-fg);
 }
 
 /*
@@ -1913,7 +1960,7 @@ span > .mt-icon:first-child {
 	/*
 	 * A line clamp caps the title at two lines but does not reserve them, so a
 	 * one-line title left the header a whole line-height short and the card
-	 * below it out of line with its neighbours. Two lines at line-height 1.4 are
+	 * below it out of line with its neighbors. Two lines at line-height 1.4 are
 	 * 2.8em of this element's own font size, which is what is reserved here.
 	 */
 	min-height: 2.8em;
@@ -1926,7 +1973,7 @@ span > .mt-icon:first-child {
 .video-card-meta {
 	display: flex;
 	justify-content: space-between;
-	/* Keeps the count on the bottom edge of the card when a neighbouring card
+	/* Keeps the count on the bottom edge of the card when a neighboring card
 	 * in the same row has a description and this one does not. */
 	margin-top: auto;
 	padding: 0 12px 12px;
@@ -2070,7 +2117,7 @@ span > .mt-icon:first-child {
 	padding: 0.12rem 0.42rem;
 	background: var(--mt-accent);
 	border-radius: 4px;
-	color: #fff;
+	color: var(--mt-accent-fg);
 	font-size: var(--mt-text-xs);
 	font-weight: var(--mt-weight-semibold);
 	line-height: 1.5;
@@ -2404,7 +2451,7 @@ span > .mt-icon:first-child {
 
 .sharing-buttons a:hover {
 	background: var(--mt-accent);
-	color: #fff;
+	color: var(--mt-accent-fg);
 }
 
 /*
@@ -2522,13 +2569,13 @@ span > .mt-icon:first-child {
 	padding: 0.48rem 0.9rem;
 	background: var(--mt-accent);
 	border: 0;
-	color: #fff;
+	color: var(--mt-accent-fg);
 	font-weight: 700;
 	cursor: pointer;
 }
 
 .video-report-submit:hover {
-	background: var(--mt-accent-dark);
+	background: var(--mt-accent-hover);
 }
 
 .video-report-feedback {
@@ -2545,14 +2592,14 @@ span > .mt-icon:first-child {
 	padding: 0.55rem 0.9rem;
 	background: var(--mt-accent);
 	border-radius: 6px;
-	color: #fff;
+	color: var(--mt-accent-fg);
 	font-weight: 700;
 }
 
 #tracking-url:hover,
 .tracking-button:hover {
-	background: var(--mt-accent-dark);
-	color: #fff;
+	background: var(--mt-accent-hover);
+	color: var(--mt-accent-fg);
 }
 
 /* Description and rich text -------------------------------------------- */
@@ -2773,7 +2820,7 @@ span > .mt-icon:first-child {
 .taxonomy-label:hover,
 .tag-item:hover {
 	background: var(--mt-accent);
-	color: #fff;
+	color: var(--mt-accent-fg);
 }
 
 .taxonomy-label strong {
@@ -2873,6 +2920,24 @@ span > .mt-icon:first-child {
 	padding-left: 20px;
 }
 
+/*
+ * The closing block shares one axis.
+ *
+ * The legal row and the copyright line under it are both centered, and the
+ * logo sat at the left edge of a box with the same geometry: two items on the
+ * page's center line and one on the gutter, so the footer read as a leftover
+ * block rather than as the page closing. Centering the logo's own box puts all
+ * three on one axis, in either writing direction, because the alignment is
+ * declared on the element itself and the right-to-left sheets re-align the
+ * footer's text as a whole rather than this block.
+ *
+ * The logo keeps its place in the shared box rule above so the three keep the
+ * same width, gutter and margin: the axis is only shared while the box is.
+ */
+.logo-footer {
+	text-align: center;
+}
+
 .logo-footer img {
 	max-width: var(--mt-logo-max-width, 260px);
 }
@@ -2885,10 +2950,16 @@ span > .mt-icon:first-child {
 	padding: 4px 20px 12px;
 }
 
+/*
+ * The legal row is a short list of three or four links that closes the page,
+ * so it is centered on the same axis as the copyright line below it rather than
+ * hung off the left edge where it read as a leftover of the widget grid.
+ */
 .footer-menu-container ul,
 .footer-nav ul {
 	display: flex;
 	flex-wrap: wrap;
+	justify-content: center;
 	gap: 8px 18px;
 	margin: 0;
 	padding: 0;
@@ -2908,12 +2979,18 @@ span > .mt-icon:first-child {
 	color: var(--mt-accent-text);
 }
 
+/*
+ * Centered to match the legal row above it, over the full-width rule rather
+ * than inside the widget grid's first column. The rule keeps its width, so the
+ * footer still reads as a closing bar.
+ */
 .site-info {
 	padding-top: 12px;
 	padding-bottom: 18px;
 	border-top: 1px solid var(--mt-border);
 	color: var(--mt-text-muted);
 	font-size: 0.84rem;
+	text-align: center;
 }
 
 .clear {
@@ -2933,13 +3010,13 @@ span > .mt-icon:first-child {
 	background: var(--mt-accent);
 	border-radius: 50%;
 	box-shadow: 0 6px 18px rgba(var(--mt-accent-rgb), 0.3);
-	color: #fff;
+	color: var(--mt-accent-fg);
 	font-size: 1.1rem;
 }
 
 .back-to-top:hover {
-	background: var(--mt-accent-dark);
-	color: #fff;
+	background: var(--mt-accent-hover);
+	color: var(--mt-accent-fg);
 }
 
 .back-to-top.is-visible {
@@ -2957,9 +3034,27 @@ span > .mt-icon:first-child {
 /*
  * Spam-protection widget. The provider draws the iframe, so nothing here
  * styles the challenge itself - only the space it sits in, so it lines up
- * with the labelled fields above and below it.
+ * with the labeled fields above and below it.
+ *
+ * The height is reserved rather than left to the iframe. Turnstile's normal
+ * widget is 300x65 and is injected after the page has rendered, so a form
+ * whose check is off, on, or still arriving is the same shape either way:
+ * switching protection on does not move the submit button, and the widget
+ * landing does not shift whatever is beside the field. A form that has no
+ * widget in it keeps the same room, which is why the rule is on the slot
+ * rather than on the mounted one. The value is a token because it has to
+ * match what Turnstile draws; a child theme can raise it for a taller size.
+ *
+ * The line height is zeroed because the frame the provider injects is an
+ * inline-level box, and a line box adds its strut's descent below one - about
+ * 6.6px here, which would otherwise put the mounted slot 6.6px past the height
+ * reserved for it and shift the form by that much as the check comes on. The
+ * challenge keeps its own typography inside its own document; this only stops
+ * the surrounding line box from growing the slot.
  */
 .majestic-tube-captcha {
+	min-height: var(--mt-captcha-height, 65px);
+	line-height: 0;
 	margin-bottom: 14px;
 	max-width: 100%;
 }
@@ -3025,7 +3120,7 @@ span > .mt-icon:first-child {
 	padding: 0.62rem 1.1rem;
 	background: var(--mt-accent);
 	border: 1px solid var(--mt-accent);
-	color: #fff;
+	color: var(--mt-accent-fg);
 	font-weight: 700;
 	cursor: pointer;
 }
@@ -3033,8 +3128,8 @@ span > .mt-icon:first-child {
 .video-submit-form button[type="submit"]:hover,
 .majestic-tube-profile-form button[type="submit"]:hover,
 .majestic-tube-user-modal button[type="submit"]:hover {
-	background: var(--mt-accent-dark);
-	border-color: var(--mt-accent-dark);
+	background: var(--mt-accent-hover);
+	border-color: var(--mt-accent-hover);
 }
 
 .majestic-tube-alert {
@@ -3104,6 +3199,113 @@ span > .mt-icon:first-child {
 	margin-top: 16px;
 	color: var(--mt-text-muted);
 	font-size: 0.84rem;
+}
+
+/* Consent surfaces ------------------------------------------------------ */
+/*
+ * The terms checkbox on the login, registration and video submission forms,
+ * and the cookie notice. Both are the theme's own sentence about the theme's
+ * own question, which is why neither carries a Code and ads area - see
+ * inc/consent.php for the rule that keeps them that way.
+ */
+.majestic-tube-consent-field {
+	margin: 12px 0 0;
+}
+
+/*
+ * Two classes on purpose. Every form this field appears in styles a bare
+ * `label` of its own - block, bold, full width - which would leave the box
+ * stretched across the row with the sentence underneath it. The consent field
+ * has to read the same way in all three: a checkbox beside the words it
+ * accepts, and the same words whether it sits in the login panel, the
+ * registration panel or the submission form.
+ */
+.majestic-tube-consent-field .majestic-tube-consent-label {
+	display: flex;
+	align-items: flex-start;
+	gap: 8px;
+	margin: 0;
+	color: var(--mt-text-muted);
+	font-size: 0.84rem;
+	font-weight: 400;
+	line-height: 1.45;
+	text-align: start;
+}
+
+.majestic-tube-consent-field .majestic-tube-consent-label input[type="checkbox"] {
+	flex: 0 0 auto;
+	width: auto;
+	margin: 3px 0 0;
+	padding: 0;
+}
+
+.majestic-tube-consent-field .majestic-tube-consent-label a,
+.majestic-tube-cookie-notice__link {
+	color: var(--mt-accent-text);
+	font-weight: 400;
+}
+
+.majestic-tube-consent-field .majestic-tube-consent-label a:hover,
+.majestic-tube-cookie-notice__link:hover {
+	color: var(--mt-accent-text-hover);
+}
+
+/*
+ * The notice sits along the bottom edge. Its inline edge is set with a logical
+ * property so the right-to-left sheet needs no mirror, and it stops short of
+ * the far corner so the back-to-top control stays reachable underneath it.
+ */
+.majestic-tube-cookie-notice {
+	position: fixed;
+	inset-inline-start: 18px;
+	bottom: 18px;
+	z-index: 95;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px 18px;
+	align-items: center;
+	justify-content: space-between;
+	width: calc(100% - 100px);
+	max-width: 720px;
+	padding: 14px 16px;
+	border: 1px solid var(--mt-border);
+	border-radius: var(--mt-radius);
+	background: var(--mt-surface);
+	box-shadow: 0 14px 40px rgba(0, 0, 0, 0.22);
+	font-size: 0.88rem;
+}
+
+.majestic-tube-cookie-notice[hidden] {
+	display: none;
+}
+
+.majestic-tube-cookie-notice__text {
+	margin: 0;
+}
+
+.majestic-tube-cookie-notice__actions {
+	display: flex;
+	flex-wrap: wrap;
+	align-items: center;
+	gap: 8px 14px;
+	margin: 0;
+}
+
+.majestic-tube-cookie-notice__dismiss {
+	padding: 8px 14px;
+	border: 1px solid var(--mt-accent);
+	border-radius: var(--mt-radius);
+	background: var(--mt-accent);
+	color: var(--mt-accent-fg);
+	font: inherit;
+	font-weight: 700;
+	cursor: pointer;
+}
+
+.majestic-tube-cookie-notice__dismiss:hover {
+	border-color: var(--mt-accent-hover);
+	background: var(--mt-accent-hover);
+	color: var(--mt-accent-fg);
 }
 
 /* Widgets and directories ---------------------------------------------- */
@@ -3221,12 +3423,12 @@ span > .mt-icon:first-child {
 .term-letter:hover,
 .term-letter:focus-visible {
 	background: var(--mt-accent);
-	color: #fff;
+	color: var(--mt-accent-fg);
 }
 
 .term-letter.is-active {
 	background: var(--mt-accent);
-	color: #fff;
+	color: var(--mt-accent-fg);
 }
 
 /* Only letters that lead somewhere are printed, so there is no empty-letter
@@ -3399,8 +3601,8 @@ span > .mt-icon:first-child {
  */
 .player-overlay-close:focus-visible {
 	background: var(--mt-accent);
-	border-color: #fff;
-	color: #fff;
+	border-color: var(--mt-accent-fg);
+	color: var(--mt-accent-fg);
 }
 
 .player-overlay-slot {
@@ -3504,7 +3706,7 @@ span > .mt-icon:first-child {
 	padding: 0.55rem 1rem;
 	background: var(--mt-accent);
 	border: 0;
-	color: #fff;
+	color: var(--mt-accent-fg);
 	font-weight: 700;
 	cursor: pointer;
 }
@@ -3532,7 +3734,7 @@ span > .mt-icon:first-child {
 	padding: 9px 14px;
 	background: var(--mt-accent);
 	border-radius: 5px;
-	color: #fff;
+	color: var(--mt-accent-fg);
 	font-weight: 700;
 }
 
@@ -3897,46 +4099,26 @@ span > .mt-icon:first-child {
 		line-height: 50px;
 	}
 
+	/*
+	 * One icon, not two. The bars this rule used to draw with ::before and
+	 * ::after landed on top of the masked menu icon that is already in the
+	 * button's markup, so the control rendered a hamburger with a second
+	 * hamburger inside it. The markup icon is the one that can also turn into a
+	 * cross when aria-expanded flips, so it is the one that stays.
+	 */
 	.button-nav.menu-toggle {
 		position: absolute;
 		top: -10px;
 		right: 0;
-		display: block;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		width: 48px;
 		height: 50px;
 		padding: 0;
 		background: transparent;
 		border: 0;
 		color: var(--mt-text-muted);
-	}
-
-	.button-nav.menu-toggle::before,
-	.button-nav.menu-toggle::after {
-		position: absolute;
-		right: 14px;
-		display: block;
-		width: 20px;
-		height: 2px;
-		background: var(--mt-text-muted);
-		content: "";
-	}
-
-	.button-nav.menu-toggle::before {
-		top: 19px;
-	}
-
-	.button-nav.menu-toggle::after {
-		top: 29px;
-	}
-
-	.button-nav.menu-toggle.menu-opened::before {
-		top: 24px;
-		transform: rotate(45deg);
-	}
-
-	.button-nav.menu-toggle.menu-opened::after {
-		top: 24px;
-		transform: rotate(-45deg);
 	}
 
 	.main-navigation > ul {
@@ -4375,7 +4557,9 @@ body.custom-background {
 		position: absolute;
 		top: -10px;
 		right: 0;
-		display: block;
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		width: 48px;
 		height: 50px;
 		padding: 0;
@@ -4383,35 +4567,6 @@ body.custom-background {
 		background: transparent;
 		color: var(--mt-text-muted);
 		cursor: pointer;
-	}
-
-	.button-nav.menu-toggle::before,
-	.button-nav.menu-toggle::after {
-		position: absolute;
-		top: 19px;
-		right: 14px;
-		display: block;
-		width: 20px;
-		height: 2px;
-		background: var(--mt-text-muted);
-		content: "";
-	}
-
-	.button-nav.menu-toggle::after {
-		top: 29px;
-	}
-
-	.button-nav.menu-toggle.menu-opened::before,
-	.button-nav.menu-toggle.menu-opened::after {
-		top: 24px;
-	}
-
-	.button-nav.menu-toggle.menu-opened::before {
-		transform: rotate(45deg);
-	}
-
-	.button-nav.menu-toggle.menu-opened::after {
-		transform: rotate(-45deg);
 	}
 }
 
@@ -4875,14 +5030,16 @@ object {
 	/*
 	 * A real control, not a transparent hotspot pinned to the top-right corner:
 	 * the button is in the flow of the header row and keeps a 48px target, which
-	 * matters most on the one device where it is the only way into the menu. Its
-	 * two bars are drawn with pseudo-elements, so they follow `currentColor`.
+	 * matters most on the one device where it is the only way into the menu, and
+	 * it centers the one icon it is given.
 	 */
 	#site-navigation .button-nav.menu-toggle {
 		position: relative;
 		top: auto;
 		right: auto;
 		display: inline-flex;
+		align-items: center;
+		justify-content: center;
 		width: 48px;
 		height: 48px;
 		margin: 0;
@@ -4892,11 +5049,6 @@ object {
 		border-radius: var(--mt-radius);
 		color: var(--mt-text-muted);
 		cursor: pointer;
-	}
-
-	#site-navigation .button-nav.menu-toggle::before,
-	#site-navigation .button-nav.menu-toggle::after {
-		background: currentColor;
 	}
 }
 

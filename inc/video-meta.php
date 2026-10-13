@@ -1,14 +1,15 @@
 <?php
 /**
  * Video meta box - WP-Script compatible meta keys.
- *	 * Uses the exact same post meta keys as the original theme so data is
-	 * interchangeable: video_url, video_url_240..4k, embed, shortcode,
-	 * duration, post_views_count, likes_count, dislikes_count, voted_IP,
+ *
+ * Uses the exact same post meta keys as the original theme so data is
+ * interchangeable: video_url, video_url_240..4k, embed, shortcode,
+ * duration, post_views_count, likes_count, dislikes_count, voted_IP,
 	 * thumbs, trailer_url, thumb, hd_video, tracking_url,
 	 * unique_ad_under_player.
  *
  * @package Majestic Tube
- * @version 2.0.0
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -74,7 +75,7 @@ function majestic_tube_video_meta_fields() {
  * invites. It is silently destructive rather than obvious: a non-empty
  * video_url makes majestic_tube_get_video_sources() report the video as
  * self-hosted, which suppresses the real embed and hands the player a page
- * URL it cannot play, so the video renders as a broken box. Recognising the
+ * URL it cannot play, so the video renders as a broken box. Recognizing the
  * markup lets the save path move it to the embed key where it belongs, and
  * lets the read path recover content saved before that move existed.
  *
@@ -150,6 +151,8 @@ function majestic_tube_video_submission_required_fields() {
 		'video'       => 'video-submit-video-link-required',
 		'embed'       => 'video-submit-embed-required',
 		'thumbnail'   => 'video-submit-thumbnail-link-required',
+		'thumbs'      => 'video-submit-thumbs-required',
+		'trailer'     => 'video-submit-trailer-required',
 		'tags'        => 'video-submit-tags-required',
 		'actors'      => 'video-submit-actors-required',
 		'duration'    => 'video-submit-duration-required',
@@ -212,13 +215,26 @@ function majestic_tube_validate_video_submission( $fields ) {
 		'video'       => __( 'Please provide a video URL.', 'majestic-tube' ),
 		'embed'       => __( 'Please provide an embed code.', 'majestic-tube' ),
 		'thumbnail'   => __( 'Please provide a thumbnail URL.', 'majestic-tube' ),
+		'thumbs'      => __( 'Please provide at least one thumbnail URL to rotate.', 'majestic-tube' ),
+		'trailer'     => __( 'Please provide a preview video URL.', 'majestic-tube' ),
 		'tags'        => __( 'Please provide at least one tag.', 'majestic-tube' ),
 		'actors'      => __( 'Please provide at least one actor.', 'majestic-tube' ),
 	);
 
 	foreach ( $messages as $field => $message ) {
-		if ( majestic_tube_video_submission_field_is_required( $field ) &&
-			'' === trim( (string) ( isset( $fields[ $field ] ) ? $fields[ $field ] : '' ) ) ) {
+		$value = isset( $fields[ $field ] ) ? trim( (string) $fields[ $field ] ) : '';
+
+		/*
+		 * A video's preview image can arrive either as one thumbnail URL or as a
+		 * list of them, so "Thumbnail URL required" is answered by either box:
+		 * a submitter who filled in the list has provided a thumbnail.
+		 */
+		if ( '' === $value && 'thumbnail' === $field &&
+			'' !== trim( (string) ( isset( $fields['thumbs'] ) ? $fields['thumbs'] : '' ) ) ) {
+			continue;
+		}
+
+		if ( majestic_tube_video_submission_field_is_required( $field ) && '' === $value ) {
 			$errors[] = $message;
 		}
 	}

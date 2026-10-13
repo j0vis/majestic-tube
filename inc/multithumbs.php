@@ -7,7 +7,7 @@
  * unindexed meta key `thumbs` so existing data keeps working.
  *
  * @package Majestic Tube
- * @version 2.0.0
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -55,6 +55,40 @@ function majestic_tube_parse_thumbs_meta( $values ) {
 			if ( '' !== $url ) {
 				$urls[] = $url;
 			}
+		}
+	}
+
+	return $urls;
+}
+
+/**
+ * Turn a front-end "extra thumbnails" box into a list of unique URLs.
+ *
+ * The admin metabox adds one thumbnail at a time through AJAX, which needs an
+ * existing post to attach it to - a visitor filling in the submission form has
+ * no post yet. Its box is therefore plain text, and a submitter writes it the
+ * way they would write any other list: one URL per line. Commas are accepted
+ * too, because that is the shape `thumbs` already has in the database and the
+ * shape the rotation attribute exports.
+ *
+ * Empty lines, duplicates and anything esc_url_raw() refuses are dropped, so
+ * what reaches the meta key is only what the card can actually request.
+ *
+ * @param string $raw Raw textarea value.
+ * @return string[] Unique thumbnail URLs, in the order they were typed.
+ */
+function majestic_tube_parse_submitted_thumbs( $raw ) {
+	$urls = array();
+
+	if ( ! is_string( $raw ) || '' === trim( $raw ) ) {
+		return $urls;
+	}
+
+	foreach ( preg_split( '/[\r\n,]+/', $raw ) as $candidate ) {
+		$url = esc_url_raw( trim( $candidate ) );
+
+		if ( '' !== $url && ! in_array( $url, $urls, true ) ) {
+			$urls[] = $url;
 		}
 	}
 

@@ -3,7 +3,7 @@
  * Template tags - WP-Script compatible helpers.
  *
  * @package Majestic Tube
- * @version 2.3.0
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -298,12 +298,25 @@ function majestic_tube_card_image_sizes() {
  * build a srcset from. Those keep the original single-file markup, so nothing
  * about a remote thumbnail changes.
  *
+ * The first card of a listing is loaded eagerly and marked high priority. It is
+ * the largest thing painted above the fold, so it is the element the browser
+ * scores as the largest contentful paint, and lazy-loading it made the browser
+ * wait for layout before starting a picture it already knew it needed. Every
+ * later card keeps the lazy default. On a single video page the cards are
+ * related videos further down the page and the poster in the player is the
+ * largest element instead, so no card claims priority there.
+ *
  * @param int $post_id Post ID.
  * @return string Image markup, or an empty string when the post has no image.
  */
 function majestic_tube_get_card_image( $post_id = 0 ) {
-	$post_id = $post_id ? $post_id : get_the_ID();
-	$alt     = the_title_attribute(
+	static $rendered = 0;
+
+	++$rendered;
+
+	$post_id  = $post_id ? $post_id : get_the_ID();
+	$priority = 1 === $rendered && ! is_singular();
+	$alt      = the_title_attribute(
 		array(
 			'echo' => false,
 			'post' => $post_id,
@@ -311,16 +324,22 @@ function majestic_tube_get_card_image( $post_id = 0 ) {
 	);
 
 	if ( has_post_thumbnail( $post_id ) ) {
+		$attributes = array(
+			'class'   => 'video-main-thumb',
+			'alt'     => $alt,
+			'loading' => $priority ? 'eager' : 'lazy',
+			'sizes'   => majestic_tube_card_image_sizes(),
+		);
+
+		if ( $priority ) {
+			$attributes['fetchpriority'] = 'high';
+		}
+
 		$markup = wp_get_attachment_image(
 			(int) get_post_thumbnail_id( $post_id ),
 			majestic_tube_get_thumb_size(),
 			false,
-			array(
-				'class'   => 'video-main-thumb',
-				'alt'     => $alt,
-				'loading' => 'lazy',
-				'sizes'   => majestic_tube_card_image_sizes(),
-			)
+			$attributes
 		);
 
 		if ( $markup ) {
@@ -335,9 +354,11 @@ function majestic_tube_get_card_image( $post_id = 0 ) {
 	}
 
 	return sprintf(
-		'<img class="video-main-thumb" src="%1$s" alt="%2$s" loading="lazy" width="320" height="180" />',
+		'<img class="video-main-thumb" src="%1$s" alt="%2$s" loading="%3$s"%4$s width="320" height="180" />',
 		esc_url( $url ),
-		esc_attr( $alt )
+		esc_attr( $alt ),
+		esc_attr( $priority ? 'eager' : 'lazy' ),
+		$priority ? ' fetchpriority="high"' : ''
 	);
 }
 
@@ -385,6 +406,15 @@ function majestic_tube_get_poster_url( $post_id = 0 ) {
  * is printed after every majestic_tube_in_feed_frequency() video cards. The
  * block is a grid item like the cards themselves, so the row rhythm survives;
  * main.css spans it across the full row on the single-column phone layout.
+ *
+ * The page rule is not asked here. The block is printed by
+ * majestic_tube_content_block(), which asks it for every placement in the
+ * advertising module - this one, the popunder, a legacy option key and a
+ * per-video snippet alike - and the widget areas ask the same question in
+ * majestic_tube_widget_area_content(). A grid of video cards does not appear on
+ * a legal page or beside the submission form today, but "does this page carry
+ * advertising?" has to have one answer wherever it is asked, and a placement
+ * that remembers the rule is how the next one comes to forget it.
  *
  * @param string $template Template part suffix.
  * @return void
@@ -719,23 +749,39 @@ function majestic_tube_tags_slider() {
 }
 
 /**
- * Display the friends and ad links bar, directly under the header row.
+ * Display the friends and ad links bar, directly under the header row, on the
+ * site's index.
  *
- * This is a site-wide strip of outbound text links - partner sites, ad zones,
- * anything that lives outside the catalogue - and it is deliberately the third
- * navigation row rather than part of the main menu. Keeping it separate means
- * a partner can be added or removed without an editor ever having to open the
- * menu a visitor actually navigates by, and it means the rel attributes below
- * cannot leak onto the site's own pages.
+ * This is a strip of outbound text links - partner sites, ad zones, anything
+ * that lives outside the catalog - and it is deliberately the third navigation
+ * row rather than part of the main menu. Keeping it separate means a partner
+ * can be added or removed without an editor ever having to open the menu a
+ * visitor actually navigates by, and it means the rel attributes below cannot
+ * leak onto the site's own pages.
  *
- * Prints nothing at all when the switch is off, no menu is assigned, or the
- * assigned menu has no items. There is no empty shell and no border left
- * behind, which is what an existing site sees after an upgrade.
+ * It prints on the index and nowhere else. A row of outbound advertising links
+ * is worth something to a visitor who is browsing the catalog, which is the page
+ * this theme's index.php renders. On a video page it competes with the player
+ * and the description the visitor came for; on an archive or a search result it
+ * is a partner list printed over somebody else's listing; and on a legal
+ * document or the submission form it is an ad beside the thing being read or
+ * agreed to, which is the surface this theme already keeps free of advertising
+ * on purpose. The rule lives here, at the printer, rather than in header.php, so
+ * every template that calls this function gets the same answer.
+ *
+ * Prints nothing at all when the switch is off, the request is not the index, no
+ * menu is assigned, or the assigned menu has no items. There is no empty shell
+ * and no border left behind, which is what an existing site sees after an
+ * upgrade.
  *
  * @return void
  */
 function majestic_tube_links_bar() {
 	if ( ! majestic_tube_option_is_on( 'show-links-bar' ) ) {
+		return;
+	}
+
+	if ( ! is_home() ) {
 		return;
 	}
 

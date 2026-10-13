@@ -10,7 +10,7 @@
 
 defined( 'ABSPATH' ) || exit;
 
-define( 'MAJESTIC_TUBE_VERSION', '2.4.2' );
+define( 'MAJESTIC_TUBE_VERSION', '2.5.0' );
 define( 'MAJESTIC_TUBE_DIR', get_template_directory() );
 define( 'MAJESTIC_TUBE_URI', get_template_directory_uri() );
 
@@ -28,6 +28,7 @@ require MAJESTIC_TUBE_DIR . '/inc/assets.php';
 require MAJESTIC_TUBE_DIR . '/inc/post-types.php';
 require MAJESTIC_TUBE_DIR . '/inc/analytics.php';
 require MAJESTIC_TUBE_DIR . '/inc/video-meta.php';
+require MAJESTIC_TUBE_DIR . '/inc/basic-seo.php';
 require MAJESTIC_TUBE_DIR . '/inc/video-seo.php';
 require MAJESTIC_TUBE_DIR . '/inc/ajax.php';
 require MAJESTIC_TUBE_DIR . '/inc/ads.php';
@@ -40,18 +41,18 @@ require MAJESTIC_TUBE_DIR . '/inc/ajax-login-register.php';
 require MAJESTIC_TUBE_DIR . '/inc/pagination.php';
 require MAJESTIC_TUBE_DIR . '/inc/breadcrumbs.php';
 require MAJESTIC_TUBE_DIR . '/inc/widgets.php';
+require MAJESTIC_TUBE_DIR . '/inc/consent.php';
 require MAJESTIC_TUBE_DIR . '/inc/template-filters.php';
 
 /*
- * Search appearance belongs to the SEO plugin the site runs. The theme prints
- * no titles, meta descriptions, robots directives or canonicals of its own, so
- * there is nothing to defer to and nothing for a plugin to override.
- *
- * The one exception is video structured data, in inc/video-seo.php. A VideoObject
- * needs the runtime, the source resolution ladder, the player markup and the
- * actors taxonomy - all of which only this theme knows and no general-purpose
- * SEO plugin reads. That is video metadata rather than search appearance, so it
- * lives here. It is deliberately additive: it never prints a title, a
- * description or a canonical, and it only fills in og:image when the SEO plugin
- * has not already set one.
+ * Search appearance belongs to the SEO plugin the site runs, and two modules
+ * here know it. inc/basic-seo.php supplies the meta description, the archive
+ * canonical and the social card a site needs when no plugin is installed, and
+ * switches itself off - completely - the moment one of the recognized plugins
+ * is detected, so there is never a second answer to the same question.
+ * inc/video-seo.php is the one thing a general-purpose plugin cannot do: a
+ * VideoObject needs the runtime, the source resolution ladder, the player
+ * markup and the actors taxonomy, all of which only this theme knows. It stays
+ * additive and never prints a title, a description or a canonical of its own.
+ * Neither module prints a <title>; the browser title remains core's.
  */

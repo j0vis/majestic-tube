@@ -73,7 +73,6 @@ function majestic_tube_share_networks() {
  * @return string
  */
 function majestic_tube_share_description( $post ) {
-
 	if ( ! $post ) {
 		return '';
 	}

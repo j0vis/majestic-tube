@@ -33,9 +33,17 @@
 	padding-right: 0;
 }
 
-.site-info,
+/*
+ * Widget text stays right-aligned in a right-to-left reading order; the legal
+ * row and the copyright line are centered in both directions, and this file
+ * loads after main.css, so the pair is split rather than shared.
+ */
 .site-footer {
 	text-align: right;
+}
+
+.site-info {
+	text-align: center;
 }
 
 /* Cards */
@@ -201,9 +209,9 @@
 		padding: 4px 18px 8px 0;
 	}
 
-	#site-navigation .button-nav.menu-toggle::before,
-	#site-navigation .button-nav.menu-toggle::after {
-		right: auto;
-		left: 14px;
-	}
+	/*
+	 * The menu toggle has no pseudo-element bars to mirror any more: it draws
+	 * the single masked icon in its markup, which needs no direction-specific
+	 * positioning in either writing mode.
+	 */
 }

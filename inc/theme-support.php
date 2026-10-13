@@ -62,7 +62,7 @@ function majestic_tube_setup() {
 	 * column over 640 CSS pixels upscales - the picture is soft on every laptop
 	 * and on every phone with a high-density screen. Sizes are recorded in the
 	 * attachment metadata when an image is uploaded, so existing libraries keep
-	 * the old behaviour and new uploads get the sharp one; a site that wants the
+	 * the old behavior and new uploads get the sharp one; a site that wants the
 	 * new files for its old videos can regenerate the thumbnails.
 	 */
 	add_image_size( 'majestic-tube-thumb-card', 480, 270, true );

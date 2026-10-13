@@ -6,7 +6,7 @@
  * wpst_reset_password) so existing front-end tooling keeps working.
  *
  * @package Majestic Tube
- * @version 2.0.0
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -82,7 +82,34 @@ function majestic_tube_captcha_secret_key() {
 }
 
 /**
- * Print the Turnstile widget.
+ * Print the room a spam check needs, and nothing in it.
+ *
+ * Turnstile's widget is 65px tall and always arrives after the page has
+ * rendered, so every form that can carry it reserves the height instead of
+ * growing when the option is switched on and again when the iframe lands.
+ * The space is reserved whether or not the check is on, which is the whole
+ * point: turning protection on must not move a submit button, resize the
+ * login panel or push a link out from under the visitor's pointer, and a
+ * widget that lands mid-tap must not either.
+ *
+ * The slot is invisible - it is room, not a placeholder. Nothing here reaches
+ * Cloudflare.
+ *
+ * @return void
+ */
+function majestic_tube_captcha_reserved_space() {
+	?>
+	<div class="majestic-tube-captcha" data-mt-captcha="reserved" aria-hidden="true"></div>
+	<?php
+}
+
+/**
+ * Print the Turnstile widget where a form is guarded by it.
+ *
+ * The slot is printed either way. With the check off it is the reserved room
+ * above, so the form is the same height whether protection is off, on or
+ * still loading; with it on the slot carries the key the script mounts the
+ * widget into.
  *
  * The widget is mounted by the theme's own script rather than by
  * auto-rendering, because the sign-up form lives inside a modal that is
@@ -93,10 +120,13 @@ function majestic_tube_captcha_secret_key() {
  */
 function majestic_tube_captcha_widget() {
 	if ( ! majestic_tube_captcha_is_configured() ) {
+		majestic_tube_captcha_reserved_space();
+
 		return;
 	}
 	?>
 	<div class="cf-turnstile majestic-tube-captcha"
+		data-mt-captcha="turnstile"
 		data-sitekey="<?php echo esc_attr( majestic_tube_captcha_site_key() ); ?>"
 		data-theme="auto"
 		data-mt-turnstile="1"></div>
@@ -130,6 +160,7 @@ function majestic_tube_login_register_modal() {
 							majestic_tube_membership_field( 'user_pass', __( 'Password', 'majestic-tube' ), 'password', 'wpst_user_pass', 8 );
 							?>
 						<?php majestic_tube_captcha_widget(); ?>
+						<?php majestic_tube_consent_field( 'register' ); ?>
 							<input type="hidden" name="action" value="wpst_register_member" />
 							<button type="submit"><?php esc_html_e( 'Sign up', 'majestic-tube' ); ?></button>
 							<?php wp_nonce_field( 'ajax-login-nonce', 'register-security' ); ?>
@@ -147,8 +178,30 @@ function majestic_tube_login_register_modal() {
 					<form id="wpst_login_form" action="<?php echo esc_url( home_url( '/' ) ); ?>" method="post">
 						<?php
 						majestic_tube_membership_field( 'user_login', __( 'Username', 'majestic-tube' ) );
-						majestic_tube_membership_field( 'user_pass', __( 'Password', 'majestic-tube' ), 'password', 'wpst_user_pass' );
+
+						/*
+						 * The register form above already prints id="wpst_user_pass",
+						 * and both forms are in the DOM at once inside the modal. A
+						 * second element with the same id is invalid HTML, and it
+						 * made the login form's <label for> - and any getElementById
+						 * lookup - resolve to the register tab's input instead, so
+						 * clicking "Password" on the login tab focused the wrong
+						 * field. The input name is unchanged; only the id is unique.
+						 */
+						majestic_tube_membership_field( 'user_pass', __( 'Password', 'majestic-tube' ), 'password', 'wpst_login_user_pass' );
 						?>
+						<?php
+						/*
+						 * The login form reserves the room for a spam check without
+						 * being guarded by one: the theme only asks Turnstile for a
+						 * token on sign-up and video submission, so no widget is
+						 * mounted here and no challenge is ever shown on this tab.
+						 * The space is kept so that the panel keeps the same shape
+						 * as its sign-up tab, where the box does appear.
+						 */
+						majestic_tube_captcha_reserved_space();
+						?>
+						<?php majestic_tube_consent_field( 'login' ); ?>
 						<div class="form-field lost-password">
 							<input type="hidden" name="action" value="wpst_login_member" />
 							<button type="submit"><?php esc_html_e( 'Login', 'majestic-tube' ); ?></button>
@@ -311,7 +364,11 @@ function majestic_tube_auth_throttled( $action ) {
 }
 
 /**
- * Record one failed membership attempt.
+ * Record one membership attempt against the throttle.
+ *
+ * Named "failure" for the original callers, but it counts an attempt rather
+ * than only a failed one - see the reset handler below for why a successful
+ * reset has to count too.
  *
  * @param string $action login|register|reset.
  */
@@ -338,6 +395,21 @@ function majestic_tube_ajax_login() {
 
 	if ( ! $login || ! $password ) {
 		majestic_tube_ajax_error( __( 'Please fill in both username and password.', 'majestic-tube' ) );
+	}
+
+	/*
+	 * The handler is the only place that can be sure the acceptance arrived:
+	 * the `required` attribute on the checkbox is browser-side advice, and it
+	 * is gone from any request that was not built by the form. A page held in
+	 * a full-page cache from before this switch was turned on is the case that
+	 * matters - the visitor gets a plain sentence telling them what to do, and
+	 * one reload brings back the form this handler expects.
+	 *
+	 * A missing checkbox is not counted against the throttle: it is a form
+	 * that needs reloading, not an attempt at anybody's password.
+	 */
+	if ( ! majestic_tube_consent_satisfied() ) {
+		majestic_tube_ajax_error( majestic_tube_consent_error_message() );
 	}
 
 	$creds = array(
@@ -401,6 +473,12 @@ function majestic_tube_ajax_register() {
 		majestic_tube_ajax_error( __( 'The email address is not valid.', 'majestic-tube' ) );
 	}
 
+	// See the login handler: the form's `required` attribute is advice, and
+	// this is the check that decides whether an account is created.
+	if ( ! majestic_tube_consent_satisfied() ) {
+		majestic_tube_ajax_error( majestic_tube_consent_error_message() );
+	}
+
 	// One generic message for both collisions: distinct "username taken"
 	// vs "email registered" strings let scanners enumerate accounts.
 	if ( username_exists( $login ) || email_exists( $email ) ) {
@@ -441,7 +519,7 @@ function majestic_tube_ajax_reset_password() {
 
 	/*
 	 * Hand the whole flow to core instead of rebuilding it here.
-	 * retrieve_password() resolves the user, honours the allow_password_reset
+	 * retrieve_password() resolves the user, honors the allow_password_reset
 	 * filter (membership plugins rely on it to keep some accounts from
 	 * resetting), generates the key and sends mail through the
 	 * retrieve_password_message / _title / _headers filters - all of which a
@@ -449,7 +527,18 @@ function majestic_tube_ajax_reset_password() {
 	 */
 	$result = retrieve_password( $user_or_email );
 
+	/*
+	 * A successful reset counts against the throttle too. Every other branch
+	 * below reaches majestic_tube_auth_note_failure(), but this one returned
+	 * first, so the counter only ever rose on failure - which meant the
+	 * throttle could not slow down the one request that actually sends mail.
+	 * retrieve_password() returns true for every resolvable address, so an
+	 * unauthenticated caller could have used this endpoint to mail unlimited
+	 * reset messages to arbitrary addresses. The reply is unchanged; only the
+	 * attempt is now counted.
+	 */
 	if ( true === $result ) {
+		majestic_tube_auth_note_failure( 'reset' );
 		majestic_tube_ajax_membership_success( __( 'A password reset link has been sent to your email address.', 'majestic-tube' ), 'p' );
 	}
 
@@ -471,6 +560,35 @@ function majestic_tube_ajax_reset_password() {
 add_action( 'wp_ajax_nopriv_wpst_reset_password', 'majestic_tube_ajax_reset_password' );
 
 /**
+ * Front-end URL of one of the theme's member pages.
+ *
+ * The activation routine creates the member pages under fixed slugs, so
+ * resolving the page and taking its permalink keeps the link correct when the
+ * permalink structure, a parent page or a translation changes the address.
+ *
+ * This is what fixes My Profile: the link was hand-built from a /my-profile/
+ * slug while the theme creates that page at /profile/, so every signed-in
+ * member followed a 404. The submit link had the same latent problem and is
+ * resolved here too.
+ *
+ * A page that is not there yet falls back to the slug URL, so the link never
+ * simply disappears - the theme's setup recreates the page under that slug.
+ *
+ * @param string $slug Page slug, e.g. profile or submit-a-video.
+ * @return string
+ */
+function majestic_tube_member_page_url( $slug ) {
+	$slug = sanitize_title( $slug );
+	$page = function_exists( 'get_page_by_path' ) ? get_page_by_path( $slug ) : null;
+
+	if ( $page && isset( $page->ID ) ) {
+		return (string) get_permalink( $page->ID );
+	}
+
+	return home_url( '/' . $slug );
+}
+
+/**
  * Membership nav: My Account dropdown / Login link appended to the main menu.
  */
 function majestic_tube_membership_nav( $items, $args ) {
@@ -483,13 +601,13 @@ function majestic_tube_membership_nav( $items, $args ) {
 		$items .= '<ul class="sub-menu">';
 
 		/*
-		 * Each of the three links honours its own switch in the Visitor video
+		 * Each of the three links honors its own switch in the Visitor video
 		 * submission section; before that they were printed unconditionally and
 		 * the switches changed nothing. Logout is not optional and is always
 		 * printed, so the sub-menu is never empty.
 		 */
 		if ( majestic_tube_option_is_on( 'display-video-submit-link' ) ) {
-			$items .= '<li><a href="' . esc_url( home_url( '/submit-a-video' ) ) . '">' . esc_html__( 'Submit a Video', 'majestic-tube' ) . '</a></li>';
+			$items .= '<li><a href="' . esc_url( majestic_tube_member_page_url( 'submit-a-video' ) ) . '">' . esc_html__( 'Submit a Video', 'majestic-tube' ) . '</a></li>';
 		}
 
 		if ( majestic_tube_option_is_on( 'display-my-channel-link' ) ) {
@@ -497,7 +615,7 @@ function majestic_tube_membership_nav( $items, $args ) {
 		}
 
 		if ( majestic_tube_option_is_on( 'display-my-profile-link' ) ) {
-			$items .= '<li><a href="' . esc_url( home_url( '/my-profile' ) ) . '">' . esc_html__( 'My Profile', 'majestic-tube' ) . '</a></li>';
+			$items .= '<li><a href="' . esc_url( majestic_tube_member_page_url( 'profile' ) ) . '">' . esc_html__( 'My Profile', 'majestic-tube' ) . '</a></li>';
 		}
 		$items .= '<li><a href="' . esc_url( wp_logout_url( is_home() ? home_url() : get_permalink() ) ) . '">' . esc_html__( 'Logout', 'majestic-tube' ) . '</a></li>';
 		$items .= '</ul></li>';

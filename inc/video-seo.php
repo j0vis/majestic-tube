@@ -151,7 +151,7 @@ function majestic_tube_video_seo_thumbnail_size() {
  * These read through the theme's own helpers rather than the meta keys
  * directly. The helpers already encode decisions that are easy to get wrong -
  * notably that an iframe pasted into a video_url field is an embed and not a
- * file - so re-deriving them here would drift from the player's behaviour.
+ * file - so re-deriving them here would drift from the player's behavior.
  * ---------------------------------------------------------------------- */
 
 /**

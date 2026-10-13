@@ -6,7 +6,7 @@
  * that call post-views / post-like keep working, with proper sanitization.
  *
  * @package Majestic Tube
- * @version 2.0.0
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -137,11 +137,18 @@ function majestic_tube_has_already_voted( $post_id ) {
 function majestic_tube_post_like() {
 	majestic_tube_verify_ajax_nonce();
 
-	if ( ! isset( $_POST['post_id'] ) || ! isset( $_POST['post_like'] ) ) {
+	/*
+	 * Only the vote itself is checked here. The post id goes through
+	 * majestic_tube_require_ajax_post_id() below, which already reports a
+	 * missing post_id with this same message - testing for it first as well
+	 * made that argument unreachable and left two different errors claiming
+	 * the same condition.
+	 */
+	if ( ! isset( $_POST['post_like'] ) ) {
 		wp_send_json_error( array( 'message' => __( 'Missing parameters.', 'majestic-tube' ) ), 400 );
 	}
 
-	$post_id = majestic_tube_require_ajax_post_id(
+	$post_id   = majestic_tube_require_ajax_post_id(
 		__( 'Missing parameters.', 'majestic-tube' ),
 		__( 'Invalid request.', 'majestic-tube' )
 	);
@@ -178,7 +185,7 @@ function majestic_tube_post_like() {
 	// likes yet" is now stale.
 	delete_transient( 'majestic_tube_site_records_likes' );
 
-	$percentage  = majestic_tube_get_post_like_rate( $post_id );
+	$percentage = majestic_tube_get_post_like_rate( $post_id );
 
 	update_post_meta( $post_id, 'rate', $percentage );
 

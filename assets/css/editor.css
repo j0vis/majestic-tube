@@ -2,7 +2,7 @@
  * Majestic Tube block editor styles.
  *
  * Keeps the editor visually close to the light front-end: the same surfaces,
- * accent colour, link behaviour and media treatment defined by the --mt-*
+ * accent color, link behavior and media treatment defined by the --mt-*
  * tokens in assets/css/main.css.
  *
  * @package Majestic Tube
@@ -24,8 +24,11 @@
 	--mt-surface: #ffffff;
 	--mt-surface-hover: #f0f2f5;
 	--mt-text: #202124;
-	--mt-text-muted: #6b7280;
-	--mt-accent: #0f8a99;
+	--mt-text-muted: #666d79;
+	--mt-accent: #0e7b8a;
+	--mt-accent-fg: #ffffff;
+	--mt-accent-text: #0d7381;
+	--mt-accent-text-hover: #0b626e;
 	--mt-radius: 6px;
 	--mt-font-family: "Inter", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
 }
@@ -41,12 +44,17 @@
 	max-width: 1200px;
 }
 
+/*
+ * Links take the accent as *text*, not as a fill, so they use the text token:
+ * the fill color is chosen to carry white button text and is too dark to read
+ * on a white editor canvas.
+ */
 .editor-styles-wrapper a {
-	color: var(--mt-accent);
+	color: var(--mt-accent-text);
 }
 
 .editor-styles-wrapper a:hover {
-	color: var(--mt-accent);
+	color: var(--mt-accent-text-hover);
 }
 
 .editor-styles-wrapper h1,
@@ -101,7 +109,7 @@
 
 .editor-styles-wrapper .wp-block-button__link {
 	background: var(--mt-accent);
-	color: #fff;
+	color: var(--mt-accent-fg);
 	border-radius: var(--mt-radius);
 }
 

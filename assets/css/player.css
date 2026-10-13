@@ -3,7 +3,15 @@
  *
  * Loaded only with the video player. The dark surfaces are intentionally
  * confined to video chrome so controls remain legible over moving pictures;
- * the accent and radius still come from the light front-end theme.
+ * the radius still comes from the front-end theme.
+ *
+ * Every accent here is --mt-accent-on-dark rather than --mt-accent. The chrome
+ * sits on black over live video, and the button fill is deliberately too deep
+ * to read against it: a progress bar or a hovered control painted in the fill
+ * color would disappear over a bright frame. inc/custom-code.php derives that
+ * token from the "Accent color" option so it stays bright enough to be seen on
+ * black whatever the administrator picked, which is also why the big play
+ * button can keep a fixed near-black glyph on top of it.
  *
  * @package Majestic Tube
  * @version 2.0.0
@@ -39,7 +47,7 @@
 
 .video-js .vjs-control:focus,
 .video-js .vjs-control:hover {
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 }
 
 /* Progress bar */
@@ -56,8 +64,8 @@
 
 .video-js .vjs-play-progress,
 .video-js .vjs-play-progress::before {
-	background-color: var(--mt-accent);
-	color: var(--mt-accent);
+	background-color: var(--mt-accent-on-dark);
+	color: var(--mt-accent-on-dark);
 }
 
 .video-js .vjs-load-progress,
@@ -81,7 +89,7 @@
 }
 
 .video-js .vjs-volume-level {
-	background-color: var(--mt-accent);
+	background-color: var(--mt-accent-on-dark);
 }
 
 /* Big play button */
@@ -96,13 +104,13 @@
 	border: 0;
 	border-radius: 50%;
 	background-color: rgba(0, 0, 0, 0.65);
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 	transition: background-color 0.2s ease, transform 0.2s ease;
 }
 
 .video-js:hover .vjs-big-play-button,
 .video-js .vjs-big-play-button:focus {
-	background-color: var(--mt-accent);
+	background-color: var(--mt-accent-on-dark);
 	color: #111;
 	transform: translate(-50%, -50%) scale(1.05);
 }
@@ -154,7 +162,7 @@
 
 .mt-quality-toggle:hover,
 .mt-quality-toggle:focus {
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 	outline: 0;
 }
 
@@ -208,12 +216,12 @@
 .mt-quality-item:hover,
 .mt-quality-item:focus {
 	background: rgba(255, 255, 255, 0.08);
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 	outline: 0;
 }
 
 .mt-quality-item.is-active {
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 	font-weight: 600;
 }
 
@@ -237,9 +245,9 @@
 /*
  * Speed control, resume bar and theater toggle.
  *
- * These sit on top of the video, so their colours are the same chrome the
+ * These sit on top of the video, so their colors are the same chrome the
  * quality selector already uses and are deliberately scheme-independent: the
- * player is a black box in both skins, and a control that changed colour with
+ * player is a black box in both skins, and a control that changed color with
  * the site would flicker when the visitor switched skins mid-video.
  */
 
@@ -267,7 +275,7 @@
 
 .mt-speed-toggle:hover,
 .mt-speed-toggle:focus {
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 	outline: 0;
 }
 
@@ -317,12 +325,12 @@
 .mt-speed-item:hover,
 .mt-speed-item:focus {
 	background: rgba(255, 255, 255, 0.08);
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 	outline: 0;
 }
 
 .mt-speed-item.is-active {
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 	font-weight: 600;
 }
 
@@ -375,7 +383,7 @@
 
 .mt-resume-play:hover,
 .mt-resume-play:focus {
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 	outline: 0;
 }
 
@@ -430,17 +438,17 @@
  * The theater mark used to be drawn here, out of a bordered rectangle, which
  * was both a weaker signal than a shape and one more thing to keep in step
  * with the set. It is the theme's own `expand` icon now, appended by main.js,
- * and this file only has to centre whatever it is handed.
+ * and this file only has to center whatever it is handed.
  */
 
 .mt-theater-toggle:hover,
 .mt-theater-toggle:focus {
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 	outline: 0;
 }
 
 .mt-theater-toggle.is-active {
-	color: var(--mt-accent);
+	color: var(--mt-accent-on-dark);
 	border-color: currentColor;
 }
 

@@ -823,7 +823,7 @@
 	 * into view behaves exactly as it did the first time.
 	 *
 	 * Without IntersectionObserver, or with it unavailable, every card is set
-	 * up immediately and no teardown ever runs: the previous behaviour, which
+	 * up immediately and no teardown ever runs: the previous behavior, which
 	 * is the safe fallback.
 	 *
 	 * @param {string}   selector Cards to watch.
@@ -884,6 +884,12 @@
 	 * "System" is only offered as a step when the site itself is set to
 	 * follow the system, so a pinned light or dark site does not hand a
 	 * visitor a third state it never asked for.
+	 *
+	 * The cycle comes from data-default rather than data-state. data-state is
+	 * the state on show, which the head script and this handler both rewrite,
+	 * so reading it here lost the site's own scheme the moment a visitor
+	 * pressed the button: a site set to follow the system dropped that step
+	 * from its own cycle after one click.
 	 */
 	function initThemeToggle() {
 		var button = document.querySelector( '[data-majestic-tube-theme-toggle]' );
@@ -892,7 +898,8 @@
 			return;
 		}
 
-		var order = 'system' === button.getAttribute( 'data-state' ) ?
+		var fallback = button.getAttribute( 'data-default' ) || 'light';
+		var order = 'system' === fallback ?
 			[ 'system', 'light', 'dark' ] :
 			[ 'light', 'dark' ];
 
@@ -905,7 +912,13 @@
 		function current() {
 			var state = document.documentElement.getAttribute( 'data-theme' );
 
-			return order.indexOf( state ) > -1 ? state : order[ 0 ];
+			if ( order.indexOf( state ) > -1 ) {
+				return state;
+			}
+
+			// The site's own scheme is the state to show when the element is on
+			// something this cycle does not carry.
+			return order.indexOf( fallback ) > -1 ? fallback : order[ 0 ];
 		}
 
 		function render() {
@@ -928,8 +941,16 @@
 
 			document.documentElement.setAttribute( 'data-theme', next );
 
+			/*
+			 * Two keys, always together. The head script applies the choice only
+			 * while it still matches the site's own scheme, so recording the
+			 * scheme it was made against is what makes the choice survive a
+			 * reload - and what lets a later change to the site's scheme take
+			 * effect instead of leaving a stale skin behind.
+			 */
 			try {
 				window.localStorage.setItem( 'majestic_tube_theme', next );
+				window.localStorage.setItem( 'majestic_tube_theme_base', fallback );
 			} catch ( e ) {
 				// Storage unavailable. The choice still applies to this page.
 			}
@@ -2291,7 +2312,7 @@
 			 *
 			 * Slightly less than a full row, so the last chip lands
 			 * comfortably inside the row instead of flush against its edge.
-			 * No behaviour is passed: the sheet owns that, and the
+			 * No behavior is passed: the sheet owns that, and the
 			 * reduced-motion rule turns it off with everything else.
 			 *
 			 * @param {number} direction -1 for back, 1 for forward.
@@ -2341,6 +2362,43 @@
 	}
 
 	/**
+	 * The cookie notice.
+	 *
+	 * The notice is printed hidden so a visitor who has already dismissed it
+	 * never sees it flash on the way in, and this reveals it only when the
+	 * browser has no record of a dismissal. The choice is kept in the visitor's
+	 * own browser, exactly like the color scheme: the panel that describes how
+	 * cookies are used sets none of its own, and nothing about the choice is
+	 * sent to the server or written to a report.
+	 */
+	function initCookieNotice() {
+		var notice = document.getElementById( 'majestic-tube-cookie-notice' );
+
+		if ( ! notice ) {
+			return;
+		}
+
+		var key = 'majestic_tube_cookie_notice';
+
+		if ( '1' === readStore( key, '' ) ) {
+			return;
+		}
+
+		notice.hidden = false;
+
+		var button = notice.querySelector( '[data-majestic-tube-cookie-notice-dismiss]' );
+
+		if ( ! button ) {
+			return;
+		}
+
+		button.addEventListener( 'click', function () {
+			writeStore( key, '1' );
+			notice.hidden = true;
+		} );
+	}
+
+	/**
 	 * Show the back-to-top link once the visitor has scrolled past the fold.
 	 */
 	function initBackToTop() {
@@ -2377,6 +2435,7 @@
 		initReadMore();
 		initCaptcha( document );
 		initUserModal();
+		initCookieNotice();
 		initThemeToggle();
 		initThumbRotation();
 		initTrailerPreview();

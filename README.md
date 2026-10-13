@@ -11,25 +11,27 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 - [Requirements](#requirements)
 - [Installation](#installation)
-- [Quick start](#quick-start)
-- [Dashboard guide](#dashboard)
-- [Adding videos](#videos)
-- [Thumbnail rotation](#thumbnails)
-- [Actors and categories](#taxonomy)
-- [Player settings](#player)
-- [Members and submissions](#membership)
+- [Quick start](#quick-start-checklist)
+- [Dashboard guide](#dashboard-guide)
+- [Adding videos](#adding-and-managing-videos)
+- [Thumbnail rotation](#thumbnail-rotation-and-trailers)
+- [Actors and categories](#actors-categories-and-tags)
+- [Player settings](#player-and-media-behavior)
+- [Members and submissions](#members-and-video-submissions)
 - [Icons](#icons)
 - [Search appearance](#search-appearance)
 - [Video structured data](#video-structured-data)
-- [Customizer settings](#customizer)
-- [Menus, widgets, and content](#appearance)
-- [Reports and moderation](#reports)
-- [Legal pages](#legal)
-- [Routine maintenance](#maintenance)
+- [What a page loads](#what-a-page-loads)
+- [Customizer settings](#customizer-settings)
+- [Menus, widgets, and content](#menus-widgets-and-content-areas)
+- [Reports and moderation](#video-reports-and-moderation)
+- [Legal pages](#legal-and-policy-pages)
+- [Routine maintenance](#routine-maintenance)
 - [What's new in 2.2.0](#whats-new-in-220)
 - [Troubleshooting](#troubleshooting)
-- [FAQ](#faq)
-- [Credits, license & support](#credits)
+- [FAQ](#frequently-asked-questions)
+- [Credits, license & support](#credits-license--support)
+- [Quick reference](#quick-reference)
 
 **Release**
 
@@ -54,7 +56,7 @@ Two problems showed up on videos brought in by an importer, and both are fixed:
 - **Ratings appeared as 0%.** Imported posts store their rating as a pair of values, which the theme was not reading, so every imported video showed no rating. The theme now reads them, and the first visitor vote builds on the imported score instead of replacing it with 100%.
 - **Hover previews showed one broken image.** Extra preview images are stored as a single comma-separated value, while the theme read them as one URL per stored value. A comma is a legal URL character, so the whole string survived as one unusable address. Both storage shapes are now handled, including removing a single preview from the editor.
 
-The 18 USC 2257 page is also now repaired automatically if it goes missing from the footer menu, so a deleted or renamed legal link comes back on its own.
+The **18 U.S.C. § 2257** page is also now repaired automatically if it goes missing from the footer menu, so a deleted or renamed legal link comes back on its own. The page is named the way the statute is written, and an update renames the page and its footer link in place — same page, same address, same content.
 
 > **Upgrading from 2.1.7**
 >
@@ -92,7 +94,7 @@ Activation sets up the basic site structure. Existing content is not overwritten
 
 - A main navigation menu, assigned to the theme’s main menu location.
 - Pages for **Submit a Video**, **Profile**, **Actors**, **Categories**, and **Tags**.
-- Starter pages for **18 USC 2257**, **DMCA**, and **Privacy Policy**.
+- Starter pages for **18 U.S.C. § 2257**, **DMCA**, and **Privacy Policy**.
 - A separate footer menu containing the built-in legal links when an appropriate menu location is available.
 
 > **Note**
@@ -113,7 +115,7 @@ Activation sets up the basic site structure. Existing content is not overwritten
 Complete these tasks before announcing the website.
 
 - [ ] Activate Majestic Tube and visit the welcome screen.
-- [ ] Set the site title, tagline, logo, and main colour.
+- [ ] Set the site title, tagline, logo, and main color.
 - [ ] Choose the homepage video sort and the number of videos displayed.
 - [ ] Create video categories, tags, and actors.
 - [ ] Add images to important categories and actors.
@@ -122,7 +124,7 @@ Complete these tasks before announcing the website.
 - [ ] Configure member registration if you plan to accept submissions.
 - [ ] Review and customize the legal pages for your actual operation.
 - [ ] Test search, video reports, password reset, and email delivery.
-- [ ] Install an SEO plugin, then confirm it prints the titles, descriptions and social cards you expect.
+- [ ] Decide how search appearance is handled: `SEO & Analytics → Basic SEO` is on by default, or install an SEO plugin and the theme steps aside for it.
 
 **Know where everything is**
 
@@ -307,7 +309,7 @@ You can replace that with a phrase of your own under `Customize → SEO & Analyt
 | `{count}` | The number of videos, formatted for the site language. |
 | `{videos}` | The word *video* or *videos*, chosen to match the count. |
 
-So `{count} {videos} starring {name}` gives "42 videos starring Amber Waves", and on a term with a single video it gives "1 video starring…". An unrecognised token is left in place rather than silently deleted, so a typo is visible on the page instead of quietly producing a half-written sentence. Clear the box to go back to each term's own description.
+So `{count} {videos} starring {name}` gives "42 videos starring Amber Waves", and on a term with a single video it gives "1 video starring…". An unrecognized token is left in place rather than silently deleted, so a typo is visible on the page instead of quietly producing a half-written sentence. Clear the box to go back to each term's own description.
 
 The line is clamped to two lines, and the card drops the blank title line that a grid card reserves, so filling this in does not make the cards any taller.
 
@@ -406,9 +408,9 @@ Positions are stored per video, so watching three videos and coming back to each
 
 #### Theater mode
 
-Theater mode dims the page around the player rather than hiding it, and it deliberately does *not* lock scrolling: the description and comments below the video stay reachable, because a visitor who came to read the page as well as watch the video has been trapped rather than helped. The choice is remembered in that visitor’s browser, like the colour scheme in 2.1.6, and nothing is stored on your server.
+Theater mode dims the page around the player rather than hiding it, and it deliberately does *not* lock scrolling: the description and comments below the video stay reachable, because a visitor who came to read the page as well as watch the video has been trapped rather than helped. The choice is remembered in that visitor’s browser, like the color scheme in 2.1.6, and nothing is stored on your server.
 
-The player controls keep the same dark chrome in both colour schemes, on purpose. A control that changed colour with the site would flicker the moment someone switched skins mid-video, and the player is a black box either way.
+The player controls keep the same dark chrome in both color schemes, on purpose. A control that changed color with the site would flicker the moment someone switched skins mid-video, and the player is a black box either way.
 
 > **Note**
 >
@@ -439,17 +441,18 @@ When enabled, visitors can log in, register, and request a password reset. Logge
 
 WordPress controls whether registration is available. Go to `Settings → General` and review **Membership** and **New User Default Role**. For a moderated video site, use a cautious default role and review new accounts.
 
+The login, registration, and submission forms also carry a required terms checkbox by default, which links your Terms of Use and Privacy Policy pages; see **Accepting the terms, and the cookie notice** under Legal and Policy Pages for the switch that prints it.
+
 ### Member menu
 
-When membership is enabled, the Main Menu includes:
+When membership is enabled, a signed-in member gets a **My Account** item in the Main Menu that opens a dropdown holding:
 
-- **My Account**
 - **Submit a Video**
 - **My Channel**
 - **My Profile**
 - **Logout**
 
-Administrators can hide the Submit a Video, My Profile, and My Channel links in the Customizer.
+These are account links, so they live under My Account rather than beside Home and the directory pages — the theme's own menu setup does not add Submit a Video or Profile as top-level items. A signed-out visitor sees a **Login** item in their place. Administrators can hide the Submit a Video, My Profile, and My Channel links in the Customizer.
 
 ### Edit a member profile
 
@@ -463,12 +466,16 @@ Administrators can hide the Submit a Video, My Profile, and My Channel links in 
 
 1. Sign in as a member.
 2. Open `My Account → Submit a Video`.
-3. Complete the title, description, playback source, thumbnail, duration, category, tags, and actors as needed.
-4. For duration, enter hours, minutes, and seconds using the three boxes.
-5. Complete the verification when spam protection is enabled.
-6. Choose **Submit video**.
+3. Complete the title, description, playback source, duration, category, tags, and actors as needed.
+4. Paste one thumbnail URL, or several — one URL per line — to rotate through while the pointer rests on the card.
+5. Paste a preview video URL (mp4, webm, gif, or webp) when you would rather the card play that on hover than rotate thumbnails.
+6. For duration, enter hours, minutes, and seconds using the three boxes.
+7. Complete the verification when spam protection is enabled.
+8. Choose **Submit video**.
 
 New submissions are saved for moderation and do not appear publicly until an administrator publishes them.
+
+A submission only needs the parts it has: one thumbnail URL, a list of them, or a preview video. When a list of thumbnails is submitted and the single Thumbnail URL box is left empty, the first URL in the list becomes the video's main thumbnail, which is what the card paints before the pointer reaches it. A preview video outranks the rotation thumbnails: a card with one plays its preview on hover instead of rotating through them.
 
 ### Configure required submission fields
 
@@ -479,6 +486,8 @@ Go to `Appearance → Customize → Site Features → Video Submission`. You can
 - [ ] Video URL
 - [ ] Embed code
 - [ ] Thumbnail URL
+- [ ] Extra thumbnails
+- [ ] Preview video
 - [ ] Tags
 - [ ] Actors
 - [ ] Duration
@@ -515,10 +524,11 @@ Turnstile’s script is loaded only while spam protection is switched on and bot
 - The widget’s token is sent to Cloudflare’s `siteverify` endpoint from the server, along with the visitor’s IP address. A token that does not verify stops the sign-up or the submission.
 - Tokens are good once. If a visitor fails for an unrelated reason — a username already taken, say — the theme clears the challenge and hands them a fresh one instead of leaving them with a form that can never succeed.
 - The sign-up form sits in a modal, so the widget is mounted only once that panel is actually open. A challenge mounted into a hidden panel measures itself as zero and never recovers.
+- Every form keeps the room the widget needs, whether protection is off, on, or still loading. The widget is 65px tall and arrives after the page has rendered, so the space is reserved up front: switching protection on never moves a submit button, and the widget landing never shifts the field beside it. The sign-up, login, comment and submission forms all reserve the same room; only sign-up and submission are guarded.
 
 #### Turn protection off
 
-Set **Enable spam protection** to **Off**. The widget disappears from both forms and Cloudflare’s script stops loading; your Turnstile keys stay saved, so switching back on needs no work.
+Set **Enable spam protection** to **Off**. The widget disappears from both forms, the room it sat in stays reserved, and Cloudflare’s script stops loading; your Turnstile keys stay saved, so switching back on needs no work.
 
 > **Important**
 >
@@ -530,7 +540,7 @@ Set **Enable spam protection** to **Off**. The widget disappears from both forms
 
 The theme draws its own icons and ships them in the stylesheet. There is no icon font to load, nothing to keep up to date, and no plugin required.
 
-Each icon is an SVG **mask**, so it paints in whatever colour surrounds it. One shape works in the light skin, the dark skin, on the accent-coloured buttons and on the muted metadata row, without a second copy of it for each.
+Each icon is an SVG **mask**, so it paints in whatever color surrounds it. One shape works in the light skin, the dark skin, on the accent-colored buttons and on the muted metadata row, without a second copy of it for each.
 
 They appear on the search button, the mobile menu toggle, the sort tabs, the video card and video page metadata, the like, dislike, share and report buttons, the category, actor and tag labels, the video tags list, pagination, and the back-to-top button.
 
@@ -553,24 +563,72 @@ echo majestic_tube_get_icon( 'heart', 'my-class' ); // with an extra class
 
 An icon name the theme does not ship returns an empty string rather than an empty box, so a typo degrades to no icon instead of a gap. The full list is `majestic_tube_icon_names()`.
 
+### Adding your own icons from a child theme
+
+The shapes in `assets/css/main.css` are generated and replaced wholesale when the set is rebuilt, so a child theme cannot add to them by appending CSS — the next rebuild would take it away. Register the shape instead, and the theme generates the mask and the paint to match everything else:
+
+```php
+add_action( 'after_setup_theme', function () {
+	majestic_tube_register_icons( array(
+		// A name => SVG path data, on the same 24x24 grid as the theme's own.
+		'brand-mark' => 'M12 2 2 22h20L12 2zm0 5 5 11H7l5-11z',
+
+		// Or with your own viewBox, for a shape that is not square.
+		'wordmark' => array(
+			'path'    => 'M2 8h4v8H2V8zm6 0h4v8H8V8zm6 0h4v8h-4V8z',
+			'viewbox' => '0 0 24 20',
+		),
+	) );
+} );
+```
+
+Then print it like any other icon. It is sized, spaced and colored by the same rules, so it sits correctly beside a label without a line of CSS:
+
+```php
+echo majestic_tube_get_icon( 'brand-mark' );
+echo majestic_tube_icon( 'wordmark', 'my-class' );
+```
+
+Registering a name the theme already ships **replaces that shape** everywhere it is used, including the legacy `fa fa-*` classes that point at the same masks. That is the supported way to restyle a mark you do not like:
+
+```php
+majestic_tube_register_icons( array( 'star' => 'M12 2 22 22H2L12 2z' ) );  // a solid star
+```
+
+**What is accepted.** A name must be lowercase, start with a letter, and contain only letters, digits and hyphens — the same convention as the theme's own names. The value is SVG path data, optionally with a `viewbox`. Nothing else registers, and anything rejected is skipped rather than fatal, so one bad shape does not stop a child theme from loading. A path is held to the characters path data is actually made of, because it ends up inside a CSS `url()`; a name or path that needs escaping into something else is refused.
+
+The generated CSS is printed after `main.css`, which is what makes an override win. `majestic_tube_registered_icons()` reads the registry back if you need to know what is in it, and `majestic_tube_registered_icons_css()` returns the stylesheet on its own.
+
 ## Search appearance
 
-Majestic Tube does not print page titles, meta descriptions, robots directives or canonical URLs. Search appearance belongs to the SEO plugin you run, and two sources of truth for a page title is worse than one.
+Two sources of truth for one page title is worse than one, so the rule is simple: **an SEO plugin wins whenever one is active.** Yoast, Rank Math, All in One SEO, SEOPress, The SEO Framework and Slim SEO are all detected, and the theme stops describing pages the moment it sees one.
 
-Install an SEO plugin and configure it there: it holds the browser title, the meta description, the social preview cards, and any noindex directive or canonical URL you want on a page or a term.
+When no plugin is active, the theme describes the site itself, so a page is not left with a bare `<title>` and nothing else. That is `SEO & Analytics → Basic SEO`, and it is on by default:
 
-Video structured data is the one exception, and it is described under [Video Structured Data](#video-structured-data) below. In short, the theme marks up each video as a `VideoObject` and publishes a video sitemap, because a video page is the one place the theme knows things a general-purpose SEO plugin has no way to read: the runtime, which file or embed the player is using, and who is in it.
-
-What the theme still owns is the wording visitors read on the page, and all of it stays in the Customizer:
-
-| Customizer section | What it controls |
+| What the theme prints | Where it comes from |
 | --- | --- |
-| `SEO & Analytics → Homepage SEO` | Where the visible homepage heading sits, and the introduction printed once beneath it. |
-| `SEO & Analytics → Archive Page SEO` | The line shown on each category and actor card, and whether category and tag descriptions sit above or below the list. |
-| `SEO & Analytics → Video Structured Data` | The `VideoObject` markup, the video social tags, and the video sitemap. |
-| `SEO & Analytics → Custom Code` | Analytics code in the page head, and extra scripts before the closing body tag. |
+| `<title>` | WordPress itself, from the theme's `title-tag` support. The theme filters the parts on the front page if you write a **Homepage search title**; it never prints a second title tag. |
+| `<meta name="description">` | The excerpt, then the body text, then the site tagline. The homepage has its own field. |
+| `<link rel="canonical">` | WordPress prints one on a video or page. The theme adds one on archive pages — including page 2, which canonicalises to itself rather than to page 1. Search results and 404s get none. |
+| Open Graph and Twitter cards | Title, description, URL, type, site name, locale, and an image: the video's own picture on a video page, a term image on an archive, then your logo, then the Site Icon. |
+| `robots` | WordPress, unchanged. |
 
-Nothing you saved in an earlier release is deleted when you upgrade. The old SEO settings stay in the database, unread, and the SEO plugin takes over from there.
+What the theme has never owned, and still does not, is a title or description for an individual term or post: those are edited where the plugin provides them, or not at all.
+
+Video structured data is the other exception, and it is described under [Video Structured Data](#video-structured-data) below. In short, the theme marks up each video as a `VideoObject` and publishes a video sitemap, because a video page is the one place the theme knows things a general-purpose SEO plugin has no way to read: the runtime, which file or embed the player is using, and who is in it. That module keeps working even while a plugin is running, because no plugin emits it.
+
+### Labeling an adult site
+
+Two optional tags in the same section declare what the site is, and both are off by default:
+
+| Setting | What it prints |
+| --- | --- |
+| **Adult content rating tag** | `<meta name="rating" content="adult" />`, the value Google documents for explicit content. |
+| **RTA label** | `<meta name="RATING" content="RTA-5042-1996-1400-1577-RTA" />`, the label Restricted To Adults prescribes and what parental-control and filtering software looks for. |
+
+Google reads either value as the same explicit-content signal, which is why one of the two is enough for search: it asks SafeSearch to filter the site. Neither is a noindex directive — a page labeled this way can still be indexed, and it is `noindex` that keeps a page out of the index. Both are independent of the Basic SEO switch and of the plugin step-aside, because no SEO plugin emits them.
+
+Nothing you saved in an earlier release is deleted when you upgrade. Settings from earlier releases stay in the database, unread.
 
 ## Video Structured Data
 
@@ -588,13 +646,35 @@ The two switches are independent, so you can keep the sitemap while turning off 
 
 **Submit the video sitemap separately.** The address is `/video-sitemap.xml`, and it is not covered by the XML sitemap index, so add it in Google Search Console as its own sitemap. A large library is split across numbered files under that same address.
 
-**Embedded videos have a limit worth knowing about.** If your videos play from another domain's player, the page can still rank as a normal web page, but Google cannot count the video as part of your site's library, so it will not appear in Google Video results. Serving the file yourself, or embedding a player from your own domain, is the only way to qualify. The theme reports how much of your catalogue is affected if you have WP-CLI available:
+**Embedded videos have a limit worth knowing about.** If your videos play from another domain's player, the page can still rank as a normal web page, but Google cannot count the video as part of your site's library, so it will not appear in Google Video results. Serving the file yourself, or embedding a player from your own domain, is the only way to qualify. The theme reports how much of your catalog is affected if you have WP-CLI available:
 
 ```
 wp majestic-tube audit
 ```
 
 It lists how many videos are submittable, which fields are missing, and which domains the embeds come from. It needs WP-CLI on the server; the **Video SEO** column shows the same information without it.
+
+## What a page loads
+
+A video site lives or dies on how fast the first screen appears, so the front end is thin and everything in it is conditional:
+
+| Asset | When it is requested |
+| --- | --- |
+| `assets/css/main.css` | Every page. The theme's own `style.css` is never requested — it carries the theme header and no rules, so a child theme's `style.css` is the only one that is loaded. |
+| `assets/css/fonts.css` and one `woff2` | Only while an option still selects the bundled Inter. Choosing the system font makes no font request at all. |
+| `assets/js/main.js` | Every page, deferred, no jQuery. |
+| `assets/css/player.css` and Video.js | Only on a video page using the enhanced player. |
+| Cloudflare Turnstile | Only while spam protection is switched on with both keys filled in. |
+| Core's emoji script and stylesheet | Never on the front end — see below. |
+
+Beyond that:
+
+- The **first card image on a listing**, or the **player poster on a video page**, is loaded eagerly and marked high priority, because that image is the one the browser scores as the largest contentful paint. Every later image stays lazy.
+- The poster is announced with a `<link rel="preload">` from the head, so it starts downloading while the stylesheet is still arriving.
+- WordPress's **speculative loading** is opted into (`wp_speculation_rules_configuration`), so a link is prefetched on hover. Forms and the like/report endpoints are POSTs, which the API never prefetches.
+- Thumbnails are served from WordPress's own `srcset`, with a `sizes` attribute built from your per-row settings, so a phone downloads a phone-sized file.
+
+**Emoji assets are not loaded.** WordPress normally prints an emoji stylesheet and a detection script on every page so that `:smile:` can be swapped for an image and so that emoji have a picture fallback on systems whose fonts lack them. Neither is worth two requests per page here: content is titles and categories, and a literal emoji renders from the visitor's own font. The admin screens keep their emoji. A site whose content genuinely depends on the fallback image can bring it back by returning `false` from the `majestic_tube_trim_emoji_assets` filter.
 
 ## Customizer Settings
 
@@ -608,17 +688,18 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 | Video Page | Video Page Layout | Which of a post's two video fields the player uses (Video URL or embed code), the video sidebar, comments, breadcrumbs, the description block, categories, tags, actors, the outbound video button, the view, duration and rating displays, the Report video button, and related videos. |
 | Video Page | Player | Autoplay, the player engine, the quality selector, view counting, and the optional keyboard shortcuts, speed, resume and theater controls. |
 | Video Page | Sharing | The share buttons printed under the player. |
-| Site Design | Colours & Typography | Light or dark skin, the header toggle, the accent colour, whether to ignore the site background image, and the site font. |
-| Site Design | Logo | An image or text logo, its font, size, dimensions and spacing, a copy in the footer, and the favicon. |
-| Site Design | Player Watermark | A logo overlaid on the player, with its size, colour treatment and corner. |
+| Site Design | Colors & Typography | Light or dark skin, the header toggle, the accent color and the readable link, text and icon tones derived from it, whether to ignore the site background image, and the site font. |
+| Site Design | Logo | An image or text logo, its font, size, dimensions and spacing, and a copy in the footer. |
+| Site Design | Player Watermark | A logo overlaid on the player, with its size, color treatment and corner. |
 | Site Design | Thumbnails | Thumbnail aspect ratio, image fit, image quality, and the hover rotation on video cards. |
-| Site Features | Header, Footer & Search | The search bar, whether the theme draws its own icons, the number of footer columns, the copyright bar and its text, and the admin bar. |
-| Site Features | Accounts & Spam Protection | Member login and registration, and the Cloudflare Turnstile spam check with its two keys. |
+| Site Features | Header, Footer & Search | The search bar, whether the theme draws its own icons, the number of footer columns, the copyright bar and its text, the admin bar, and the cookie notice with its wording. |
+| Site Features | Accounts & Spam Protection | Member login and registration, the Cloudflare Turnstile spam check with its two keys, and the terms checkbox asked for on the login, registration and submission forms. |
 | Site Features | Video Submission | The submission form, the links that lead to it, and which fields are required. |
 | Advertising | Advertising | In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from `Appearance → Widgets`. |
-| Advertising | Friends & Ad Links | The row of outbound partner and ad text links printed under the header. The links themselves are a menu, under `Appearance → Menus`. |
+| Advertising | Friends & Ad Links | The row of outbound partner and ad text links printed under the header on the index page. The links themselves are a menu, under `Appearance → Menus`. |
+| SEO & Analytics | Basic SEO | The theme's own search appearance — homepage search title and meta description, and the two optional content-rating labels. Switched off automatically while an SEO plugin is active. |
 | SEO & Analytics | Homepage SEO | Where the visible homepage heading sits and the introduction printed once beneath it. |
-| SEO & Analytics | Archive Page SEO | The line shown on each category and actor card, and whether the category and tag descriptions go above or below the list. The per-term titles and descriptions are not here — see below. |
+| SEO & Analytics | Archive Page SEO | The line shown on each category and actor card, and whether the category and tag descriptions go above or below the list. |
 | SEO & Analytics | Custom Code | Analytics code in the page head, extra scripts before the closing body tag, and scripts for mobile visitors only. |
 | SEO & Analytics | Video Structured Data | The `VideoObject` markup on video pages, the video social tags, and the video sitemap. |
 
@@ -647,15 +728,16 @@ The bar is cached, and the cache key carries WordPress's own `last_changed` mark
 ### Site Design
 
 - Enable a custom background.
-- Choose the main accent colour.
-- Set the site's default colour scheme: Light, Dark, or Follow system.
+- Choose the main accent color. The theme derives its readable link, text and icon tones from that one value for each skin.
+- Set the site's default color scheme: Light, Dark, or Follow system.
 - Optionally show a light/dark toggle in the header so visitors can switch.
 - Pick the site font: the bundled Inter, or the visitor's own system font.
 - Use an uploaded logo or a text logo with an icon.
 - Adjust logo font, size, dimensions, and spacing.
 - Optionally show the logo in the footer.
 - Optionally place a logo watermark over the video player.
-- Set a favicon for browser tabs and bookmarks.
+
+The browser-tab icon is not here: it is WordPress's own **Site Icon**, under `Appearance → Customize → Site Identity → Site Icon`. That is the only place it lives, so there is nothing to keep in sync.
 
 #### Typography
 
@@ -665,24 +747,43 @@ If the font file cannot be loaded — an offline reader, a blocked asset — the
 
 The text logo has its own choice: **Inter** (the default), **System UI**, **System serif** (Georgia, Times New Roman, Noto Serif), and **System monospace** (Menlo, Consolas, DejaVu Sans Mono). The three system voices are installed fonts rather than downloaded ones, so each looks slightly different per operating system — that is expected, not a glitch.
 
-#### Colour scheme and dark mode
+#### Color scheme and dark mode
 
-Go to `Appearance → Customize → Site Design → Colours & Typography`. Two settings control the skin.
+Go to `Appearance → Customize → Site Design → Colors & Typography`. Two settings control the skin.
 
-- **Colour scheme** chooses what the site uses by default.
+- **Color scheme** chooses what the site uses by default.
 - **Show the light/dark toggle in the header** adds a small round button to the header so visitors can switch for themselves. It is off by default.
 
-**Light** is the classic Majestic Tube surface. **Dark** is a near-black companion built for evening viewing: the same layout, the same accent, retuned borders and text colours so nothing turns into unreadable grey-on-black. **Follow system** renders whatever the visitor's own operating system asks for and needs no script and no stored value — the browser decides, and the page is correct before any of the theme's JavaScript runs.
+**Light** is the classic Majestic Tube surface. **Dark** is a near-black companion built for evening viewing: the same layout, the same accent, and retuned borders and text colors so nothing turns into unreadable gray-on-black — including the accent itself, which is brightened for the dark surface so a link reads as well on near-black as it does on white. **Follow system** renders whatever the visitor's own operating system asks for and needs no script and no stored value — the browser decides, and the page is correct before any of the theme's JavaScript runs.
 
-The accent colour, background, and every other control in the `Site Design` panel apply to both skins, so a dark site is the same site rather than a separate design.
+The accent color, background, and every other control in the `Site Design` panel apply to both skins, so a dark site is the same site rather than a separate design.
+
+#### Accent color
+
+There is one accent to choose, and it is the color of the button fills, the active sort tab, the play badge over a thumbnail, the like and dislike buttons, the sort icons and every link. Everything else about it is derived, because one value cannot do every job well: a color dark enough to carry white button text is too dark to read as a link on a near-black page, and a color bright enough to read there is far too pale under white text.
+
+So the theme works the shades out from the one color you pick and measures each against the surface it will be painted on:
+
+- **The fill** keeps your color exactly, with white text on it where white is readable, and the theme's near-black ink where it is not.
+- **Links, text and icons** get a tone deepened for the light skin until it clears 5:1, and brightened for the dark skin until it clears 7:1.
+- **Hover states** step further away from their surface than the resting state, so hovering always means more contrast rather than less.
+- **The player** takes a bright version of the same color, because its chrome stays black over video in both skins: a progress bar in the fill color would disappear over a bright frame.
+
+Whatever you pick therefore stays consistent across the buttons, the links, the text and the icons in both skins, and stays readable — including a very pale or very dark choice, where the theme moves the shade rather than leaving unreadable text on the page. None of the derived shades are stored anywhere: change the accent and every tone moves with it.
+
+**For developers:** the derived values are printed as CSS custom properties on `:root` by `inc/custom-code.php` — `--mt-accent`, `--mt-accent-fg`, `--mt-accent-hover`, `--mt-accent-text`, `--mt-accent-text-hover` and `--mt-accent-on-dark` — and each role is documented beside the tokens in `assets/css/main.css`. The `majestic_tube_brand_css` filter can add to or replace any declaration in that block.
 
 > **Note**
 >
-> A visitor's choice is stored in their own browser and is never sent to the server. No cookie is set, nothing is written to the database, and a visitor who has never chosen anything simply gets the site default. Clearing site data, or opening a private window, returns them to the default — which is usually the right behaviour.
+> A visitor's choice is stored in their own browser and is never sent to the server. No cookie is set, nothing is written to the database, and a visitor who has never chosen anything simply gets the site default. Clearing site data, or opening a private window, returns them to the default — which is usually the right behavior.
 
 With the toggle on, the button cycles **Light** and **Dark**. If the site default is **Follow system**, it cycles all three, so a visitor can leave it back on automatic. The button's label, tooltip, and screen-reader text all name the scheme it will switch to, so it stays usable without relying on the glyph.
 
-A short script in the page head applies the stored choice before the first paint, so a dark-mode visitor never sees a flash of the light skin on the way in. On a site set to Light with the toggle switched off, the theme prints nothing for any of this. Where a browser refuses local storage — private browsing, a strict cookie policy, a partitioned frame — the script steps aside quietly and the site default stands, so the page is still readable.
+A short script in the page head applies the stored choice before the first paint, so a dark-mode visitor never sees a flash of the light skin on the way in. The theme prints nothing for any of this while the toggle is switched off, whatever the site is set to: the button is the only place the choice is made or shown, so with no button there is nothing to honor.
+
+A stored choice is recorded against the default it was made under, so changing **Color scheme** takes effect for everyone — including the browser that already had a choice stored. A choice made against the old default is dropped rather than left silently deciding what the page looks like; the visitor picks again in one click. The cycle the button steps through is built from the site's own scheme too, so a site set to **Follow system** keeps its third step after a visitor has used the button rather than losing it.
+
+Where a browser refuses local storage — private browsing, a strict cookie policy, a partitioned frame — the script steps aside quietly and the site default stands, so the page is still readable.
 
 > **Note**
 >
@@ -715,19 +816,25 @@ This section directs you to `Appearance → Widgets`, where header, player, belo
 
 Advertising is unchanged by default. Turning on `Only load advertising after consent` makes the theme print nothing at all for any of its placements, in-feed, popunder, header, footer, under-player, video-sidebar, and player, until a cookie banner or consent management platform says the visitor has agreed. The theme never records or asks for consent itself, so the switch stays off until you connect a solution that does.
 
+This switch is about the visitor's choice. Where the page itself is the question the rule is different, and it is always on: no placement of any kind prints on a legal page or beside the submission form, whether or not this switch is set. See [What a legal page does not carry](#what-a-legal-page-does-not-carry).
+
+The theme can also print a cookie notice of its own: **Show a cookie notice** under `Site Features → Header, Footer & Search`. It tells visitors the site uses cookies and links your Terms of Use, Privacy Policy, and Cookie Policy pages. It records nothing on your server and does **not** hold advertising back — the switch above is what does that, and it still needs a consent solution to report the visitor's choice.
+
 > **Note**
 >
 > Connecting a consent plugin is a one-line filter in a small snippet or a site-specific plugin. Let the consent plugin return `true` once advertising is allowed, and the theme will print its placements as normal. The filter is `majestic_tube_ads_allowed` and it receives the placement name as its second argument: in-feed, popunder, header, footer, under-player, video-sidebar, or player. It also works the other way round for a single placement, which is useful if one area should always be shown.
 
 ### Advertising → Friends & Ad Links
 
-A row of outbound text links &mdash; partner sites, ad zones, anything outside your own catalogue &mdash; printed under the header on **every** page, including single video pages.
+A row of outbound text links &mdash; partner sites, ad zones, anything outside your own catalog &mdash; printed under the header on the index page, and nowhere else.
+
+The row appears on the site's index: the main listing, which is the page your front page shows when it shows the video grid. Every other request prints nothing &mdash; a single video page, a category, tag or actor archive, a search result, a legal document, and the submission form &mdash; so a partner link never lands beside the player, over a listing it has nothing to do with, or next to a policy or a form a visitor is being asked to accept. Whether the row prints at all is still the switch below, and it still needs an assigned menu with items in it.
 
 The links are a real WordPress menu, so you add, remove and reorder them the usual way. This section only decides whether the row prints and how it looks.
 
 | Setting | What it does |
 | --- | --- |
-| **Show the friends and ad links row** | Prints the row. On by default, but it stays invisible until a menu is actually assigned. |
+| **Show the friends and ad links row** | Prints the row, on the index page. On by default, but it stays invisible until a menu is actually assigned. |
 | **Row label** | An optional heading printed before the links, such as &ldquo;Friends&rdquo;. Leave it blank and the links print alone. |
 | **Open links in a new tab** | Whether a link opens in a new tab. On by default. |
 | **Row style** | How the row is decorated. See below. |
@@ -741,12 +848,12 @@ The links are a real WordPress menu, so you add, remove and reorder them the usu
 | **Plain** | Text only. The quiet default. |
 | **Stars and sparkles** | An emoji in front of each link, cycling through stars and sparkles. |
 | **Rockets and shooting stars** | The same, with a rocket set. Links lift slightly on hover, as though launching. |
-| **Glam** | Fire, crowns and jewels, with the heading in your accent colour. |
-| **Neon** | No emoji at all &mdash; the text itself takes a glow in your accent colour. |
+| **Glam** | Fire, crowns and jewels, with the heading in your accent color. |
+| **Neon** | No emoji at all &mdash; the text itself takes a glow in your accent color. |
 
 The emoji cycle through the preset&rsquo;s set rather than repeating one glyph, so a long row reads as decorated rather than stamped. The row label gets the first glyph of the same set.
 
-**Two details worth knowing.** If you type your own emoji at the start of a menu label, the theme adds nothing in front of it &mdash; two icons on one link looks like a fault, not a flourish. And the neon style deliberately carries no emoji, because a colour glow behind a colour emoji reads as a rendering problem rather than as design.
+**Two details worth knowing.** If you type your own emoji at the start of a menu label, the theme adds nothing in front of it &mdash; two icons on one link looks like a fault, not a flourish. And the neon style deliberately carries no emoji, because a color glow behind a color emoji reads as a rendering problem rather than as design.
 
 The shine sweep, the icon tilt and the rocket lift are all switched off for visitors whose system asks for reduced motion. None of them carries meaning, so nothing is lost.
 
@@ -754,11 +861,25 @@ The shine sweep, the icon tilt and the rocket lift are all switched off for visi
 
 Every link in this row is treated as advertising, and the theme adds `rel="sponsored nofollow noopener noreferrer"` to each one whether or not you set a rel yourself. That is not something the switch controls, and it cannot be turned off: the row exists for outbound and usually paid links, and none of it should pass ranking signal to the destination or read as an endorsement. The filter is scoped to this one menu location, so the Main Menu and Footer Legal Menu keep exactly the rel values you give them.
 
-The row is a `nav` landmark labelled by the row label, or by &ldquo;Friends and partners&rdquo; when the label is blank, so it is announced properly rather than being read as a stray line of text.
+The row is a `nav` landmark labeled by the row label, or by &ldquo;Friends and partners&rdquo; when the label is blank, so it is announced properly rather than being read as a stray line of text.
+
+### SEO & Analytics → Basic SEO
+
+This is the search appearance the theme supplies by itself, for a site that runs no SEO plugin. All of it switches off the moment Yoast, Rank Math, All in One SEO, SEOPress, The SEO Framework or Slim SEO is detected.
+
+| Setting | What it does |
+| --- | --- |
+| **Basic SEO** | Whether the theme prints its own description, archive canonical and social cards. On by default. |
+| **Homepage search title** | What the browser tab and the search result say for the front page. Blank falls back to the site title. |
+| **Homepage meta description** | The text under the front page title in a result, and on a share card. Blank falls back to the site tagline. It is deliberately separate from the visible homepage introduction, which a visitor reads. |
+| **Adult content rating tag** | Adds the explicit-content rating tag Google documents. Off by default. |
+| **RTA label** | Adds the Restricted To Adults label, verbatim. Off by default. |
+
+The two labels are independent of the switch above, so they keep working if you later install an SEO plugin. Neither is a noindex directive: they ask SafeSearch to filter the site, they do not keep a page out of the index.
 
 ### SEO & Analytics → Homepage SEO
 
-These controls set the visible homepage introduction and where it appears. The search title and meta description are set in your SEO plugin.
+These controls set the visible homepage introduction and where it appears. The search title and meta description are under Basic SEO, or in your SEO plugin if you run one.
 
 | Setting | What it does |
 | --- | --- |
@@ -771,7 +892,7 @@ The visible homepage heading remains under `Customize → Homepage & Listings �
 
 ### SEO & Analytics → Archive Page SEO
 
-Shared archive-card wording and description placement. The browser title and meta description for an individual term belong to your SEO plugin.
+Shared archive-card wording and description placement. A term's own name and description are edited on that term's own screen, beside its image; the archive's browser title and meta description come from Basic SEO, or from your SEO plugin if you run one.
 
 | Setting | What it does |
 | --- | --- |
@@ -814,7 +935,7 @@ Keep legal pages in the footer rather than crowding the primary navigation.
 4. In the **Menu Locations** column on the same screen, tick **Friends & Ad Links**.
 5. Choose **Save Menu**.
 
-That menu is then printed as a row of text links under the header on every page, and nowhere else. Whether the row shows, and its heading, are set under `Appearance → Customize → Advertising → Friends & Ad Links`.
+That menu is then printed as a row of text links under the header on the index page, and nowhere else. Whether the row shows, and its heading, are set under `Appearance → Customize → Advertising → Friends & Ad Links`.
 
 Keep it to outbound destinations. Anything that belongs in your own navigation is a better fit in the Main Menu above, and the theme marks every link in this row `sponsored nofollow` so it never passes ranking signal to the destination.
 
@@ -843,6 +964,12 @@ Every area named **code and ads** accepts this widget and nothing else, so any a
 | Footer: code and ads | At the very top of the site footer, above the footer widgets. Content Block widgets only. |
 | Footer widgets | The column area at the bottom of the footer. Accepts every standard widget, so menus, link lists, friends links, text and images all go here. |
 
+No area in this table appears on the theme's legal pages. A policy, a takedown procedure or a recordkeeping notice prints none of them, so nothing placed here — not even an ad tag — reaches those pages; see [Legal and Policy Pages](#legal-and-policy-pages). Your widget settings are untouched, so the same areas resume on every other page.
+
+The placements the theme prints itself follow the same rule. The in-feed block, the popunder / interstitial snippet and a snippet set on an individual video are printed by the advertising module rather than by a widget area, and that rule is asked where the module prints — so no ad of any kind reaches a legal page or the submission form, whichever placement it came from. A placement added later is covered by the same check rather than by remembering to add one.
+
+The same treatment covers the surfaces where a visitor is asked to accept something rather than to read something. While the video submission form is on the page, its Code and ads areas and Footer widgets columns are withheld exactly as they are on a legal page, and the login/registration panel and the theme's own cookie notice carry no area at all. See [Accepting the terms, and the cookie notice](#accepting-the-terms-and-the-cookie-notice).
+
 > **Important**
 >
 > Content Block markup is intended for trusted administrators. Review all third-party embed and tracking snippets before activating them, and comply with the service’s terms and your privacy obligations.
@@ -869,7 +996,7 @@ Visitors may also include a short message. A visitor is asked not to report the 
 
 #### What a visitor's address is used for
 
-Stopping one visitor from voting, viewing or reporting the same video several times needs to recognise a returning visitor, and nothing more. The theme stores a keyed fingerprint of the address — a one-way value derived with your site's own secret salt — next to a timestamp, never the address itself. Entries older than the 24-hour window are deleted, both on the next visit and by a daily housekeeping run, and each video keeps at most 500 of them.
+Stopping one visitor from voting, viewing or reporting the same video several times needs to recognize a returning visitor, and nothing more. The theme stores a keyed fingerprint of the address — a one-way value derived with your site's own secret salt — next to a timestamp, never the address itself. Entries older than the 24-hour window are deleted, both on the next visit and by a daily housekeeping run, and each video keeps at most 500 of them.
 
 That makes the value pseudonymous rather than anonymous, so it still counts as personal data under GDPR: mention it in your Privacy Policy, which the theme installs as a starter page. The fingerprint only means the same thing while your salts stay the same, so regenerating the salts in `wp-config.php` resets the stored history rather than leaving it readable. Sites behind a CDN or proxy should filter `majestic_tube_client_ip` to the header the proxy overwrites; without that, every visitor shares one address and the de-duplication treats them as a single person.
 
@@ -888,7 +1015,7 @@ Editors may also see a reported-video summary on the WordPress dashboard.
 
 Activation creates starter pages for:
 
-- 18 USC 2257
+- 18 U.S.C. § 2257
 - DMCA
 - Privacy Policy
 
@@ -907,7 +1034,41 @@ A few things it deliberately does not do:
 
 A page still sitting on the original `18-usc-2257` address counts as present, not missing, and a site using WordPress's own custom privacy page counts as having its privacy page.
 
-### The 18 USC 2257 page and which role your site is in
+The 2257 document is named **18 U.S.C. § 2257**, the way the statute is written: that is the title at the top of the policy and the label on the footer link to it. An update renames a page an earlier version created under its former name (`18 USC 2257`), and relabels the footer link that came with it. The rename is deliberately narrow — the page keeps its ID, its `18-usc-2257` address, its content, its author and its comments, and only its title and the theme's own link label change. It also only touches a name the theme itself shipped: a page you have named yourself keeps the name you gave it, and the theme still recognizes it as the same document rather than creating a second one beside it.
+
+WordPress creates its own **Privacy Policy** page as a draft when a site is installed. The theme adopts that page rather than making a second one, and publishes it — on activation and again if the footer repair runs — because the footer legal menu links it, and a link to a draft is a link visitors cannot open. No duplicate is created.
+
+### What a legal page does not carry
+
+A legal page is a document a visitor may be shown, or asked to accept, on its own terms, so the theme keeps three things off it.
+
+**No widget areas.** The 2257 page, the DMCA page, the privacy policy, and any page whose slug or title reads as one of those carry none of the Code and ads areas and no Footer widgets columns. Anything placed in those areas — an ad tag, a tracking script, a promo block — is withheld rather than hidden, so none of it reaches the page. What the theme prints itself is unchanged: the header, the menus, the footer legal links and the copyright line all appear as usual.
+
+**No advertising of any kind.** The placements the theme controls itself — the in-feed block in the video grid, the popunder / interstitial snippet, a snippet set on an individual video, and the legacy ad fields an older version of the theme used — are all printed through one shared function, and that function asks the same question the areas ask. A legal page therefore carries no advertising from any placement, including one a child theme adds through the same helper. On every other page each of these placements answers to its own switch and code, exactly as it did before.
+
+**No template notice.** Earlier versions ended each legal page with a bolded **Template notice** paragraph written for you, the administrator. It sat inside the page body, so a visitor reading the policy was told by the policy itself that it was a template. The pages this version creates do not carry it, and an update to this version removes it — and the horizontal rule that introduced it — from the pages an earlier version created, leaving the wording you wrote around it exactly as it is. A page you have renamed or moved so the theme no longer recognizes it is left alone; if you see the paragraph there, delete it by hand. The warning belongs in this document and on the welcome screen, not on a page your visitors read.
+
+Neither change affects what the pages say: they remain starting points you are responsible for reviewing, not legal advice.
+
+### Accepting the terms, and the cookie notice
+
+Two more surfaces ask a visitor to accept something, and both are treated the way a legal page is: nothing an administrator placed in a Code and ads area appears beside the question, and neither does anything the theme prints itself — the in-feed block, the popunder / interstitial snippet or a per-video snippet. Advertising of any kind is withheld beside the question, not only the widget areas.
+
+**The terms checkbox.** The login form, the registration form, and the front-end video submission form each carry a required checkbox naming the documents being accepted — *I have read and accept the Terms of Use and Privacy Policy.* It links the pages your site actually publishes: a Terms of Use page if you have one (`terms`, `terms-of-use`, `terms-and-conditions`, or `terms-of-service`), your Privacy Policy page, and a Cookie Policy page if you have one. A page still sitting in draft does not count, because a link to a page visitors cannot open is not something anyone can accept.
+
+Turn the checkbox off, or back on, at `Appearance → Customize → Site Features → Accounts & Spam Protection` → **Ask visitors to accept the terms**. It is on by default — the theme asks for acceptance as soon as it gives a visitor something to accept — and it decides both halves of the rule: the checkbox is printed *and* a form submitted without it is refused. A site that publishes neither a terms page nor a privacy policy prints no checkbox and enforces nothing: the theme will not ask a visitor to accept a document that does not exist.
+
+The checkbox is not decoration. The `required` attribute stops a browser from sending an empty form, and the handler asks again on the server, so a login, a registration or a video submission that arrives without the acceptance is refused with *Please accept the terms to continue.* The server check is the one that decides, because an attribute in the markup reaches only forms the browser built. The case you will notice is a page cached before you switched this on: the visitor submits, reads that sentence, reloads, and gets the form with the checkbox on it.
+
+**The cookie notice.** Turn on **Show a cookie notice** at `Appearance → Customize → Site Features → Header, Footer & Search` and the theme prints a dismissible bar along the bottom of the page: your wording, or the sentence it ships, together with links to the same documents the checkbox names. Write your own words in **Cookie notice text** and the links are still printed beneath them.
+
+The dismissal is kept in the visitor's own browser, in local storage, exactly like the color scheme choice. The notice sets no cookie, writes nothing to your database, and sends no choice to your server — so a visitor who clears their site data sees the bar once more, and where a browser refuses storage the bar simply never appears. It is off until you turn it on, because a cookie notice is your site's public copy and a theme update should not add any.
+
+> **Note**
+>
+> The notice tells; it does not hold anything back, and it is not a consent management platform. To keep advertising off until a visitor has accepted, use `Only load advertising after consent` under Advertising with a solution that reports the choice back — see [Advertising and cookie consent](#advertising-and-cookie-consent).
+
+### The 18 U.S.C. § 2257 page and which role your site is in
 
 The starter 2257 page is written for a site that **distributes material produced by other people** — the posture this theme's video submission and membership features normally put an operator in. It describes the *secondary producer* role under 18 U.S.C. § 2257 and 28 C.F.R. part 75 in general terms, and it does not assert that your site holds any particular obligation.
 
@@ -948,6 +1109,8 @@ Built-in legal pages use the site’s WordPress administrative email. Keep that 
 ### Footer legal menu
 
 The legal pages are normally kept separate from the Main Menu. Review the footer menu after editing page titles or slugs. If you intentionally use a different footer menu, make sure the legal links are still present.
+
+The row is centered on the page, on the same axis as the copyright line below it, and stays centered whatever the site direction is. A long footer menu still wraps to a second line rather than scrolling sideways; the widget columns above it keep their own left-aligned text.
 
 **Keep the site healthy**
 
@@ -1049,9 +1212,11 @@ Front-end submissions are intentionally moderated. Open `Videos`, select the pen
 
 ### Do I need an SEO plugin for this theme?
 
-Yes. Majestic Tube prints no titles, meta descriptions, robots directives or canonical URLs, so an SEO plugin is what puts those on the page. It is also where you set a title or description for an individual category, actor, tag, studio or series term. The theme keeps only the wording a visitor reads on the page, which stays in the Customizer.
+No. `SEO & Analytics → Basic SEO` prints a meta description, a canonical on archive pages, and the Open Graph and Twitter cards a shared link needs, and it is on by default. Install a plugin only if you want more than that — per-post keywords, a score, redirects, a noindex switch per page — and the theme will step aside for it automatically rather than printing a competing tag.
 
-The one thing the theme does add is video structured data — a `VideoObject` block and a video sitemap — because a video theme is the only place that knows a video's runtime, source and cast. See [Video Structured Data](#video-structured-data). It is switched off in one click if your SEO plugin already covers it.
+What the theme does not do either way is set a title or description for an individual category, actor, tag, studio or series term. Those come from the plugin you install, or stay as the term's own name and description.
+
+The theme also adds video structured data — a `VideoObject` block and a video sitemap — because a video theme is the only place that knows a video's runtime, source and cast. See [Video Structured Data](#video-structured-data). It keeps working while a plugin is running, and it is switched off in one click if your plugin already covers it.
 
 ### Can I use this on an existing WordPress site?
 
@@ -1105,6 +1270,10 @@ The theme prints that snippet once per page from the end of the page, which is w
 
 Turn on `Only load advertising after consent`, then let your consent plugin return `true` through the `majestic_tube_ads_allowed` filter once the visitor has accepted. Until then, every placement prints nothing. Remember to clear any page cache afterwards, since cached HTML may still contain the earlier ad markup.
 
+### Does the theme's own cookie notice hold ads back?
+
+No. The notice is a sentence, a dismiss control, and links to your policy pages. It records nothing on your server and changes nothing about advertising. Advertising is held back by `Only load advertising after consent`, which needs a consent solution to report the visitor's choice.
+
 ### Should I count a view when someone only opens the page?
 
 That is the default, and it matches the original theme. Turn on `Count a view only after playback starts` to record the view after three seconds of playback instead, which gives a much truer number. The switch affects new views only, so existing totals stay as they are.
@@ -1119,7 +1288,7 @@ They are off until you turn them on, under `Appearance → Customize → Video P
 
 ### Do the resume position and theater mode store anything about my visitors?
 
-No. The playback position, the chosen speed, and whether theater mode is on are all kept in the visitor’s own browser, exactly like the colour scheme choice in 2.1.6. Nothing is sent to your server, no cookie is set, and nothing is written to the database or any report. Clearing site data, or opening a private window, simply returns a visitor to your defaults.
+No. The playback position, the chosen speed, and whether theater mode is on are all kept in the visitor’s own browser, exactly like the color scheme choice in 2.1.6. Nothing is sent to your server, no cookie is set, and nothing is written to the database or any report. Clearing site data, or opening a private window, simply returns a visitor to your defaults.
 
 ### Why is a password or report action unavailable?
 
@@ -1127,7 +1296,7 @@ Sign in when required, disable conflicting caching or security restrictions, and
 
 ### Can I have a dark site?
 
-Yes. Set `Colour scheme` to **Dark** under `Appearance → Customize → Site Design → Colours & Typography`. Set it to **Follow system** instead and each visitor gets the skin their own device already asks for, which is usually the friendliest default for a video site people watch at night.
+Yes. Set `Color scheme` to **Dark** under `Appearance → Customize → Site Design → Colors & Typography`. Set it to **Follow system** instead and each visitor gets the skin their own device already asks for, which is usually the friendliest default for a video site people watch at night.
 
 To let visitors override it, also turn on `Show the light/dark toggle in the header`. Their choice is remembered per browser and never reaches your server, so it costs you nothing in stored data and reports no personal preference.
 

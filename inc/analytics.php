@@ -44,7 +44,7 @@
  * AJAX endpoints running alongside this one).
  *
  * @package Majestic Tube
- * @version 2.0.0
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -96,7 +96,7 @@ function majestic_tube_get_client_ip() {
  * A stable, non-reversible stand-in for a visitor address.
  *
  * Every place the theme remembers a visitor stores this instead of the address
- * itself: the theme has to recognise a returning visitor, not know where they
+ * itself: the theme has to recognize a returning visitor, not know where they
  * are. The hash is keyed with the site's auth salt, which lives in wp-config.php
  * and never in the database, so a copy of wp_postmeta or wp_options contains no
  * address list that can be turned back into addresses without the server's
@@ -109,7 +109,7 @@ function majestic_tube_get_client_ip() {
  * Two consequences of being keyed and therefore only as stable as the salt:
  * regenerating the salts in wp-config.php changes every fingerprint, so past
  * votes and reports stop matching and each visitor may act once more; and a
- * row written under the old salt stops being recognisable at all, which is why
+ * row written under the old salt stops being recognizable at all, which is why
  * the cleanup below drops anything that is neither an address nor one of these.
  * Rotating salts is worth that much, but it should be a decision rather than a
  * surprise.
@@ -213,7 +213,7 @@ function majestic_tube_ip_history_window( $meta_key ) {
  *
  * Rows written before keyed hashing held addresses verbatim. They are rehashed
  * here rather than dropped, which does two things at once: a visitor who has
- * already voted inside this window stays recognised instead of getting a
+ * already voted inside this window stays recognized instead of getting a
  * second vote, and the plain-text address leaves the database the next time
  * anyone acts on that video.
  *
@@ -371,7 +371,7 @@ function majestic_tube_view_dedup_window() {
  * are visible in wp_options, and a plain address there is personal data that
  * also invites prefix collisions. The same keyed fingerprint the post meta
  * history uses applies here, so the one visitor identity is the one the whole
- * theme recognises. Views written under the old md5 key are simply not found
+ * theme recognizes. Views written under the old md5 key are simply not found
  * and age out of wp_options on their own.
  *
  * @param string $ip Validated client IP.
@@ -524,25 +524,51 @@ function majestic_tube_analytics_get( $post_id ) {
 	 * post moves the imported rating by one rather than replacing it with a
 	 * bare 100%.
 	 */
-	$likes    = isset( $meta['likes_count'] ) ? absint( $meta['likes_count'][0] ) : null;
-	$dislikes = isset( $meta['dislikes_count'] ) ? absint( $meta['dislikes_count'][0] ) : null;
+	$likes    = isset( $meta['likes_count'] ) ? majestic_tube_analytics_meta_int( $meta, 'likes_count' ) : null;
+	$dislikes = isset( $meta['dislikes_count'] ) ? majestic_tube_analytics_meta_int( $meta, 'dislikes_count' ) : null;
 
 	if ( null === $likes || null === $dislikes ) {
-		$likes    = ( null === $likes && isset( $meta['thumbs_up'] ) ) ? absint( $meta['thumbs_up'][0] ) : $likes;
-		$dislikes = ( null === $dislikes && isset( $meta['thumbs_down'] ) ) ? absint( $meta['thumbs_down'][0] ) : $dislikes;
+		$likes    = ( null === $likes && isset( $meta['thumbs_up'] ) ) ? majestic_tube_analytics_meta_int( $meta, 'thumbs_up' ) : $likes;
+		$dislikes = ( null === $dislikes && isset( $meta['thumbs_down'] ) ) ? majestic_tube_analytics_meta_int( $meta, 'thumbs_down' ) : $dislikes;
 	}
 
 	$data = array(
-		'views'    => isset( $meta['post_views_count'] ) ? absint( $meta['post_views_count'][0] ) : 0,
+		'views'    => majestic_tube_analytics_meta_int( $meta, 'post_views_count' ),
 		'likes'    => null === $likes ? 0 : $likes,
 		'dislikes' => null === $dislikes ? 0 : $dislikes,
-		'rate'     => isset( $meta['rate'] ) ? absint( $meta['rate'][0] ) : 0,
-		'reported' => isset( $meta['reported_count'] ) ? absint( $meta['reported_count'][0] ) : 0,
+		'rate'     => majestic_tube_analytics_meta_int( $meta, 'rate' ),
+		'reported' => majestic_tube_analytics_meta_int( $meta, 'reported_count' ),
 	);
 
 	wp_cache_set( $key, $data, MAJESTIC_TUBE_ANALYTICS_GROUP );
 
 	return $data;
+}
+
+/**
+ * Read one integer counter out of a raw get_post_meta( $post_id ) array.
+ *
+ * get_post_meta() with one argument returns meta_key => array-of-values, and
+ * that array is empty for a row that was written with no value at all - an
+ * interrupted import, a hand-edited row, a plugin that saved '' rather than
+ * deleting. Reading $meta[ $key ][0] straight off it raises "Undefined array
+ * key 0" on PHP 8, on a request that only meant to display a counter.
+ *
+ * @param array  $meta     Raw meta array from get_post_meta( $post_id ).
+ * @param string $meta_key Counter key.
+ * @param int    $fallback Value when the key is absent or carries no value.
+ * @return int
+ */
+function majestic_tube_analytics_meta_int( $meta, $meta_key, $fallback = 0 ) {
+	if ( ! is_array( $meta ) || ! isset( $meta[ $meta_key ] ) ) {
+		return (int) $fallback;
+	}
+
+	// A scalar means the meta was cached as a single value rather than the
+	// usual array-of-one, which some object-cache layers do.
+	$values = is_array( $meta[ $meta_key ] ) ? $meta[ $meta_key ] : array( $meta[ $meta_key ] );
+
+	return $values ? absint( $values[0] ) : (int) $fallback;
 }
 
 /**

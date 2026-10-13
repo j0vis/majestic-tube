@@ -135,7 +135,7 @@ if ( ! function_exists( 'wpst_get_video_preview' ) ) {
 		$trailer_url = $post_id ? majestic_tube_get_trailer_url( $post_id ) : '';
 
 		if ( ! $trailer_url ) {
-			throw new Exception( 'No trailer found for video #' . esc_html( $post_id ) );
+			throw new Exception( 'No trailer found for video #' . (int) $post_id );
 		}
 
 		$trailer_format = wpst_get_type_from_video_url( $trailer_url );
@@ -151,14 +151,14 @@ if ( ! function_exists( 'wpst_get_video_preview' ) ) {
 			return '<img class="wpst-trailer preview-thumb" width="100%" height="100%" src="' . esc_url( $trailer_url ) . '" alt="" />';
 		}
 
-		throw new Exception( 'Unsupported trailer format for video #' . esc_html( $post_id ) );
+		throw new Exception( 'Unsupported trailer format for video #' . (int) $post_id );
 	}
 }
 
 /**
  * Print the categories / actors / tags list of the current video.
  *
- * Each group honours its original visibility switch.
+ * Each group honors its original visibility switch.
  *
  * @return void
  */

@@ -390,7 +390,7 @@ function majestic_tube_get_requested_letter() {
  * Empty terms are hidden by default. The original theme listed them, but a
  * directory of terms with nothing behind them is dead weight on every page that
  * links to it, and bulk imports leave a lot of them behind. The filter stays so
- * a site that wants the original behaviour can return false.
+ * a site that wants the original behavior can return false.
  *
  * @param string $taxonomy Taxonomy name.
  * @param string $letter   Active letter filter, or an empty string.
@@ -675,15 +675,15 @@ function majestic_tube_term_letter_nav( $taxonomy ) {
 	<nav class="term-letter-nav" aria-label="<?php esc_attr_e( 'Browse by letter', 'majestic-tube' ); ?>">
 		<ul>
 			<li>
-				<a class="term-letter<?php echo '' === $current ? ' is-active' : ''; ?>"
+				<a class="term-letter<?php echo '' === $current ? ' is-active' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static attribute fragment. ?>"
 					href="<?php echo esc_url( $base ); ?>"
-					<?php echo '' === $current ? ' aria-current="true"' : ''; ?>><?php esc_html_e( 'All', 'majestic-tube' ); ?></a>
+					<?php echo '' === $current ? ' aria-current="true"' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static attribute fragment. ?>><?php esc_html_e( 'All', 'majestic-tube' ); ?></a>
 			</li>
 			<?php foreach ( $available as $letter ) : ?>
 				<li>
-					<a class="term-letter<?php echo $current === $letter ? ' is-active' : ''; ?>"
+					<a class="term-letter<?php echo $current === $letter ? ' is-active' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static attribute fragment. ?>"
 						href="<?php echo esc_url( add_query_arg( 'letter', rawurlencode( $letter ), $base ) ); ?>"
-						<?php echo $current === $letter ? ' aria-current="true"' : ''; ?>><?php echo esc_html( $letter ); ?></a>
+						<?php echo $current === $letter ? ' aria-current="true"' : ''; // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- static attribute fragment. ?>><?php echo esc_html( $letter ); ?></a>
 				</li>
 			<?php endforeach; ?>
 		</ul>

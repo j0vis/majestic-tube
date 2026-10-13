@@ -7,7 +7,7 @@
  * screen.
  *
  * @package Majestic Tube
- * @version 2.3.0
+ * @version 2.5.0
  */
 
 defined( 'ABSPATH' ) || exit;
@@ -24,6 +24,29 @@ function majestic_tube_activation_pages() {
 		'Actors'         => 'template-actors.php',
 		'Categories'     => 'template-categories.php',
 		'Tags'           => 'template-tags.php',
+	);
+}
+
+/**
+ * Activation pages that belong inside My Account, never in the top-level menu.
+ *
+ * These two are members' account pages, and the theme prints a My Account
+ * dropdown holding both of them at render time (majestic_tube_membership_nav).
+ * Adding them as top-level items as well - which is what activation used to
+ * do - put "Submit a Video" beside Home and Categories, linking at the same
+ * place twice. The pages are still created; only their menu place changes.
+ *
+ * @return string[] Page titles, matching majestic_tube_activation_pages().
+ */
+function majestic_tube_account_page_titles() {
+	/**
+	 * Filter which activation pages are kept out of the top-level main menu.
+	 *
+	 * @param string[] $titles Page titles.
+	 */
+	return (array) apply_filters(
+		'majestic_tube_account_page_titles',
+		array( 'Submit a Video', 'Profile' )
 	);
 }
 
@@ -112,14 +135,45 @@ function majestic_tube_send_contact_email( $subject, $message, $headers = array(
  * installs of this theme, and wronger still for anyone who published it
  * without reading it.
  *
- * @return array<string, array{slug: string, legacy_slug?: string, content: string}>
+ * These three pages no longer end with the bolded "Template notice" paragraph
+ * an earlier release shipped. That paragraph was aimed at the administrator,
+ * but it was part of the page body, so a visitor reading the policy was told
+ * by the policy itself that it was a template - the site appearing to
+ * disclaim its own document. The warning still belongs on this screen and in
+ * the setup notes, not on the page a visitor is asked to read, so the shipped
+ * copy carries the policy and nothing else. Pages an earlier release already
+ * created are cleaned up by majestic_tube_strip_template_notice().
+ *
+ * The address each document is asked for matters more than it looks, because
+ * WordPress decides it: wp_unique_post_slug() refuses a slug that is a number,
+ * with or without the pagination base in front of it, since /2257/ would be
+ * indistinguishable from a page number in a URL the site itself generates.
+ * Asking for /2257/ therefore never produced /2257/ - it produced /2257-2/, and
+ * then /2257-3/ on the site after that. The 2257 page keeps the address it has
+ * been linked at since the first release, /18-usc-2257/, and the numbered forms
+ * are the retired ones (majestic_tube_retired_2257_redirect_url() sends them
+ * on). Everything else here is a word, and words are always available.
+ *
+ * The title of a legal document is not only a label. It is what the footer link
+ * says, what a lookup by title searches for, and - on a site built by an earlier
+ * release - what is already written in the database, because a page row keeps
+ * the title it was created with. Renaming a document therefore cannot be "change
+ * the key and move on": the old name has to keep finding the page that is
+ * already there, or the next setup pass fails to recognize it and inserts a
+ * second copy of a legal document. That is what former_titles records. It is an
+ * admission that an existing page answers to its old name until the rename
+ * lands, and majestic_tube_legal_page_former_titles() is the one place that list
+ * is read, so a rename is described in one array rather than in every lookup.
+ *
+ * @return array<string, array{slug: string, legacy_slug?: string, former_titles?: string[], content: string}>
  */
 function majestic_tube_legal_pages() {
 	return array(
-		'18 USC 2257' => array(
-			'slug'        => '2257',
-			'legacy_slug' => '18-usc-2257',
-			'content'     => <<<'HTML'
+		'18 U.S.C. § 2257' => array(
+			'slug'          => '18-usc-2257',
+			'legacy_slug'   => '2257',
+			'former_titles' => array( '18 USC 2257' ),
+			'content'       => <<<'HTML'
 <h2>18 U.S.C. § 2257</h2>
 <p>This site is operated by <strong>[Site Name]</strong>. It publishes and distributes material produced by third parties.</p>
 <p>Where a site distributes or markets material it did not produce, it may fall within the definition of a <em>secondary producer</em> under 18 U.S.C. § 2257 and its implementing regulations at 28 C.F.R. part 75. Obligations attaching to that role can include keeping certain records, publishing a statement describing where those records are held, and producing them for lawful inspection. Which, if any, of those obligations apply to this site depends on the site’s content, the operator’s role in producing it, and the law applicable where the operator and the material are located.</p>
@@ -135,8 +189,6 @@ function majestic_tube_legal_pages() {
 <p>Visitors must not upload, publish, or distribute content that violates applicable law. The operator may remove content and may cooperate with lawful requests concerning records, identification, or reported content.</p>
 <h3>Contact</h3>
 <p>Questions about records or this notice may be sent to [majestic_tube_default_email_link].</p>
-<hr />
-<p><strong>Template notice:</strong> This page is a starting template and does not certify compliance. <strong>[Site Name]</strong> and the site contact address fill themselves in from Settings &rarr; General; every other bracketed field is the operator’s to complete. If the operator produces any material rather than only distributing material produced by others, obligations attach to the primary producer instead, and generic secondary-producer wording is not sufficient. The site operator is responsible for establishing which role the site falls in, reviewing this policy against the site’s actual content, hosting, age-verification, and recordkeeping practices, completing the placeholder fields, and obtaining legal advice where needed.</p>
 HTML,
 		),
 		'DMCA' => array(
@@ -156,7 +208,6 @@ HTML,
 </ol>
 <h3>Response and repeat infringers</h3>
 <p>The operator may review and remove alleged infringing material and may restrict access to repeat infringers. A notice does not guarantee removal. The operator may forward a valid notice to the person who posted the material and may disclose necessary information to comply with law.</p>
-<p><strong>Template notice:</strong> This page is a general starting point, not legal advice or a substitute for a review of the site’s actual content and hosting practices. <strong>[Site Name]</strong> and the site contact address fill themselves in from Settings &rarr; General; the mailing address, designated-agent details, and legal name are the operator’s to complete.</p>
 HTML,
 		),
 		'Privacy Policy' => array(
@@ -177,8 +228,6 @@ HTML,
 <p>The site is not directed to children under 13, and we do not knowingly collect personal information from them. We may update this policy when the site’s practices or legal requirements change. Material changes will be posted on this page with an updated date.</p>
 <h3>Contact</h3>
 <p>Privacy questions and requests may be sent to [majestic_tube_default_email_link].</p>
-<hr />
-<p><strong>Template notice:</strong> This page is a starting point, not legal advice. <strong>[Site Name]</strong> and the site contact address fill themselves in from Settings &rarr; General. The operator is responsible for documenting the site’s actual data practices, vendors, retention periods, legal bases, and region-specific rights before relying on it.</p>
 HTML,
 		),
 	);
@@ -251,12 +300,16 @@ function majestic_tube_page_is_viewable( $page ) {
  *
  * Only viewable pages count: a trashed copy is reported missing so the
  * welcome screen offers the restore, and the restore then untrashes that
- * same copy instead of inserting a second one. An exact title match is the
- * last resort, for the copy a previous duplicate left behind under a
- * suffixed slug (2257-2) - finding it stops the third copy.
+ * same copy instead of inserting a second one. A lookup by title is the last
+ * resort, for the copy a previous duplicate left behind under a suffixed slug
+ * (2257-2) - finding it stops the third copy - and it searches the document's
+ * former names as well as its current one, because the page a previous release
+ * created is titled with the name that release used and nothing has renamed it
+ * yet. That is what keeps a rename from looking like a missing page.
  *
  * @param array  $definition Legal page definition.
- * @param string $title      Page title, for the renamed-copy fallback.
+ * @param string $title      Page title, for the title lookup and the former
+ *                           names it includes.
  * @return object|false Page object, or false when no viewable page exists.
  */
 function majestic_tube_find_legal_page( $definition, $title = '' ) {
@@ -277,7 +330,7 @@ function majestic_tube_find_legal_page( $definition, $title = '' ) {
 	}
 
 	if ( '' !== $title ) {
-		foreach ( majestic_tube_legal_pages_by_title( $title ) as $by_title ) {
+		foreach ( majestic_tube_legal_pages_by_title( $title, $definition ) as $by_title ) {
 			if ( majestic_tube_page_is_viewable( $by_title ) ) {
 				return $by_title;
 			}
@@ -288,33 +341,104 @@ function majestic_tube_find_legal_page( $definition, $title = '' ) {
 }
 
 /**
- * Every page row carrying an exact title, in any status.
+ * Every name a built-in legal document has ever been published under.
+ *
+ * The list is the document's current title followed by the titles it carried in
+ * earlier releases. It is what makes a rename safe: a page row created before
+ * the rename still answers to the old name, so the lookup that prevents a second
+ * copy keeps finding it, and once the rename has landed the page answers to the
+ * new name instead. Only names the theme itself shipped are listed - a title an
+ * administrator typed is not in here, and is therefore never treated as the
+ * theme's own to change.
+ *
+ * @param array $definition Legal page definition.
+ * @return string[] Former titles, empty when the document was never renamed.
+ */
+function majestic_tube_legal_page_former_titles( $definition ) {
+	if ( ! is_array( $definition ) || empty( $definition['former_titles'] ) ) {
+		return array();
+	}
+
+	$former = array();
+
+	foreach ( (array) $definition['former_titles'] as $title ) {
+		$title = (string) $title;
+
+		if ( '' !== $title ) {
+			$former[] = $title;
+		}
+	}
+
+	return $former;
+}
+
+/**
+ * Every title one legal document answers to, its current name first.
+ *
+ * @param string $title      Current page title.
+ * @param array  $definition Legal page definition.
+ * @return string[] Titles, empty when neither argument names the document.
+ */
+function majestic_tube_legal_page_titles( $title, $definition = array() ) {
+	$titles = array();
+
+	foreach ( array_merge( array( (string) $title ), majestic_tube_legal_page_former_titles( $definition ) ) as $candidate ) {
+		if ( '' !== $candidate && ! in_array( $candidate, $titles, true ) ) {
+			$titles[] = $candidate;
+		}
+	}
+
+	return $titles;
+}
+
+/**
+ * Every page row carrying one of a document's titles, in any status.
  *
  * get_page_by_title() returns a single row, so a second live copy hiding
  * under a suffixed slug is invisible to it - which is exactly the duplicate
  * this machinery exists to find. An exact-title query returns them all.
  *
- * @param string $title Exact page title.
+ * A document's former titles are searched in the same pass as its current one.
+ * A page created before a rename is a copy of this document in every sense that
+ * matters here, and a lookup that could not see it would report the document
+ * missing and then insert the duplicate it exists to prevent. Rows come back
+ * oldest first across every title, which is the order the single-title query
+ * returned them in.
+ *
+ * @param string $title      Exact page title.
+ * @param array  $definition Legal page definition, for the former names.
  * @return array<int, object> Page rows, oldest first.
  */
-function majestic_tube_legal_pages_by_title( $title ) {
-	if ( '' === $title || ! function_exists( 'get_posts' ) ) {
+function majestic_tube_legal_pages_by_title( $title, $definition = array() ) {
+	if ( ! function_exists( 'get_posts' ) ) {
 		return array();
 	}
 
-	$found = get_posts(
-		array(
-			'post_type'      => 'page',
-			'post_status'    => array( 'publish', 'private', 'draft', 'pending', 'trash' ),
-			'title'          => $title,
-			'posts_per_page' => -1,
-			'orderby'        => 'ID',
-			'order'          => 'ASC',
-			'no_found_rows'  => true,
-		)
-	);
+	$rows = array();
 
-	return is_array( $found ) ? array_values( $found ) : array();
+	foreach ( majestic_tube_legal_page_titles( $title, $definition ) as $form ) {
+		$found = get_posts(
+			array(
+				'post_type'      => 'page',
+				'post_status'    => array( 'publish', 'private', 'draft', 'pending', 'trash' ),
+				'title'          => $form,
+				'posts_per_page' => -1,
+				'orderby'        => 'ID',
+				'order'          => 'ASC',
+				'no_found_rows'  => true,
+			)
+		);
+
+		foreach ( is_array( $found ) ? $found : array() as $row ) {
+			if ( isset( $row->ID ) ) {
+				$rows[ (int) $row->ID ] = $row;
+			}
+		}
+	}
+
+	ksort( $rows );
+
+	return array_values( $rows );
 }
 
 /**
@@ -346,11 +470,180 @@ function majestic_tube_find_legal_copies( $definition, $title = '' ) {
 		$take( get_page_by_path( $legacy_slug ) );
 	}
 
-	foreach ( majestic_tube_legal_pages_by_title( $title ) as $by_title ) {
+	foreach ( majestic_tube_legal_pages_by_title( $title, $definition ) as $by_title ) {
 		$take( $by_title );
 	}
 
 	return $copies;
+}
+
+/**
+ * Put a single legal page back on the slug the theme links at.
+ *
+ * WordPress appends a number when a slug is already taken, so a slug like
+ * 2257-2 is not a choice anyone made: it is the fingerprint of a second row
+ * holding /2257/ when the page was inserted. The document works from that
+ * address, but a page the theme created should not carry an address nobody
+ * chose - and the address is wrong for the document too, since the canonical
+ * one is where the footer, the sitemap and anything the operator wrote point.
+ *
+ * Only the name changes: the page ID, its content, its author, its comments and
+ * every menu item pointing at it are untouched, and WordPress's own old-slug
+ * redirect keeps the suffixed address working for anyone who has it.
+ *
+ * Two things stop it, both deliberate. A document with more than one live copy
+ * is left alone until the administrator has settled which copy to keep, since
+ * renaming onto a slug a second live page holds would simply mint the next
+ * number; the status screen names the extra copy and offers to trash it, and
+ * the pass after that repairs the slug. And a slug the administrator chose is
+ * not the theme's to change: only the canonical slug, the legacy slug and a
+ * numbered variant of the canonical slug are recognized as this document's own.
+ *
+ * @param string $title      Legal page title.
+ * @param array  $definition Legal page definition.
+ * @return int Page ID whose slug now sits on the canonical name, 0 when there
+ *         was nothing to repair.
+ */
+function majestic_tube_repair_legal_slug( $title, $definition ) {
+	if ( ! is_array( $definition ) || empty( $definition['slug'] ) || ! function_exists( 'wp_update_post' ) ) {
+		return 0;
+	}
+
+	$canonical = (string) $definition['slug'];
+	$copies    = majestic_tube_find_legal_copies( $definition, $title );
+
+	// Two live copies, or none: not a repair this pass can make.
+	if ( 1 !== count( $copies ) ) {
+		return 0;
+	}
+
+	$page = reset( $copies );
+
+	if ( ! $page || ! isset( $page->ID, $page->post_name ) ) {
+		return 0;
+	}
+
+	$current = (string) $page->post_name;
+
+	if ( $current === $canonical ) {
+		return 0;
+	}
+
+	$legacy = ! empty( $definition['legacy_slug'] ) ? (string) $definition['legacy_slug'] : '';
+	$own    = false;
+
+	/*
+	 * Either name this document has ever had, and any numbered copy of either:
+	 * 18-usc-2257-2 is what WordPress would have made of a second attempt at
+	 * the same slug, and 2257-2 is what it made of the retired numeric one.
+	 */
+	foreach ( array( $canonical, $legacy ) as $family ) {
+		if ( '' === $family ) {
+			continue;
+		}
+
+		if ( $current === $family || preg_match( '/^' . preg_quote( $family, '/' ) . '-\d+$/', $current ) ) {
+			$own = true;
+			break;
+		}
+	}
+
+	if ( ! $own ) {
+		return 0;
+	}
+
+	/*
+	 * The canonical slug has to be free in every status, not just among live
+	 * pages: a trashed or draft row still reserves it, and WordPress would
+	 * answer this rename with 2257-2 - the very name being repaired.
+	 */
+	if ( get_page_by_path( $canonical ) ) {
+		return 0;
+	}
+
+	$updated = wp_update_post(
+		array(
+			'ID'        => (int) $page->ID,
+			'post_name' => $canonical,
+		),
+		true
+	);
+
+	if ( is_wp_error( $updated ) || ! $updated ) {
+		return 0;
+	}
+
+	// Believe the stored row rather than the request: the next pass retries.
+	$refreshed = get_post( (int) $page->ID );
+
+	return ( $refreshed && isset( $refreshed->post_name ) && $canonical === $refreshed->post_name ) ? (int) $page->ID : 0;
+}
+
+/**
+ * Put an existing legal page back on the name the theme gives it now.
+ *
+ * A page carries the title it was created with, and it keeps that title until
+ * something renames it - so a document renamed in the theme is still titled
+ * with its old name on every site that already exists. The title is not
+ * cosmetic: it is what a visitor reads at the top of the policy, what the
+ * footer link says, and part of what the lookup searching for the page was
+ * looking for.
+ *
+ * Only the title changes: the page ID, its slug, its content, its author, its
+ * comments and every menu item pointing at it stay exactly as they are.
+ *
+ * One thing stops it, and it is the same judgment the by-title lookup makes.
+ * Only a name the theme itself shipped is the theme's to change; a title the
+ * administrator chose is theirs. That is what former_titles is for - a page
+ * whose title matches neither the current name nor a former one is left alone,
+ * which is also what keeps this harmless on a site where an operator renamed
+ * their own 2257 page deliberately.
+ *
+ * @param int    $page_id    Page ID.
+ * @param string $title      Current page title.
+ * @param array  $definition Legal page definition.
+ * @return int Page ID once the title sits on the current name, 0 when there was
+ *         nothing to repair.
+ */
+function majestic_tube_repair_legal_page_title( $page_id, $title, $definition ) {
+	$title = (string) $title;
+
+	if ( ! $page_id || '' === $title || ! function_exists( 'wp_update_post' ) ) {
+		return 0;
+	}
+
+	$page = get_post( $page_id );
+
+	if ( ! $page || ! isset( $page->ID, $page->post_title ) ) {
+		return 0;
+	}
+
+	$current = (string) $page->post_title;
+
+	if ( $current === $title ) {
+		return 0;
+	}
+
+	if ( ! in_array( $current, majestic_tube_legal_page_former_titles( $definition ), true ) ) {
+		return 0;
+	}
+
+	$updated = wp_update_post(
+		array(
+			'ID'         => (int) $page_id,
+			'post_title' => $title,
+		),
+		true
+	);
+
+	if ( is_wp_error( $updated ) || ! $updated ) {
+		return 0;
+	}
+
+	// Believe the stored row rather than the request: the next pass retries.
+	$refreshed = get_post( (int) $page_id );
+
+	return ( $refreshed && isset( $refreshed->post_title ) && $title === $refreshed->post_title ) ? (int) $page_id : 0;
 }
 
 /**
@@ -387,59 +680,169 @@ function majestic_tube_legal_page_status() {
 }
 
 /**
- * Move the original 2257 page to the canonical slug when it is the only page.
+ * Find the code, embeds and ad blocks inside a legal page.
  *
- * WordPress records the previous slug in `_wp_old_slug` when wp_update_post()
- * changes a published page name. The explicit redirect below also covers sites
- * where a second page already occupies the canonical slug.
+ * The theme withholds every widget area on a legal page, so nothing an
+ * administrator placed in a Code and ads area reaches the document. Markup
+ * saved *inside the page body* is the other door: an editor can paste an ad
+ * tag, a Custom HTML block or an embed into the policy itself, and the theme
+ * neither wrote it nor may take it out - the wording on that page belongs to
+ * the administrator, and a theme that silently deleted it would be the worse
+ * bug. This is the detector the two warnings below are built on, so the
+ * guarantee stays honest rather than assumed.
  *
- * @param array $definition Legal page definition.
- * @return object|false Canonical page object, or false when unavailable.
+ * It looks for the shapes such markup actually arrives in: a script tag, an
+ * embed or ad frame, a network ad marker, the editor blocks an ad is pasted
+ * into, an advertising block from a plugin, and an ad or embed shortcode. It
+ * reports what it found rather than only that something is there, so a screen
+ * can say which page and which block.
+ *
+ * The one thing it leaves alone is what a page only quotes. Plenty of privacy
+ * policies name the script they load - "we use Google's adsbygoogle.js" - and
+ * a passage saying so is not an ad. A Core Code block is exactly that kind of
+ * quotation, so its contents are left out of the marker search, which is why
+ * the code sample in this comment does not flag this theme:
+ *
+ *     <!-- wp:code --><pre>adsbygoogle</pre><!-- /wp:code -->
+ *
+ * The search for markup that would actually run covers the whole page, code
+ * block or not, because a raw tag hand-pasted between those two comments still
+ * prints. The rule is to flag what runs and to leave what is quoted alone.
+ *
+ * @param string $content Page content.
+ * @return string[] Kinds found, empty when the page is clean.
  */
-function majestic_tube_migrate_2257_page( $definition ) {
-	$canonical = majestic_tube_get_legal_page( $definition );
-	$legacy_slug = ! empty( $definition['legacy_slug'] ) ? $definition['legacy_slug'] : '';
-	$legacy      = $legacy_slug ? get_page_by_path( $legacy_slug ) : false;
-
-	if ( ! $legacy || ! isset( $legacy->ID ) ) {
-		return $canonical;
+function majestic_tube_legal_content_blocks( $content ) {
+	if ( ! is_string( $content ) || '' === $content ) {
+		return array();
 	}
-
-	$legacy_id = (int) $legacy->ID;
 
 	/*
-	 * A trashed or draft canonical still occupies the slug: renaming the
-	 * legacy page onto it would make WordPress mint a suffixed 2257-2
-	 * second copy. Leave the legacy page serving the document instead -
-	 * the status check counts it as found, so nothing else is created.
+	 * The page with every Core Code block emptied, which is the text a visitor
+	 * reads as prose rather than as live markup. Only the marker search below
+	 * uses it; a tag is looked for everywhere.
 	 */
-	if ( $canonical && isset( $canonical->ID ) && ! majestic_tube_page_is_viewable( $canonical ) ) {
-		return $legacy;
-	}
+	$unquoted = preg_replace( '#<!--\s*wp:code\b.*?<!--\s*/wp:code\s*-->#is', ' ', $content );
+	$prose    = is_string( $unquoted ) ? $unquoted : $content;
 
-	if ( ! $canonical && function_exists( 'wp_update_post' ) ) {
-		// Supplying only the name preserves the page ID and all administrator
-		// edits to the title, content, status, and metadata.
-		$updated = wp_update_post(
-			array(
-				'ID'        => $legacy_id,
-				'post_name' => $definition['slug'],
-			),
-			true
-		);
+	$patterns = array(
+		'/<!--\s*wp:html\b/i'       => __( 'a Custom HTML block', 'majestic-tube' ),
+		'/<!--\s*wp:embed\b/i'      => __( 'an Embed block', 'majestic-tube' ),
+		'/<!--\s*wp:script\b/i'     => __( 'a Script block', 'majestic-tube' ),
+		'/<script\b/i'              => __( 'a script tag', 'majestic-tube' ),
+		'/<(?:iframe|embed|object|ins)\b/i' => __( 'an embed or ad frame', 'majestic-tube' ),
+	);
 
-		if ( ! is_wp_error( $updated ) && $updated ) {
-			$canonical = get_page_by_path( $definition['slug'] );
+	$markers = array(
+		'/(?:\badsbygoogle\b|\bdata-ad[-_a-z]*\s*=)/i' => __( 'a network ad marker', 'majestic-tube' ),
+		'/\[\s*(?:ads?|adsense|advert[a-z_]*|embed|iframe|google_ads[a-z_]*)\b[^\]]*\]/i' => __( 'an ad or embed shortcode', 'majestic-tube' ),
+	);
+
+	$found = array();
+
+	foreach ( $patterns as $pattern => $label ) {
+		if ( preg_match( $pattern, $content ) ) {
+			$found[ $label ] = $label;
 		}
 	}
 
-	if ( $canonical && isset( $canonical->ID ) && $legacy_id !== (int) $canonical->ID && function_exists( 'update_post_meta' ) ) {
-		// This marker is useful when a site has both slugs. The request-level
-		// redirect remains the source of truth, so editing the old page is safe.
-		update_post_meta( $legacy_id, '_majestic_tube_legal_redirect', $definition['slug'] );
+	foreach ( $markers as $pattern => $label ) {
+		if ( preg_match( $pattern, $prose ) ) {
+			$found[ $label ] = $label;
+		}
 	}
 
-	return $canonical;
+	/*
+	 * A block from an advertising plugin is otherwise an ordinary-looking
+	 * block: its name is the only clue. Every block name in the page is split
+	 * into its words and checked against the ones those plugins use, which is
+	 * why `wp:heading` is not an ad and `wp:ads/leaderboard` is.
+	 */
+	if ( preg_match_all( '/<!--\s*wp:([a-z0-9-]+(?:\/[a-z0-9-]+)?)/i', $prose, $blocks ) ) {
+		$ad_words = array( 'ad', 'ads', 'advert', 'adverts', 'advertising', 'adsense', 'admanager', 'dfp', 'doubleclick' );
+
+		foreach ( $blocks[1] as $block_name ) {
+			foreach ( preg_split( '/[-_\/]/', strtolower( $block_name ) ) as $segment ) {
+				if ( in_array( $segment, $ad_words, true ) ) {
+					$found[ __( 'an advertising block', 'majestic-tube' ) ] = __( 'an advertising block', 'majestic-tube' );
+					break 2;
+				}
+			}
+		}
+	}
+
+	return array_values( $found );
+}
+
+/**
+ * Legal pages whose body carries code, an embed or an ad block.
+ *
+ * Every live copy of a document is checked, so a duplicate that kept the ad
+ * tag is reported even when the canonical page is clean.
+ *
+ * @return array<string, array{id: int, kinds: string[]}> Page title => the first
+ *         flagged copy's ID, and what was found on it.
+ */
+function majestic_tube_legal_pages_with_code_blocks() {
+	$flagged = array();
+
+	foreach ( majestic_tube_legal_pages() as $title => $definition ) {
+		foreach ( majestic_tube_find_legal_copies( $definition, $title ) as $page ) {
+			$kinds = majestic_tube_legal_content_blocks( isset( $page->post_content ) ? $page->post_content : '' );
+
+			if ( $kinds ) {
+				$flagged[ $title ] = array(
+					'id'    => (int) $page->ID,
+					'kinds' => $kinds,
+				);
+
+				break;
+			}
+		}
+	}
+
+	return $flagged;
+}
+
+/**
+ * The value a dismissal is remembered against.
+ *
+ * It changes only when the set of problems changes - a different page flagged,
+ * or a different kind of block found on one - so an administrator who has read
+ * the warning is left alone while the site is unchanged and is told again when
+ * there is something new to tell. The page's modification date is deliberately
+ * not part of it: editing a policy to fix its wording must not resurrect a
+ * warning that has already been answered.
+ *
+ * @param array<string, array{id: int, kinds: string[]}> $flagged Flagged pages.
+ * @return string
+ */
+function majestic_tube_legal_code_notice_key( $flagged ) {
+	$parts = array();
+
+	foreach ( (array) $flagged as $title => $page ) {
+		$parts[] = (string) $title . ':' . (int) $page['id'] . ':' . implode( '+', (array) $page['kinds'] );
+	}
+
+	return md5( implode( '|', $parts ) );
+}
+
+/**
+ * Whether this administrator has already dismissed the warning for this state.
+ *
+ * Kept per user, so one administrator reading it does not hide it from the
+ * next one, and kept in user meta rather than an option, because a dismissal is
+ * a decision about a person's attention rather than about the site.
+ *
+ * @param string $key Notice key.
+ * @return bool
+ */
+function majestic_tube_legal_code_notice_is_dismissed( $key ) {
+	if ( ! function_exists( 'get_user_meta' ) || ! function_exists( 'get_current_user_id' ) ) {
+		return false;
+	}
+
+	return (string) get_user_meta( get_current_user_id(), 'majestic_tube_legal_code_notice', true ) === (string) $key;
 }
 
 /**
@@ -447,7 +850,7 @@ function majestic_tube_migrate_2257_page( $definition ) {
  *
  * Deleting a page sends it to the trash, where the slug lookup cannot tell it
  * apart from a page that never existed - so the old code inserted a fresh
- * copy and the site ended up with two 18 USC 2257 pages. Trashing is also
+ * copy and the site ended up with two 18 U.S.C. § 2257 pages. Trashing is also
  * never a deliberate "keep" state for these infrastructure pages: the footer
  * legal menu links at them, and a trashed target is a dead link.
  *
@@ -476,7 +879,7 @@ function majestic_tube_repair_unviewable_legal_page( $title, $definition, $publi
 		}
 	}
 
-	foreach ( majestic_tube_legal_pages_by_title( $title ) as $by_title ) {
+	foreach ( majestic_tube_legal_pages_by_title( $title, $definition ) as $by_title ) {
 		if ( isset( $by_title->ID ) && ! isset( $seen[ (int) $by_title->ID ] ) ) {
 			$seen[ (int) $by_title->ID ] = true;
 			$candidates[]               = (int) $by_title->ID;
@@ -525,10 +928,17 @@ function majestic_tube_repair_unviewable_legal_page( $title, $definition, $publi
 /**
  * Get or create one built-in legal page, preserving existing page content.
  *
- * A page that exists in any form - live, trashed, draft, or sitting under a
- * suffixed slug from an earlier duplicate - is reused, never duplicated. Only
- * a page that exists nowhere is created, and a created page is explicitly put
- * on the default page template so it renders through page.php like any
+ * A page that exists in any form - live, trashed, draft, or on a retired slug
+ * from an earlier release - is reused, never duplicated, and a page that does
+ * not exist anywhere is created exactly once. The search runs by slug, by
+ * retired slug, and by title - a title that means every name the document has
+ * answered to, including the one an earlier release gave it - so a copy that
+ * ended up on a numbered address (2257-2), or under a name the theme has since
+ * changed, is still found rather than duplicated: the lookups below are the
+ * only ones, so "does this document exist?" has a single answer. A page that is
+ * found is also brought onto the document's current title, so the rename and
+ * the lookup that has to survive it move together. A created page is explicitly
+ * put on the default page template so it renders through page.php like any
  * ordinary prose page.
  *
  * @param string $title               Page title/menu label.
@@ -545,30 +955,27 @@ function majestic_tube_get_or_create_legal_page( $title, $definition, $publish_u
 		$page_id = majestic_tube_repair_unviewable_legal_page( $title, $definition, $publish_unviewable );
 
 		if ( ! $page_id ) {
-			$page = ! empty( $definition['legacy_slug'] )
-				? majestic_tube_migrate_2257_page( $definition )
-				: majestic_tube_get_legal_page( $definition );
-
-			if ( majestic_tube_page_is_viewable( $page ) ) {
-				$page_id = (int) $page->ID;
-			} else {
-				$page_id = majestic_tube_create_page( $title, 'default', $definition['content'], $definition['slug'] );
-			}
+			$page_id = majestic_tube_create_page( $title, 'default', $definition['content'], $definition['slug'] );
 		}
 	}
 
 	if ( $page_id ) {
 		majestic_tube_migrate_legal_page_content( $page_id );
+		majestic_tube_repair_legal_slug( $title, $definition );
+		majestic_tube_repair_legal_page_title( $page_id, $title, $definition );
 	}
 
 	return $page_id;
 }
 
 /**
- * Replace only the legacy theme contact placeholders in an existing page.
- * Administrator-authored wording and all unrelated content are left intact.
- * A render-time filter below adds the dynamic contact line when an edited page
- * has no theme contact shortcode at all.
+ * Put an existing legal page back in step with the shipped copy.
+ *
+ * Two things happen here and nothing else does: the legacy theme contact
+ * placeholders are replaced with the current one, and the retired template
+ * notice is removed. Administrator-authored wording and all unrelated content
+ * are left intact. A render-time filter below adds the dynamic contact line
+ * when an edited page has no theme contact shortcode at all.
  *
  * @param int $page_id Page ID.
  * @return void
@@ -586,6 +993,8 @@ function majestic_tube_migrate_legal_page_content( $page_id ) {
 		$page->post_content
 	);
 
+	$updated = majestic_tube_strip_template_notice( $updated );
+
 	if ( $updated !== $page->post_content && function_exists( 'wp_update_post' ) ) {
 		wp_update_post(
 			array(
@@ -595,6 +1004,38 @@ function majestic_tube_migrate_legal_page_content( $page_id ) {
 			true
 		);
 	}
+}
+
+/**
+ * Remove the retired "Template notice" paragraph from a legal page.
+ *
+ * Every legal page this theme used to create ended with a bolded paragraph
+ * beginning "Template notice:". It is no longer part of the shipped copy (see
+ * majestic_tube_legal_pages()), because it printed inside the page body where
+ * a visitor reads it. An install that already published one of those pages
+ * still has the old markup stored, since the theme never rewrites a page an
+ * administrator has edited.
+ *
+ * Only that paragraph is removed - and the `<hr />` that separated it from the
+ * policy above it - so wording the administrator wrote around it survives. The
+ * whole-content search means a page with no notice at all is returned byte for
+ * byte, which is what keeps this a no-op on every page that never had one.
+ *
+ * @param string $content Page content.
+ * @return string
+ */
+function majestic_tube_strip_template_notice( $content ) {
+	if ( ! is_string( $content ) || false === strpos( $content, '<strong>Template notice:</strong>' ) ) {
+		return is_string( $content ) ? $content : '';
+	}
+
+	$stripped = preg_replace(
+		'#(?:\s*<hr\s*/?>)?\s*<p>\s*<strong>Template notice:</strong>.*?</p>#is',
+		'',
+		$content
+	);
+
+	return is_string( $stripped ) ? $stripped : $content;
 }
 
 /**
@@ -650,6 +1091,9 @@ function majestic_tube_is_legal_document( $post ) {
  * question the same way, and so adding a second placeholder does not mean a
  * second copy of this lookup.
  *
+ * majestic_tube_is_legal_page() asks the same question for the widget areas,
+ * so "is this a legal document" has one answer for the whole theme.
+ *
  * @return object|false The page object, or false when this is not one.
  */
 function majestic_tube_current_legal_document() {
@@ -662,6 +1106,26 @@ function majestic_tube_current_legal_document() {
 	$post = $post_id ? get_post( $post_id ) : false;
 
 	return ( $post && majestic_tube_is_legal_document( $post ) ) ? $post : false;
+}
+
+/**
+ * Whether this request is rendering one of the theme's legal documents.
+ *
+ * A legal page is a document a visitor may be shown, or asked to accept, on
+ * its own terms: a policy, a takedown procedure, a recordkeeping notice. Ad or
+ * tracking markup placed around it belongs to whoever placed it and is not the
+ * site's own wording, so on these pages the theme prints none of it - the
+ * document is the page. Everything the theme itself prints (header, menus,
+ * footer legal links, copyright) is untouched; only the widget areas are
+ * withheld.
+ *
+ * The lookup is the same one the placeholder filters use, so "legal page" has
+ * a single definition everywhere in the theme.
+ *
+ * @return bool
+ */
+function majestic_tube_is_legal_page() {
+	return (bool) majestic_tube_current_legal_document();
 }
 
 /**
@@ -737,53 +1201,99 @@ function majestic_tube_filter_legal_document_contact( $content ) {
 add_filter( 'the_content', 'majestic_tube_filter_legal_document_contact', 9 );
 
 /**
- * Return the canonical destination for the retired 2257 URL.
+ * Return the canonical destination for a retired 2257 address.
+ *
+ * The document lives on /18-usc-2257/, because WordPress will not publish a
+ * page on a numeric slug - wp_unique_post_slug() reserves numbers for the
+ * pagination it generates itself. Every numbered address (2257, 2257-2, 2257-3)
+ * therefore comes from a release that asked for one and was handed something
+ * else, and each of them is answered here rather than left serving a second
+ * copy of the policy or a 404 for a link somebody published.
+ *
+ * Three things are deliberately not redirected. The document answering its own
+ * address - which on a site that has not repaired yet is the numbered one - or
+ * the redirect would be a loop. A page with an unrelated title that happens to
+ * sit on a retired address: that page belongs to whoever made it. And a request
+ * when no 2257 document exists at all, since there is then nothing to point at.
  *
  * @return string Canonical permalink, or an empty string when not applicable.
  */
-function majestic_tube_legacy_2257_redirect_url() {
-	$request_uri = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
-	$legacy_request = false;
+function majestic_tube_retired_2257_redirect_url() {
+	$request_uri   = isset( $_SERVER['REQUEST_URI'] ) ? wp_unslash( $_SERVER['REQUEST_URI'] ) : '';
+	$requested     = '';
+	$requested_row = false;
 
 	if ( is_string( $request_uri ) && '' !== $request_uri ) {
 		$path = wp_parse_url( $request_uri, PHP_URL_PATH );
-		$legacy_request = is_string( $path ) && (bool) preg_match( '#(?:^|/)18-usc-2257/?$#', $path );
-	}
 
-	// Also cover plain-permalink requests such as ?page_id=123.
-	if ( ! $legacy_request && function_exists( 'get_query_var' ) ) {
-		$requested_id = absint( get_query_var( 'page_id' ) );
-		$requested    = $requested_id ? get_post( $requested_id ) : false;
-
-		if ( $requested && isset( $requested->post_name ) && '18-usc-2257' === $requested->post_name ) {
-			$legacy_request = true;
+		if ( is_string( $path ) && preg_match( '#(?:^|/)((?:18-usc-)?2257(?:-\d+)?)/?$#i', $path, $match ) ) {
+			$requested     = strtolower( $match[1] );
+			$requested_row = get_page_by_path( $requested );
 		}
 	}
 
-	if ( ! $legacy_request ) {
+	// Also cover plain-permalink requests such as ?page_id=123.
+	if ( '' === $requested && function_exists( 'get_query_var' ) ) {
+		$requested_id = absint( get_query_var( 'page_id' ) );
+		$candidate    = $requested_id ? get_post( $requested_id ) : false;
+
+		if ( $candidate && isset( $candidate->post_name ) && preg_match( '/^(?:18-usc-)?2257(?:-\d+)?$/i', (string) $candidate->post_name ) ) {
+			$requested     = strtolower( (string) $candidate->post_name );
+			$requested_row = $candidate;
+		}
+	}
+
+	if ( '' === $requested || ! function_exists( 'get_permalink' ) ) {
 		return '';
 	}
 
-	$canonical = get_page_by_path( '2257' );
+	$title      = '18 U.S.C. § 2257';
+	$pages      = majestic_tube_legal_pages();
+	$definition = isset( $pages[ $title ] ) ? $pages[ $title ] : array();
+	$canonical  = $definition ? majestic_tube_find_legal_page( $definition, $title ) : false;
 
-	if ( ! $canonical || ! isset( $canonical->ID ) || ! function_exists( 'get_permalink' ) ) {
+	if ( ! $canonical || ! isset( $canonical->ID, $canonical->post_name ) ) {
 		return '';
 	}
 
-	return (string) get_permalink( $canonical );
+	// The document is already on the address being asked for: this is the page.
+	if ( $requested === strtolower( (string) $canonical->post_name ) ) {
+		return '';
+	}
+
+	/*
+	 * A different row answering the address is only redirected when it is a
+	 * copy of this same document; anything else there is not the theme's.
+	 */
+	if ( $requested_row && isset( $requested_row->ID ) && (int) $requested_row->ID !== (int) $canonical->ID ) {
+		$same_document = false;
+
+		foreach ( majestic_tube_legal_pages_by_title( $title, $definition ) as $row ) {
+			if ( isset( $row->ID ) && (int) $row->ID === (int) $requested_row->ID ) {
+				$same_document = true;
+				break;
+			}
+		}
+
+		if ( ! $same_document ) {
+			return '';
+		}
+	}
+
+	return (string) get_permalink( (int) $canonical->ID );
 }
 
 /**
- * Preserve /18-usc-2257/ as a permanent alias for /2257/.
+ * Send a retired numeric 2257 address to the document's own address.
  *
  * @return void
  */
-function majestic_tube_legacy_2257_redirect() {
+function majestic_tube_retired_2257_redirect() {
 	if ( ( function_exists( 'is_admin' ) && is_admin() ) || ( function_exists( 'wp_doing_ajax' ) && wp_doing_ajax() ) ) {
 		return;
 	}
 
-	$target = majestic_tube_legacy_2257_redirect_url();
+	$target = majestic_tube_retired_2257_redirect_url();
 
 	if ( ! $target || ! function_exists( 'wp_safe_redirect' ) ) {
 		return;
@@ -792,7 +1302,7 @@ function majestic_tube_legacy_2257_redirect() {
 	wp_safe_redirect( $target, 301 );
 	exit;
 }
-add_action( 'template_redirect', 'majestic_tube_legacy_2257_redirect', 1 );
+add_action( 'template_redirect', 'majestic_tube_retired_2257_redirect', 1 );
 
 /**
  * Create a page if it does not already exist.
@@ -889,8 +1399,22 @@ function majestic_tube_create_initial_pages() {
 		}
 	}
 
+	/*
+	 * A stock WordPress install already contains a "Privacy Policy" page that
+	 * core created as a **draft** and pointed wp_page_for_privacy_policy at.
+	 * The theme adopts that page rather than duplicating it, but adoption used
+	 * to leave it a draft - and the footer legal menu then linked a document
+	 * visitors cannot open. Publishing it here is what makes that link live.
+	 *
+	 * The publish is deliberately limited to a site whose setup has never
+	 * completed. On a later revision bump the marker is already set, so a page
+	 * an administrator has since returned to draft is reused untouched, exactly
+	 * as before.
+	 */
+	$publish_unviewable = 0 === (int) get_option( 'majestic_tube_setup_revision', 0 );
+
 	foreach ( majestic_tube_legal_pages() as $title => $page ) {
-		$page_id = majestic_tube_get_or_create_legal_page( $title, $page );
+		$page_id = majestic_tube_get_or_create_legal_page( $title, $page, $publish_unviewable );
 
 		if ( $page_id ) {
 			$created[ $title ] = $page_id;
@@ -909,7 +1433,10 @@ function majestic_tube_create_initial_pages() {
  *
  * Bumping this number makes every existing installation run the setup once
  * more. It is the release-time switch; the retry counter below is separate so
- * a site that genuinely cannot create pages stops retrying.
+ * a site that genuinely cannot create pages stops retrying. Revision 7 is the
+ * release that renamed the 2257 document, so the bump is how a page created
+ * under the old name is brought onto the new one without the administrator
+ * having to touch anything.
  *
  * @return int
  */
@@ -919,7 +1446,7 @@ function majestic_tube_setup_revision() {
 	 *
 	 * @param int $revision Current revision.
 	 */
-	return (int) apply_filters( 'majestic_tube_setup_revision', 4 );
+	return (int) apply_filters( 'majestic_tube_setup_revision', 7 );
 }
 
 /**
@@ -1070,6 +1597,11 @@ function majestic_tube_update_page_menu_item( $menu_id, $title, $page_id, $item_
 /**
  * Add each built-in legal page to a menu once.
  *
+ * An item that is already there keeps its place and its own label. The one label
+ * this touches is one an earlier release of this function wrote under a name the
+ * document no longer uses, so the footer does not keep reading an old name after
+ * the document itself has been renamed.
+ *
  * @param int $menu_id Menu term ID.
  * @return void
  */
@@ -1079,10 +1611,19 @@ function majestic_tube_add_legal_pages_to_menu( $menu_id ) {
 	$have_ids = array();
 	$legacy_ids = array();
 	$canonical_ids = array();
+	$canonical_definitions = array();
 
-	// Resolve canonical pages first, including a custom WordPress privacy page.
+	/*
+	 * Resolve the page each footer link should point at. find_legal_page() is
+	 * deliberate here rather than get_legal_page(): it also falls back to an
+	 * exact title match, so a page that ended up on a suffixed slug is still
+	 * linked. That is precisely how the 18 U.S.C. § 2257 link went missing - an
+	 * earlier duplicate pushed the page to 2257-2, get_legal_page() looked only
+	 * at the canonical slug, found nothing, and skipped it for good. The page
+	 * was present the whole time, and the Pages list showed it.
+	 */
 	foreach ( majestic_tube_legal_pages() as $title => $legal_page ) {
-		$page = majestic_tube_get_legal_page( $legal_page );
+		$page = majestic_tube_find_legal_page( $legal_page, $title );
 
 		if ( ! $page || ! isset( $page->ID ) ) {
 			continue;
@@ -1090,6 +1631,7 @@ function majestic_tube_add_legal_pages_to_menu( $menu_id ) {
 
 		$canonical_id = (int) $page->ID;
 		$canonical_ids[ $canonical_id ] = $title;
+		$canonical_definitions[ $canonical_id ] = $legal_page;
 
 		if ( ! empty( $legal_page['legacy_slug'] ) ) {
 			$legacy_page = get_page_by_path( $legal_page['legacy_slug'] );
@@ -1104,7 +1646,9 @@ function majestic_tube_add_legal_pages_to_menu( $menu_id ) {
 	}
 
 	// Migrate an old 2257 menu item to the canonical page, and remove only
-	// duplicate legacy items. Custom titles on the surviving item are retained.
+	// duplicate legacy items. Labels are left alone here, including a custom one
+	// on the surviving item; the only label rewritten in this function is one of
+	// the theme's own former names, which the pass at the end of the loop does.
 	foreach ( $items as $item ) {
 		if ( ! isset( $item->type, $item->object_id ) || 'post_type' !== $item->type ) {
 			continue;
@@ -1160,10 +1704,16 @@ function majestic_tube_add_legal_pages_to_menu( $menu_id ) {
 		}
 
 		$have_ids[] = $item_id;
+
+		if ( isset( $canonical_ids[ $item_id ], $canonical_definitions[ $item_id ] ) ) {
+			majestic_tube_repair_legal_menu_item_label( $menu_id, $item, $canonical_ids[ $item_id ], $canonical_definitions[ $item_id ] );
+		}
 	}
 
 	foreach ( majestic_tube_legal_pages() as $title => $legal_page ) {
-		$page = majestic_tube_get_legal_page( $legal_page );
+		// Same resolve as above, so a page on a suffixed slug is linked here
+		// rather than silently dropped from the footer menu.
+		$page = majestic_tube_find_legal_page( $legal_page, $title );
 
 		if ( ! $page || ! isset( $page->ID ) || in_array( (int) $page->ID, $have_ids, true ) ) {
 			continue;
@@ -1177,6 +1727,100 @@ function majestic_tube_add_legal_pages_to_menu( $menu_id ) {
 			$have_ids[] = (int) $page->ID;
 		}
 	}
+}
+
+/**
+ * Bring a footer legal link's label onto the document's current name.
+ *
+ * The label a link shows is the title the theme gave the item when it was
+ * created, and an item created before a rename keeps it - so the footer would
+ * read "18 USC 2257" while the page it points at, and every link created since,
+ * reads "18 U.S.C. § 2257". The link itself is not touched, only the label.
+ *
+ * The same judgment as the page title repair applies, for the same reason. Only
+ * a label that is one of the document's former names was written by the theme;
+ * anything else, including a deliberate "2257", was typed by an administrator
+ * and is left exactly as it is.
+ *
+ * @param int    $menu_id    Menu term ID.
+ * @param object $item       Existing menu item.
+ * @param string $title      Current document title.
+ * @param array  $definition Legal page definition.
+ * @return bool Whether the label was rewritten.
+ */
+function majestic_tube_repair_legal_menu_item_label( $menu_id, $item, $title, $definition ) {
+	if ( ! is_object( $item ) || ! isset( $item->ID, $item->title ) || ! function_exists( 'wp_update_nav_menu_item' ) ) {
+		return false;
+	}
+
+	$label = (string) $item->title;
+	$title = (string) $title;
+
+	if ( '' === $label || $label === $title ) {
+		return false;
+	}
+
+	if ( ! in_array( $label, majestic_tube_legal_page_former_titles( $definition ), true ) ) {
+		return false;
+	}
+
+	$updated = majestic_tube_update_page_menu_item(
+		$menu_id,
+		$title,
+		isset( $item->object_id ) ? (int) $item->object_id : 0,
+		(int) $item->ID
+	);
+
+	return ! is_wp_error( $updated ) && (bool) $updated;
+}
+
+/**
+ * Remove top-level main-menu items that point at an account page.
+ *
+ * Only an item that is both top level and targeted at the Submit a Video or
+ * Profile page is removed, because those are the theme's own defaults and they
+ * duplicate the My Account dropdown. Anything nested, or aimed anywhere else,
+ * is left exactly as the administrator arranged it.
+ *
+ * @param int         $menu_id Menu term ID.
+ * @param array|null  $items   Existing items, or null to fetch them.
+ * @return int How many items were removed.
+ */
+function majestic_tube_remove_top_level_account_items( $menu_id, $items = null ) {
+	$items = is_array( $items ) ? $items : wp_get_nav_menu_items( $menu_id );
+	$items = is_array( $items ) ? $items : array();
+	$ids   = array();
+
+	foreach ( majestic_tube_account_page_titles() as $title ) {
+		$page = get_page_by_path( sanitize_title( $title ) );
+
+		if ( $page && isset( $page->ID ) ) {
+			$ids[] = (int) $page->ID;
+		}
+	}
+
+	if ( ! $ids ) {
+		return 0;
+	}
+
+	$removed = 0;
+
+	foreach ( $items as $item ) {
+		if ( ! isset( $item->type, $item->object_id, $item->ID ) ) {
+			continue;
+		}
+
+		if ( 'post_type' !== $item->type || 0 !== (int) $item->menu_item_parent ) {
+			continue;
+		}
+
+		if ( in_array( (int) $item->object_id, $ids, true ) && function_exists( 'wp_delete_post' ) ) {
+			wp_delete_post( (int) $item->ID, true );
+			++$removed;
+		}
+	}
+
+	return $removed;
 }
 
 /**
@@ -1255,11 +1899,19 @@ function majestic_tube_create_default_menu() {
 		);
 	}
 
-	// All five theme pages belong on the main header menu: the video-submit
-	// and profile pages as well as the three directory pages. Pages that
-	// are still missing are skipped here; the setup creates them first, and
-	// the next run links whatever appears.
+	// Home plus the three directory pages belong on the main header menu.
+	// Submit a Video and Profile do not: they are account pages, and the theme
+	// prints them inside the My Account dropdown at render time, so a top-level
+	// item is a second link to the same destination. Pages that are still
+	// missing are skipped here; the setup creates them first, and the next run
+	// links whatever appears.
+	$account_pages = majestic_tube_account_page_titles();
+
 	foreach ( majestic_tube_activation_pages() as $menu_title => $menu_template ) {
+		if ( in_array( $menu_title, $account_pages, true ) ) {
+			continue;
+		}
+
 		$item_page = get_page_by_path( sanitize_title( $menu_title ) );
 
 		if ( ! majestic_tube_page_is_viewable( $item_page ) || in_array( (int) $item_page->ID, $have_ids, true ) ) {
@@ -1269,6 +1921,12 @@ function majestic_tube_create_default_menu() {
 		majestic_tube_update_page_menu_item( $menu_id, $menu_title, $item_page->ID );
 		$have_ids[] = (int) $item_page->ID;
 	}
+
+	// A site activated before this rule kept the top-level copies. Remove a
+	// top-level item that points at either account page; items nested under
+	// something else are left alone, so an administrator who deliberately
+	// placed them is not disturbed.
+	majestic_tube_remove_top_level_account_items( $menu_id, $existing );
 
 	// Keep legal links out of the primary navigation. Existing custom footer
 	// menus are retained; a separate footer menu is used when the old shared
@@ -1304,7 +1962,7 @@ function majestic_tube_footer_legal_revision() {
 	 *
 	 * @param int $revision Current revision.
 	 */
-	return (int) apply_filters( 'majestic_tube_footer_legal_revision', 1 );
+	return (int) apply_filters( 'majestic_tube_footer_legal_revision', 3 );
 }
 
 /**
@@ -1313,7 +1971,7 @@ function majestic_tube_footer_legal_revision() {
  * The full site setup only runs once per revision, so a legal page that was
  * created later, a page whose slug was migrated, or a footer menu item that
  * was deleted by hand was never repaired: the link simply stayed missing for
- * good. That is how the 18 USC 2257 page ended up unlinked while DMCA and the
+ * good. That is how the 18 U.S.C. § 2257 page ended up unlinked while DMCA and the
  * Privacy Policy were still there.
  *
  * This runs on admin requests only, and stops after it finds nothing to do, so
@@ -1350,8 +2008,15 @@ function majestic_tube_repair_footer_legal_links() {
 		set_theme_mod( 'nav_menu_locations', $locations );
 	}
 
+	/*
+	 * $publish_unviewable is true here, unlike the background setup, because a
+	 * live footer link is the whole reason this repair exists: a page that is
+	 * still a draft - most often WordPress's own stock Privacy Policy page,
+	 * which core creates as a draft and the theme then adopts - is a link
+	 * visitors cannot open. Publishing it is what makes the footer link real.
+	 */
 	foreach ( majestic_tube_legal_pages() as $title => $definition ) {
-		if ( ! majestic_tube_get_or_create_legal_page( $title, $definition ) ) {
+		if ( ! majestic_tube_get_or_create_legal_page( $title, $definition, true ) ) {
 			// Leave the marker unset so the next admin request tries again.
 			return;
 		}
@@ -1637,13 +2302,21 @@ function majestic_tube_handle_legal_page_trash() {
 
 		if ( $post && isset( $post->ID, $post->post_type ) && 'page' === $post->post_type ) {
 			foreach ( majestic_tube_legal_pages() as $title => $definition ) {
-			$copies = majestic_tube_find_legal_copies( $definition, $title );
+				$copies = majestic_tube_find_legal_copies( $definition, $title );
 
-			if ( isset( $copies[ $post_id ] ) && count( $copies ) > 1 ) {
-				$trashed = (bool) wp_trash_post( $post_id );
-				break;
-		}
-		}
+				if ( isset( $copies[ $post_id ] ) && count( $copies ) > 1 ) {
+					$trashed = (bool) wp_trash_post( $post_id );
+
+					if ( $trashed ) {
+						// With the extra copy out of the way the document can go back
+						// on its own slug: the duplicate holding that slug is exactly
+						// why the remaining page was left on a suffixed one.
+						majestic_tube_repair_legal_slug( $title, $definition );
+					}
+
+					break;
+				}
+			}
 		}
 	}
 
@@ -1708,6 +2381,123 @@ function majestic_tube_setup_notice() {
 add_action( 'admin_notices', 'majestic_tube_setup_notice' );
 
 /**
+ * Warn on the dashboard when a legal page carries code, an embed or an ad.
+ *
+ * The welcome screen repeats this beside the page list, but the dashboard is
+ * where an administrator actually lands, so the warning starts there and names
+ * the pages it is about. It is dismissible per user and per state - see
+ * majestic_tube_legal_code_notice_key() - and it never changes a page: the
+ * words on a legal page belong to the administrator, and a theme that quietly
+ * deleted them would be the worse bug.
+ *
+ * The theme's own widget areas are already withheld on a legal page; this is
+ * the other door, the markup an editor pastes into the policy itself.
+ *
+ * @return void
+ */
+function majestic_tube_legal_code_notice() {
+	if ( ! is_admin() || ! current_user_can( 'edit_theme_options' ) ) {
+		return;
+	}
+
+	$screen = function_exists( 'get_current_screen' ) ? get_current_screen() : null;
+
+	if ( ! $screen || 'dashboard' !== $screen->id ) {
+		return;
+	}
+
+	$flagged = majestic_tube_legal_pages_with_code_blocks();
+
+	if ( ! $flagged ) {
+		return;
+	}
+
+	$key = majestic_tube_legal_code_notice_key( $flagged );
+
+	if ( majestic_tube_legal_code_notice_is_dismissed( $key ) ) {
+		return;
+	}
+
+	$named = array();
+
+	foreach ( $flagged as $title => $page ) {
+		$link = get_edit_post_link( $page['id'] );
+
+		$named[] = sprintf(
+			'%s (%s)',
+			$link ? '<a href="' . esc_url( $link ) . '">' . esc_html( $title ) . '</a>' : esc_html( $title ),
+			esc_html( implode( ', ', $page['kinds'] ) )
+		);
+	}
+
+	$dismiss = wp_nonce_url(
+		add_query_arg( 'majestic-tube-legal-notice', 'dismiss', admin_url( 'index.php' ) ),
+		'majestic_tube_legal_code_notice'
+	);
+	?>
+	<div class="notice notice-warning">
+		<p>
+			<strong><?php esc_html_e( 'Majestic Tube:', 'majestic-tube' ); ?></strong>
+			<?php
+			printf(
+				/* translators: %s: comma-separated list of legal pages and what each one contains. */
+				esc_html__( 'A legal page carries code, an embed or an ad block: %s.', 'majestic-tube' ),
+				implode( ', ', $named ) // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- each entry escaped where it was built.
+			);
+			?>
+			<?php esc_html_e( 'The theme prints none of its widget areas on a legal page, but markup saved inside the page body still prints inside the document a visitor is reading, where it reads as the site’s own wording. Remove it from the page, or move it to a Code and ads area.', 'majestic-tube' ); ?>
+		</p>
+		<p>
+			<a class="button button-secondary" href="<?php echo esc_url( $dismiss ); ?>">
+				<?php esc_html_e( 'Dismiss this warning', 'majestic-tube' ); ?>
+			</a>
+		</p>
+	</div>
+	<?php
+}
+add_action( 'admin_notices', 'majestic_tube_legal_code_notice' );
+
+/**
+ * Remember that this administrator has read the warning.
+ *
+ * The dismissal is stored against the state of the pages rather than as a
+ * plain "seen it" flag, so a site whose legal pages are left alone is left
+ * alone, and one where a different page or a different kind of block turns up
+ * is told again. It is user meta, not an option: a dismissal is a decision
+ * about one person's attention, and hiding the warning from the next
+ * administrator would be the wrong kind of silence.
+ *
+ * @return void
+ */
+function majestic_tube_handle_legal_code_notice_dismissal() {
+	if ( ! isset( $_GET['majestic-tube-legal-notice'] ) || 'dismiss' !== $_GET['majestic-tube-legal-notice'] ) { // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- the nonce is verified below.
+		return;
+	}
+
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		wp_die(
+			esc_html__( 'You are not allowed to dismiss this warning.', 'majestic-tube' ),
+			esc_html__( 'Legal pages', 'majestic-tube' ),
+			array( 'response' => 403 )
+		);
+	}
+
+	check_admin_referer( 'majestic_tube_legal_code_notice' );
+
+	update_user_meta(
+		get_current_user_id(),
+		'majestic_tube_legal_code_notice',
+		majestic_tube_legal_code_notice_key( majestic_tube_legal_pages_with_code_blocks() )
+	);
+
+	$back = wp_get_referer();
+
+	wp_safe_redirect( $back ? remove_query_arg( array( 'majestic-tube-legal-notice', '_wpnonce' ), $back ) : admin_url( 'index.php' ) );
+	exit;
+}
+add_action( 'admin_init', 'majestic_tube_handle_legal_code_notice_dismissal', 4 );
+
+/**
  * Register the welcome screen (informational only, no data changes).
  */
 function majestic_tube_welcome_page() {
@@ -1731,6 +2521,7 @@ function majestic_tube_render_welcome_page() {
 	$retry_state    = isset( $_GET['majestic-tube-setup'] ) ? sanitize_key( wp_unslash( $_GET['majestic-tube-setup'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display state.
 	$legal          = majestic_tube_legal_page_status();
 	$legal_state    = isset( $_GET['majestic-tube-legal'] ) ? sanitize_key( wp_unslash( $_GET['majestic-tube-legal'] ) ) : ''; // phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only display state.
+	$legal_code     = majestic_tube_legal_pages_with_code_blocks();
 	?>
 	<div class="wrap">
 		<h1><?php esc_html_e( 'Welcome to Majestic Tube', 'majestic-tube' ); ?></h1>
@@ -1810,6 +2601,24 @@ function majestic_tube_render_welcome_page() {
 				</p></div>
 			<?php endif; ?>
 
+			<?php if ( $legal_code ) : ?>
+				<div class="notice notice-warning inline">
+					<p>
+						<strong><?php esc_html_e( 'A legal page carries code, an embed or an ad block.', 'majestic-tube' ); ?></strong>
+						<?php esc_html_e( 'The theme prints none of its widget areas on a legal page, but markup saved inside the page body still prints inside the document a visitor is reading, where it reads as the site’s own wording. Remove it from the page, and place it in a Code and ads area instead if you still need it.', 'majestic-tube' ); ?>
+						<?php esc_html_e( 'The theme never edits content you have written, so this one is yours to change.', 'majestic-tube' ); ?>
+					</p>
+					<ul style="list-style: disc; padding-left: 1.5em;">
+						<?php foreach ( $legal_code as $legal_code_title => $legal_code_page ) : ?>
+							<li>
+								<a href="<?php echo esc_url( (string) get_edit_post_link( $legal_code_page['id'] ) ); ?>"><?php echo esc_html( $legal_code_title ); ?></a>:
+								<?php echo esc_html( implode( ', ', $legal_code_page['kinds'] ) ); ?>
+							</li>
+						<?php endforeach; ?>
+					</ul>
+				</div>
+			<?php endif; ?>
+
 		<p><?php esc_html_e( 'These are the compliance pages the theme creates. If one has been deleted, the footer link to it is dead and the document is no longer published.', 'majestic-tube' ); ?></p>
 
 		<table class="widefat striped" style="max-width: 40em;">
@@ -1821,6 +2630,10 @@ function majestic_tube_render_welcome_page() {
 							<a href="<?php echo esc_url( (string) get_permalink( $legal_id ) ); ?>"><?php esc_html_e( 'View', 'majestic-tube' ); ?></a>
 							&middot;
 							<a href="<?php echo esc_url( (string) get_edit_post_link( $legal_id ) ); ?>"><?php esc_html_e( 'Edit', 'majestic-tube' ); ?></a>
+							<?php if ( isset( $legal_code[ $legal_title ] ) ) : ?>
+								<br />
+								<em><?php echo esc_html( sprintf( /* translators: %s: what was found in the page. */ __( 'Contains %s', 'majestic-tube' ), implode( ', ', $legal_code[ $legal_title ]['kinds'] ) ) ); ?></em>
+							<?php endif; ?>
 						</td>
 					</tr>
 				<?php endforeach; ?>					<?php foreach ( $legal['missing'] as $legal_title ) : ?>
