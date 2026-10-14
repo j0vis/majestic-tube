@@ -1,8 +1,20 @@
 # Local application state
 .freebuff/
 
-# Development-only tooling (not part of the distributed theme)
-tools/
+# Development-only tooling (not part of the distributed theme). The release
+# toolchain is tracked on purpose: a published zip has to be verifiable with the
+# smoke suite that shipped beside it, and neither the verifier nor the suite can
+# run at all if they live only on one machine. Everything here is scratch unless
+# it is named below.
+tools/*
+!tools/build-release.py
+!tools/publish-release.py
+!tools/verify_release.py
+!tools/release-notes-*.md
+
+# Bytecode the toolchain leaves behind
+__pycache__/
+*.pyc
 
 # Internal project notes (not part of the distributed theme)
 FEATURES.md
