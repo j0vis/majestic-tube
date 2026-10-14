@@ -27,7 +27,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#video-reports-and-moderation)
 - [Legal pages](#legal-and-policy-pages)
 - [Routine maintenance](#routine-maintenance)
-- [What's new in 2.5.2](#whats-new-in-252)
+- [What's new in 2.5.3](#whats-new-in-253)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#frequently-asked-questions)
 - [Credits, license & support](#credits-license--support)
@@ -35,9 +35,26 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 **Release**
 
-## What’s New in 2.5.2
+## What’s New in 2.5.3
 
-The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, and stops one unlinkable tag from taking a page down with it.
+The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, and ships the template a translation starts from.
+
+### 2.5.3 — a random listing stops re-sorting the catalog
+
+**A random listing is drawn from a cache instead of sorting your catalog.** The random listing, the [Video list widget](#video-list-widget) set to Random, and the picture a category or actor card borrows from a video all asked MySQL for `ORDER BY RAND()`, which reads every matching row and sorts it on every request — the most expensive query the theme made, on the pages that repeat it most. Each of them now draws from a pool of video IDs kept for the archive it belongs to, shared by all three and rebuilt when you publish, edit or delete a video.
+
+**An upload is resized once.** Every thumbnail size was registered twice — the original theme’s `wpst_thumb_*` names sat beside the theme’s own at identical dimensions — so WordPress wrote seven metadata entries for five files and encoded three of them a second time. The older names are answered from the attachment’s own metadata now, which is where WordPress looks a size up and which can only point at a file that was really generated, so everything that asks for one by name still finds it: the **Main thumbnail quality** setting, WP-Script plugins, and a child theme. Nothing in your media library has to be re-uploaded or regenerated. See [Thumbnail rotation and trailers](#thumbnail-rotation-and-trailers).
+
+**The theme ships a translation template.** `languages/majestic-tube.pot` lists every string the theme asks to have translated, in the format a translation tool reads, with the contexts and plural forms the harder strings carry. Copy it to your locale, translate the copy, compile it and place the `.mo` beside it — three steps, described in that folder’s own notes. It is generated from the theme’s own source rather than edited by hand, so it keeps describing the version you have installed.
+
+**Also fixed:**
+
+- A **part of the video sitemap is built once and kept** until a video changes. It ran a `COUNT(*)` whose answer it never read, and rendered the whole chunk again on every request, so a crawl of a large catalog repeated that work page after page. A site with a persistent object cache answers a crawl from memory now; a site without one sees no change at all.
+- A **share row with no address to share is not printed.** Each network’s link carries the video’s own permalink, so a video whose permalink cannot be built — trashed, still a draft, or a post type that never publishes — produced a row of buttons that shared whichever page the reader happened to be on.
+- A **related-videos list no longer breaks on a taxonomy that answers with an error.** The term is left out of the query and the rest of the list prints.
+- The **term image picker’s strings** travel as one inline value rather than a localized script object, which drops a script WordPress loaded on every admin page for the sake of one screen.
+
+**One thing worth knowing about random listings:** a random listing is a sample, not a shuffle of the catalog. The pool holds 500 IDs by default and is taken at a random offset into the archive, so a page is drawn from part of the catalog rather than from all of it, and the same video can appear on two pages running. The `majestic_tube_random_pool_size` filter raises it for a site that wants a wider sample, at the cost of a larger query whenever the pool is rebuilt.
 
 ### 2.5.2 — a locked video stays locked, and one broken term no longer takes the page
 

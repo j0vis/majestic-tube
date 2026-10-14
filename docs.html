@@ -444,7 +444,7 @@
     <nav class="toc" aria-label="User guide contents">
       <strong>Contents</strong>
       <ul>
-        <li><a href="#whats-new-252">What&rsquo;s new in 2.5.2</a></li>
+        <li><a href="#whats-new-253">What&rsquo;s new in 2.5.3</a></li>
         <li><a href="#requirements">Requirements</a></li>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#quick-start">Quick start</a></li>
@@ -467,10 +467,23 @@
     </nav>
 
     <main>
-      <section id="whats-new-252">
+      <section id="whats-new-253">
         <p class="eyebrow">Release</p>
-        <h2>What&rsquo;s New in 2.5.2</h2>
-        <p class="section-intro">The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, and stops one unlinkable tag from taking a page down with it.</p>
+        <h2>What&rsquo;s New in 2.5.3</h2>
+        <p class="section-intro">The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, and ships the template a translation starts from.</p>
+
+        <h3>2.5.3 &mdash; a random listing stops re-sorting the catalog</h3>
+        <p><strong>A random listing is drawn from a cache instead of sorting your catalog.</strong> The random listing, the <strong>Video list</strong> widget set to Random, and the picture a category or actor card borrows from a video all asked MySQL for <code>ORDER BY RAND()</code>, which reads every matching row and sorts it on every request &mdash; the most expensive query the theme made, on the pages that repeat it most. Each of them now draws from a pool of video IDs kept for the archive it belongs to, shared by all three and rebuilt when you publish, edit or delete a video.</p>
+        <p><strong>An upload is resized once.</strong> Every thumbnail size was registered twice &mdash; the original theme&rsquo;s <code>wpst_thumb_*</code> names sat beside the theme&rsquo;s own at identical dimensions &mdash; so WordPress wrote seven metadata entries for five files and encoded three of them a second time. The older names are answered from the attachment&rsquo;s own metadata now, which is where WordPress looks a size up and which can only point at a file that was really generated, so everything that asks for one by name still finds it: the <strong>Main thumbnail quality</strong> setting, WP-Script plugins, and a child theme. Nothing in your media library has to be re-uploaded or regenerated. See <a href="#thumbnails">Thumbnail rotation and trailers</a>.</p>
+        <p><strong>The theme ships a translation template.</strong> <span class="path">languages/majestic-tube.pot</span> lists every string the theme asks to have translated, in the format a translation tool reads, with the contexts and plural forms the harder strings carry. Copy it to your locale, translate the copy, compile it and place the <span class="path">.mo</span> beside it &mdash; three steps, described in that folder&rsquo;s own notes. It is generated from the theme&rsquo;s own source rather than edited by hand, so it keeps describing the version you have installed.</p>
+        <p><strong>Also fixed:</strong></p>
+        <ul>
+          <li>A <strong>part of the video sitemap is built once and kept</strong> until a video changes. It ran a <code>COUNT(*)</code> whose answer it never read, and rendered the whole chunk again on every request, so a crawl of a large catalog repeated that work page after page. A site with a persistent object cache answers a crawl from memory now; a site without one sees no change at all.</li>
+          <li>A <strong>share row with no address to share is not printed.</strong> Each network&rsquo;s link carries the video&rsquo;s own permalink, so a video whose permalink cannot be built &mdash; trashed, still a draft, or a post type that never publishes &mdash; produced a row of buttons that shared whichever page the reader happened to be on.</li>
+          <li>A <strong>related-videos list no longer breaks on a taxonomy that answers with an error.</strong> The term is left out of the query and the rest of the list prints.</li>
+          <li>The <strong>term image picker&rsquo;s strings</strong> travel as one inline value rather than a localized script object, which drops a script WordPress loaded on every admin page for the sake of one screen.</li>
+        </ul>
+        <p><strong>One thing worth knowing about random listings:</strong> a random listing is a sample, not a shuffle of the catalog. The pool holds 500 IDs by default and is taken at a random offset into the archive, so a page is drawn from part of the catalog rather than from all of it, and the same video can appear on two pages running. The <span class="setting">majestic_tube_random_pool_size</span> filter raises it for a site that wants a wider sample, at the cost of a larger query whenever the pool is rebuilt.</p>
 
         <h3>2.5.2 &mdash; a locked video stays locked, and one broken term no longer takes the page</h3>
         <p>This release is about the content a video site did not write itself: a visitor&rsquo;s submission, an imported feed, a title copied from somewhere else. Several of the fixes below only show up on a page nobody looks at twice, which is what made them worth finding.</p>
