@@ -10,6 +10,10 @@ name: Tests
 on:
   push:
     branches: [ main ]
+    # A tag belongs here as well as a branch, or the release job below can never
+    # run: a workflow that names only branches is not started by a tag push at
+    # all, so its `refs/tags/v` gate would be a job nothing can reach.
+    tags: [ 'v*' ]
   pull_request:
   workflow_dispatch:
 
