@@ -352,7 +352,22 @@ $template      = false === $template ? '' : $template;
 
 check( 'the template exists', '' !== $template, $template_path . ' is missing' );
 check( 'and holds something', strlen( $template ) > 1000, strlen( $template ) . ' bytes' );
-check( 'and is written with LF line endings only', false === strpos( $template, "\r" ) );
+/*
+ * The repository keeps the template with LF endings and the release export
+ * writes it with the platform's, because git converts a text file on the way
+ * out - every PHP file in the theme is exported the same way, and the installed
+ * theme is the export. So the thing worth failing on is a file that mixes the
+ * two: that is what a second editor on a second machine leaves behind, and a
+ * gettext tool then reads it a line at a time.
+ */
+$crlf = substr_count( $template, "\r\n" );
+$lone = substr_count( str_replace( "\r\n", '', $template ), "\r" );
+
+check(
+	'and does not mix line endings',
+	0 === $lone && ( 0 === $crlf || $crlf === substr_count( $template, "\n" ) ),
+	$crlf . ' CRLF line(s), ' . $lone . ' bare CR'
+);
 check( 'and ends with a newline', "\n" === substr( $template, -1 ) );
 
 /* -------------------------------------------------------------------------
