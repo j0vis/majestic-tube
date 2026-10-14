@@ -1,0 +1,85 @@
+# What a change has to survive.
+#
+# Two jobs, because they answer different questions: the suite says the theme
+# still runs on every PHP a site might be running, and the release job says the
+# archive built from a tag is the code of that tag and nothing else. Neither runs
+# on a schedule - a theme has no service to keep alive - so both are cheap enough
+# to run on every push.
+name: Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  suite:
+    name: Smoke suite on PHP ${{ matrix.php }}
+    runs-on: ubuntu-latest
+    strategy:
+      # One PHP failing must not hide the rest: a break on 7.4 and a break on
+      # 8.3 are two different bugs, and the point of the matrix is to see both.
+      fail-fast: false
+      matrix:
+        # The floor is what the theme declares (Requires PHP: 7.4), and the rest
+        # is every version a site is likely to be on today.
+        php: [ '7.4', '8.0', '8.1', '8.2', '8.3' ]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install PHP ${{ matrix.php }}
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php }}
+          coverage: none
+
+      # Each suite is a standalone script that prints its own tally and exits
+      # non-zero when a check fails, so the loop keeps the first failure as the
+      # job's status instead of letting the last suite decide it.
+      - name: Run every smoke suite
+        run: |
+          status=0
+          for suite in tests/*-smoke.php; do
+            echo "::group::$suite"
+            php "$suite" || status=1
+            echo "::endgroup::"
+          done
+          exit "$status"
+
+  release:
+    name: Verify the archive built from this tag
+    # Only a tag is a release; a branch has nothing to verify.
+    if: startsWith( github.ref, 'refs/tags/v' )
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # The verifier compares the archive against an export of the commit it
+          # claims to be, so the history has to be readable here.
+          fetch-depth: 0
+
+      - name: Install PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+          coverage: none
+
+      # This is the release build, held to the same checks a maintainer's build
+      # is: the layout WordPress needs, the two version numbers agreeing with the
+      # tag, every PHP file parsing, the contents matching the commit's own
+      # export, and the commit's own smoke suite passing against the archive.
+      #
+      # --no-notes because the release notes carry the size and the digest of the
+      # published file. Those describe that artifact, and a rebuild on another
+      # machine is not required to be byte-identical to it; the comparison
+      # belongs to publish time, where the file is the one being uploaded.
+      - name: Build the archive from the tag and hold it to every check
+        run: |
+          version="${GITHUB_REF_NAME#v}"
+          export_dir="$(mktemp -d)"
+          git archive --format=tar "$GITHUB_SHA" | tar -x -C "$export_dir"
+          python3 tools/build-release.py "$version" "$export_dir" "majestic-tube-$version.zip" --no-notes

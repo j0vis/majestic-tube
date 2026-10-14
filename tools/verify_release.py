@@ -25,16 +25,21 @@ What it checks, in order:
   4. the version in style.css and the version in functions.php agree with each
      other and with the version being released;
   5. every PHP file in the archive parses (php -l);
-  6. the contents match, file for file and byte for byte, the commit or the
-     exported tree the zip claims to be, so a zip built before the last commit
-     is caught here rather than by a user;
+  6. the contents match, file for file and byte for byte, the commit the zip
+     claims to be, so a zip built before the last commit is caught here rather
+     than by a user - and when an exported tree is named too, that tree is shown
+     to be the export of that same commit, because a tree on its own only says
+     the zip matches something;
   7. the smoke suite passes against the extracted archive rather than against
      the working tree, and it is the suite the artifact's own commit carries
      when that commit is known;
   8. the release notes describe this exact file: its size and its SHA-256.
 
+Nothing is checked against nothing: with neither --commit nor --tree the run
+fails, and a named tree has to come with the commit it was exported from.
+
 Usage:
-    python3 tools/verify_release.py <zip> [version] [--tree DIR] [--commit SHA]
+    python3 tools/verify_release.py <zip> [version] --commit SHA [--tree DIR]
                                    [--notes FILE] [--require-notes]
 """
 
@@ -76,12 +81,14 @@ DEV_ONLY = {
     ".env.local",
     ".env.production",
     "node_modules",
+    ".github",
     "tests",
     "tools",
     "__pycache__",
     "AGENTS.md",
     "FEATURES.md",
     "knowledge.md",
+    "local-notes.md",
     "Thumbs.db",
     ".DS_Store",
 }
@@ -483,10 +490,36 @@ def verify(
         if tree:
             report.section(f"The contents against {tree}")
 
-            if os.path.isdir(tree):
-                compare_trees(tree_digests(tree), tree_digests(theme_dir), report, "the tree")
-            else:
+            if not os.path.isdir(tree):
                 report.check("the exported tree exists", False, tree)
+            else:
+                compare_trees(tree_digests(tree), tree_digests(theme_dir), report, "the tree")
+
+                # The tree is only worth comparing against once it has been tied
+                # to the commit being released. Without that, the archive is
+                # held to a directory whose name is a claim: an export taken
+                # before an edit, hand-patched afterwards, or pointed at by
+                # mistake would all pass, and the release would be of code
+                # nobody committed.
+                if commit_tree:
+                    compare_trees(
+                        tree_digests(commit_tree),
+                        tree_digests(tree),
+                        report,
+                        f"the tree against commit {commit[:12]}",
+                    )
+                else:
+                    report.check(
+                        "the tree is the export of the commit being released",
+                        False,
+                        "no --commit was given, so the tree cannot be tied to a commit: name the commit it was exported from",
+                    )
+        elif not commit:
+            report.check(
+                "the artifact is held to the commit it claims to be",
+                False,
+                "neither --commit nor --tree was given, so nothing ties these bytes to a release",
+            )
 
         report.section("The smoke suite")
 

@@ -20,6 +20,9 @@ __pycache__/
 FEATURES.md
 knowledge.md
 
+# Local test-site credentials: ignored so no staged change can carry them out
+local-notes.md
+
 # Release archives
 *.zip
 

@@ -15,11 +15,25 @@ fails any of it is removed rather than left on disk to be published later.
 tools/verify_release.py holds those checks, and publish-release.py runs the
 same ones again on the way out.
 
+A zip is only a release if it is the code of a commit, so the tree it is built
+from is checked against the export of that commit before the file is trusted. The
+commit is the fourth argument, and HEAD when it is left out - a wrong guess fails
+verification rather than shipping, which is how a build from a stale export is
+caught here instead of by a site owner.
+
+Passing --no-notes skips the release-notes comparison. That comparison holds the
+file to the size and digest the notes state, which describe the artifact that was
+published: a rebuild on another machine is not required to be byte-identical to
+it, so a check that only cares about the code - a release build on a tag, for
+instance - asks for the code checks and leaves the digest to publish time.
+
 Usage:
-    python3 tools/build-release.py <version> <exported-tree> <output.zip>
+    python3 tools/build-release.py <version> <exported-tree> <output.zip> [commit]
+                                   [--no-notes]
 """
 
 import os
+import subprocess
 import sys
 import zipfile
 
@@ -30,12 +44,37 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import verify_release  # noqa: E402
 
 
+def head_commit() -> str:
+    """The commit to hold this build to when the caller does not name one.
+
+    HEAD is a guess, and the verifier is what makes a guess safe: the exported
+    tree is compared against this commit's export, so building from an older tag
+    while HEAD has moved on fails the build instead of producing a zip that
+    claims to be newer than it is.
+
+    @return Commit hash, or an empty string when this is not a git checkout.
+    """
+    result = subprocess.run(
+        ["git", "rev-parse", "HEAD"], capture_output=True, text=True
+    )
+
+    if result.returncode != 0:
+        return ""
+
+    return result.stdout.strip()
+
+
 def main() -> int:
-    if len(sys.argv) != 4:
+    flags = [argument for argument in sys.argv[1:] if argument.startswith("--")]
+    arguments = [argument for argument in sys.argv[1:] if not argument.startswith("--")]
+
+    if any(flag != "--no-notes" for flag in flags) or len(arguments) not in (3, 4):
         print(__doc__)
         return 2
 
-    version, tree, output = sys.argv[1], sys.argv[2], sys.argv[3]
+    version, tree, output = arguments[0], arguments[1], arguments[2]
+    commit = arguments[3] if len(arguments) == 4 else head_commit()
+    skip_notes = "--no-notes" in flags
     prefix = "majestic-tube"
 
     if not os.path.isdir(tree):
@@ -80,7 +119,8 @@ def main() -> int:
         output,
         version=version,
         tree=tree,
-        notes_path=notes if os.path.isfile(notes) else "",
+        commit=commit,
+        notes_path="" if skip_notes else (notes if os.path.isfile(notes) else ""),
     )
 
     if not verified:
