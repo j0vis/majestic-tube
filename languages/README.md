@@ -1,31 +1,39 @@
 # Translations
 
-Every user-facing string in Majestic Tube is wrapped in the `majestic-tube`
-text domain. The domain is bound to this folder by `load_theme_textdomain()` in
-`inc/theme-support.php`, so a compiled translation placed here is loaded
-automatically on every request.
+Every user-facing string in Majestic Tube passes the `majestic-tube` text
+domain, and the domain is bound to this folder by `load_theme_textdomain()`, so
+a compiled translation placed here is loaded automatically on every request.
 
-## Adding a translation
+`majestic-tube.pot` is the template: the list of strings the theme asks to have
+translated, in the format translation tools read. It is generated from the
+theme's own source and regenerated when the strings change, so it always
+describes the version you have installed.
 
-1. Generate the template from the theme source, for example with WP-CLI:
+## Translating the theme
 
-   ```
-   wp i18n make-pot . majestic-tube.pot --domain=majestic-tube
-   ```
+1. Copy the template to the locale you want, for example
+   `de_DE.majestic-tube.po`, and translate the `msgstr` lines in the copy. Any
+   gettext editor reads it; so does a text editor.
+2. Compile the copy to `de_DE.majestic-tube.mo`. That is the file WordPress
+   actually loads. An editor that saves a `.po` usually writes the `.mo` beside
+   it, and the gettext compiler does it from a command line if you have one.
+3. Put both files in this folder.
 
-2. Copy the template to the locale you want, for example
-   `de_DE.majestic-tube.po`, translate it, and compile it:
+The locale comes from the site's language setting under Settings → General, so
+there is nothing else to configure. A file here is loaded before a language pack
+for the same locale and wins for every string it translates, so a pack fills in
+the gaps rather than replacing your work.
 
-   ```
-   wp i18n make-json . --no-purge          # only needed for block scripts
-   msgfmt de_DE.majestic-tube.po -o de_DE.majestic-tube.mo
-   ```
+## About the template
 
-3. Drop the resulting `.mo` next to the `.po` in this folder.
-
-## Notes
-
-- The `.pot` template itself is not committed; regenerate it when the strings
-  change so translators always work from a current file.
-- The locale is chosen by WordPress from the site's language setting, so no
-  further configuration is needed per language.
+- It is generated from the theme's source, never edited by hand. A hand-edit is
+  a string that no longer exists in the theme, and the next regeneration drops
+  it; change the string in the theme and the template follows.
+- It carries no creation date and no source line numbers on purpose. Both change
+  on edits that leave every string alone, and a template that churns on every
+  edit is one nobody can review.
+- A string with a context (`_x`, `_nx`) or a plural form (`_n`, `_nx`) is listed
+  with it, so a translation can tell two uses of one word apart and can carry the
+  language's own plural rules.
+- The theme ships no compiled translation of its own. Any `.mo` here is yours or
+  a language pack's.

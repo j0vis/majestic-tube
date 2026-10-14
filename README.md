@@ -1225,7 +1225,7 @@ Use a reliable WordPress backup solution or your hosting provider’s backup ser
 
 ### Translate the theme
 
-Every visible string uses the `majestic-tube` text domain, and the theme loads that domain from the `languages` folder automatically. To add or update a translation, place the compiled `.mo` file for your locale in that folder; WordPress then serves it based on the site language set under `Settings → General`. Regenerate the `.pot` template from the theme source whenever the wording changes, so translators work from a current file. See the `languages/README.md` file shipped with the theme for the exact commands.
+Every visible string uses the `majestic-tube` text domain, and the theme loads that domain from the `languages` folder automatically. That folder ships with `majestic-tube.pot`, the template: the list of every string the theme asks to have translated, generated from the theme's own source and current for the version you installed. Copy it to your locale (for example `de_DE.majestic-tube.po`), translate the `msgstr` lines in the copy, compile it to `de_DE.majestic-tube.mo`, and place both files in the folder; WordPress then serves the translation based on the site language set under `Settings → General`. A translation in the folder wins over a language pack for the same locale, so a pack fills in whatever your file does not translate. See the `languages/README.md` file shipped with the theme for the full procedure.
 
 **Solve common problems**
 

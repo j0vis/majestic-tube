@@ -1,0 +1,1903 @@
+# Copyright (C) 2026 Majestic Tube
+# This file is distributed under the terms of the GNU General Public License.
+#
+# Generated from the theme's source. Regenerate it with the generator rather
+# than editing it: the template is the list of strings the theme asks to have
+# translated, and a hand-edit is a string that no longer exists.
+msgid ""
+msgstr ""
+"Project-Id-Version: Majestic Tube\n"
+"Report-Msgid-Bugs-To: https://github.com/j0vis/majestic-tube/issues\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+
+msgid "%1$d%% of the last %2$d published videos are missing a duration, thumbnail or source, so they are left out of the video sitemap."
+msgstr ""
+
+msgid "%1$s %2$s %3$s"
+msgstr ""
+
+msgid "%s Comment"
+msgid_plural "%s Comments"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "%s video"
+msgid_plural "%s videos"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "%s video has pending reports."
+msgid_plural "%s videos have pending reports."
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "(duplicate)"
+msgstr ""
+
+msgid "...or embed code (YouTube iframe, etc.)"
+msgstr ""
+
+msgid "A card-sized content block is inserted after this many video cards. A value below 3 behaves like 3."
+msgstr ""
+
+msgid "A dismissible bar that tells visitors the site uses cookies and links the pages that explain them. The dismissal is kept in the visitor&rsquo;s own browser - the theme sets no cookie of its own - and the notice never records a choice on your server or changes which ads print. Turn on <strong>Only load advertising after consent</strong> under Advertising to hold ads back until a consent plugin says otherwise."
+msgstr ""
+
+msgid "A highlight passes across a link as the pointer crosses it. The theme stops all of its animation for visitors whose system asks for reduced motion."
+msgstr ""
+
+msgid "A horizontally scrolling bar of the most-used tags, printed directly under the Latest / Most viewed / Longest / Popular / Random sort bar. It shows on the homepage and on actor pages, and stays hidden on a site that has no tags yet."
+msgstr ""
+
+msgid "A large library is split across numbered files under the same address. Google allows 50,000 URLs per sitemap; smaller files are quicker to generate on shared hosting."
+msgstr ""
+
+msgid "A legal page carries code, an embed or an ad block."
+msgstr ""
+
+msgid "A legal page carries code, an embed or an ad block: %s."
+msgstr ""
+
+msgid "A phrase shown on every category card, built from the tokens below. Leave it blank to use each category's own description instead."
+msgstr ""
+
+msgid "A row of outbound text links - partner sites, ad zones - printed under the header on the index page, and on no other page. The links themselves are a WordPress menu assigned under Appearance &rarr; Menus; this section decides whether the row prints and how it looks."
+msgstr ""
+
+msgid "A short visible introduction under the homepage heading, printed once above or below the grid. It is also the fallback search description unless you supply one under Basic SEO. Existing saved text is preserved."
+msgstr ""
+
+msgid "A single 300x250 ad with a close button, shown centered over the desktop video player. Takes Content Block widgets only."
+msgstr ""
+
+msgid "A text logo can use its own voice here. \"Inter\" and \"System UI\" match the rest of the site; the serif and monospace choices are fonts already installed on each visitor device and are never downloaded."
+msgstr ""
+
+msgid "About this video"
+msgstr ""
+
+msgid "Above the grid"
+msgstr ""
+
+msgid "Accent color"
+msgstr ""
+
+msgid "Accounts &amp; Spam Protection"
+msgstr ""
+
+msgid "Actions"
+msgstr ""
+
+msgid "Actor card text"
+msgstr ""
+
+msgid "Actors"
+msgstr ""
+
+msgid "Actors (comma separated)"
+msgstr ""
+
+msgid "Actors per page"
+msgstr ""
+
+msgid "Actors required"
+msgstr ""
+
+msgid "Add New Actor"
+msgstr ""
+
+msgid "Add New Video"
+msgstr ""
+
+msgid "Add Video"
+msgstr ""
+
+msgid "Add administrator-provided markup or shortcodes to a theme content area."
+msgstr ""
+
+msgid "Add or remove Actors"
+msgstr ""
+
+msgid "Add thumbnail"
+msgstr ""
+
+msgid "Add videos"
+msgstr ""
+
+msgid "Adds a button that widens the player across the page and dims the surrounding content, for watching without distractions. Also available on the keyboard with T while the shortcuts are on."
+msgstr ""
+
+msgid "Adds a speed button to the player with the usual range from 0.5x to 2x. The chosen speed is remembered in that visitor's own browser and applied to every video they open."
+msgstr ""
+
+msgid "Adds the usual player keys: space to play and pause, the arrow keys to seek and change volume, M to mute, F for full screen, 0-9 to jump to a point, and T for theater mode. Shortcuts never fire while a visitor is typing in a form field."
+msgstr ""
+
+msgid "Administrator-provided markup and shortcodes are supported."
+msgstr ""
+
+msgid "Adult content rating tag"
+msgstr ""
+
+msgid "Advertising"
+msgstr ""
+
+msgid "Advertising under the video player"
+msgstr ""
+
+msgid "After a visitor watches a few seconds of a video, a bar offers to continue from where they left off on their next visit. The position is kept in that visitor's own browser, never on your server, and finishing a video clears it."
+msgstr ""
+
+msgid "All"
+msgstr ""
+
+msgid "All Actors"
+msgstr ""
+
+msgid "All Videos"
+msgstr ""
+
+msgid "All devices"
+msgstr ""
+
+msgid "All fields are required."
+msgstr ""
+
+msgid "Already have an account?"
+msgstr ""
+
+msgid "An optional call-to-action button under the player that sends the visitor off this site - to a partner, a network, or your own download page. It only appears when there is a link to send them to, and the three settings below control that button."
+msgstr ""
+
+msgid "An optional heading printed before the links, such as &ldquo;Friends&rdquo;. Leave it blank and the row prints the links alone, still labeled &ldquo;Friends and partners&rdquo; for screen readers."
+msgstr ""
+
+msgid "Analytics code"
+msgstr ""
+
+msgid "Any standard widget: menus, link lists, friends links, text and images. Arranged in columns below the footer code and ads area."
+msgstr ""
+
+msgid "Archive Page SEO"
+msgstr ""
+
+msgid "Ask visitors to accept the terms"
+msgstr ""
+
+msgid "Asks visitors to prove they are human with Cloudflare Turnstile on the sign-up, password reset and video submission forms. Both Turnstile keys below must be filled in. The room the widget needs is reserved in those forms, and on the login and comment forms, whether or not this is on, so switching protection on never moves a button or changes a form&rsquo;s height. Neither the login form nor the comment form is guarded: the theme asks for a token on sign-up, password reset and submission only."
+msgstr ""
+
+msgid "Auto"
+msgstr ""
+
+msgid "Automatic: Video URL if the post has one, otherwise the embed code"
+msgstr ""
+
+msgid "Autoplay video player"
+msgstr ""
+
+msgid "Back to top"
+msgstr ""
+
+msgid "Basic (150px)"
+msgstr ""
+
+msgid "Basic SEO"
+msgstr ""
+
+msgid "Below player: code and ads"
+msgstr ""
+
+msgid "Below the grid"
+msgstr ""
+
+msgid "Bio"
+msgstr ""
+
+msgid "Bottom"
+msgstr ""
+
+msgid "Bottom left"
+msgstr ""
+
+msgid "Bottom right"
+msgstr ""
+
+msgid "Breadcrumb"
+msgstr ""
+
+msgid "Browse by letter"
+msgstr ""
+
+msgid "Browser tab icon"
+msgstr ""
+
+msgid "Browser tab icon (favicon)"
+msgstr ""
+
+msgid "Browsers only honor autoplay for muted videos."
+msgstr ""
+
+msgid "Captcha verification failed, please try again."
+msgstr ""
+
+msgid "Categories per page"
+msgstr ""
+
+msgid "Categories per row"
+msgstr ""
+
+msgid "Category"
+msgstr ""
+
+msgid "Category card text"
+msgstr ""
+
+msgid "Category description position"
+msgstr ""
+
+msgid "Category, Tag &amp; Actor Archives"
+msgstr ""
+
+msgid "Check the legal pages again"
+msgstr ""
+
+msgid "Choose an image"
+msgstr ""
+
+msgid "Choose from the most used Actors"
+msgstr ""
+
+msgid "Clear reports"
+msgstr ""
+
+msgid "Close"
+msgstr ""
+
+msgid "Close the player overlay"
+msgstr ""
+
+msgid "Code and ads shown at the very top of the site footer, above the footer widgets. Takes Content Block widgets only."
+msgstr ""
+
+msgid "Code and ads shown beside a video page when the video sidebar is switched on. Takes Content Block widgets only."
+msgstr ""
+
+msgid "Code and ads shown directly below the site header. Takes Content Block widgets only."
+msgstr ""
+
+msgid "Code and ads shown directly below the video player. Takes Content Block widgets only."
+msgstr ""
+
+msgid "Color scheme"
+msgstr ""
+
+msgid "Colors &amp; Typography"
+msgstr ""
+
+msgid "Comments are closed."
+msgstr ""
+
+msgid "Configure theme options"
+msgstr ""
+
+msgid "Contain"
+msgstr ""
+
+msgid "Contains %s"
+msgstr ""
+
+msgid "Content"
+msgstr ""
+
+msgid "Content Block"
+msgstr ""
+
+msgid "Controls the video grid on the site&rsquo;s front page."
+msgstr ""
+
+msgid "Controls what a single video page shows around the player."
+msgstr ""
+
+msgid "Cookie Policy"
+msgstr ""
+
+msgid "Cookie notice"
+msgstr ""
+
+msgid "Cookie notice text"
+msgstr ""
+
+msgid "Copyright text"
+msgstr ""
+
+msgid "Could not create reset key. Please try again."
+msgstr ""
+
+msgid "Could not create the submission. Please try again."
+msgstr ""
+
+msgid "Could not record your vote. Please try again."
+msgstr ""
+
+msgid "Could not send your report. Please try again."
+msgstr ""
+
+msgid "Count a view only after playback starts"
+msgstr ""
+
+msgid "Cover"
+msgstr ""
+
+msgid "Created page: %s"
+msgstr ""
+
+msgid "Created the Main Menu and assigned the legal footer links"
+msgstr ""
+
+msgid "Custom Code"
+msgstr ""
+
+msgid "Customize the menus"
+msgstr ""
+
+msgid "Dark"
+msgstr ""
+
+msgid "Default"
+msgstr ""
+
+msgid "Description"
+msgstr ""
+
+msgid "Description required"
+msgstr ""
+
+msgid "Desktop only"
+msgstr ""
+
+msgid "Details (optional)"
+msgstr ""
+
+msgid "Dislike"
+msgstr ""
+
+msgid "Dislikes"
+msgstr ""
+
+msgid "Dismiss"
+msgstr ""
+
+msgid "Dismiss this warning"
+msgstr ""
+
+msgid "Display admin bar for logged-in users"
+msgstr ""
+
+msgid "Display breadcrumbs"
+msgstr ""
+
+msgid "Display comments on videos"
+msgstr ""
+
+msgid "Display name"
+msgstr ""
+
+msgid "Display on"
+msgstr ""
+
+msgid "Display related videos"
+msgstr ""
+
+msgid "Display the copyright bar"
+msgstr ""
+
+msgid "Display the rating percentage"
+msgstr ""
+
+msgid "Display the search bar"
+msgstr ""
+
+msgid "Display the view counter"
+msgstr ""
+
+msgid "Display video durations"
+msgstr ""
+
+msgid "Displays a list of videos: latest, most viewed or random."
+msgstr ""
+
+msgid "Don't have an account?"
+msgstr ""
+
+msgid "Download"
+msgstr ""
+
+msgid "Duration"
+msgstr ""
+
+msgid "Duration %1$s, %2$s"
+msgstr ""
+
+msgid "Duration (seconds)"
+msgstr ""
+
+msgid "Duration required"
+msgstr ""
+
+msgid "Edit"
+msgstr ""
+
+msgid "Edit Actor"
+msgstr ""
+
+msgid "Edit Video"
+msgstr ""
+
+msgid "Email"
+msgstr ""
+
+msgid "Embed code required"
+msgstr ""
+
+msgid "Enable \"Report video\" button"
+msgstr ""
+
+msgid "Enable in-feed advertising"
+msgstr ""
+
+msgid "Enable membership (login/register)"
+msgstr ""
+
+msgid "Enable popunder / interstitial code"
+msgstr ""
+
+msgid "Enable spam protection"
+msgstr ""
+
+msgid "Enable the video quality selector"
+msgstr ""
+
+msgid "Enable thumbnails rotation on hover"
+msgstr ""
+
+msgid "Enable video sharing"
+msgstr ""
+
+msgid "Enable video submission"
+msgstr ""
+
+msgid "Enter a username or email address."
+msgstr ""
+
+msgid "Enter the username or e-mail you used in your profile. A password reset link will be sent to you by email."
+msgstr ""
+
+msgid "Every legal page is already present, so nothing was changed."
+msgstr ""
+
+msgid "Every link in this row is an outbound partner or ad link, so the theme always adds <code>rel=&quot;sponsored nofollow noopener noreferrer&quot;</code> whether this is on or off. This switch only controls the new tab."
+msgstr ""
+
+msgid "Exit theater mode"
+msgstr ""
+
+msgid "External link"
+msgstr ""
+
+msgid "Extra markup printed before <code>&lt;/body&gt;</code> for mobile visitors only."
+msgstr ""
+
+msgid "Extra markup printed before <code>&lt;/body&gt;</code>."
+msgstr ""
+
+msgid "Extra thumbnails required"
+msgstr ""
+
+msgid "Fill"
+msgstr ""
+
+msgid "Film"
+msgstr ""
+
+msgid "Fine (640px)"
+msgstr ""
+
+msgid "First"
+msgstr ""
+
+msgid "First name"
+msgstr ""
+
+msgid "Follow system"
+msgstr ""
+
+msgid "Footer Menu"
+msgstr ""
+
+msgid "Footer widget columns"
+msgstr ""
+
+msgid "Footer widgets"
+msgstr ""
+
+msgid "Footer: code and ads"
+msgstr ""
+
+msgid "Four columns"
+msgstr ""
+
+msgid "Friends"
+msgstr ""
+
+msgid "Friends & Ad Links"
+msgstr ""
+
+msgid "Friends &amp; Ad Links"
+msgstr ""
+
+msgid "Friends and partners"
+msgstr ""
+
+msgid "Get new password"
+msgstr ""
+
+msgid "Glam - fire, crowns, jewels"
+msgstr ""
+
+msgid "Got it"
+msgstr ""
+
+msgid "Grayscale the watermark"
+msgstr ""
+
+msgid "HD"
+msgstr ""
+
+msgid "HD video"
+msgstr ""
+
+msgid "Header, Footer &amp; Search"
+msgstr ""
+
+msgid "Header: code and ads"
+msgstr ""
+
+msgid "Heart"
+msgstr ""
+
+msgid "Hold every ad back until the visitor has agreed to cookies. This needs a consent banner that reports the visitor&rsquo;s choice back to the theme - a cookie banner plugin, or a short snippet of your own. Until consent is recorded, no ad placement prints anything at all."
+msgstr ""
+
+msgid "Home"
+msgstr ""
+
+msgid "Homepage"
+msgstr ""
+
+msgid "Homepage &amp; Listings"
+msgstr ""
+
+msgid "Homepage SEO"
+msgstr ""
+
+msgid "Homepage description"
+msgstr ""
+
+msgid "Homepage meta description"
+msgstr ""
+
+msgid "Homepage on Mobile"
+msgstr ""
+
+msgid "Homepage search title"
+msgstr ""
+
+msgid "Homepage title"
+msgstr ""
+
+msgid "Homepage title position"
+msgstr ""
+
+msgid "How an image that does not match the chosen aspect ratio is handled. Cover fills the box and crops the overflow, Contain fits the whole image and leaves bars, Fill stretches the image to the box."
+msgstr ""
+
+msgid "How the Footer widgets area is arranged. It does not affect the Footer: code and ads area, which is always full width."
+msgstr ""
+
+msgid "How the category, tag and actor pages describe themselves: the line on each card, and where the description sits. Each term&rsquo;s own words are edited on its own screen, next to its image."
+msgstr ""
+
+msgid "How the row is decorated. Stars, rockets and glam add an emoji in front of each link, cycling through their set; neon lights the text up instead. Plain is the quiet, undecorated row."
+msgstr ""
+
+msgid "I have read and accept the %s."
+msgstr ""
+
+msgid "I like it"
+msgstr ""
+
+msgid "Icon logo"
+msgstr ""
+
+msgid "If an account exists, a reset link has been sent."
+msgstr ""
+
+msgid "Ignore the site background image"
+msgstr ""
+
+msgid "Image"
+msgstr ""
+
+msgid "In-feed ad code"
+msgstr ""
+
+msgid "In-feed ad every N videos"
+msgstr ""
+
+msgid "Inter (bundled with the theme)"
+msgstr ""
+
+msgid "Inter (same as the site)"
+msgstr ""
+
+msgid "Inter is bundled with the theme, so every visitor - Windows, macOS, Android, iOS - sees the same letterforms. The system option renders in whatever interface font the visitor already has, which costs no download but looks different on each platform."
+msgstr ""
+
+msgid "Invalid post."
+msgstr ""
+
+msgid "Invalid request."
+msgstr ""
+
+msgid "Invalid taxonomy."
+msgstr ""
+
+msgid "Invalid username or password."
+msgstr ""
+
+msgid "Invalid video."
+msgstr ""
+
+msgid "It looks like nothing was found at this location. Maybe try a search?"
+msgstr ""
+
+msgid "It seems we can&rsquo;t find what you&rsquo;re looking for. Perhaps searching can help."
+msgstr ""
+
+msgid "Join %s"
+msgstr ""
+
+msgid "Keyboard shortcuts on the video page"
+msgstr ""
+
+msgid "Last"
+msgstr ""
+
+msgid "Last name"
+msgstr ""
+
+msgid "Last reason"
+msgstr ""
+
+msgid "Latest"
+msgstr ""
+
+msgid "Latest videos"
+msgstr ""
+
+msgid "Leave a Reply"
+msgstr ""
+
+msgid "Leave blank for the wording this theme ships. The links to your Terms of Use, Privacy Policy and Cookie Policy are printed under whatever you write here, so the notice always points at the pages it refers to."
+msgstr ""
+
+msgid "Legacy below-player content (desktop)"
+msgstr ""
+
+msgid "Legacy below-player content (mobile)"
+msgstr ""
+
+msgid "Legacy footer content (desktop)"
+msgstr ""
+
+msgid "Legacy footer content (mobile)"
+msgstr ""
+
+msgid "Legacy header content (desktop)"
+msgstr ""
+
+msgid "Legacy header content (mobile)"
+msgstr ""
+
+msgid "Legacy mobile sidebar content"
+msgstr ""
+
+msgid "Legacy player content 1"
+msgstr ""
+
+msgid "Legacy player content 2"
+msgstr ""
+
+msgid "Legacy video sidebar content 1"
+msgstr ""
+
+msgid "Legacy video sidebar content 2"
+msgstr ""
+
+msgid "Legacy video sidebar content 3"
+msgstr ""
+
+msgid "Legal pages"
+msgstr ""
+
+msgid "Lets visitors flag broken or miscategorized videos. Reports appear under Videos > Reported Videos."
+msgstr ""
+
+msgid "Light"
+msgstr ""
+
+msgid "Like it"
+msgstr ""
+
+msgid "Likes"
+msgstr ""
+
+msgid "Login"
+msgstr ""
+
+msgid "Login successful, reloading page..."
+msgstr ""
+
+msgid "Login to %s"
+msgstr ""
+
+msgid "Logo"
+msgstr ""
+
+msgid "Logo font family"
+msgstr ""
+
+msgid "Logo font size (px)"
+msgstr ""
+
+msgid "Logo image URL"
+msgstr ""
+
+msgid "Logo left margin (px)"
+msgstr ""
+
+msgid "Logo max height (px)"
+msgstr ""
+
+msgid "Logo max width (px)"
+msgstr ""
+
+msgid "Logo top margin (px)"
+msgstr ""
+
+msgid "Logout"
+msgstr ""
+
+msgid "Longest"
+msgstr ""
+
+msgid "Longest videos"
+msgstr ""
+
+msgid "Lost Password?"
+msgstr ""
+
+msgid "Main Menu"
+msgstr ""
+
+msgid "Main menu"
+msgstr ""
+
+msgid "Main thumbnail"
+msgstr ""
+
+msgid "Main thumbnail quality"
+msgstr ""
+
+msgid "Majestic Tube"
+msgstr ""
+
+msgid "Majestic Tube Videos"
+msgstr ""
+
+msgid "Majestic Tube setup is incomplete."
+msgstr ""
+
+msgid "Majestic Tube:"
+msgstr ""
+
+msgid "Majestic Video SEO:"
+msgstr ""
+
+msgid "Marks up each video for Google Video search: a VideoObject block, the Open Graph video tags, and a video sitemap. These describe the video itself, which only this theme knows about - the browser title, meta description and canonical for a video page come from Basic SEO, or from your SEO plugin when one is running."
+msgstr ""
+
+msgid "Menu"
+msgstr ""
+
+msgid "Missing"
+msgstr ""
+
+msgid "Missing data"
+msgstr ""
+
+msgid "Missing parameters."
+msgstr ""
+
+msgid "Missing: %s"
+msgstr ""
+
+msgid "Mobile only"
+msgstr ""
+
+msgid "Mobile scripts"
+msgstr ""
+
+msgid "More thumbnails (one URL per line, rotated on hover)"
+msgstr ""
+
+msgid "Most viewed"
+msgstr ""
+
+msgid "Most viewed videos"
+msgstr ""
+
+msgid "Move to trash"
+msgstr ""
+
+msgid "Multiple thumbnails are rotated on hover in the front-end. The first one is used as the main thumb if no featured image is set."
+msgstr ""
+
+msgid "My Account"
+msgstr ""
+
+msgid "My Channel"
+msgstr ""
+
+msgid "My Profile"
+msgstr ""
+
+msgid "Neon - glowing text"
+msgstr ""
+
+msgid "New Actor Name"
+msgstr ""
+
+msgid "New Video"
+msgstr ""
+
+msgid "New password (leave blank to keep current)"
+msgstr ""
+
+msgid "Next"
+msgstr ""
+
+msgid "Next steps"
+msgstr ""
+
+msgid "No actors found"
+msgstr ""
+
+msgid "No image"
+msgstr ""
+
+msgid "No legal page could be recreated. Check that your database user may create pages, then try again."
+msgstr ""
+
+msgid "No video has been reported yet."
+msgstr ""
+
+msgid "No videos found"
+msgstr ""
+
+msgid "No videos found in Trash"
+msgstr ""
+
+msgid "Normal (320px)"
+msgstr ""
+
+msgid "Not specified"
+msgstr ""
+
+msgid "Nothing Found"
+msgstr ""
+
+msgid "Number of popular tags"
+msgstr ""
+
+msgid "Number of related videos"
+msgstr ""
+
+msgid "Number of videos:"
+msgstr ""
+
+msgid "OK (embed)"
+msgstr ""
+
+msgid "Off"
+msgstr ""
+
+msgid "Offer to resume where the visitor stopped"
+msgstr ""
+
+msgid "On"
+msgstr ""
+
+msgid "One column"
+msgstr ""
+
+msgid "Only affects the styles that carry emoji. If you type your own emoji at the start of a menu label the theme leaves it exactly as you wrote it and adds nothing in front of it."
+msgstr ""
+
+msgid "Only load advertising after consent"
+msgstr ""
+
+msgid "Only pages that are missing are created, using the starter wording the theme ships with. A page that already exists is never overwritten, so any text you have written stays."
+msgstr ""
+
+msgid "Open Site Identity"
+msgstr ""
+
+msgid "Open links in a new tab"
+msgstr ""
+
+msgid "Optional title"
+msgstr ""
+
+msgid "Other scripts"
+msgstr ""
+
+msgid "Outbound button icon"
+msgstr ""
+
+msgid "Outbound button link"
+msgstr ""
+
+msgid "Outbound button text"
+msgstr ""
+
+msgid "Overlay a logo watermark on the player"
+msgstr ""
+
+msgid "Page not found"
+msgstr ""
+
+msgid "Pages:"
+msgstr ""
+
+msgid "Password"
+msgstr ""
+
+msgid "Plain - text only"
+msgstr ""
+
+msgid "Play circle"
+msgstr ""
+
+msgid "Playback speed"
+msgstr ""
+
+msgid "Playback speed control"
+msgstr ""
+
+msgid "Player"
+msgstr ""
+
+msgid "Player Watermark"
+msgstr ""
+
+msgid "Player overlay"
+msgstr ""
+
+msgid "Player overlay: 300x250 code and ads"
+msgstr ""
+
+msgid "Please accept the terms to continue."
+msgstr ""
+
+msgid "Please choose one of the offered display names."
+msgstr ""
+
+msgid "Please enter a valid video duration."
+msgstr ""
+
+msgid "Please fill in both username and password."
+msgstr ""
+
+msgid "Please provide a preview video URL."
+msgstr ""
+
+msgid "Please provide a thumbnail URL."
+msgstr ""
+
+msgid "Please provide a video URL."
+msgstr ""
+
+msgid "Please provide a video description."
+msgstr ""
+
+msgid "Please provide a video title."
+msgstr ""
+
+msgid "Please provide an embed code."
+msgstr ""
+
+msgid "Please provide at least one actor."
+msgstr ""
+
+msgid "Please provide at least one tag."
+msgstr ""
+
+msgid "Please provide at least one thumbnail URL to rotate."
+msgstr ""
+
+msgid "Please provide the video duration."
+msgstr ""
+
+msgid "Popular"
+msgstr ""
+
+msgid "Popular Actors"
+msgstr ""
+
+msgid "Popular tags"
+msgstr ""
+
+msgid "Popular videos"
+msgstr ""
+
+msgid "Popunder / interstitial code"
+msgstr ""
+
+msgid "Post id required!"
+msgstr ""
+
+msgid "Preview video URL (mp4, webm, gif or webp, shown on hover)"
+msgstr ""
+
+msgid "Preview video required"
+msgstr ""
+
+msgid "Previous"
+msgstr ""
+
+msgid "Printed inside the document head on every front-end page."
+msgstr ""
+
+msgid "Prints a VideoObject block and the Open Graph video tags on every video page, and adds a &ldquo;Video SEO&rdquo; column to the Videos list so you can see which videos are missing a duration, thumbnail or source. Turn this off if another plugin already prints video markup."
+msgstr ""
+
+msgid "Prints a meta description, a canonical on archive pages, and the Open Graph and Twitter card a shared link needs. Switched off for you while a known SEO plugin is active; turn it off by hand if you run one the theme does not recognize."
+msgstr ""
+
+msgid "Prints a required terms checkbox on the login, registration and video submission forms, and refuses a submission that arrives without it. The checkbox links the Terms of Use and Privacy Policy pages when the site has them; with neither published, no checkbox is printed. The login and registration panel and the submission page also print no Code and ads area while this is on, so no ad or code block appears beside the question."
+msgstr ""
+
+msgid "Prints a row of outbound text links under the header on the index page, and on no other page. Assign a menu to <strong>Friends &amp; Ad Links</strong> under Appearance &rarr; Menus first - until you do, the row prints nothing."
+msgstr ""
+
+msgid "Prints the Restricted To Adults label exactly as rtalabel.org prescribes it, which is what parental-control and filtering software looks for. Google reads it as the same explicit-content signal as the rating tag above, so one of the two is enough for search - enable both only if the filters you rely on look for different ones."
+msgstr ""
+
+msgid "Privacy Policy"
+msgstr ""
+
+msgid "Profile updated."
+msgstr ""
+
+msgid "Puts the rating tag Google documents for explicit content in the head of every page. It asks SafeSearch to filter the site; it is not a noindex directive, so it does not by itself keep a page out of the index."
+msgstr ""
+
+msgid "Quality"
+msgstr ""
+
+msgid "RTA label"
+msgstr ""
+
+msgid "Random"
+msgstr ""
+
+msgid "Random videos"
+msgstr ""
+
+msgid "Rating"
+msgstr ""
+
+msgid "Read less"
+msgstr ""
+
+msgid "Read more"
+msgstr ""
+
+msgid "Recreate the missing legal pages"
+msgstr ""
+
+msgid "Registration complete. You can now log in."
+msgstr ""
+
+msgid "Registration is disabled."
+msgstr ""
+
+msgid "Related Videos"
+msgstr ""
+
+msgid "Remove"
+msgstr ""
+
+msgid "Remove image"
+msgstr ""
+
+msgid "Removes the Video.js dependency entirely. Quality switcher, keyboard shortcuts and skinning are then handled by the browser."
+msgstr ""
+
+msgid "Repeat new password"
+msgstr ""
+
+msgid "Report this video"
+msgstr ""
+
+msgid "Reported"
+msgstr ""
+
+msgid "Reported Videos"
+msgstr ""
+
+msgid "Reported videos"
+msgstr ""
+
+msgid "Reporting is disabled."
+msgstr ""
+
+msgid "Reports"
+msgstr ""
+
+msgid "Reports are kept in post meta (reported_count, reported_reasons, reported_ips). Clear a video once it has been fixed to reset its counter."
+msgstr ""
+
+msgid "Reports cleared for that video."
+msgstr ""
+
+msgid "Reset Password"
+msgstr ""
+
+msgid "Resume from"
+msgstr ""
+
+msgid "Retained for migration into the Player content widget area."
+msgstr ""
+
+msgid "Review all reports"
+msgstr ""
+
+msgid "Rockets and shooting stars"
+msgstr ""
+
+msgid "Row label"
+msgstr ""
+
+msgid "Row style"
+msgstr ""
+
+msgid "Run the setup again"
+msgstr ""
+
+msgid "SEO &amp; Analytics"
+msgstr ""
+
+msgid "Save profile"
+msgstr ""
+
+msgid "Scroll the tags back"
+msgstr ""
+
+msgid "Scroll the tags forward"
+msgstr ""
+
+msgid "Search"
+msgstr ""
+
+msgid "Search Actors"
+msgstr ""
+
+msgid "Search Results for: %s"
+msgstr ""
+
+msgid "Search Videos"
+msgstr ""
+
+msgid "Search for:"
+msgstr ""
+
+msgid "Search videos&hellip;"
+msgstr ""
+
+msgid "Search: %s"
+msgstr ""
+
+msgid "Security check failed."
+msgstr ""
+
+msgid "Security check failed. Please try again."
+msgstr ""
+
+msgid "Select a category"
+msgstr ""
+
+msgid "Select image"
+msgstr ""
+
+msgid "Send report"
+msgstr ""
+
+msgid "Separate Actors with commas"
+msgstr ""
+
+msgid "Serves a Google video sitemap at /video-sitemap.xml and advertises it in robots.txt. Submit the address to Google Search Console separately - the XML sitemap index does not cover it."
+msgstr ""
+
+msgid "Setup finished. Every page and menu the theme ships with now exists."
+msgstr ""
+
+msgid "Setup still could not create everything. Check that your database user may create pages, then try again."
+msgstr ""
+
+msgid "Share"
+msgstr ""
+
+msgid "Share by email"
+msgstr ""
+
+msgid "Share on Facebook"
+msgstr ""
+
+msgid "Share on Google+"
+msgstr ""
+
+msgid "Share on LinkedIn"
+msgstr ""
+
+msgid "Share on Odnoklassniki"
+msgstr ""
+
+msgid "Share on Reddit"
+msgstr ""
+
+msgid "Share on Tumblr"
+msgstr ""
+
+msgid "Share on X"
+msgstr ""
+
+msgid "Share on X / Twitter"
+msgstr ""
+
+msgid "Sharing"
+msgstr ""
+
+msgid "Shine sweep on hover"
+msgstr ""
+
+msgid "Show a cookie notice"
+msgstr ""
+
+msgid "Show icons throughout the site"
+msgstr ""
+
+msgid "Show the \"My Channel\" link"
+msgstr ""
+
+msgid "Show the \"My Profile\" link"
+msgstr ""
+
+msgid "Show the \"Submit a Video\" link"
+msgstr ""
+
+msgid "Show the Video sidebar widget area beside individual video pages. The area stays empty until you add content."
+msgstr ""
+
+msgid "Show the description block"
+msgstr ""
+
+msgid "Show the emoji on each link"
+msgstr ""
+
+msgid "Show the friends and ad links row"
+msgstr ""
+
+msgid "Show the light/dark toggle in the header"
+msgstr ""
+
+msgid "Show the logo in the footer"
+msgstr ""
+
+msgid "Show the outbound video button"
+msgstr ""
+
+msgid "Show the popular tags bar"
+msgstr ""
+
+msgid "Show the video sidebar"
+msgstr ""
+
+msgid "Show video actors"
+msgstr ""
+
+msgid "Show video categories"
+msgstr ""
+
+msgid "Show video tags"
+msgstr ""
+
+msgid "Sign up"
+msgstr ""
+
+msgid "Site Design"
+msgstr ""
+
+msgid "Site Features"
+msgstr ""
+
+msgid "Site contact"
+msgstr ""
+
+msgid "Site font"
+msgstr ""
+
+msgid "Skip to content"
+msgstr ""
+
+msgid "Some legal pages could not be recreated: %s. Check that your database user may create pages, then try again."
+msgstr ""
+
+msgid "Something else"
+msgstr ""
+
+msgid "Sorry, but nothing matched your search terms. Please try again with some different keywords."
+msgstr ""
+
+msgid "Sort by:"
+msgstr ""
+
+msgid "Spam or misleading"
+msgstr ""
+
+msgid "Star"
+msgstr ""
+
+msgid "Stars and sparkles"
+msgstr ""
+
+msgid "Still missing: %s."
+msgstr ""
+
+msgid "Submit a Video"
+msgstr ""
+
+msgid "Submit video"
+msgstr ""
+
+msgid "Switch color scheme"
+msgstr ""
+
+msgid "System UI"
+msgstr ""
+
+msgid "System UI (the visitor's own font)"
+msgstr ""
+
+msgid "System monospace"
+msgstr ""
+
+msgid "System serif"
+msgstr ""
+
+msgid "Tag description position"
+msgstr ""
+
+msgid "Tags (comma separated)"
+msgstr ""
+
+msgid "Tags required"
+msgstr ""
+
+msgid "Terms of Use"
+msgstr ""
+
+msgid "Text logo"
+msgstr ""
+
+msgid "Thank you!"
+msgstr ""
+
+msgid "Thanks for activating Majestic Tube. Setup has not finished yet, so the site may be missing pages or menus:"
+msgstr ""
+
+msgid "Thanks for activating Majestic Tube. The following setup steps ran:"
+msgstr ""
+
+msgid "Thanks for submitting a video! Your submission is being moderated."
+msgstr ""
+
+msgid "Thanks, our team will review this video."
+msgstr ""
+
+msgid "That page cannot be moved to the trash. It may be the only copy of its document, or it may already be gone."
+msgstr ""
+
+msgid "The Secret Key from the same widget. This one is sent to Cloudflare from the server and must never appear on the page."
+msgstr ""
+
+msgid "The Site Key shown in the Turnstile widget you created at dash.cloudflare.com."
+msgstr ""
+
+msgid "The ad slots this theme prints itself are switched on here. The remaining page areas are managed from Appearance &rarr; Widgets."
+msgstr ""
+
+msgid "The browser tab, and the blue title on a search result, for the front page. Leave it empty for the site title."
+msgstr ""
+
+msgid "The browser-tab icon you had set could not be moved to the WordPress Site Icon: %s."
+msgstr ""
+
+msgid "The duplicate copy was moved to the trash. The remaining page keeps its content and its footer link."
+msgstr ""
+
+msgid "The email address is not valid."
+msgstr ""
+
+msgid "The email you entered is not valid. Please try again."
+msgstr ""
+
+msgid "The highlight color, and the only one you have to choose: buttons and badges are filled with it, and the theme derives a readable link, text and icon tone from it for the light skin and for the dark skin. The video player keeps its own bright version of the same color, because it stays black whatever the skin is."
+msgstr ""
+
+msgid "The missing legal pages have been recreated, and the footer legal links now point at them."
+msgstr ""
+
+msgid "The password must be at least 8 characters long."
+msgstr ""
+
+msgid "The passwords you entered do not match. Your password was not updated."
+msgstr ""
+
+msgid "The same idea for actor cards. Leave it blank to use each actor's own description instead."
+msgstr ""
+
+msgid "The search appearance the theme can supply by itself, for a site that runs no SEO plugin: a homepage search title, the meta description, the canonical for archives, and the social card a shared link shows. All of it is switched off automatically while Yoast, Rank Math, All in One SEO, SEOPress, The SEO Framework or Slim SEO is active, because that plugin already answers these questions and two answers in one page head is worse than one."
+msgstr ""
+
+msgid "The skin the site uses by default. \"Follow system\" follows each visitor's operating-system setting and needs no script. Visitors can still override this with the header toggle, and that choice is stored only in their own browser."
+msgstr ""
+
+msgid "The theme could not create every page and menu it ships with."
+msgstr ""
+
+msgid "The theme draws its own icons - the search button, the sort tabs, the play, like, share and report buttons, the video cards. They are part of the stylesheet, so they cost no request and need no plugin. Switch this off to print the words alone."
+msgstr ""
+
+msgid "The theme never edits content you have written, so this one is yours to change."
+msgstr ""
+
+msgid "The theme prints none of its widget areas on a legal page, but markup saved inside the page body still prints inside the document a visitor is reading, where it reads as the site’s own wording. Remove it from the page, and place it in a Code and ads area instead if you still need it."
+msgstr ""
+
+msgid "The theme prints none of its widget areas on a legal page, but markup saved inside the page body still prints inside the document a visitor is reading, where it reads as the site’s own wording. Remove it from the page, or move it to a Code and ads area."
+msgstr ""
+
+msgid "The thumbnail could not be saved. Please try again."
+msgstr ""
+
+msgid "The video does not play"
+msgstr ""
+
+msgid "The view is recorded once the video has played for three seconds instead of on page load. Applies to new views only."
+msgstr ""
+
+msgid "The visible introduction and its position on the homepage. The visible homepage heading is under Homepage &amp; Listings &rarr; Homepage; the browser title and meta description for the front page are under Basic SEO."
+msgstr ""
+
+msgid "The words on the button. Leave it blank for &ldquo;Watch the full video&rdquo;."
+msgstr ""
+
+msgid "Theater mode"
+msgstr ""
+
+msgid "These are the compliance pages the theme creates. If one has been deleted, the footer link to it is dead and the document is no longer published."
+msgstr ""
+
+msgid "This account cannot be created. Try a different username or email."
+msgstr ""
+
+msgid "This email is already used by another user. Try a different one."
+msgstr ""
+
+msgid "This site uses cookies to keep it working and to measure what is used."
+msgstr ""
+
+msgid "Three columns"
+msgstr ""
+
+msgid "Thumbnail URL"
+msgstr ""
+
+msgid "Thumbnail link required"
+msgstr ""
+
+msgid "Thumbnails"
+msgstr ""
+
+msgid "Thumbnails (rotation)"
+msgstr ""
+
+msgid "Thumbnails aspect ratio"
+msgstr ""
+
+msgid "Thumbnails fit"
+msgstr ""
+
+msgid "Title required"
+msgstr ""
+
+msgid "Title:"
+msgstr ""
+
+msgid "To view this video please enable JavaScript, and consider upgrading to a web browser that supports HTML5 video."
+msgstr ""
+
+msgid "Toggle navigation"
+msgstr ""
+
+msgid "Too many attempts. Please try again later."
+msgstr ""
+
+msgid "Top"
+msgstr ""
+
+msgid "Top left"
+msgstr ""
+
+msgid "Top right"
+msgstr ""
+
+msgid "Tracking URL"
+msgstr ""
+
+msgid "Truncate long descriptions"
+msgstr ""
+
+msgid "Turn this on to drop any background image set under Appearance &rarr; Customize &rarr; Background. The theme then paints its own flat background color instead. Leave it off to let that image show through."
+msgstr ""
+
+msgid "Turnstile secret key"
+msgstr ""
+
+msgid "Turnstile site key"
+msgstr ""
+
+msgid "Two columns"
+msgstr ""
+
+msgid "Two live copies of %s exist. The footer links at the first; move the other to the trash below and its content stays recoverable there."
+msgstr ""
+
+msgid "Update Actor"
+msgstr ""
+
+msgid "Use an image logo"
+msgstr ""
+
+msgid "Use selected image"
+msgstr ""
+
+msgid "Use the native HTML5 player instead of Video.js"
+msgstr ""
+
+msgid "Username"
+msgstr ""
+
+msgid "Username or E-mail"
+msgstr ""
+
+msgid "Video"
+msgstr ""
+
+msgid "Video Categories"
+msgstr ""
+
+msgid "Video Page"
+msgstr ""
+
+msgid "Video Page Layout"
+msgstr ""
+
+msgid "Video SEO"
+msgstr ""
+
+msgid "Video Structured Data"
+msgstr ""
+
+msgid "Video Submission"
+msgstr ""
+
+msgid "Video Tags"
+msgstr ""
+
+msgid "Video URL"
+msgstr ""
+
+msgid "Video URL (mp4, webm)"
+msgstr ""
+
+msgid "Video URL 1080p"
+msgstr ""
+
+msgid "Video URL 240p"
+msgstr ""
+
+msgid "Video URL 360p"
+msgstr ""
+
+msgid "Video URL 480p"
+msgstr ""
+
+msgid "Video URL 4K"
+msgstr ""
+
+msgid "Video URL 720p"
+msgstr ""
+
+msgid "Video embed code"
+msgstr ""
+
+msgid "Video filters"
+msgstr ""
+
+msgid "Video information"
+msgstr ""
+
+msgid "Video link required"
+msgstr ""
+
+msgid "Video rating"
+msgstr ""
+
+msgid "Video shortcode"
+msgstr ""
+
+msgid "Video sidebar"
+msgstr ""
+
+msgid "Video sidebar: code and ads"
+msgstr ""
+
+msgid "Video sitemap"
+msgstr ""
+
+msgid "Video source for the player"
+msgstr ""
+
+msgid "Video structured data"
+msgstr ""
+
+msgid "Video submission is currently disabled."
+msgstr ""
+
+msgid "Video title"
+msgstr ""
+
+msgid "Video trailer URL"
+msgstr ""
+
+msgid "Videos"
+msgstr ""
+
+msgid "Videos displayed on homepage"
+msgstr ""
+
+msgid "Videos per page"
+msgstr ""
+
+msgid "Videos per page (mobile)"
+msgstr ""
+
+msgid "Videos per row"
+msgstr ""
+
+msgid "Videos per row (mobile)"
+msgstr ""
+
+msgid "Videos per sitemap file"
+msgstr ""
+
+msgid "View"
+msgstr ""
+
+msgid "View Video"
+msgstr ""
+
+msgid "Views"
+msgstr ""
+
+msgid "Watch %1$s. %2$s videos on %3$s."
+msgstr ""
+
+msgid "Watch %s on %s."
+msgstr ""
+
+msgid "Watch the full video"
+msgstr ""
+
+msgid "Watermark image URL"
+msgstr ""
+
+msgid "Watermark max width (px)"
+msgstr ""
+
+msgid "Watermark position"
+msgstr ""
+
+msgid "Website"
+msgstr ""
+
+msgid "Welcome to Majestic Tube"
+msgstr ""
+
+msgid "What a search engine may show under the front page title, and the text on a Facebook or X share card. Leave it empty for the site tagline. It is kept apart from the visible homepage introduction on purpose: one is read by a visitor, the other only by a machine."
+msgstr ""
+
+msgid "What is wrong with this video?"
+msgstr ""
+
+msgid "When off, the WordPress admin bar is hidden for everyone except administrators."
+msgstr ""
+
+msgid "Where the button sends the visitor. Leave it blank to use each video&rsquo;s own tracking link, and the button then appears only on videos that have one."
+msgstr ""
+
+msgid "Which field the player uses on every video page. Both are still saved on the post either way, so switching back costs nothing. A video that does not have the field you picked falls back to the other one instead of showing an empty player."
+msgstr ""
+
+msgid "Written as width/height. The front end splits this value on the slash, so keep the \"16/9\" form."
+msgstr ""
+
+msgid "Wrong video or thumbnail"
+msgstr ""
+
+msgid "You are not allowed to dismiss this warning."
+msgstr ""
+
+msgid "You are not allowed to manage legal pages."
+msgstr ""
+
+msgid "You are not allowed to moderate reports."
+msgstr ""
+
+msgid "You have already rated this video."
+msgstr ""
+
+msgid "You have already reported this video. Thanks!"
+msgstr ""
+
+msgid "You must be logged in to submit a video. Please"
+msgstr ""
+
+msgid "You must be logged in to view your profile."
+msgstr ""
+
+msgid "Your browser does not support the video tag."
+msgstr ""
+
+msgid "Your session expired. Please reload the page and try again."
+msgstr ""
+
+msgid "Your setting has not been touched. Upload that image once under Appearance → Customize → Site Identity → Site Icon and the tab icon is back."
+msgstr ""
+
+msgid "a Custom HTML block"
+msgstr ""
+
+msgid "a Script block"
+msgstr ""
+
+msgid "a network ad marker"
+msgstr ""
+
+msgid "a script tag"
+msgstr ""
+
+msgid "an Embed block"
+msgstr ""
+
+msgid "an ad or embed shortcode"
+msgstr ""
+
+msgid "an advertising block"
+msgstr ""
+
+msgid "an embed or ad frame"
+msgstr ""
+
+msgid "and"
+msgstr ""
+
+msgid "duration"
+msgstr ""
+
+msgid "embed"
+msgstr ""
+
+msgid "https://... thumbnail URL"
+msgstr ""
+
+msgid "likes"
+msgstr ""
+
+msgid "log in"
+msgstr ""
+
+msgid "or"
+msgstr ""
+
+msgid "register"
+msgstr ""
+
+msgid "self-hosted"
+msgstr ""
+
+msgid "source"
+msgstr ""
+
+msgid "the site administrator"
+msgstr ""
+
+msgid "thumbnail"
+msgstr ""
+
+msgid "video"
+msgid_plural "videos"
+msgstr[0] ""
+msgstr[1] ""
+
+msgid "views"
+msgstr ""
+
+msgctxt "post date"
+msgid "Posted on %s"
+msgstr ""
+
+msgctxt "taxonomy general name"
+msgid "Actors"
+msgstr ""
+
+msgctxt "taxonomy singular name"
+msgid "Actor"
+msgstr ""
