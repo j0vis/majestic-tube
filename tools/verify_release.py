@@ -79,6 +79,7 @@ DEV_ONLY = {
     "tests",
     "tools",
     "__pycache__",
+    "AGENTS.md",
     "FEATURES.md",
     "knowledge.md",
     "Thumbs.db",

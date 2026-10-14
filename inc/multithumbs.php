@@ -98,11 +98,15 @@ function majestic_tube_parse_submitted_thumbs( $raw ) {
 /**
  * Render the thumbnails metabox.
  *
+ * The box prints no nonce field of its own. Nothing in the post form writes
+ * this list - a thumbnail is added or removed the moment its button is pressed,
+ * through the admin-ajax.php requests below, and those are authorized by the
+ * post's own capability check and the ajax nonce. A wp_nonce_field() here was a
+ * field no handler ever read, and it read like the list was saved on publish.
+ *
  * @param WP_Post $post Current post.
  */
 function majestic_tube_thumbs_meta_box_callback( $post ) {
-	wp_nonce_field( 'majestic_tube_thumbs', 'majestic_tube_thumbs_nonce' );
-
 	$thumbs = majestic_tube_parse_thumbs_meta( get_post_meta( $post->ID, 'thumbs', false ) );
 	?>
 	<div class="majestic-tube-thumbs-list" id="majestic-tube-thumbs-list">
@@ -128,12 +132,123 @@ function majestic_tube_thumbs_meta_box_callback( $post ) {
 	<p class="description"><?php esc_html_e( 'Multiple thumbnails are rotated on hover in the front-end. The first one is used as the main thumb if no featured image is set.', 'majestic-tube' ); ?></p>
 
 	<script>
-	// Data passed from PHP for the AJAX handlers.
+	// Data passed from PHP for the AJAX handlers. The strings are encoded with
+	// the JSON_HEX_* flags inc/assets.php uses for its own inline payload: the
+	// labels come from translation files, and a translated sentence holding
+	// "</script>" must not be able to end this block.
 	window.majesticTubeThumbsAdmin = {
 		postId: <?php echo esc_js( $post->ID ); ?>,
-		ajaxUrl: <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ) ); ?>,
-		nonce: <?php echo wp_json_encode( wp_create_nonce( 'ajax-nonce' ) ); ?>
+		ajaxUrl: <?php echo wp_json_encode( admin_url( 'admin-ajax.php' ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>,
+		nonce: <?php echo wp_json_encode( wp_create_nonce( 'ajax-nonce' ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>,
+		removeLabel: <?php echo wp_json_encode( __( 'Remove', 'majestic-tube' ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>,
+		errorLabel: <?php echo wp_json_encode( __( 'The thumbnail could not be saved. Please try again.', 'majestic-tube' ), JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT ); ?>
 	};
+
+	/*
+	 * The Add and Remove buttons had no listener at all: this block handed out
+	 * the endpoint, the nonce and the post id, and nothing read them, so both
+	 * controls did nothing on every post edit screen. The listeners live here,
+	 * beside the markup they drive, because the screens that render this box
+	 * enqueue no script of their own. The handlers behind them check the
+	 * capability against the post each time, so the data here is not the thing
+	 * that decides what a request may change.
+	 */
+	( function () {
+		var data = window.majesticTubeThumbsAdmin;
+		var list = document.getElementById( 'majestic-tube-thumbs-list' );
+		var input = document.getElementById( 'majestic-tube-new-thumb-url' );
+
+		if ( ! data || ! list || ! input ) {
+			return;
+		}
+
+		function request( action, url ) {
+			var body = new FormData();
+
+			body.append( 'action', action );
+			body.append( 'nonce', data.nonce );
+			body.append( 'post_id', data.postId );
+			body.append( 'thumb_url', url );
+
+			return fetch( data.ajaxUrl, {
+				method: 'POST',
+				credentials: 'same-origin',
+				body: body
+			} ).then( function ( response ) {
+				return response.json();
+			} ).then( function ( json ) {
+				if ( ! json || ! json.result ) {
+					throw new Error( 'rejected' );
+				}
+
+				return json;
+			} );
+		}
+
+		function row( url ) {
+			var item = document.createElement( 'div' );
+			var image = document.createElement( 'img' );
+			var button = document.createElement( 'button' );
+
+			item.className = 'majestic-tube-thumb-item';
+			image.src = url;
+			image.alt = '';
+			button.type = 'button';
+			button.className = 'button majestic-tube-thumb-remove';
+			button.setAttribute( 'data-thumb', url );
+			button.textContent = data.removeLabel;
+			item.appendChild( image );
+			item.appendChild( button );
+
+			return item;
+		}
+
+		function failed() {
+			window.alert( data.errorLabel );
+		}
+
+		document.addEventListener( 'click', function ( e ) {
+			var target = e.target;
+
+			if ( ! target || typeof target.closest !== 'function' ) {
+				return;
+			}
+
+			var add = target.closest( '.majestic-tube-thumb-add' );
+			var remove = target.closest( '.majestic-tube-thumb-remove' );
+
+			if ( add ) {
+				e.preventDefault();
+
+				var url = input.value.trim();
+
+				if ( ! url ) {
+					input.focus();
+
+					return;
+				}
+
+				request( 'majestic_tube_insert_thumb', url ).then( function () {
+					list.appendChild( row( url ) );
+					input.value = '';
+				} ).catch( failed );
+
+				return;
+			}
+
+			if ( remove ) {
+				e.preventDefault();
+
+				request( 'majestic_tube_remove_thumb', remove.getAttribute( 'data-thumb' ) ).then( function () {
+					var item = remove.closest( '.majestic-tube-thumb-item' );
+
+					if ( item ) {
+						item.parentNode.removeChild( item );
+					}
+				} ).catch( failed );
+			}
+		} );
+	}() );
 	</script>
 	<?php
 }

@@ -194,8 +194,9 @@ function majestic_tube_login_register_modal() {
 						/*
 						 * The login form reserves the room for a spam check without
 						 * being guarded by one: the theme only asks Turnstile for a
-						 * token on sign-up and video submission, so no widget is
-						 * mounted here and no challenge is ever shown on this tab.
+						 * token on sign-up, password reset and video submission, so
+						 * no widget is mounted here and no challenge is ever shown
+						 * on this tab.
 						 * The space is kept so that the panel keeps the same shape
 						 * as its sign-up tab, where the box does appear.
 						 */
@@ -219,6 +220,24 @@ function majestic_tube_login_register_modal() {
 
 					<form id="wpst_reset_password_form" action="<?php echo esc_url( home_url( '/' ) ); ?>" method="post">
 						<?php majestic_tube_membership_field( 'user_or_email', __( 'Username or E-mail', 'majestic-tube' ), 'text', 'wpst_user_or_email' ); ?>
+						<?php
+						/*
+						 * This tab is guarded too. The endpoint behind it mails a
+						 * reset link to whatever address it is handed, so without a
+						 * challenge it is a mail relay anyone can aim at anyone
+						 * else's address: the reply is deliberately vague about
+						 * whether the account exists, and a vague reply is exactly
+						 * what an account enumerator measures. The throttle only
+						 * slowed that down. The handler verifies the token, and this
+						 * is the slot it lands in.
+						 *
+						 * The slot comes from the same helper the sign-up tab uses,
+						 * so protection off is room and nothing else, and switching
+						 * it on never changes the panel's height or moves the
+						 * button under the visitor's pointer.
+						 */
+						majestic_tube_captcha_widget();
+						?>
 						<input type="hidden" name="action" value="wpst_reset_password" />
 						<button type="submit"><?php esc_html_e( 'Get new password', 'majestic-tube' ); ?></button>
 						<?php wp_nonce_field( 'ajax-login-nonce', 'password-security' ); ?>
@@ -262,7 +281,9 @@ function majestic_tube_verify_captcha( $response ) {
 
 	// Optional, but it lets Cloudflare score the request against the address
 	// the token was issued to rather than trusting the token alone.
-	$remote_ip = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$remote_ip = function_exists( 'majestic_tube_get_client_ip' )
+		? majestic_tube_get_client_ip()
+		: ( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
 
 	if ( $remote_ip ) {
 		$body['remoteip'] = $remote_ip;
@@ -357,7 +378,9 @@ add_action( 'wp_ajax_nopriv_majestic_tube_refresh_nonces', 'majestic_tube_refres
  * @return bool True when the caller must back off.
  */
 function majestic_tube_auth_throttled( $action ) {
-	$ip  = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$ip  = function_exists( 'majestic_tube_get_client_ip' )
+		? majestic_tube_get_client_ip()
+		: ( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
 	$key = 'majestic_tube_auth_' . $action . '_' . md5( $ip );
 
 	return (int) get_transient( $key ) > 10;
@@ -373,7 +396,9 @@ function majestic_tube_auth_throttled( $action ) {
  * @param string $action login|register|reset.
  */
 function majestic_tube_auth_note_failure( $action ) {
-	$ip    = isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '';
+	$ip    = function_exists( 'majestic_tube_get_client_ip' )
+		? majestic_tube_get_client_ip()
+		: ( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
 	$key   = 'majestic_tube_auth_' . $action . '_' . md5( $ip );
 	$count = (int) get_transient( $key );
 
@@ -511,6 +536,22 @@ function majestic_tube_ajax_reset_password() {
 		majestic_tube_ajax_error( __( 'Too many attempts. Please try again later.', 'majestic-tube' ), 429 );
 	}
 
+	/*
+	 * The same check the sign-up handler makes, for the same reason: this
+	 * endpoint hands a reset link to whatever address it is given, and the
+	 * throttle counts attempts rather than stopping them, so a scripted call
+	 * could still walk an address list at a steady rate. The reply stays as
+	 * vague as it was; only the door in front of it is different.
+	 */
+	if ( majestic_tube_captcha_is_configured() ) {
+		$field = majestic_tube_captcha_token_field();
+		$token = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
+
+		if ( ! majestic_tube_verify_captcha( $token ) ) {
+			majestic_tube_ajax_error( __( 'Captcha verification failed, please try again.', 'majestic-tube' ) );
+		}
+	}
+
 	$user_or_email = isset( $_POST['wpst_user_or_email'] ) ? sanitize_text_field( wp_unslash( $_POST['wpst_user_or_email'] ) ) : '';
 
 	if ( ! $user_or_email ) {
@@ -539,18 +580,21 @@ function majestic_tube_ajax_reset_password() {
 	 */
 	if ( true === $result ) {
 		majestic_tube_auth_note_failure( 'reset' );
-		majestic_tube_ajax_membership_success( __( 'A password reset link has been sent to your email address.', 'majestic-tube' ), 'p' );
+		majestic_tube_ajax_membership_success( __( 'If an account exists, a reset link has been sent.', 'majestic-tube' ), 'p' );
 	}
 
 	if ( is_wp_error( $result ) && 'invalidcombo' === $result->get_error_code() ) {
-		// Do not reveal whether the account exists, but retain the original
-		// `{ error: false, message: HTML }` success shape.
+		// Do not reveal whether the account exists, and count non-existent
+		// lookups against the throttle so account enumeration cannot proceed
+		// at unlimited speed.
+		majestic_tube_auth_note_failure( 'reset' );
 		majestic_tube_ajax_membership_success( __( 'If an account exists, a reset link has been sent.', 'majestic-tube' ), 'p' );
 	}
 
 	if ( is_wp_error( $result ) && 'no_password_reset' === $result->get_error_code() ) {
 		// A deliberate block (allow_password_reset filter): say so plainly,
 		// the same way core's lost-password flow does.
+		majestic_tube_auth_note_failure( 'reset' );
 		majestic_tube_ajax_error( $result->get_error_message() );
 	}
 

@@ -25,13 +25,18 @@ add_action( 'get_header', 'majestic_tube_maybe_hide_admin_bar' );
 /**
  * Include the featured thumbnail in RSS feeds.
  *
+ * The post is fetched rather than taken from the global: the_excerpt_rss and
+ * the_content_feed also fire for a feed item built straight from ID, and a
+ * global $post that is null there made $post->ID a fatal error on every item
+ * of such a feed instead of one image being left out.
+ *
  * @param string $content Feed content.
  * @return string
  */
 function majestic_tube_rss_post_thumbnail( $content ) {
-	global $post;
+	$post = get_post();
 
-	if ( has_post_thumbnail( $post->ID ) ) {
+	if ( $post && has_post_thumbnail( $post->ID ) ) {
 		$content = '<p>' . get_the_post_thumbnail( $post->ID ) . '</p>' . $content;
 	}
 
@@ -75,11 +80,11 @@ add_filter( 'excerpt_more', 'majestic_tube_excerpt_more' );
  * shape they had.
  *
  * It is the room and not a challenge. The theme asks Turnstile for a token on
- * the sign-up and video submission forms, so nothing on this one is verified
- * and a visitor is never asked to solve a puzzle that decides nothing. The
- * comment form is the same height whether protection is off, on or still
- * loading, and the helpers that own the markup live with the rest of the spam
- * check in inc/ajax-login-register.php.
+ * the sign-up, password reset and video submission forms, so nothing on this
+ * one is verified and a visitor is never asked to solve a puzzle that decides
+ * nothing. The comment form is the same height whether protection is off, on
+ * or still loading, and the helpers that own the markup live with the rest of
+ * the spam check in inc/ajax-login-register.php.
  *
  * @param string $submit_field Submit field markup, including the button.
  * @return string The room, then the submit field.

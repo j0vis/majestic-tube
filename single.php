@@ -15,6 +15,33 @@ get_header();
 while ( have_posts() ) :
 	the_post();
 
+	/*
+	 * A video behind a password is not a video yet. Core puts its password form
+	 * in front of the content inside the_content(), but this template prints the
+	 * player - and, for a self-hosted file, the direct <source> URLs - above the
+	 * content, so a password-protected post handed its video to anyone who
+	 * followed the link. comments.php already refuses the same post; the rest of
+	 * the article is skipped here for the same reason, and the visitor gets the
+	 * form core would have shown them.
+	 */
+	if ( post_password_required() ) :
+		?>
+		<div id="primary" class="content-area single-content-area">
+			<main id="main" class="site-main" role="main">
+				<article id="post-<?php the_ID(); ?>" <?php post_class( 'single-video' ); ?>>
+					<header class="entry-header">
+						<?php the_title( '<h1 class="entry-title">', '</h1>' ); ?>
+					</header>
+					<div class="entry-content">
+						<?php echo get_the_password_form(); // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- core's own password form markup. ?>
+					</div>
+				</article>
+			</main>
+		</div>
+		<?php
+		continue;
+	endif;
+
 	// One canonical source read feeds the player, embed and shortcode branches;
 	// passing $sources also stops get_player_sources() re-reading every URL key.
 	$sources        = majestic_tube_get_video_sources( get_the_ID() );

@@ -991,6 +991,34 @@ check(
 	false !== $clear && false === strpos( $script_on, 'site !== chosen' )
 );
 
+/*
+ * Until 2.5.0 the scheme was stored on its own, with no default beside it, so a
+ * visitor who chose a skin before then has a value this cannot check against
+ * anything. It is honored and given the second key rather than deleted: an
+ * update is not a place to take a choice away silently, which is the rule the
+ * retired favicon setting was handed over by one release later.
+ */
+$orphan = strpos( $script_on, '! chosen' );
+$adopt  = strpos( $script_on, 'setItem( base, site )' );
+
+check(
+	'a choice stored before the default was recorded beside it is honored, not dropped',
+	false !== $orphan && false !== $adopt && false !== $clear,
+	'a branch for a value with no default beside it: ' . ( false !== $orphan ? 'yes' : 'no' )
+);
+check(
+	'and it is recorded against the default in force, after the pair check and before the drop',
+	false !== $guard && false !== $orphan && false !== $adopt && false !== $clear
+	&& $guard < $orphan && $orphan < $clear && $adopt < $clear,
+	sprintf(
+		'positions: pair %s, no-default %s, record %s, drop %s',
+		var_export( $guard, true ),
+		var_export( $orphan, true ),
+		var_export( $adopt, true ),
+		var_export( $clear, true )
+	)
+);
+
 $GLOBALS['mods']['majestic_tube_color_scheme'] = 'dark';
 
 ob_start();

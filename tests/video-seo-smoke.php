@@ -242,6 +242,9 @@ function get_post_time( $format, $gmt = false, $post_id = 0 ) {
 
 	return $post ? gmdate( 'c', strtotime( $post['date'] ) ) : '';
 }
+function get_queried_object_id() {
+	return (int) $GLOBALS['mtv_queried_id'];
+}
 function get_post_modified_time( $format, $gmt = false, $post_id = 0 ) {
 	$post = mtv_fixture( $post_id );
 
@@ -539,6 +542,60 @@ $decoded = json_decode( wp_json_encode( majestic_tube_video_seo_build_schema( $f
 check( 'contentUrl is the media file', 'https://example.test/wp-content/uploads/2026/10/clip.mp4' === $decoded['contentUrl'] );
 check( 'embedUrl falls back to contentUrl', $decoded['embedUrl'] === $decoded['contentUrl'] );
 check( 'encodingFormat present', 'video/mp4' === $decoded['encodingFormat'] );
+
+echo "\nThe JSON-LD block cannot be broken out of\n";
+
+/*
+ * The node carries content: the post title, its description and its taxonomy
+ * terms. Every one of them can be written by somebody who is not the site
+ * owner - an author, a contributor whose submission was published, an
+ * imported feed - so the printed block has to survive a value that reads as
+ * markup. The failure this pins is specific: encoded without JSON_HEX_TAG,
+ * a title holding "</script>" ends the element, and the rest of the title is
+ * parsed as markup on every page the video appears on.
+ */
+$hostile_title = '</script><script>alert(1)</script>';
+
+/*
+ * A fixture of its own, added for this section and removed again after it:
+ * get_video() memoises per post id, so borrowing a fixture the sitemap
+ * section asserts against would leave the hostile title cached in it.
+ */
+$GLOBALS['mtv_posts'][] = array(
+	'ID'           => 4,
+	'post_title'   => $hostile_title,
+	'post_excerpt' => 'A hostile fixture.',
+	'post_content' => '',
+	'date'         => '2026-10-03 09:00:00',
+	'modified'     => '2026-10-03 09:00:00',
+	'meta'         => array(
+		'duration' => 120,
+		'embed'    => '<iframe src="https://player.test/embed/1/" width="640"></iframe>',
+	),
+	'terms'        => array(
+		'category' => array( 'HD' ),
+		'post_tag' => array(),
+		'actors'   => array(),
+	),
+);
+$GLOBALS['mtv_queried_id'] = 4;
+
+ob_start();
+majestic_tube_video_seo_output_json_ld();
+$printed = ob_get_clean();
+
+array_pop( $GLOBALS['mtv_posts'] );
+$GLOBALS['mtv_queried_id'] = 0;
+
+preg_match( '#^<script type="application/ld\+json">(.*)</script>\n$#s', $printed, $block );
+$node = isset( $block[1] ) ? json_decode( $block[1], true ) : null;
+
+check( 'the block is one JSON-LD script element', isset( $block[1] ) && 1 === substr_count( $printed, '<script' ), $printed );
+check( 'only the block\'s own closing tag is printed', 1 === substr_count( $printed, '</script>' ), $printed );
+check( 'the hostile title cannot open a second script element', false === strpos( $printed, '<script>alert' ), $printed );
+check( 'no raw angle brackets survive in the payload', false === strpos( $printed, '</script><script>' ), $printed );
+check( 'the title still reads back intact', is_array( $node ) && $hostile_title === ( $node['name'] ?? null ), 'got: ' . var_export( is_array( $node ) ? ( $node['name'] ?? null ) : null, true ) );
+check( 'and the rest of the node is still there', is_array( $node ) && isset( $node['@type'], $node['embedUrl'] ) );
 
 echo "\nXML escaping\n";
 

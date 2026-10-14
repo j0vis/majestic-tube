@@ -225,7 +225,13 @@ function majestic_tube_video_seo_player_src( $markup ) {
 		return '';
 	}
 
-	return esc_url_raw( trim( $match[2] ) );
+	$src = trim( html_entity_decode( $match[2], ENT_QUOTES, 'UTF-8' ) );
+
+	if ( '' === $src || ! preg_match( '#^https?://#i', $src ) ) {
+		return '';
+	}
+
+	return esc_url_raw( $src, array( 'http', 'https' ) );
 }
 
 /**
@@ -585,7 +591,20 @@ function majestic_tube_video_seo_output_json_ld() {
 		return;
 	}
 
-	$json = wp_json_encode( majestic_tube_video_seo_build_schema( $video ), JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE );
+	/*
+	 * JSON_HEX_TAG is load-bearing, not decoration. This node carries the post
+	 * title, its description and its taxonomy terms, and every one of those is
+	 * content: an author's post, an imported feed, a submission an
+	 * administrator published. Encoded without it, a title holding "</script>"
+	 * ends the element and the rest of the title is parsed as markup on a page
+	 * every visitor loads. The four flags are the ones inc/assets.php already
+	 * uses for its own inline payload; they keep the sequence inside the JSON
+	 * string, and json_decode() still reads the title back unchanged.
+	 */
+	$json = wp_json_encode(
+		majestic_tube_video_seo_build_schema( $video ),
+		JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE | JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT
+	);
 
 	if ( false === $json ) {
 		return;
@@ -593,7 +612,7 @@ function majestic_tube_video_seo_output_json_ld() {
 
 	printf(
 		'<script type="application/ld+json">%s</script>' . "\n",
-		$json // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode output.
+		$json // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- wp_json_encode() with the JSON_HEX_* flags, which is what keeps a title from ending the element.
 	);
 }
 

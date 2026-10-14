@@ -71,11 +71,39 @@ function esc_html_e( $s, $d = null ) {
 function esc_attr_e( $s, $d = null ) {
 	echo esc_attr( $s );
 }
+/*
+ * The text sanitizer as the submission path depends on it.
+ *
+ * Core's sanitize_text_field() throws away a script or style element with its
+ * contents, drops every other tag and collapses runs of whitespace, and the
+ * form leans on exactly that: a title a visitor types reaches wp_insert_post()
+ * as text and cannot carry markup into the post. A stub that only trimmed
+ * would let a title full of tags read as stored-as-typed, which is the one
+ * thing this suite has to be able to tell apart from a sanitized title.
+ *
+ * @param string $s Raw value.
+ * @return string
+ */
 function sanitize_text_field( $s ) {
-	return trim( (string) $s );
+	$s = preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', (string) $s );
+
+	return trim( preg_replace( '/[\r\n\t ]+/', ' ', strip_tags( (string) $s ) ) );
 }
+
+/**
+ * The textarea sanitizer: the same, with newlines kept.
+ *
+ * The rotation thumbnails arrive one URL per line, so a stub that collapsed
+ * newlines the way the single-line sanitizer does would hide every check the
+ * list parsing has.
+ *
+ * @param string $s Raw value.
+ * @return string
+ */
 function sanitize_textarea_field( $s ) {
-	return trim( (string) $s );
+	$s = preg_replace( '@<(script|style)[^>]*?>.*?</\\1>@si', '', (string) $s );
+
+	return trim( preg_replace( '/[\r\t ]+/', ' ', strip_tags( (string) $s ) ) );
 }
 function wp_unslash( $s ) {
 	return $s;
@@ -556,6 +584,44 @@ check(
 	'an empty title is still refused, so the switches are the switches',
 	$GLOBALS['next_post_id'] === $before && false !== strpos( $out, 'Please provide a video title.' ),
 	$out
+);
+
+/*
+ * A title a visitor types is text. It is the one field on this form that is
+ * printed inside an <h1> and inside the structured data once an administrator
+ * publishes the submission, so it is held to a sanitizer here rather than to
+ * whatever the database is later handed - a submission cannot introduce markup
+ * that the site then prints back to every reader.
+ */
+echo "\nA submitted title is text, not markup\n";
+
+reset_options();
+$before = $GLOBALS['next_post_id'];
+submit( array( 'wpst-video_title' => 'Space <script>alert(1)</script> Voyage' ) );
+$title_id = last_post_id();
+$stored   = isset( $GLOBALS['created'][ $title_id ]['post_title'] ) ? $GLOBALS['created'][ $title_id ]['post_title'] : '';
+
+check(
+	'a script in a submitted title never reaches the post',
+	$GLOBALS['next_post_id'] > $before && '' !== $stored && false === strpos( $stored, '<' ) && false === strpos( $stored, 'alert(1)' ),
+	var_export( $stored, true )
+);
+check(
+	'and the words around it are kept',
+	false !== strpos( $stored, 'Space' ) && false !== strpos( $stored, 'Voyage' ),
+	var_export( $stored, true )
+);
+
+$GLOBALS['url_raw'] = array();
+reset_options();
+submit( array( 'wpst-video_title' => 'Tag <b>bold</b> and <img src=x onerror=alert(1)> image' ) );
+$bold_id = last_post_id();
+$bold    = isset( $GLOBALS['created'][ $bold_id ]['post_title'] ) ? $GLOBALS['created'][ $bold_id ]['post_title'] : '';
+
+check(
+	'a tag in a submitted title is dropped as text too, not carried into the post',
+	'' !== $bold && false === strpos( $bold, '<' ) && false === strpos( $bold, 'onerror' ),
+	var_export( $bold, true )
 );
 
 reset_options();

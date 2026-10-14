@@ -45,8 +45,23 @@ $tags      = $directory['terms'];
 		<?php if ( ! is_wp_error( $tags ) && $tags ) : ?>
 
 			<div class="tags-cloud">
-				<?php foreach ( $tags as $tag ) : ?>
-					<a class="tag-item" href="<?php echo esc_url( get_term_link( $tag ) ); ?>">
+				<?php
+				foreach ( $tags as $tag ) :
+					/*
+					 * get_term_link() answers with a WP_Error for a term it cannot build
+					 * a link for - a bad term, a filtered permalink, a shared taxonomy
+					 * whose archive is not public. esc_url() takes a string, so handing
+					 * that error straight to it is a TypeError on PHP 8 and the whole
+					 * page dies over one tag. A tag with no link is left out; the rest of
+					 * the cloud still prints.
+					 */
+					$tag_link = get_term_link( $tag );
+
+					if ( is_wp_error( $tag_link ) ) {
+						continue;
+					}
+					?>
+					<a class="tag-item" href="<?php echo esc_url( $tag_link ); ?>">
 						<?php echo esc_html( $tag->name ); ?>
 						<span class="tag-count"><?php echo esc_html( number_format_i18n( $tag->count ) ); ?></span>
 					</a>

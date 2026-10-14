@@ -24,6 +24,16 @@ function majestic_tube_verify_ajax_nonce() {
 /**
  * Require a valid post ID from an AJAX request.
  *
+ * The post also has to be one the front end would actually show. Every endpoint
+ * behind this helper publishes something a publicly viewable post owns - a view
+ * count, a vote, the current stats, a report - and get_post() alone answers for
+ * a draft, a pending submission, a trashed row and a private post alike. Called
+ * without this check the handlers let any signed-out visitor with a nonce read
+ * (and, on post-views and post-like, write) the counters of content the theme
+ * never renders for them. is_post_publicly_viewable() is core's own answer to
+ * the same question, so the front end and these endpoints cannot disagree about
+ * which posts are on the site.
+ *
  * @param string $missing_message Message when post_id is absent.
  * @param string $invalid_message Message when the post does not exist.
  * @param int    $status          HTTP status for the JSON error.
@@ -35,8 +45,9 @@ function majestic_tube_require_ajax_post_id( $missing_message, $invalid_message,
 	}
 
 	$post_id = absint( wp_unslash( $_POST['post_id'] ) );
+	$post    = $post_id ? get_post( $post_id ) : null;
 
-	if ( ! $post_id || ! get_post( $post_id ) ) {
+	if ( ! $post || ! is_post_publicly_viewable( $post ) ) {
 		wp_send_json_error( array( 'message' => $invalid_message ), $status );
 	}
 

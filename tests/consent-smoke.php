@@ -726,10 +726,10 @@ check(
  * The panel is rendered twice: once with the check off, which is the state a
  * form is in on a site that never turns protection on, and once with it on.
  */
-check( 'the login panel reserves a slot on its sign-up and login tabs', 2 === substr_count( $modal, 'data-mt-captcha="' ), (string) substr_count( $modal, 'data-mt-captcha="' ) );
+check( 'the login panel reserves a slot on its sign-up, login and password reset tabs', 3 === substr_count( $modal, 'data-mt-captcha="' ), (string) substr_count( $modal, 'data-mt-captcha="' ) );
 check(
-	'with the check off both slots are the reserved kind, which asks Cloudflare for nothing',
-	2 === substr_count( $modal, 'data-mt-captcha="reserved"' ) &&
+	'with the check off every slot is the reserved kind, which asks Cloudflare for nothing',
+	3 === substr_count( $modal, 'data-mt-captcha="reserved"' ) &&
 	false === strpos( $modal, 'cf-turnstile' ) &&
 	false === strpos( $modal, 'data-sitekey' ),
 	'the reserved slot must not be a mount point the script can pick up'
@@ -742,8 +742,10 @@ $modal_on = capture( 'majestic_tube_login_register_modal' );
 
 preg_match( '/id="wpst_registration_form".*?<\/form>/s', $modal_on, $register_form );
 preg_match( '/id="wpst_login_form".*?<\/form>/s', $modal_on, $login_form );
+preg_match( '/id="wpst_reset_password_form".*?<\/form>/s', $modal_on, $reset_form );
 $register_form = isset( $register_form[0] ) ? $register_form[0] : '';
 $login_form    = isset( $login_form[0] ) ? $login_form[0] : '';
+$reset_form    = isset( $reset_form[0] ) ? $reset_form[0] : '';
 
 check(
 	'with the check on the sign-up tab carries the widget and the key the script mounts it with',
@@ -757,7 +759,28 @@ check(
 	false !== strpos( $login_form, 'data-mt-captcha="reserved"' ) && false === strpos( $login_form, 'cf-turnstile' ),
 	$login_form
 );
-check( 'the panel is two slots wide whichever state the check is in', 2 === substr_count( $modal_on, 'data-mt-captcha="' ), (string) substr_count( $modal_on, 'data-mt-captcha="' ) );
+check(
+	'the password reset tab is guarded the same way the sign-up tab is',
+	false !== strpos( $reset_form, 'class="cf-turnstile majestic-tube-captcha"' ) &&
+	false !== strpos( $reset_form, 'data-sitekey="1x00000000000000000000AA"' ),
+	$reset_form
+);
+check( 'the panel is three slots wide whichever state the check is in', 3 === substr_count( $modal_on, 'data-mt-captcha="' ), (string) substr_count( $modal_on, 'data-mt-captcha="' ) );
+
+/*
+ * A widget on the tab is only half of the guard: the endpoint behind it has to
+ * read the token, or the challenge is decoration. The handler is read rather
+ * than run, because it reaches retrieve_password() and therefore mail.
+ */
+$reset_handler = substr( $ajax_source, (int) strpos( $ajax_source, 'function majestic_tube_ajax_reset_password' ) );
+$reset_handler = substr( $reset_handler, 0, (int) strpos( $reset_handler, "add_action( 'wp_ajax_nopriv_wpst_reset_password'" ) );
+
+check(
+	'and the reset handler verifies the token the tab now asks for',
+	false !== strpos( $reset_handler, 'majestic_tube_captcha_is_configured()' ) &&
+	false !== strpos( $reset_handler, 'majestic_tube_verify_captcha(' ),
+	'a slot nobody verifies is a challenge a script can ignore'
+);
 
 $GLOBALS['captcha_configured'] = false;
 unset( $GLOBALS['opts']['turnstile-site-key'] );

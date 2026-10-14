@@ -1086,7 +1086,7 @@ function majestic_tube_options_map() {
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Enable spam protection', 'majestic-tube' ),
-			'description' => __( 'Asks visitors to prove they are human with Cloudflare Turnstile on the sign-up and video submission forms. Both Turnstile keys below must be filled in. The room the widget needs is reserved in those forms, and on the login and comment forms, whether or not this is on, so switching protection on never moves a button or changes a form&rsquo;s height. Neither the login form nor the comment form is guarded: the theme asks for a token on sign-up and submission only.', 'majestic-tube' ),
+			'description' => __( 'Asks visitors to prove they are human with Cloudflare Turnstile on the sign-up, password reset and video submission forms. Both Turnstile keys below must be filled in. The room the widget needs is reserved in those forms, and on the login and comment forms, whether or not this is on, so switching protection on never moves a button or changes a form&rsquo;s height. Neither the login form nor the comment form is guarded: the theme asks for a token on sign-up, password reset and submission only.', 'majestic-tube' ),
 			'section' => $members,
 		),
 		'turnstile-site-key'      => array(
@@ -2002,6 +2002,15 @@ function majestic_tube_theme_toggle_enabled() {
  * made against a default that has since changed is dropped, and the visitor
  * chooses again in one click.
  *
+ * A choice can also predate the second key entirely: until 2.5.0 the scheme was
+ * stored on its own, with no default beside it to compare against. There is
+ * nothing to check such a value against - it was a choice against whatever the
+ * default was at the time - so it is honored and recorded against the default
+ * in force from here on, which is what the value's new home is. Dropping it
+ * instead would reset a skin somebody deliberately chose, on an update, with
+ * nothing on screen to say why; it is the same taking-away the retired favicon
+ * setting was handed over rather than left to, one release earlier.
+ *
  * The script is printed only while the toggle is rendered, because that button
  * is the only place the choice is shown or changed. A site that does not offer
  * the toggle has no override to honor: a stored value that survives from a
@@ -2037,6 +2046,21 @@ function majestic_tube_color_scheme_script() {
 			// Kept only while it is a choice against the default still in force.
 			if ( stored && valid[ stored ] && site === chosen ) {
 				document.documentElement.setAttribute( 'data-theme', stored );
+				return;
+			}
+
+			/*
+			 * A choice stored before the default was recorded beside it, which
+			 * is every choice made under 2.4.2 or earlier. Nothing here can say
+			 * whether the default has moved since, so the choice is honored and
+			 * the default in force is recorded next to it - the pair becomes
+			 * the shape the rest of this reads, and the next change to the
+			 * site's scheme takes effect as it does for any other visitor.
+			 */
+			if ( stored && valid[ stored ] && ! chosen ) {
+				document.documentElement.setAttribute( 'data-theme', stored );
+				window.localStorage.setItem( base, site );
+
 				return;
 			}
 

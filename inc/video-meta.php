@@ -110,7 +110,7 @@ function majestic_tube_kses_player_markup( $html ) {
 		return '';
 	}
 
-	return wp_kses(
+	$filtered = wp_kses(
 		$html,
 		array(
 			'iframe' => array(
@@ -135,7 +135,27 @@ function majestic_tube_kses_player_markup( $html ) {
 				'src'  => true,
 				'type' => true,
 			),
-		)
+		),
+		array( 'http', 'https' )
+	);
+
+	// Refuse any element whose remaining src is empty or points outside http(s)/root-relative.
+	return (string) preg_replace_callback(
+		'/<(iframe|video|source)\b[^>]*>/i',
+		static function ( $match ) {
+			if ( ! preg_match( '/\bsrc\s*=\s*(["\'])(.*?)\1/is', $match[0], $src_match ) ) {
+				return $match[0];
+			}
+
+			$src = trim( html_entity_decode( $src_match[2], ENT_QUOTES, 'UTF-8' ) );
+
+			if ( '' === $src || ! preg_match( '#^(?:https?://|/(?!/))#i', $src ) ) {
+				return '';
+			}
+
+			return $match[0];
+		},
+		$filtered
 	);
 }
 

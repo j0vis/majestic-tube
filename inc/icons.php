@@ -34,9 +34,9 @@ defined( 'ABSPATH' ) || exit;
  * degrades to the text beside it, which is always readable.
  *
  * The literal list below is deliberately kept as literals and not generated:
- * tools/install-icon-set.py cross-checks it against the masks in main.css by
- * reading this file as text, and a name added here without a shape behind it
- * would be an empty box on a live page.
+ * it stays readable as text, so the masks in main.css can be held against it,
+ * and a name added here without a shape behind it - an empty box on a live
+ * page - is caught rather than shipped.
  *
  * @return string[]
  */
@@ -261,8 +261,8 @@ function majestic_tube_sanitise_icon( $name, $icon ) {
  *
  * Only the characters that actually break a CSS url() token are escaped.
  * Escaping everything turns the payload unreadable in devtools for no gain, and
- * it is the same rule tools/build-icon-set.py applies to the theme's own set -
- * two implementations of one rule, held together by the smoke test.
+ * the theme's own icon set is built by the same rule - two implementations of
+ * one rule, which have to stay in step.
  *
  * @param string $path    SVG path data.
  * @param string $viewbox Four numbers.

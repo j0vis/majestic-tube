@@ -186,9 +186,25 @@ if ( ! function_exists( 'wpst_cats_tags' ) ) {
 
 		if ( $categories && majestic_tube_option_is_on( 'show-categories-video-about' ) ) {
 			foreach ( (array) $categories as $category ) {
+				/*
+				 * get_category_link() and get_tag_link() answer with a WP_Error
+				 * when the term cannot be linked, and each hands that error
+				 * straight back rather than a URL. esc_url() takes a string, so
+				 * the error reaches it as an object and "Object of class
+				 * WP_Error could not be converted to string" ends the page - for
+				 * one category on one post. The actor loop below has always
+				 * skipped a term it cannot link; these two now do the same, so
+				 * a broken link costs a label and not the article.
+				 */
+				$category_link = get_category_link( $category->term_id );
+
+				if ( is_wp_error( $category_link ) ) {
+					continue;
+				}
+
 				printf(
 					'<a href="%1$s" class="label" title="%2$s">%3$s %2$s</a>',
-					esc_url( get_category_link( $category->term_id ) ),
+					esc_url( $category_link ),
 					esc_attr( $category->name ),
 					majestic_tube_get_icon( 'folder' )
 				);
@@ -214,9 +230,15 @@ if ( ! function_exists( 'wpst_cats_tags' ) ) {
 
 		if ( $tags && majestic_tube_option_is_on( 'show-tags-video-about' ) ) {
 			foreach ( (array) $tags as $tag ) {
+				$tag_link = get_tag_link( $tag->term_id );
+
+				if ( is_wp_error( $tag_link ) ) {
+					continue;
+				}
+
 				printf(
 					'<a href="%1$s" class="label" title="%2$s">%3$s %2$s</a>',
-					esc_url( get_tag_link( $tag->term_id ) ),
+					esc_url( $tag_link ),
 					esc_attr( $tag->name ),
 					majestic_tube_get_icon( 'tag' )
 				);
@@ -446,14 +468,21 @@ if ( ! function_exists( 'wpst_posted_on' ) ) {
 			esc_html( get_the_modified_date() )
 		);
 
+		/*
+		 * The date markup is printed, not shown. $time_string holds the <time>
+		 * elements the stylesheet and the theme's own scripts key on, and
+		 * escaping the sprintf() result turned every one of them into visible
+		 * text, so the byline read "Posted on <time class="entry-date published
+		 * updated" datetime="...">". The sentence is escaped before the markup
+		 * goes back into its %s instead: the tags survive, and a translation is
+		 * still escaped rather than printed raw.
+		 */
 		printf(
-			'<span class="posted-on">%s</span>',
-			esc_html(
-				sprintf(
-					/* translators: %s: post date. */
-					_x( 'Posted on %s', 'post date', 'majestic-tube' ),
-					$time_string
-				)
+			'<span class="posted-on">%s</span>', // phpcs:ignore WordPress.Security.EscapeOutput.OutputNotEscaped -- escaped sentence plus date markup escaped above.
+			sprintf(
+				/* translators: %s: post date. */
+				esc_html_x( 'Posted on %s', 'post date', 'majestic-tube' ),
+				$time_string
 			)
 		);
 	}
