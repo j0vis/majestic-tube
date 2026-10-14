@@ -50,6 +50,20 @@ class MajesticTube_Video_Widget extends WP_Widget {
 			$query_args['meta_key'] = 'post_views_count';
 		}
 
+		if ( 'rand' === $orderby ) {
+			/*
+			 * A random widget is drawn from a cached pool of IDs rather than
+			 * handed to MySQL as ORDER BY RAND(), which would read and sort the
+			 * whole archive on every page that shows the widget. `0` matches no
+			 * post, so an empty draw leaves the list empty instead of silently
+			 * turning a Random widget into a Latest one.
+			 */
+			$ids = majestic_tube_random_video_ids( $count );
+
+			$query_args['post__in'] = $ids ? $ids : array( 0 );
+			$query_args['orderby']  = 'post__in';
+		}
+
 		$videos = new WP_Query( $query_args );
 
 		if ( ! $videos->have_posts() ) {

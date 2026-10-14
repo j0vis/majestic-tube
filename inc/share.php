@@ -99,8 +99,20 @@ function majestic_tube_share_buttons( $post_id = 0 ) {
 		return;
 	}
 
+	$permalink = get_permalink( $post_id );
+
+	/*
+	 * Every network builds its link from this URL, so a post without one
+	 * (trashed, still a draft, or a post type that never publishes) would
+	 * print a share row of links carrying `url=`: each one shares whatever
+	 * page the reader happens to be on, which is worse than no row at all.
+	 */
+	if ( ! $permalink ) {
+		return;
+	}
+
 	$context = array(
-		'url'         => get_permalink( $post_id ),
+		'url'         => $permalink,
 		'title'       => get_the_title( $post_id ),
 		'description' => majestic_tube_share_description( get_post( $post_id ) ),
 	);

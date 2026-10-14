@@ -440,13 +440,22 @@ function majestic_tube_enqueue_admin_assets( $hook_suffix = '' ) {
 			'in_footer' => true,
 		)
 	);
-	wp_localize_script(
+	/*
+	 * The picker's two strings, handed over the same way the front-end payload
+	 * is: one inline `var` rather than wp_localize_script(), which WordPress
+	 * soft-discourages and whose escaping is awkward for anything but strings.
+	 * The global name is part of the contract - term-images.js reads
+	 * majesticTubeTermImage.title and .select - so it is preserved exactly.
+	 */
+	$picker_data = array(
+		'title'  => __( 'Choose an image', 'majestic-tube' ),
+		'select' => __( 'Use selected image', 'majestic-tube' ),
+	);
+
+	wp_add_inline_script(
 		'majestic-tube-term-images',
-		'majesticTubeTermImage',
-		array(
-			'title'  => __( 'Choose an image', 'majestic-tube' ),
-			'select' => __( 'Use selected image', 'majestic-tube' ),
-		)
+		'var majesticTubeTermImage = ' . wp_json_encode( $picker_data, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT | JSON_UNESCAPED_SLASHES ) . ';',
+		'before'
 	);
 }
 add_action( 'admin_enqueue_scripts', 'majestic_tube_enqueue_admin_assets' );

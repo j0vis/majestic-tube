@@ -328,7 +328,7 @@ function majestic_tube_get_term_fallback_post_id( $term_id, $taxonomy ) {
 		'fields'              => 'ids',
 		'no_found_rows'       => true,
 		'ignore_sticky_posts' => true,
-		'orderby'             => 'random' === $mode ? 'rand' : 'date',
+		'orderby'             => 'date',
 		'order'               => 'DESC',
 		'tax_query'           => array(
 			array(
@@ -357,8 +357,21 @@ function majestic_tube_get_term_fallback_post_id( $term_id, $taxonomy ) {
 	 */
 	$args = apply_filters( 'majestic_tube_term_fallback_post_args', $args, $term_id, $taxonomy, $mode );
 
-	$post_ids = get_posts( $args );
-	$post_id  = ! empty( $post_ids ) ? (int) $post_ids[0] : 0;
+	if ( 'random' === $mode ) {
+		/*
+		 * The random pick is drawn from a cached pool of this term's posts
+		 * rather than asked of MySQL as ORDER BY RAND(). This code runs whenever
+		 * the cached answer below is cold, which on a site with no persistent
+		 * object cache is every request, so the clause was paying to read and
+		 * sort the whole term each time a visitor opened it.
+		 */
+		$drawn    = majestic_tube_random_video_ids( 1, $args );
+		$post_ids = $drawn ? $drawn : array();
+	} else {
+		$post_ids = get_posts( $args );
+	}
+
+	$post_id = ! empty( $post_ids ) ? (int) $post_ids[0] : 0;
 
 	// A term with no usable post is a legitimate answer, so the negative result is
 	// cached too. Otherwise every page load would repeat the query to learn nothing.

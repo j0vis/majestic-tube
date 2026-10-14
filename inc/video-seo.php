@@ -41,6 +41,9 @@ defined( 'ABSPATH' ) || exit;
  */
 define( 'MAJESTIC_TUBE_VIDEO_SEO_VERSION', '1.0.0' );
 
+/** Object cache group the sitemap parts are kept in. */
+define( 'MAJESTIC_TUBE_VIDEO_SEO_CACHE_GROUP', 'majestic_tube_video_seo' );
+
 /* -------------------------------------------------------------------------
  * Master switch
  * ---------------------------------------------------------------------- */
@@ -830,14 +833,14 @@ function majestic_tube_video_seo_render_sitemap() {
 	if ( 'part' === $mode ) {
 		$part = max( 1, (int) get_query_var( 'majestic_tube_video_seo_part' ) );
 		majestic_tube_video_seo_send_xml();
-		echo majestic_tube_video_seo_sitemap_part_xml( $part, $chunk );
+		echo majestic_tube_video_seo_sitemap_part( $part, $chunk );
 		exit;
 	}
 
 	majestic_tube_video_seo_send_xml();
 
 	if ( 1 === $parts ) {
-		echo majestic_tube_video_seo_sitemap_part_xml( 1, $chunk );
+		echo majestic_tube_video_seo_sitemap_part( 1, $chunk );
 		exit;
 	}
 
@@ -883,11 +886,65 @@ function majestic_tube_video_seo_xml( $value ) {
 }
 
 /**
- * Render one chunk of the video sitemap.
+ * One chunk of the video sitemap, answered from the cache when there is one.
+ *
+ * The cached copy lives in the object cache rather than in a transient on
+ * purpose: a part is hundreds of kilobytes of XML, and a transient per part on
+ * a 50,000-video site would put tens of megabytes into the options table, which
+ * is a worse problem than the repeated render it would save. A site with a
+ * persistent object cache serves a whole crawl from memory; a site without one
+ * keeps today's behavior, which is what WordPress's per-request cache amounts
+ * to by itself. The key carries WordPress's own `last_changed` marker for the
+ * posts group, so publishing, editing or deleting a video makes the cached
+ * parts unreachable rather than merely stale.
+ *
+ * @param int $part  Chunk number, 1-based.
+ * @param int $chunk URLs per chunk.
+ * @return string
+ */
+function majestic_tube_video_seo_sitemap_part( $part, $chunk ) {
+	$cache_key = sprintf(
+		'part_%d_%d_%s',
+		max( 1, (int) $part ),
+		max( 1, (int) $chunk ),
+		preg_replace( '/[^A-Za-z0-9_.:-]/', '', (string) wp_cache_get( 'last_changed', 'posts' ) )
+	);
+
+	$cached = wp_cache_get( $cache_key, MAJESTIC_TUBE_VIDEO_SEO_CACHE_GROUP );
+
+	if ( is_string( $cached ) && '' !== $cached ) {
+		return $cached;
+	}
+
+	$xml = majestic_tube_video_seo_sitemap_part_xml( $part, $chunk );
+
+	/**
+	 * Filter the largest sitemap part that is worth keeping in the cache.
+	 *
+	 * @param int $bytes Size cap in bytes.
+	 */
+	$cap = (int) apply_filters( 'majestic_tube_video_seo_sitemap_cache_bytes', 512 * KB_IN_BYTES );
+
+	if ( $cap < 1 || strlen( $xml ) <= $cap ) {
+		/**
+		 * Filter how long a part of the video sitemap stays cached.
+		 *
+		 * @param int $ttl Seconds.
+		 */
+		$ttl = (int) apply_filters( 'majestic_tube_video_seo_sitemap_ttl', 6 * HOUR_IN_SECONDS );
+
+		wp_cache_set( $cache_key, $xml, MAJESTIC_TUBE_VIDEO_SEO_CACHE_GROUP, $ttl );
+	}
+
+	return $xml;
+}
+
+/**
+ * Build one chunk of the video sitemap.
  *
  * Rows missing required data are skipped rather than emitted half-filled. The
- * audit command reports how many that is, because a sitemap full of skips
- * looks to Google like a site that stopped maintaining its videos.
+ * audit command reports how many that is, because a sitemap full of skips looks
+ * to Google like a site that stopped maintaining its videos.
  *
  * @param int $part  Chunk number, 1-based.
  * @param int $chunk URLs per chunk.
@@ -906,7 +963,11 @@ function majestic_tube_video_seo_sitemap_part_xml( $part, $chunk ) {
 			'orderby'             => 'ID',
 			'order'               => 'ASC',
 			'fields'              => 'ids',
-			'no_found_rows'       => false,
+			// This part renders the rows it fetched and never asks how many
+			// rows matched, so found_rows would buy it a COUNT(*) per part for
+			// nothing. How many parts there are comes from
+			// majestic_tube_video_seo_total_videos() instead.
+			'no_found_rows'       => true,
 			'ignore_sticky_posts' => true,
 			'suppress_filters'    => true,
 		)

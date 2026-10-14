@@ -184,14 +184,15 @@ function majestic_tube_get_player_sources( $post_id = 0, $data = null ) {
 }
 
 /**
- * Registered image size from the original `main-thumbnail-quality` option.
+ * Image size from the original `main-thumbnail-quality` option.
  *
  * The option stores the original theme's size names (wpst_thumb_small,
- * wpst_thumb_medium, wpst_thumb_large), which are registered in
- * inc/theme-support.php - plugins such as the WP-Script paywall ask for them
- * by name too.
+ * wpst_thumb_medium, wpst_thumb_large). inc/theme-support.php owns which of
+ * those is a registration and which is answered from the attachment metadata;
+ * all three resolve by name either way, which is what matters here, and to
+ * plugins such as the WP-Script paywall that ask for them too.
  *
- * @return string Registered image size name.
+ * @return string Image size name.
  */
 function majestic_tube_get_thumb_size() {
 	$size    = (string) majestic_tube_get_option( 'wpst-options', 'main-thumbnail-quality', 'wpst_thumb_medium' );
@@ -1104,6 +1105,167 @@ function majestic_tube_site_records_likes() {
 }
 
 /**
+ * How long a pool of IDs a random draw is taken from stays cached.
+ *
+ * The pool exists to take ORDER BY RAND() out of the request: that clause makes
+ * MySQL read every matching row, sort them all on a temporary table and throw
+ * all but one page away, every time. Drawn from a cached pool the same listing
+ * costs one indexed ID scan per cache window instead, and every reader inside
+ * that window still gets their own shuffle.
+ *
+ * The key carries WordPress's own `last_changed` markers, so correctness does
+ * not depend on this expiry; the TTL only bounds how stale a pool may be.
+ */
+const MAJESTIC_TUBE_RANDOM_POOL_TTL = 15 * MINUTE_IN_SECONDS;
+
+/**
+ * The IDs a random draw may be taken from.
+ *
+ * A random listing wants a fair sample of a whole archive, and the only cheap
+ * way to have one is to keep it: the pool is a contiguous window of the
+ * ID-ordered set (so it is bounded by `majestic_tube_random_pool_size` rather
+ * than by the size of the archive) started at a random offset, which keeps the
+ * draw from being the oldest videos the site ever published.
+ *
+ * @param array $args Query args the drawn videos have to match.
+ * @return int[] Post IDs, in the order the database returned them.
+ */
+function majestic_tube_random_video_pool( $args = array() ) {
+	$query_args = wp_parse_args(
+		(array) $args,
+		array(
+			'post_type'   => 'post',
+			'post_status' => 'publish',
+		)
+	);
+
+	/**
+	 * Filter how many IDs a random pool may hold.
+	 *
+	 * The arguments the pool is being sized for travel with the size so a site
+	 * can size one archive's pool differently from another's. They are the ones
+	 * the pool is built with, defaults included, rather than the caller's
+	 * partial set.
+	 *
+	 * @param int   $size Pool size.
+	 * @param array $args Query args the pool matches.
+	 */
+	$size = max( 1, absint( apply_filters( 'majestic_tube_random_pool_size', 500, $query_args ) ) );
+
+	$query_args['fields']              = 'ids';
+	$query_args['posts_per_page']      = $size;
+	$query_args['no_found_rows']       = true;
+	$query_args['ignore_sticky_posts'] = true;
+	$query_args['orderby']             = 'ID';
+	$query_args['order']               = 'ASC';
+
+	$cache_key = 'majestic_tube_random_pool_' . md5(
+		wp_json_encode( $query_args ) . '|' . wp_cache_get( 'last_changed', 'posts' ) . '|' . wp_cache_get( 'last_changed', 'terms' )
+	);
+
+	$cached = get_transient( $cache_key );
+
+	if ( is_array( $cached ) ) {
+		return $cached;
+	}
+
+	// One count, so the window starts somewhere inside the archive rather than
+	// at its oldest post. Cached with the pool it sizes.
+	$count_args                 = $query_args;
+	$count_args['posts_per_page'] = 1;
+	$count_args['no_found_rows']  = false;
+	unset( $count_args['offset'] );
+
+	$counted = new WP_Query( $count_args );
+	$total   = (int) $counted->found_posts;
+
+	if ( $total > $size ) {
+		$query_args['offset'] = wp_rand( 0, $total - $size );
+	}
+
+	$pool = (array) get_posts( $query_args );
+
+	set_transient( $cache_key, $pool, MAJESTIC_TUBE_RANDOM_POOL_TTL );
+
+	return $pool;
+}
+
+/**
+ * Draw random video IDs that match the given query args.
+ *
+ * The draw is a shuffle, not an order: callers that print the result are asking
+ * for the selection, and callers that need the selection in ONE order pass the
+ * IDs to WP_Query as `post__in` with `orderby => post__in`.
+ *
+ * @param int   $count How many IDs to draw.
+ * @param array $args  Query args the drawn videos have to match.
+ * @return int[] Drawn post IDs.
+ */
+function majestic_tube_random_video_ids( $count = 1, $args = array() ) {
+	$count = max( 1, absint( $count ) );
+	$pool  = majestic_tube_random_video_pool( $args );
+
+	if ( ! $pool ) {
+		return array();
+	}
+
+	if ( count( $pool ) <= $count ) {
+		return array_map( 'absint', $pool );
+	}
+
+	$ids = array();
+
+	// array_rand() answers with a bare key when asked for one of them.
+	foreach ( (array) array_rand( $pool, $count ) as $key ) {
+		$ids[] = (int) $pool[ $key ];
+	}
+
+	return $ids;
+}
+
+/**
+ * The constraints a random draw on this archive has to respect.
+ *
+ * A pool is cached per set of arguments, so the arguments have to describe the
+ * archive the reader is actually on: the same listing inside a category is a
+ * different set of videos, and a pool built for the whole site would hand out
+ * videos the archive is meant to exclude.
+ *
+ * @param WP_Query $query Main query.
+ * @return array Query args for the pool.
+ */
+function majestic_tube_random_pool_args( $query ) {
+	$args = array(
+		'post_type'   => 'post',
+		'post_status' => 'publish',
+	);
+
+	$tax_query = $query->get( 'tax_query' );
+
+	if ( is_array( $tax_query ) && $tax_query ) {
+		$args['tax_query'] = $tax_query; // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+	}
+
+	$object = $query->get_queried_object();
+
+	if ( $object instanceof WP_Term ) {
+		$args['tax_query'][] = array( // phpcs:ignore WordPress.DB.SlowDBQuery.slow_db_query_tax_query
+			'taxonomy' => $object->taxonomy,
+			'field'    => 'term_id',
+			'terms'    => (int) $object->term_id,
+		);
+	}
+
+	$date_query = $query->get( 'date_query' );
+
+	if ( is_array( $date_query ) && $date_query ) {
+		$args['date_query'] = $date_query;
+	}
+
+	return $args;
+}
+
+/**
  * Modify the main loop for the sort filters (original behavior).
  *
  * @param WP_Query $query Current query.
@@ -1186,13 +1348,17 @@ function majestic_tube_filter_query( $query ) {
 
 		case 'random':
 			/*
-			 * E3: bare ORDER BY RAND() scans the whole result set on every
-			 * request, which is the classic large-table killer, so the draw
-			 * can be confined to a recent window. The window is off by
-			 * default for the same reason as the popular one above: on a
-			 * backdated or dormant archive the narrower window returned an
-			 * empty page rather than a slower one. A site large enough to
-			 * need the guard turns it back on.
+			 * The draw comes from a cached pool of IDs rather than from an
+			 * ORDER BY RAND() clause: that clause makes MySQL read and sort every
+			 * matching row on every request, which is the classic large-table
+			 * killer. The pool is built from the constraints this query already
+			 * carries, so a draw on a category archive stays inside it.
+			 *
+			 * `majestic_tube_random_window_days`, kept from when the clause was
+			 * the problem, still narrows the draw to recent videos. It stays off
+			 * by default for the same reason as the popular window above: a
+			 * window narrower than the archive emptied the page rather than
+			 * merely slowing it.
 			 */
 			$random_days = (int) apply_filters( 'majestic_tube_random_window_days', 0 );
 
@@ -1208,7 +1374,18 @@ function majestic_tube_filter_query( $query ) {
 				);
 			}
 
-			$query->set( 'orderby', 'rand' );
+			$per_page = (int) $query->get( 'posts_per_page' );
+			$per_page = $per_page > 0 ? $per_page : (int) get_option( 'posts_per_page' );
+
+			/*
+			 * An empty draw closes the listing rather than opening it: without a
+			 * post__in the query would print the whole archive under a Random
+			 * heading, and `0` is the ID that matches no post.
+			 */
+			$ids = majestic_tube_random_video_ids( $per_page, majestic_tube_random_pool_args( $query ) );
+
+			$query->set( 'post__in', $ids ? $ids : array( 0 ) );
+			$query->set( 'orderby', 'post__in' );
 			break;
 	}
 }
@@ -1357,7 +1534,19 @@ function majestic_tube_get_related_videos( $post_id, $count = 6 ) {
 	}
 
 	$actor_ids = wp_get_post_terms( $post_id, 'actors', array( 'fields' => 'ids' ) );
-	$args = array(
+
+	/*
+	 * A taxonomy that is not registered on this request hands back WP_Error
+	 * rather than a list. `actors` is registered at init priority 0, so this
+	 * is reachable from anything that queries earlier than that, or on a site
+	 * whose child theme removed the taxonomy - and an error object assigned
+	 * straight into `terms` is a fatal, not a warning.
+	 */
+	if ( is_wp_error( $actor_ids ) ) {
+		$actor_ids = array();
+	}
+
+	$args = array(
 		'post_type'           => 'post',
 		'posts_per_page'      => $count,
 		'post__not_in'        => array( $post_id ),

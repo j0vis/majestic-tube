@@ -36,17 +36,26 @@ function majestic_tube_setup() {
 	add_theme_support( 'post-thumbnails' );
 	add_theme_support( 'post-formats', array( 'video' ) );
 
-	// Featured image sizes for the video theme (original dimensions).
-	//
-	// The wpst_thumb_* names are the original theme's, and WP-Script plugins
-	// (for example the paywall) ask for wpst_thumb_large by name, so they must
-	// stay registered. The majestic-tube-thumb-* names are our own aliases.
+	/*
+	 * Featured image sizes for the video theme (original dimensions).
+	 *
+	 * One registration per file. The original theme's wpst_thumb_* names used
+	 * to be registered beside these at identical dimensions, so WordPress
+	 * resized and re-encoded every upload twice for a file it had already
+	 * written, and stored seven metadata entries for five files. The extra
+	 * names are not registered any more; they are answered from the attachment
+	 * metadata instead - see majestic_tube_image_size_aliases() - which is
+	 * where WordPress itself looks a size up (image_get_intermediate_size()
+	 * reads $metadata['sizes'][ $size ] and nothing else) and which can only
+	 * ever point at a file that was really generated.
+	 *
+	 * The names that live on that way are the theme's public interface: the
+	 * `main-thumbnail-quality` option stores wpst_thumb_small,
+	 * wpst_thumb_medium or wpst_thumb_large, and WP-Script plugins (the
+	 * paywall, for one) ask for them by name.
+	 */
 	set_post_thumbnail_size( 320, 180, true );
-	add_image_size( 'wpst_thumb_large', 640, 360, true );
-	add_image_size( 'wpst_thumb_medium', 320, 180, true );
-	add_image_size( 'wpst_thumb_small', 150, 84, true );
 	add_image_size( 'majestic-tube-thumb-large', 640, 360, true );
-	add_image_size( 'majestic-tube-thumb-medium', 320, 180, true );
 	add_image_size( 'majestic-tube-thumb-small', 150, 84, true );
 
 	/*
@@ -130,6 +139,67 @@ function majestic_tube_setup() {
 	load_theme_textdomain( 'majestic-tube', MAJESTIC_TUBE_DIR . '/languages' );
 }
 add_action( 'after_setup_theme', 'majestic_tube_setup' );
+
+/**
+ * Image size names answered from the attachment metadata.
+ *
+ * A registered size is a promise to generate a file; two names for one set of
+ * dimensions is not, and WordPress has no concept of an alias that would avoid
+ * it. Resolving the second name from the metadata costs nothing - a size is
+ * looked up in `$metadata['sizes']` and nowhere else - and it can only ever
+ * answer with a file that exists, so an image too small to produce the size
+ * falls back to the original upload exactly as an ungenerated registered size
+ * does. Nothing is lost, including for a site whose library was uploaded while
+ * both names were registered: that metadata already carries all of them.
+ *
+ * @return array<string, string> Aliased size name => the size that made the file.
+ */
+function majestic_tube_image_size_aliases() {
+	/**
+	 * Filter the image size names answered from the attachment metadata.
+	 *
+	 * @param array<string, string> $aliases Aliased name => registered size name.
+	 */
+	return (array) apply_filters(
+		'majestic_tube_image_size_aliases',
+		array(
+			'wpst_thumb_large'           => 'majestic-tube-thumb-large',
+			'wpst_thumb_small'           => 'majestic-tube-thumb-small',
+			// The 320x180 size is core's featured-image size, which core and
+			// third-party code ask for as `post-thumbnail`.
+			'wpst_thumb_medium'          => 'post-thumbnail',
+			'majestic-tube-thumb-medium' => 'post-thumbnail',
+		)
+	);
+}
+
+/**
+ * Write the aliased size names into an attachment's metadata.
+ *
+ * Hooked to both ends of that metadata's life: the write end covers a new
+ * upload, so the stored record names every size the theme can ask for, and the
+ * read end covers an attachment whose record was written elsewhere - a library
+ * carried over from the original theme, an importer, or a regeneration with
+ * this filter not yet in place.
+ *
+ * @param array $metadata Attachment metadata.
+ * @return array
+ */
+function majestic_tube_alias_image_sizes( $metadata ) {
+	if ( ! is_array( $metadata ) || empty( $metadata['sizes'] ) || ! is_array( $metadata['sizes'] ) ) {
+		return $metadata;
+	}
+
+	foreach ( majestic_tube_image_size_aliases() as $alias => $source ) {
+		if ( isset( $metadata['sizes'][ $source ] ) && ! isset( $metadata['sizes'][ $alias ] ) ) {
+			$metadata['sizes'][ $alias ] = $metadata['sizes'][ $source ];
+		}
+	}
+
+	return $metadata;
+}
+add_filter( 'wp_generate_attachment_metadata', 'majestic_tube_alias_image_sizes' );
+add_filter( 'wp_get_attachment_metadata', 'majestic_tube_alias_image_sizes' );
 
 /**
  * Body classes like the original (group-blog, hfeed).
