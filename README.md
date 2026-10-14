@@ -27,7 +27,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#video-reports-and-moderation)
 - [Legal pages](#legal-and-policy-pages)
 - [Routine maintenance](#routine-maintenance)
-- [What's new in 2.2.0](#whats-new-in-220)
+- [What's new in 2.5.2](#whats-new-in-252)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#frequently-asked-questions)
 - [Credits, license & support](#credits-license--support)
@@ -35,32 +35,117 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 **Release**
 
-## What’s New in 2.2.0
+## What’s New in 2.5.2
 
-This release reorganizes the Customizer, replaces the spam check with Cloudflare Turnstile, and makes imported videos display correctly.
+The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, and stops one unlinkable tag from taking a page down with it.
 
-### A Customizer you can navigate
+### 2.5.2 — a locked video stays locked, and one broken term no longer takes the page
+
+This release is about the content a video site did not write itself: a visitor's submission, an imported feed, a title copied from somewhere else. Several of the fixes below only show up on a page nobody looks at twice, which is what made them worth finding.
+
+- A **password-protected video** was protected in name only. The template printed the player — and, for a self-hosted file, the direct file addresses — above the content, so a locked video handed its file to anyone who followed the link. It now shows WordPress's own password form and reads none of the player data first. See [Player and media behavior](#player-and-media-behavior).
+- A video's **title can no longer break the page's structured data**. The VideoObject block is JSON inside a `<script>` element, and a title carrying `</script>` ended that element, so everything after it was read as page markup by every visitor. The block is encoded so no title, description or tag can end it, and an embedded player's address is checked to be http or https before it is used. See [Video structured data](#video-structured-data).
+- A **category, tag or actor whose link cannot be built no longer stops the page.** The list under a video asks WordPress for each term's link, and that answer can be an error rather than an address — which was printed as if it were the address, ending the whole request for every reader of that video. A term with no link is left out now, and the rest of the list prints.
+- The **counters only answer for videos a visitor can see.** The endpoints behind views, likes, dislikes and reports took any post ID they were handed, including a draft, a pending submission and a private video. See [Video reports and moderation](#video-reports-and-moderation).
+- The **password reset form is guarded** the way the sign-up form is: with the Turnstile keys filled in, a reset request is checked before it is answered. The reply no longer says whether an account exists, and a lookup that finds nothing counts toward the throttle.
+- The **rotation thumbnails box works.** Its **Add** and **Remove** buttons did nothing at all — the box handed out the endpoint, the nonce and the post ID, and no script read them. Both buttons do what they say now, and the list is written when a button is pressed rather than on publish. See [Thumbnail rotation and trailers](#thumbnail-rotation-and-trailers).
+- The **date under a video title is a date again**, instead of the markup around it printed as text.
+- The **term image picker** writes its preview safely — an image address with a quote in it could close the attribute it was written into — and copes with an image that has no thumbnail size. See [Actors, categories and tags](#actors-categories-and-tags).
+- An **RSS item's featured image no longer errors** when the item is built without a post in the loop, and a saved **color scheme survives the update** if it was chosen before the site's default was recorded beside it.
+
+### 2.5.1 — the browser-tab icon is handed over
+
+If you had set the theme’s own **Browser tab icon** before it was retired, it is moved into WordPress’s **Site Icon** (`Appearance → Customize → Site Identity → Site Icon`) on the first admin page load after the update, because that is where the browser-tab icon lives now. An image the media library already holds is reused by reference; one hosted somewhere else is fetched once through WordPress’s own importer and kept in the library. Nothing is deleted — the stored setting stays in the database, so an older release that downgrades still reads it.
+
+- A **Site Icon** you set yourself is never overwritten. The icon you chose is not the theme’s to replace, so the retired setting stands down rather than competing with it.
+- When the address cannot be moved — it no longer answers, or it points at a file the media library refuses to keep as an image — the dashboard names the address and links the screen where the icon belongs, instead of the tab icon quietly disappearing. The warning is dismissible, and comes back only if the address changes.
+- The move runs on an admin request from a user who could set a Site Icon by hand, and never while a visitor is loading a page: it writes an option and it may fetch a file, and neither belongs on the front end.
+
+### 2.5.0 — a site that describes itself, and no advertising where a question is asked
+
+**The theme describes the site again, unless you run an SEO plugin.** `SEO & Analytics → Basic SEO` is on by default and prints a meta description, a canonical on archive pages — including page 2, which canonicalises to itself rather than to page 1 — and the Open Graph and Twitter cards a shared link needs, with the image taken from the video’s own picture, then a term image, then your logo, then the Site Icon. It switches itself off completely the moment Yoast, Rank Math, All in One SEO, SEOPress, The SEO Framework or Slim SEO is active, so a site that already runs one keeps exactly the search appearance it had. The **Adult content rating tag** and the **RTA label** are off by default and keep working with a plugin, because no SEO plugin emits them. See [Search appearance](#search-appearance).
+
+**A page that asks a visitor to accept something carries no advertising.** A legal page — the 2257 document, the DMCA page, the privacy policy, and any page whose slug or title reads as one of those — prints none of the **Code and ads** areas, no footer widget columns, and no advertising from any placement, the popunder included. The submission page is treated the same way while the form is on it, and the login and registration panel and the cookie notice never contain a widget area.
+
+**Forms, consent, and submissions.** The login, registration and submission forms carry a required **terms checkbox**, on by default, naming and linking the documents your site actually publishes; the handler asks again on the server, so a form submitted without it is refused. A **cookie notice** along the bottom of the page is off by default, uses your own wording, keeps its dismissal in the visitor’s browser and records nothing on your server. The submission form gained **extra thumbnails** — a list of URLs, one per line, rotated as the pointer rests on a card — and an optional **preview video**, with switches that make either one a required field.
+
+**Color, icons, and the first image.** The **Accent color** now derives the tones one value cannot serve: the fill keeps your color and picks white or the theme’s near-black ink for the text on it by measuring contrast, links, text and icons are deepened for the light skin until they clear 5:1 and brightened for the dark skin until they clear 7:1, and the player takes a bright version because its chrome stays black over video. Nothing derived is stored. A child theme can add or replace a shape — see [Icons](#icons). The first card image of a listing, or the player poster on a video page, is loaded eagerly, marked high priority and preloaded from the head, because that image is the one the browser scores as the largest contentful paint; every later image stays lazy. Core’s emoji script and stylesheet no longer load on the front end, and the footer legal row is centered on the same axis as the copyright line and wraps instead of scrolling sideways.
+
+**Fixed.** The moderation screen no longer takes the page down with it when its ten-minute cache names a video that has since been deleted or trashed. A counter row written with no value — an interrupted import, a hand-edited row — no longer raises `Undefined array key 0` on PHP 8. The like endpoint stops asking for a missing `post_id` twice, and two exception messages escaped an integer post id instead of the message around it.
+
+### 2.4.2 — icons drawn by the theme
+
+The theme now ships its own icon set of 43 shapes in its stylesheet: no icon font, no plugin, no extra request. Each one is a masked SVG that paints in whatever color surrounds it, so a single shape works in the light skin, the dark skin, on accent-colored buttons and on muted metadata. They appear on the search button, the mobile menu toggle, the sort tabs, the video card and video page metadata, the like, dislike, share and report buttons, the category, actor and tag labels, the tag list, pagination and the back-to-top button.
+
+A thumbnail badge is no longer a bare number: an eye marks the view count, a clock the length and a star the rating, in the sidebar widget and the category directories too, and a card with no picture shows a frame above its caption rather than an empty rectangle that looked like a thumbnail still loading. The player controls carry the same shapes — sliders on the quality selector, a dial on the speed control, the expand mark on theater mode, and a play and a close on the resume pill — and the quality and speed menus tick the current choice with the tick reserved on every row, so the options stay in a column instead of the one you just picked shifting sideways.
+
+Icons are on by default. `Customize → Site Features → Header, Footer & Search → Show icons throughout the site` turns them off everywhere at once and returns every surface to words alone, which is the right choice for a site that has been styling the old `fa fa-*` classes through a child theme. Nothing is written to the database and no setting moves, an icon name the theme does not ship returns nothing rather than an empty box, and the full set is documented under [Icons](#icons).
+
+The release also repaired a defect worth naming: the icon generator had silently removed 260 lines from the stylesheet, including the skin toggle and the base typography and header rules. The file still parsed and the braces still balanced, so nothing reported it.
+
+### 2.4.1 — a row for the sites you link to
+
+A new **Friends & Ad Links** menu location prints as its own row directly under the header, set apart from the widget area so it never reads as site navigation. Every link in it is force-tagged `rel="sponsored nofollow noopener noreferrer"`, plus `target="_blank"` if you want it, so exchanged or paid links cannot leak follow equity — and only that menu is affected, because navigation menus, post links and footer links keep the attributes you set on them. Five row styles are built in (plain, stars, rockets, glam and neon), and `Customize → Advertising → Friends & Ad Links` holds the switches. The row prints nothing until you assign a menu to it, so an existing site looks exactly the same until it uses it.
+
+### 2.4.0 — videos described to Google Video
+
+Every video page now carries a schema.org `VideoObject` block built from the runtime, the file or embed the player is actually using, and the actors taxonomy, plus the `og:video` tags and `twitter:player` where an embeddable player exists. A video sitemap is served at `/video-sitemap.xml`, advertised in `robots.txt` and split across numbered files so a large catalog stays inside the per-file limits; submit it in Search Console as its own sitemap, because the XML sitemap index does not cover it. `Videos → All Videos` gained a **Video SEO** column that shows `OK`, `OK (embed)`, or the fields a video is missing, and a video missing a duration, a thumbnail or a source is skipped rather than submitted half-finished. The switches are described under [Video Structured Data](#video-structured-data); both default to on, and neither touches the title, description or canonical your SEO plugin prints.
+
+One limit is worth knowing before you count on it: a video played from another domain’s player can still rank as a web page, but Google cannot count it as part of your site’s own video library, so it will not appear in Google Video results. Serving the file yourself, or embedding a player from your own domain, is the only way to qualify. `wp majestic-tube audit` reports how much of a catalog is affected.
+
+### 2.3.0 — search appearance is your SEO plugin’s job
+
+This release took the theme out of search appearance, on the reasoning that two sources of truth for one page title is worse than one. It removed the dashboard **SEO** workspace and its five tabs, the theme-printed titles, meta descriptions, robots directives and canonicals, the Open Graph and Twitter cards with the Facebook app ID and the player card, the JSON-LD `VideoObject` and the `BreadcrumbList` graph, the per-term SEO title and description fields with their list column and bulk editor, and the programmatic collections with their `/browse/` crawl spine and the theme’s XML sitemap provider.
+
+`Customize → SEO & Analytics` still holds **Homepage SEO** (heading position, visible introduction), **Archive Page SEO** (category and actor card text, description placement) and **Custom Code** (analytics code, extra scripts, mobile scripts). Share links and the visible breadcrumb trail are unchanged.
+
+**Updating from the 2.2 line**, install an SEO plugin for titles, descriptions, social cards and structured data. Nothing those screens stored is read any more, although it stays in the database. The theme came back to two of those jobs on its own terms, because no general-purpose plugin can do them: [Video structured data](#video-structured-data) in 2.4.0, and the theme’s own description of the site in 2.5.0.
+
+### 2.2.1 – 2.2.26 — the 2.2 patch line
+
+Twenty-six patch releases followed 2.2.0. Grouped by what they touch:
+
+- **The alphabet bar and the term directories.** Every letter A–Z and 0–9 is printed on every directory whether or not anything sits behind it — a letter with terms is a link, a letter without is dimmed and inert, digits sort last — because a directory that lists its terms with no visible sort control is the worst outcome, and an empty lookup produced exactly that. Choosing a letter lists every term under it on one page, the letter map is read straight from the term tables so a `hide_empty` combination cannot defeat it, and the tags page lists every tag rather than twenty of them.
+- **Term cards and archives.** Category and actor cards take a phrase from the Customizer with `{description}`, `{count}` and `{videos}` tokens, the term description fills a band that used to leave the card looking unfinished, and the video count no longer borrows the thumbnail-badge class. Category, tag and author archives render the same grid as every other listing, which they did not before.
+- **Widget areas and labels.** Every content area now says “code and ads”, the one area that takes any widget says “Footer widgets”, and three Customizer labels that described something other than the control they belonged to were corrected. Labels only — no saved value moved.
+- **The player.** A 300x250 overlay sits centered over the player with a close button that can be seen on a black video, the homepage description can sit above or below the title, and a site-wide choice decides which of a post’s two video fields the player prefers, with the social and schema tags following the same choice. The membership menu links honor their show/hide switches, and `categories-per-row` emits its own column count instead of inheriting the video listing’s.
+- **Members and submissions.** The profile editor answers honestly when WordPress refuses a password or email change, first name, last name and bio can be cleared once they hold a value, the eight-character password floor is enforced on the server rather than in a `minlength` attribute, and password reset goes through WordPress’s own flow again so a membership plugin’s filters and mail customizations apply. A full-page cache no longer freezes the front-end nonces: a stale one answers 403, and the script fetches a live nonce and replays the request once. Subscriber submissions keep their tags and actors, and unsubscribing removes the navigation menu items it used to leave behind.
+- **Privacy.** Vote, view and report de-duplication no longer keeps raw IP addresses in post meta. They are keyed fingerprints that expire, a daily sweep clears rows nothing writes to again, and the 24-hour windows are unchanged.
+- **The legal pages.** The 2257 starter page no longer asserts that its operator holds the primary producer’s record-keeping duty, which most installs of this theme are not in a position to hold: it describes the secondary producer role and says outright that it does not decide which obligations apply. The site name is expanded from `Settings → General` where it is shown rather than stored as a bracketed field, so it reaches pages older installs already have. A deleted legal page can be recreated from the welcome screen, duplicate copies are shown there so the extra one can be trashed, and all five are linked on the main menu.
+- **The listings.** Popular ranks by likes once the site has a vote and by views until then, instead of sorting on a rate value only a vote writes. The most-used tags print as a strip under the sort bar, scrolling on its own so it works without JavaScript, with the arrow buttons revealed only once the tags are measured as overflowing.
+- **Search appearance, briefly the theme’s own.** 2.2.20 to 2.2.26 built a search-appearance workspace of the theme’s own: facet pages generated from the catalog behind an index gate, per-term SEO titles and descriptions, switchable generated pages with editable wording, and a `/browse/` crawl spine with their sitemaps. 2.3.0 removed all of it, so what those releases added is history rather than a feature: on 2.5.1 that job belongs to your SEO plugin, and none of those settings is read.
+- **Fixed along the way.** The sitemap provider implemented method names WordPress does not call, so every sitemap request died with a fatal error; the tag bar’s sort order was an `orderby` array `get_terms()` cannot take, which was a `TypeError` on every page that printed the bar; a cleared page-template assignment left **Submit a Video** rendering a title with no form; the header search bar sat hard against the logo with the space it was meant to fill left empty; the logo badge was dropped, a logo icon that duplicated the plain play triangle was retired in favor of Film, and Film and Video were given shapes of their own instead of sharing one character; and the stats refresh stopped answering 0% for an imported post whose rating a vote had not written.
+
+### 2.2.0 — the release this guide opened with
+
+It regrouped the Customizer, replaced the spam check with Cloudflare Turnstile, and made imported videos display correctly.
+
+#### A Customizer you can navigate
 
 The settings used to sit in nine flat sections with a catch-all bucket that mixed homepage settings with video-page settings. They are now grouped into panels, and every setting is filed under the page it actually affects. The two panels you will visit most are kept apart: **Homepage & Listings** and **Video Page**. The full map is in [Customizer Settings](#customizer-settings).
 
 Nothing is lost in the move, and no setting is reset: the values stay exactly where they were stored. Only the labels and the layout around them changed.
 
-### Cloudflare Turnstile replaces reCAPTCHA
+#### Cloudflare Turnstile replaces reCAPTCHA
 
 Spam protection on sign-up and video submission is now handled by Cloudflare Turnstile, and reCAPTCHA has been removed. Turnstile is free at any traffic level and asks less of a visitor. Setup takes a few minutes and is covered in [Members and Video Submissions](#members-and-video-submissions).
 
-### Imported videos display correctly
+#### Imported videos display correctly
 
 Two problems showed up on videos brought in by an importer, and both are fixed:
 
 - **Ratings appeared as 0%.** Imported posts store their rating as a pair of values, which the theme was not reading, so every imported video showed no rating. The theme now reads them, and the first visitor vote builds on the imported score instead of replacing it with 100%.
 - **Hover previews showed one broken image.** Extra preview images are stored as a single comma-separated value, while the theme read them as one URL per stored value. A comma is a legal URL character, so the whole string survived as one unusable address. Both storage shapes are now handled, including removing a single preview from the editor.
 
-The **18 U.S.C. § 2257** page is also now repaired automatically if it goes missing from the footer menu, so a deleted or renamed legal link comes back on its own. The page is named the way the statute is written, and an update renames the page and its footer link in place — same page, same address, same content.
+The **18 U.S.C. § 2257** page is also repaired automatically if it goes missing from the footer menu, so a deleted or renamed legal link comes back on its own. The page is named the way the statute is written, and an update renames the page and its footer link in place — same page, same address, same content. Later releases go further and let you recreate any deleted legal page from the welcome screen.
 
-> **Upgrading from 2.1.7**
+> **Upgrading from an earlier release**
 >
-> Replace the theme folder. Your settings carry over. If you were using reCAPTCHA, create a Turnstile widget and paste its two keys into `Appearance → Customize → Site Features → Accounts & Spam Protection` — the old reCAPTCHA keys are no longer used.
+> Replace the theme folder. Your settings carry over, and nothing is deleted: a value written by an earlier release stays in the database even where nothing reads it any more.
+>
+> - **Search appearance** has been an SEO plugin’s job since 2.3.0. Install one, or — if you run none — leave **Basic SEO** on, which is its default. Per-term SEO titles and descriptions, the generated collections and the `/browse/` pages from the 2.2.x line are not read any more.
+> - **A browser-tab icon you set in the theme** is moved into WordPress’s **Site Icon** for you on the first admin page load after the update. If the address cannot be fetched, the dashboard names it so you can upload that file once.
+> - **If you are updating from 2.1.7 or earlier**, remember the spam check is now Cloudflare Turnstile: create a widget and paste its two keys into `Appearance → Customize → Site Features → Accounts & Spam Protection`. The old reCAPTCHA keys are no longer used.
 
 **Before you begin**
 
@@ -507,7 +592,7 @@ Turnstile is Cloudflare’s free, privacy-friendly spam check. It asks less of a
 9. Turn on **Enable spam protection**.
 10. Paste the site key into **Turnstile site key** and the secret key into **Turnstile secret key**. Both are required: while either one is blank the theme leaves the forms alone rather than blocking every visitor.
 11. Choose **Publish**.
-12. Open your site in a private browser window, choose **Sign up**, and complete the challenge to confirm it works. Sign-up and video submission are the two protected forms.
+12. Open your site in a private browser window, choose **Sign up**, and complete the challenge to confirm it works. Sign-up, password reset and video submission are the three protected forms.
 
 > **Tip**
 >
@@ -521,14 +606,14 @@ Turnstile is Cloudflare’s free, privacy-friendly spam check. It asks less of a
 
 Turnstile’s script is loaded only while spam protection is switched on and both keys are filled in, so a site with the feature off makes no request to Cloudflare at all.
 
-- The widget’s token is sent to Cloudflare’s `siteverify` endpoint from the server, along with the visitor’s IP address. A token that does not verify stops the sign-up or the submission.
+- The widget’s token is sent to Cloudflare’s `siteverify` endpoint from the server, along with the visitor’s IP address. A token that does not verify stops the sign-up, the password reset or the submission.
 - Tokens are good once. If a visitor fails for an unrelated reason — a username already taken, say — the theme clears the challenge and hands them a fresh one instead of leaving them with a form that can never succeed.
 - The sign-up form sits in a modal, so the widget is mounted only once that panel is actually open. A challenge mounted into a hidden panel measures itself as zero and never recovers.
-- Every form keeps the room the widget needs, whether protection is off, on, or still loading. The widget is 65px tall and arrives after the page has rendered, so the space is reserved up front: switching protection on never moves a submit button, and the widget landing never shifts the field beside it. The sign-up, login, comment and submission forms all reserve the same room; only sign-up and submission are guarded.
+- Every form keeps the room the widget needs, whether protection is off, on, or still loading. The widget is 65px tall and arrives after the page has rendered, so the space is reserved up front: switching protection on never moves a submit button, and the widget landing never shifts the field beside it. The sign-up, login, password reset, comment and submission forms all reserve the same room; only sign-up, password reset and submission are guarded.
 
 #### Turn protection off
 
-Set **Enable spam protection** to **Off**. The widget disappears from both forms, the room it sat in stays reserved, and Cloudflare’s script stops loading; your Turnstile keys stay saved, so switching back on needs no work.
+Set **Enable spam protection** to **Off**. The widget disappears from every guarded form, the room it sat in stays reserved, and Cloudflare’s script stops loading; your Turnstile keys stay saved, so switching back on needs no work.
 
 > **Important**
 >
