@@ -41,6 +41,18 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: none
 
+      # A suite drives the theme files it covers, so a file it loads has to
+      # parse here. One it never loads - a template behind a path no check
+      # takes - would not, and the floor this job exists to hold is a PHP a
+      # live site may be running. Every theme file is parsed on it too.
+      - name: Parse every theme file on this PHP
+        run: |
+          status=0
+          for file in $(git ls-files '*.php' | grep -v '^tests/'); do
+            php -l "$file" > /dev/null || status=1
+          done
+          exit "$status"
+
       # Each suite is a standalone script that prints its own tally and exits
       # non-zero when a check fails, so the loop keeps the first failure as the
       # job's status instead of letting the last suite decide it.

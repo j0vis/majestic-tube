@@ -305,6 +305,43 @@ function check( $label, $ok, $context = '' ) {
 }
 
 /**
+ * Whether a string ends with another.
+ *
+ * The suite runs on the oldest PHP the theme supports, and that floor is 7.4,
+ * where str_ends_with() does not exist: the check below asserted the sentence
+ * with the notice removed ends where it should, and on 7.4 the call was an
+ * uncaught Error that ended the whole file instead of a single check. Two lines
+ * here rather than a version test at every call site.
+ *
+ * @param string $haystack String to search.
+ * @param string $needle   Text the string should end with.
+ * @return bool
+ */
+function mt_ends_with( $haystack, $needle ) {
+	$haystack = (string) $haystack;
+	$needle   = (string) $needle;
+
+	return '' === $needle || substr( $haystack, -strlen( $needle ) ) === $needle;
+}
+
+/**
+ * Whether a string starts with another.
+ *
+ * The counterpart of mt_ends_with(), and there for the same reason: the suite
+ * has to answer on PHP 7.4, where str_starts_with() is not defined either.
+ *
+ * @param string $haystack String to search.
+ * @param string $needle   Text the string should start with.
+ * @return bool
+ */
+function mt_starts_with( $haystack, $needle ) {
+	$haystack = (string) $haystack;
+	$needle   = (string) $needle;
+
+	return '' === $needle || 0 === strpos( $haystack, $needle );
+}
+
+/**
  * Add a page to the model.
  *
  * @param int    $id     Page ID.
@@ -435,7 +472,7 @@ $stored = "<h2>DMCA Copyright Policy</h2>\n"
 check( 'the paragraph is removed', false === strpos( majestic_tube_strip_template_notice( $stored ), 'Template notice' ) );
 check(
 	'the separator that introduced it goes with it',
-	str_ends_with( majestic_tube_strip_template_notice( $stored ), 'infringing material.</p>' ),
+	mt_ends_with( majestic_tube_strip_template_notice( $stored ), 'infringing material.</p>' ),
 	'got: ' . json_encode( majestic_tube_strip_template_notice( $stored ) )
 );
 check(
@@ -447,7 +484,7 @@ $without_hr = "<p>Contact us.</p>\n"
 	. '<p><strong>Template notice:</strong> A notice with no separator above it.</p>';
 
 check( 'a notice with no separator above it still goes', false === strpos( majestic_tube_strip_template_notice( $without_hr ), 'Template notice' ) );
-check( 'and the sentence before it is kept whole', str_starts_with( majestic_tube_strip_template_notice( $without_hr ), '<p>Contact us.</p>' ) );
+check( 'and the sentence before it is kept whole', mt_starts_with( majestic_tube_strip_template_notice( $without_hr ), '<p>Contact us.</p>' ) );
 
 /*
  * The no-op half: restarting the setup must not disturb a page that never had

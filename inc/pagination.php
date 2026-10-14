@@ -429,7 +429,7 @@ function majestic_tube_term_directory_hide_empty( $taxonomy, $letter = '' ) {
  * unfiltered listing.
  *
  * @param string $taxonomy Taxonomy name.
- * @return array<string, int[]> Letter => term IDs, keys in alphabetical order.
+ * @return array<string, int[]> Letter => term IDs, keys in the bar's own order: 0-9, then A-Z.
  */
 function majestic_tube_get_term_letter_map( $taxonomy ) {
 	$taxonomy = sanitize_key( $taxonomy );
@@ -495,7 +495,7 @@ function majestic_tube_get_term_letter_map( $taxonomy ) {
  * Read every term name in a taxonomy and bucket the terms by first letter.
  *
  * @param string $taxonomy Taxonomy name.
- * @return array<string, int[]> Letter => term IDs, keys in alphabetical order.
+ * @return array<string, int[]> Letter => term IDs, keys in the bar's own order: 0-9, then A-Z.
  */
 function majestic_tube_build_term_letter_map( $taxonomy ) {
 	$hide_empty = majestic_tube_term_directory_hide_empty( $taxonomy );
@@ -573,7 +573,17 @@ function majestic_tube_build_term_letter_map( $taxonomy ) {
 		$map[ $letter ][] = (int) $row->term_id;
 	}
 
-	ksort( $map );
+	/*
+	 * Digits and letters share this one map, and the digit bucket's key is a
+	 * number: a term named "7 Up" files under '7', which PHP stores as the
+	 * integer 7. ksort()'s default comparison ranks that integer against 'A'
+	 * by rules that are not the same on every version the theme supports - the
+	 * digit bucket lands after A-Z on PHP 7.4 through 8.1 and before it on 8.2
+	 * and later - so the bar's own order changed with the site's PHP.
+	 * SORT_STRING compares both keys as strings everywhere, which puts 0-9
+	 * before A-Z on every version and is the order the bar's markup assumes.
+	 */
+	ksort( $map, SORT_STRING );
 
 	return $map;
 }
