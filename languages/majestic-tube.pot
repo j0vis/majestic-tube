@@ -295,7 +295,7 @@ msgstr ""
 msgid "Code and ads shown at the very top of the site footer, above the footer widgets. Takes Content Block widgets only."
 msgstr ""
 
-msgid "Code and ads shown beside a video page when the video sidebar is switched on. Takes Content Block widgets only."
+msgid "Code and ads shown beside a video page on a desktop screen, when the video sidebar is switched on. Takes Content Block widgets only; a phone shows none of it."
 msgstr ""
 
 msgid "Code and ads shown directly below the site header. Takes Content Block widgets only."
@@ -1354,7 +1354,7 @@ msgstr ""
 msgid "Show the \"Submit a Video\" link"
 msgstr ""
 
-msgid "Show the Video sidebar widget area beside individual video pages. The area stays empty until you add content."
+msgid "Show the Video sidebar widget area beside individual video pages on a desktop screen. The area stays empty until you add content; a phone does not print it at all, because a 300x250 ad needs a desktop-width column."
 msgstr ""
 
 msgid "Show the description block"

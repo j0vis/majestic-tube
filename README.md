@@ -27,7 +27,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#video-reports-and-moderation)
 - [Legal pages](#legal-and-policy-pages)
 - [Routine maintenance](#routine-maintenance)
-- [What's new in 2.5.6](#whats-new-in-256)
+- [What's new in 2.5.7](#whats-new-in-257)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#frequently-asked-questions)
 - [Credits, license & support](#credits-license--support)
@@ -35,9 +35,17 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 **Release**
 
-## What’s New in 2.5.6
+## What’s New in 2.5.7
 
-The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, and moves the player overlay's close box out of the corner an ad's own controls sit in.
+The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, moves the player overlay's close box out of the corner an ad's own controls sit in, and gives the video sidebar a column wide enough for a 300x250 ad, on a desktop screen only.
+
+### 2.5.7 — the video sidebar is measured in ad slots
+
+**The video sidebar is wide enough for a 300x250 ad.** The column was capped at 280px, so a 300x250 creative was squeezed into the space that was left — 242px in a 280px column, which clips the creative and reports a frame size the ad network was never told about. The column now leaves 300px of clear width beside the box's own padding, which is where its 336px minimum comes from, so a 300x250 ad is served at the size it was sold at. See [Menus, widgets, and content](#menus-widgets-and-content-areas).
+
+**The sidebar is a desktop area.** On a mobile device it is not printed at all — no box, no widget rendered, and no ad requested. Hiding it with CSS would have been the smaller change and the wrong one: a hidden iframe still loads and still counts an impression for an ad nobody can see. The mobile slots are the header, the strip below the player and the footer, and they are unchanged.
+
+**Also in this release:** the widget area and the setting that switches it on both say that the sidebar is a desktop one now, so the panel does not promise a phone what it will not deliver.
 
 ### 2.5.6 — the player overlay's close box moves out of the ad's way
 
@@ -1041,7 +1049,7 @@ Administrators can add analytics code to the page header and extra scripts near 
 
 - Choose the number of videos per mobile page and per row.
 
-The homepage has no widget area of its own, so there is nothing to hide on mobile. The theme's widget areas are the header strip, the player overlay, the strip below the player, the video sidebar, the footer, and the footer's own widget row.
+The homepage has no widget area of its own, so there is nothing to hide on mobile. The theme's widget areas are the header strip, the player overlay, the strip below the player, the video sidebar, the footer, and the footer's own widget row. Two of them belong to a desktop screen and are not printed for a mobile visitor at all: the player overlay and the video sidebar, both sized around a 300x250 creative. The mobile slots are the header, the strip below the player, and the footer.
 
 **Navigation and optional content**
 
@@ -1090,7 +1098,7 @@ Every area named **code and ads** accepts this widget and nothing else, so any a
 | Header: code and ads | Below the site header. Content Block widgets only. |
 | Player overlay: 300x250 code and ads | A single 300x250 ad with a close button, centered over the desktop video player. Content Block widgets only. |
 | Below player: code and ads | Below the individual video player unless the video has its own content. Content Block widgets only. |
-| Video sidebar: code and ads | Beside an individual video when the sidebar setting is enabled. Content Block widgets only. |
+| Video sidebar: code and ads | Beside an individual video on a desktop screen, when the sidebar setting is enabled. Content Block widgets only; a phone shows none of it. |
 | Footer: code and ads | At the very top of the site footer, above the footer widgets. Content Block widgets only. |
 | Footer widgets | The column area at the bottom of the footer. Accepts every standard widget, so menus, link lists, friends links, text and images all go here. |
 
@@ -1337,6 +1345,7 @@ Front-end submissions are intentionally moderated. Open `Videos`, select the pen
 - Open `Appearance → Widgets → Video sidebar: code and ads`.
 - Add at least one widget and save.
 - Remember that the sidebar belongs to individual video pages, not the homepage or normal archives.
+- On a phone the sidebar is not printed at all. It is there for 300x250 ads, which need a desktop-width column; use the mobile slot in the header, below the player or in the footer for mobile impressions.
 
 ## Frequently Asked Questions
 

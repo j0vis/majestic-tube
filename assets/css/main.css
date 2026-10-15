@@ -4701,8 +4701,21 @@ body.custom-background {
 	min-width: 0;
 }
 
+/*
+ * The sidebar column is measured in ad slots, not in pixels that looked
+ * balanced: the area exists for a 300x250 creative, and an ad is served at the
+ * size it was sold at or not at all. Anything narrower and the widget's own
+ * `max-width: 100%` shrinks the iframe to the column - a clipped creative and a
+ * frame whose size no longer matches the one the ad server was told.
+ *
+ * So the minimum is 300px of clear width plus the box's own 18px padding on
+ * both sides, which is where the 336px comes from and why it moves with that
+ * padding rather than being a number to taste. The maximum is a little more, so
+ * a wide screen gives the column some air instead of handing every spare pixel
+ * to the player; the creative stays at its sold size either way.
+ */
 .single-video-layout.has-video-sidebar {
-	grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+	grid-template-columns: minmax(0, 1fr) minmax(336px, 360px);
 }
 
 .video-sidebar {

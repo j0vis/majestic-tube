@@ -426,7 +426,7 @@ function majestic_tube_options_map() {
 			'type'        => 'onoff',
 			'label'       => __( 'Show the video sidebar', 'majestic-tube' ),
 			'section' => $single,
-			'description' => __( 'Show the Video sidebar widget area beside individual video pages. The area stays empty until you add content.', 'majestic-tube' ),
+			'description' => __( 'Show the Video sidebar widget area beside individual video pages on a desktop screen. The area stays empty until you add content; a phone does not print it at all, because a 300x250 ad needs a desktop-width column.', 'majestic-tube' ),
 		),
 		'enable-comments'          => array(
 			'setting' => 'majestic_tube_enable_comments',

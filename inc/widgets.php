@@ -55,7 +55,7 @@ function majestic_tube_content_widget_areas() {
 		'video-sidebar' => array(
 			'id'          => 'majestic-tube-video-sidebar',
 			'name'        => esc_html__( 'Video sidebar: code and ads', 'majestic-tube' ),
-			'description' => esc_html__( 'Code and ads shown beside a video page when the video sidebar is switched on. Takes Content Block widgets only.', 'majestic-tube' ),
+			'description' => esc_html__( 'Code and ads shown beside a video page on a desktop screen, when the video sidebar is switched on. Takes Content Block widgets only; a phone shows none of it.', 'majestic-tube' ),
 		),
 		'footer'        => array(
 			'id'          => 'majestic-tube-footer-content',

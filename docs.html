@@ -444,7 +444,7 @@
     <nav class="toc" aria-label="User guide contents">
       <strong>Contents</strong>
       <ul>
-        <li><a href="#whats-new-256">What&rsquo;s new in 2.5.6</a></li>
+        <li><a href="#whats-new-257">What&rsquo;s new in 2.5.7</a></li>
         <li><a href="#requirements">Requirements</a></li>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#quick-start">Quick start</a></li>
@@ -467,10 +467,15 @@
     </nav>
 
     <main>
-      <section id="whats-new-256">
+      <section id="whats-new-257">
         <p class="eyebrow">Release</p>
-        <h2>What&rsquo;s New in 2.5.6</h2>
-        <p class="section-intro">The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, and moves the player overlay&rsquo;s close box out of the corner an ad&rsquo;s own controls sit in.</p>
+        <h2>What&rsquo;s New in 2.5.7</h2>
+        <p class="section-intro">The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, moves the player overlay&rsquo;s close box out of the corner an ad&rsquo;s own controls sit in, and gives the video sidebar a column wide enough for a 300x250 ad, on a desktop screen only.</p>
+
+        <h3>2.5.7 &mdash; the video sidebar is measured in ad slots</h3>
+        <p><strong>The video sidebar is wide enough for a 300x250 ad.</strong> The column was capped at 280px, so a 300x250 creative was squeezed into the space that was left &mdash; 242px in a 280px column, which clips the creative and reports a frame size the ad network was never told about. The column now leaves 300px of clear width beside the box&rsquo;s own padding, which is where its 336px minimum comes from, so a 300x250 ad is served at the size it was sold at. See <a href="#appearance">Menus, widgets, and content</a>.</p>
+        <p><strong>The sidebar is a desktop area.</strong> On a mobile device it is not printed at all &mdash; no box, no widget rendered, and no ad requested. Hiding it with CSS would have been the smaller change and the wrong one: a hidden iframe still loads and still counts an impression for an ad nobody can see. The mobile slots are the header, the strip below the player and the footer, and they are unchanged.</p>
+        <p><strong>Also in this release:</strong> the widget area and the setting that switches it on both say that the sidebar is a desktop one now, so the panel does not promise a phone what it will not deliver.</p>
 
         <h3>2.5.6 &mdash; the player overlay&rsquo;s close box moves out of the ad&rsquo;s way</h3>
         <p><strong>The close box on the player overlay is in the top right corner.</strong> It sat in the top left &mdash; the start edge of the slot &mdash; and that is the corner an ad network draws its own controls in: an Exoclick creative puts its info link there, and the close button covered it, so the visitor could not open the ad&rsquo;s own information and the control read as part of the creative. The button is pinned to the right edge now, and its plate follows it, so the hairline and the rounded corner still face into the creative instead of hanging off the player&rsquo;s clipped corner. The slot keeps its full 300x250 and the button still sits over the creative rather than taking a row from it, so nothing about the overlay&rsquo;s size or position changes. On a right-to-left site the button stays in that same corner, because the creative is a third-party frame whose own controls sit at its left however your page reads. See <a href="#appearance">Menus, widgets, and content</a>.</p>
@@ -1486,7 +1491,7 @@
         <ul>
           <li>Choose the number of videos per mobile page and per row.</li>
         </ul>
-        <p>The homepage has no widget area of its own, so there is nothing to hide on mobile. The theme's widget areas are the header strip, the player overlay, the strip below the player, the video sidebar, the footer, and the footer's own widget row.</p>
+        <p>The homepage has no widget area of its own, so there is nothing to hide on mobile. The theme&rsquo;s widget areas are the header strip, the player overlay, the strip below the player, the video sidebar, the footer, and the footer&rsquo;s own widget row. Two of them belong to a desktop screen and are not printed for a mobile visitor at all: the player overlay and the video sidebar, both sized around a 300x250 creative. The mobile slots are the header, the strip below the player, and the footer.</p>
       </section>
 
       <section id="appearance">
@@ -1529,7 +1534,7 @@
               <tr><td>Header: code and ads</td><td>Below the site header. Content Block widgets only.</td></tr>
               <tr><td>Player overlay: 300x250 code and ads</td><td>A single 300x250 ad with a close button, centered over the desktop video player. Content Block widgets only.</td></tr>
               <tr><td>Below player: code and ads</td><td>Below the individual video player unless the video has its own content. Content Block widgets only.</td></tr>
-              <tr><td>Video sidebar: code and ads</td><td>Beside an individual video when the sidebar setting is enabled. Content Block widgets only.</td></tr>
+              <tr><td>Video sidebar: code and ads</td><td>Beside an individual video on a desktop screen, when the sidebar setting is enabled. Content Block widgets only; a phone shows none of it.</td></tr>
               <tr><td>Footer: code and ads</td><td>At the very top of the site footer, above the footer widgets. Content Block widgets only.</td></tr>
               <tr><td>Footer widgets</td><td>The column area at the bottom of the footer. Accepts every standard widget, so menus, link lists, friends links, text and images all go here.</td></tr>
             </tbody>
@@ -1818,6 +1823,7 @@
               <li>Open <span class="path">Appearance → Widgets → Video sidebar: code and ads</span>.</li>
               <li>Add at least one widget and save.</li>
               <li>Remember that the sidebar belongs to individual video pages, not the homepage or normal archives.</li>
+              <li>On a phone the sidebar is not printed at all. It is there for 300x250 ads, which need a desktop-width column; use the mobile slot in the header, below the player or in the footer for mobile impressions.</li>
             </ul>
           </div>
         </details>

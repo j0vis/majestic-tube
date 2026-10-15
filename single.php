@@ -53,7 +53,15 @@ while ( have_posts() ) :
 	$source_classes = $player ? 'video-js vjs-default-skin vjs-big-play-centered' : 'majestic-tube-native-player';
 	$video_sidebar  = '';
 
-	if ( majestic_tube_option_is_on( 'single-sidebar' ) && is_active_sidebar( 'majestic-tube-video-sidebar' ) ) {
+	/*
+	 * The sidebar is where a site's 300x250 slots go, and an ad is served at the
+	 * size it was sold at or not at all: a phone stacked full width can give the
+	 * creative its 300px only at the widest phones, so the area is a desktop one,
+	 * like the overlay over the player. It is skipped before it asks for
+	 * anything rather than printed and hidden - a hidden iframe still loads and
+	 * still counts an impression for an ad nobody can see.
+	 */
+	if ( ! majestic_tube_is_mobile() && majestic_tube_option_is_on( 'single-sidebar' ) && is_active_sidebar( 'majestic-tube-video-sidebar' ) ) {
 		$video_sidebar = majestic_tube_widget_area_content( 'majestic-tube-video-sidebar' );
 	}
 
