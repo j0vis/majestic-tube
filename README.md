@@ -27,7 +27,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#video-reports-and-moderation)
 - [Legal pages](#legal-and-policy-pages)
 - [Routine maintenance](#routine-maintenance)
-- [What's new in 2.5.5](#whats-new-in-255)
+- [What's new in 2.5.6](#whats-new-in-256)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#frequently-asked-questions)
 - [Credits, license & support](#credits-license--support)
@@ -35,9 +35,13 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 **Release**
 
-## What’s New in 2.5.5
+## What’s New in 2.5.6
 
-The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, and shows a section only the settings that apply to it.
+The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, and moves the player overlay's close box out of the corner an ad's own controls sit in.
+
+### 2.5.6 — the player overlay's close box moves out of the ad's way
+
+**The close box on the player overlay is in the top right corner.** It sat in the top left — the start edge of the slot — and that is the corner an ad network draws its own controls in: an Exoclick creative puts its info link there, and the close button covered it, so the visitor could not open the ad's own information and the control read as part of the creative. The button is pinned to the right edge now, and its plate follows it, so the hairline and the rounded corner still face into the creative instead of hanging off the player's clipped corner. The slot keeps its full 300x250 and the button still sits over the creative rather than taking a row from it, so nothing about the overlay's size or position changes. On a right-to-left site the button stays in that same corner, because the creative is a third-party frame whose own controls sit at its left however your page reads. See [Menus, widgets, and content](#menus-widgets-and-content-areas).
 
 ### 2.5.5 — the settings show a site what it has, and a comment is checked
 

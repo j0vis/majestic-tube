@@ -3527,12 +3527,17 @@ span > .mt-icon:first-child {
  * that is deliberate. The percentage in `translate` is a fraction of the
  * element's own box, so it shifts the same way in both directions, whereas
  * a logical `inset-inline-start` would resolve to the right edge in RTL and
- * walk the slot 300px off center. Centering is direction-neutral; corner
- * pinning is not.
+ * walk the slot 300px off center. Centering is direction-neutral, and the
+ * corner below is pinned physically for the same reason, spelled out on the
+ * button itself.
  *
- * The close button is pinned in the top left corner of the slot and overlaps
+ * The close button is pinned in the top right corner of the slot and overlaps
  * the creative instead of taking rows from it, which keeps the visible ad
- * area at the full 300x250. Logical offsets keep it in the same corner in RTL.
+ * area at the full 300x250. The corner is a physical `right` rather than a
+ * logical inline-end: the creative lives in a third-party ad iframe, and the
+ * controls that creative draws for itself - Exoclick's info link, for one -
+ * sit at the creative's physical top left whichever way the page reads, so a
+ * logical offset would walk this button back on top of them under RTL.
  */
 .player-overlay {
 	position: absolute;
@@ -3563,7 +3568,7 @@ span > .mt-icon:first-child {
 .player-overlay-close {
 	position: absolute;
 	top: 0;
-	inset-inline-start: 0;
+	right: 0;
 	z-index: 2;
 	display: flex;
 	align-items: center;
@@ -3573,8 +3578,8 @@ span > .mt-icon:first-child {
 	padding: 0;
 	background: rgba(17, 17, 17, 0.94);
 	border: 1px solid rgba(255, 255, 255, 0.75);
-	border-width: 0 1px 1px 0;
-	border-radius: 0 0 6px 0;
+	border-width: 0 0 1px 1px;
+	border-radius: 0 0 0 6px;
 	color: #fff;
 	font-size: 1.6rem;
 	font-weight: 700;
@@ -3595,7 +3600,7 @@ span > .mt-icon:first-child {
  * and here is also the only thing that works. An outline is painted outside
  * the button, and both this slot and the player set `overflow: hidden`, so a
  * ring on a control pinned into the corner is sliced off along the top and
- * the inline start edge: measured, the 2px ring at offset 2px is clipped on
+ * the edge it is pinned to: measured, the 2px ring at offset 2px is clipped on
  * both of them and the keyboard user is left with no indicator at all. A
  * repaint is inside the control and cannot be clipped.
  */

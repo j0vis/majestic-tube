@@ -1102,6 +1102,53 @@ check( 'and no button at all when the site does not offer one', '' === trim( $bu
 
 $GLOBALS['mods'] = array();
 
+/* -------------------------------------------------------------------------
+ * 10. The player overlay close button
+ * ---------------------------------------------------------------------- */
+
+echo "\nThe player overlay close button\n";
+
+/*
+ * The button sits over a 300x250 ad creative, and that creative is a
+ * third-party iframe free to draw its own controls wherever it likes - the ones
+ * the ad network adds sit on the creative's left edge. So the button belongs in
+ * the top right corner, and the offset has to be a physical `right`: a logical
+ * inline offset would walk it back over those controls the moment the page
+ * reads right to left, which is the corner it was reported from.
+ */
+$overlay_close = declarations_for( css_rules( $main_css ), '.player-overlay-close' );
+
+check(
+	'the close button is pinned to the right edge of the slot',
+	declares( $overlay_close, 'right', '0' )
+	&& ! declares_any( $overlay_close, 'inset-inline-start', array( '0' ) )
+	&& ! declares_any( $overlay_close, 'left', array( '0' ) ),
+	implode( ' | ', $overlay_close )
+);
+$rtl_close = array_merge(
+	declarations_for( css_rules( $base_rtl ), '.player-overlay-close' ),
+	declarations_for( css_rules( $rtl_css ), '.player-overlay-close' )
+);
+
+check(
+	'and it is a physical offset, so nothing in either right-to-left sheet moves it',
+	! declares_any( $overlay_close, 'inset-inline-end', array( '0' ) )
+	&& ! declares_any( $rtl_close, 'left', array( '0' ) )
+	&& ! declares_any( $rtl_close, 'right', array( '0' ) )
+);
+check(
+	'and the plate mirrors with it: the hairline and the rounding are on the inner edges',
+	declares( $overlay_close, 'border-width', '0 0 1px 1px' )
+	&& declares( $overlay_close, 'border-radius', '0 0 0 6px' ),
+	implode( ' | ', $overlay_close )
+);
+check(
+	'and it overlaps the creative rather than taking a row from it',
+	declares( $overlay_close, 'position', 'absolute' )
+);
+
+$GLOBALS['mods'] = array();
+
 echo "\n" . str_repeat( '-', 46 ) . "\n";
 printf( "%d passed, %d failed\n", $passed, $failed );
 
