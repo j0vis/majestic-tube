@@ -27,7 +27,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#video-reports-and-moderation)
 - [Legal pages](#legal-and-policy-pages)
 - [Routine maintenance](#routine-maintenance)
-- [What's new in 2.5.8](#whats-new-in-258)
+- [What's new in 2.5.9](#whats-new-in-259)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#frequently-asked-questions)
 - [Credits, license & support](#credits-license--support)
@@ -35,9 +35,17 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 **Release**
 
-## What’s New in 2.5.8
+## What’s New in 2.5.9
 
-The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, moves the player overlay's close box out of the corner an ad's own controls sit in, gives the video sidebar a column wide enough for a 300x250 ad on a desktop screen only, and replaces the theme's screenshot of the layout with the front page itself.
+The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, moves the player overlay's close box out of the corner an ad's own controls sit in, gives the video sidebar a column wide enough for a 300x250 ad on a desktop screen only, replaces the theme's screenshot of the layout with the front page itself, and centers a 300x250 ad in the box that holds it.
+
+### 2.5.9 — the 300x250 ad sits in the middle of its box
+
+**A fixed-size creative is centered in the box that holds it.** Both of these boxes exist for a 300x250 ad, the one in the video sidebar and the one in the player overlay, and neither of them is always exactly 300px wide. The sidebar column runs from 338px to 360px and is 360px on a wide screen, so a 300px creative sat at the start edge of the box with 19px of padding and border on one side of it and 41px on the other — which reads as an ad that missed its slot rather than as a box that is wider than its ad. The creative is centered now, in the sidebar and in the overlay alike. Centering is the fix rather than pinning the column to its own minimum, because the air a wide screen gives that column is deliberate. The same rule takes the text baseline out from under the creative: as an inline image it added the font's descender below itself, about 7px of height that no ad asked for.
+
+**The video sidebar's column floor counts the whole box.** It was 336px — 300px of clear width plus the box's own 18px padding on each side — and it left out the box's 1px border, so a 300x250 creative was two pixels short of the size it was sold at. The floor is 338px, which is 300px plus the 38px the box takes off it, and it still holds from the widest screen down to the 960px breakpoint, where the column becomes a row. See [Menus, widgets, and content](#menus-widgets-and-content-areas).
+
+**Also in this release:** the centering is a column rather than a row, because these two slots take administrator markup as well as an ad tag and a row would set two paragraphs side by side instead of one under the other. No setting changes and nothing has to be re-uploaded.
 
 ### 2.5.8 — the screenshot shows the front page the theme renders
 

@@ -3623,6 +3623,35 @@ span > .mt-icon:first-child {
 }
 
 /*
+ * A fixed-size creative is centered in whichever box it lands in.
+ *
+ * Both of these boxes exist for a 300x250 ad, and neither of them is always
+ * exactly 300px wide. The sidebar column runs from 338px to 360px and is 360 on
+ * a wide screen, so a 300px creative sat at the start edge of the column with
+ * 22px of dead space beside it - 19px of padding and border on one side and
+ * 41px on the other, which reads as an ad that missed its slot rather than as a
+ * box that is wider than its ad. The overlay is 300px on the nose, but a
+ * creative a few pixels narrower or shorter sat at its top left the same way.
+ *
+ * Centering is the fix rather than pinning the column to 338px: the air a wide
+ * screen gives the column is deliberate (see .single-video-layout.has-video-sidebar)
+ * and the creative is the thing that belongs in the middle of it. The same rule
+ * takes the text baseline out from under the creative, which was adding the
+ * font's descender below it - about 7px of height that no ad asked for.
+ *
+ * A column, not a row: these two slots take administrator markup as well as an
+ * ad tag, and a row would lay two paragraphs out side by side instead of one
+ * under the other. The column keeps them stacked the way block flow had them.
+ */
+.video-sidebar .majestic-tube-content-block,
+.player-overlay .majestic-tube-content-block {
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	justify-content: center;
+}
+
+/*
  * A widget title would come out of the fixed 250px height and leave the
  * creative the wrong size, so the slot prints the ad alone.
  */
@@ -4708,14 +4737,17 @@ body.custom-background {
  * `max-width: 100%` shrinks the iframe to the column - a clipped creative and a
  * frame whose size no longer matches the one the ad server was told.
  *
- * So the minimum is 300px of clear width plus the box's own 18px padding on
- * both sides, which is where the 336px comes from and why it moves with that
- * padding rather than being a number to taste. The maximum is a little more, so
- * a wide screen gives the column some air instead of handing every spare pixel
- * to the player; the creative stays at its sold size either way.
+ * So the minimum is 300px of clear width plus everything the box takes off it:
+ * its own 18px padding and its 1px border on both sides, which is 38px and is
+ * where the 338px comes from. That is why the number moves with the padding and
+ * the border rather than being a number to taste - 336px was the same sum with
+ * the border left out, and it left the creative two pixels short of the size it
+ * was sold at. The maximum is a little more, so a wide screen gives the column
+ * some air instead of handing every spare pixel to the player; the creative
+ * stays at its sold size either way.
  */
 .single-video-layout.has-video-sidebar {
-	grid-template-columns: minmax(0, 1fr) minmax(336px, 360px);
+	grid-template-columns: minmax(0, 1fr) minmax(338px, 360px);
 }
 
 .video-sidebar {
