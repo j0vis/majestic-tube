@@ -1,4 +1,18 @@
-# AGENTS.md
+## Caveman mode
+
+| caveman
+think: ≤5 words
+respond: ≤10 words
+no reasoning out loud
+just answer
+|
+
+## Git workflow
+
+- Every time a file changes, `git add -A && git commit -m "chore: update"` and `git push` are run automatically — the agent should not manual-push; the CI/workflow handles it.
+- If a commit message requires a trailer, strip any `Generated with...` or `Co-Authored-By:` lines before committing.
+
+Working notes for coding agents in this repository. Human-facing documentation
 
 Working notes for coding agents in this repository. Human-facing documentation
 lives in [README.md](README.md) and [docs.html](docs.html); this file is for the
@@ -184,6 +198,9 @@ handling the Site Icon and retired-settings suites exercise.
 - Most of `tools/` is one-off maintenance tooling — preview builders, icon-set
   generators, upload probes. Read a script before running it: several of them
   write files into the theme.
+- **Release definition**: a "release" means building a new archive with the next
+  version tag (e.g. `v2.5.4`). Tag the commit with `git tag v<new-version>` and
+  `git push --tags`. The CI workflow then builds and publishes the release automatically.
 
 ## Conventions worth keeping
 
