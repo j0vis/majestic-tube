@@ -42,11 +42,13 @@ function majestic_tube_option_sections() {
 			'title'       => __( 'Homepage on Mobile', 'majestic-tube' ),
 			'panel'       => 'listings',
 			'panel_title' => __( 'Homepage &amp; Listings', 'majestic-tube' ),
+			'description' => __( 'The same two numbers for phones and tablets, where the grid is narrower. The desktop values are under Homepage, above.', 'majestic-tube' ),
 		),
 		'archives'     => array(
 			'title'       => __( 'Category, Tag &amp; Actor Archives', 'majestic-tube' ),
 			'panel'       => 'listings',
 			'panel_title' => __( 'Homepage &amp; Listings', 'majestic-tube' ),
+			'description' => __( 'How the Categories and Actors pages lay their term cards out. Each term&rsquo;s own name, image and description are edited on its own screen, next to its image.', 'majestic-tube' ),
 		),
 		'single'       => array(
 			'title'       => __( 'Video Page Layout', 'majestic-tube' ),
@@ -58,46 +60,55 @@ function majestic_tube_option_sections() {
 			'title'       => __( 'Player', 'majestic-tube' ),
 			'panel'       => 'video',
 			'panel_title' => __( 'Video Page', 'majestic-tube' ),
+			'description' => __( 'The player itself: autoplay, the engine that plays the video, and the extra controls a visitor is offered in it. What a page shows around the player is under Video Page Layout, above.', 'majestic-tube' ),
 		),
 		'social'       => array(
 			'title'       => __( 'Sharing', 'majestic-tube' ),
 			'panel'       => 'video',
 			'panel_title' => __( 'Video Page', 'majestic-tube' ),
+			'description' => __( 'The share buttons printed under the player. Each service is its own switch, so a site can offer some of them and not others.', 'majestic-tube' ),
 		),
 		'colors'      => array(
 			'title'       => __( 'Colors &amp; Typography', 'majestic-tube' ),
 			'panel'       => 'design',
 			'panel_title' => __( 'Site Design', 'majestic-tube' ),
+			'description' => __( 'The skin, the accent color every button, link and icon is derived from, and the site font. Each of them applies to the light and the dark skin both.', 'majestic-tube' ),
 		),
 		'logo'         => array(
 			'title'       => __( 'Logo', 'majestic-tube' ),
 			'panel'       => 'design',
 			'panel_title' => __( 'Site Design', 'majestic-tube' ),
+			'description' => __( 'The site logo in the header: an image or a line of text, its icon, font, size and spacing, and whether a copy prints in the footer.', 'majestic-tube' ),
 		),
 		'watermark'    => array(
 			'title'       => __( 'Player Watermark', 'majestic-tube' ),
 			'panel'       => 'design',
 			'panel_title' => __( 'Site Design', 'majestic-tube' ),
+			'description' => __( 'A second logo laid over the video while it plays, with its size, color treatment and corner. It is off by default, and it is not the header logo: that one is under Logo.', 'majestic-tube' ),
 		),
 		'thumbnails'   => array(
 			'title'       => __( 'Thumbnails', 'majestic-tube' ),
 			'panel'       => 'design',
 			'panel_title' => __( 'Site Design', 'majestic-tube' ),
+			'description' => __( 'The image on every video card: its shape, how the image is fitted into it, which size is requested, and the rotation a visitor sees on hover.', 'majestic-tube' ),
 		),
 		'chrome'       => array(
 			'title'       => __( 'Header, Footer &amp; Search', 'majestic-tube' ),
 			'panel'       => 'features',
 			'panel_title' => __( 'Site Features', 'majestic-tube' ),
+			'description' => __( 'What the theme prints around the videos: the search bar, the footer columns, the copyright bar, the admin bar, and the cookie notice with its wording.', 'majestic-tube' ),
 		),
 		'members'      => array(
 			'title'       => __( 'Accounts &amp; Spam Protection', 'majestic-tube' ),
 			'panel'       => 'features',
 			'panel_title' => __( 'Site Features', 'majestic-tube' ),
+			'description' => __( 'Member accounts - signing in, registering, resetting a password - the terms checkbox in front of them, and the Cloudflare Turnstile check that keeps bots out. Both Turnstile keys come from one widget in the Cloudflare dashboard.', 'majestic-tube' ),
 		),
 		'submission'   => array(
 			'title'       => __( 'Video Submission', 'majestic-tube' ),
 			'panel'       => 'features',
 			'panel_title' => __( 'Site Features', 'majestic-tube' ),
+			'description' => __( 'The form a visitor sends a video in with, the links that lead to it, and which of its fields they have to fill in before the form will send.', 'majestic-tube' ),
 		),
 		'advertising'  => array(
 			'title'       => __( 'Advertising', 'majestic-tube' ),
@@ -139,6 +150,7 @@ function majestic_tube_option_sections() {
 			'title'       => __( 'Custom Code', 'majestic-tube' ),
 			'panel'       => 'seo',
 			'panel_title' => __( 'SEO &amp; Analytics', 'majestic-tube' ),
+			'description' => __( 'Code printed on every page: analytics, a verification tag, a chat widget, whatever a third party asks a site to paste in. One field prints for mobile visitors alone.', 'majestic-tube' ),
 		),
 	);
 }
@@ -201,7 +213,13 @@ function majestic_tube_flush_options_map() {
  * which does not change mid-request, so the cache is safe. Anything that does
  * switch locale can call majestic_tube_flush_options_map().
  *
- * @return array<string, array{setting: string, default: mixed, type: string, label: string, section?: string, choices?: array<string, string>, description?: string, input_attrs?: array<string, int>}>
+ * A field that only does something while another option is switched on names
+ * that option instead of leaving an inert control on the screen: `active_when`
+ * shows it while the named option is on, `inactive_when` while it is off, and
+ * either one may name a list of options to show it while any of them is in the
+ * wanted state. See majestic_tube_option_active_callback().
+ *
+ * @return array<string, array{setting: string, default: mixed, type: string, label: string, section?: string, choices?: array<string, string>, description?: string, input_attrs?: array<string, int>, active_when?: string|string[], inactive_when?: string|string[]}>
  */
 function majestic_tube_options_map() {
 	if ( isset( $GLOBALS['majestic_tube_options_map_cache'] ) ) {
@@ -301,6 +319,7 @@ function majestic_tube_options_map() {
 			'type'        => 'number',
 			'label'       => __( 'Number of popular tags', 'majestic-tube' ),
 			'section'     => $home,
+			'active_when' => 'show-popular-tags-slider',
 			'input_attrs' => array(
 				'min'  => 5,
 				'max'  => 50,
@@ -429,6 +448,8 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Truncate long descriptions', 'majestic-tube' ),
 			'section' => $single,
+
+			'description' => __( 'Collapses a long description to a few lines and adds a Read more / Read less button under it. The whole description stays in the page either way, so a search engine still reads all of it.', 'majestic-tube' ),
 		),
 		'show-description-video-about' => array(
 			'setting' => 'majestic_tube_show_description_video_about',
@@ -472,6 +493,8 @@ function majestic_tube_options_map() {
 			'type'    => 'select',
 			'label'   => __( 'Outbound button icon', 'majestic-tube' ),
 			'section' => $single,
+
+			'active_when' => 'display-tracking-button',
 			'choices' => array(
 				'download'    => __( 'Download', 'majestic-tube' ),
 				'external'    => __( 'External link', 'majestic-tube' ),
@@ -486,6 +509,8 @@ function majestic_tube_options_map() {
 			'type'    => 'url',
 			'label'   => __( 'Outbound button link', 'majestic-tube' ),
 			'section' => $single,
+
+			'active_when' => 'display-tracking-button',
 			'description' => __( 'Where the button sends the visitor. Leave it blank to use each video&rsquo;s own tracking link, and the button then appears only on videos that have one.', 'majestic-tube' ),
 		),
 		'tracking-button-text'     => array(
@@ -494,6 +519,8 @@ function majestic_tube_options_map() {
 			'type'    => 'text',
 			'label'   => __( 'Outbound button text', 'majestic-tube' ),
 			'section' => $single,
+
+			'active_when' => 'display-tracking-button',
 			'description' => __( 'The words on the button. Leave it blank for &ldquo;Watch the full video&rdquo;.', 'majestic-tube' ),
 		),
 		'enable-views-system'      => array(
@@ -538,6 +565,8 @@ function majestic_tube_options_map() {
 			'type'        => 'number',
 			'label'       => __( 'Number of related videos', 'majestic-tube' ),
 			'section' => $single,
+
+			'active_when' => 'display-related-videos',
 			'input_attrs' => array(
 				'min'  => 1,
 				'max'  => 30,
@@ -584,6 +613,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Enable the video quality selector', 'majestic-tube' ),
 			'section' => $player,
+
+			'inactive_when' => 'use-native-player',
+			'description'   => __( 'The quality list drawn over the player. It belongs to the enhanced player, so it is not offered while the browser&rsquo;s own player is in use; a video with a single source has nothing to list either way.', 'majestic-tube' ),
 		),
 		/*
 		 * Player UX, added in 2.1.7. All four are off by default so an upgrade
@@ -640,6 +672,8 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Share on X / Twitter', 'majestic-tube' ),
 			'section' => $social,
+
+			'active_when' => 'enable-video-share',
 		),
 		'reddit-video-share'       => array(
 			'setting' => 'majestic_tube_share_reddit',
@@ -647,6 +681,8 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Share on Reddit', 'majestic-tube' ),
 			'section' => $social,
+
+			'active_when' => 'enable-video-share',
 		),
 		'email-video-share'        => array(
 			'setting' => 'majestic_tube_share_email',
@@ -654,6 +690,8 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Share by email', 'majestic-tube' ),
 			'section' => $social,
+
+			'active_when' => 'enable-video-share',
 		),
 		'facebook-video-share'     => array(
 			'setting' => 'majestic_tube_share_facebook',
@@ -757,6 +795,8 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Use an image logo', 'majestic-tube' ),
 			'section' => $logo,
+
+			'description' => __( 'Off by default, which leaves the text logo and its icon in charge. Turn it on to use the image address below instead.', 'majestic-tube' ),
 		),
 		'image-logo-file'          => array(
 			'setting' => 'majestic_tube_image_logo_file',
@@ -764,6 +804,9 @@ function majestic_tube_options_map() {
 			'type'    => 'file',
 			'label'   => __( 'Logo image URL', 'majestic-tube' ),
 			'section' => $logo,
+
+			'active_when' => 'use-logo-image',
+			'description' => __( 'The address of the image, copied out of the media library. Used only while Use an image logo is on.', 'majestic-tube' ),
 		),
 		'icon-logo'                => array(
 			'setting' => 'majestic_tube_icon_logo',
@@ -771,6 +814,9 @@ function majestic_tube_options_map() {
 			'type'    => 'select',
 			'label'   => __( 'Icon logo', 'majestic-tube' ),
 			'section' => $logo,
+
+			'inactive_when' => 'use-logo-image',
+			'description'   => __( 'The shape drawn before the text logo, from the icon set the theme ships.', 'majestic-tube' ),
 			'choices' => array(
 				'film'        => __( 'Film', 'majestic-tube' ),
 				'video'       => __( 'Video', 'majestic-tube' ),
@@ -784,6 +830,9 @@ function majestic_tube_options_map() {
 			'type'    => 'text',
 			'label'   => __( 'Text logo', 'majestic-tube' ),
 			'section' => $logo,
+
+			'inactive_when' => 'use-logo-image',
+			'description'   => __( 'Leave it blank to fall back to the site title.', 'majestic-tube' ),
 		),
 		'logo-font-family'         => array(
 			'setting'     => 'majestic_tube_logo_font_family',
@@ -791,6 +840,8 @@ function majestic_tube_options_map() {
 			'type'        => 'select',
 			'label'       => __( 'Logo font family', 'majestic-tube' ),
 			'section' => $logo,
+
+			'inactive_when' => 'use-logo-image',
 			'description' => __( 'A text logo can use its own voice here. "Inter" and "System UI" match the rest of the site; the serif and monospace choices are fonts already installed on each visitor device and are never downloaded.', 'majestic-tube' ),
 			'choices'     => array(
 				'Inter'            => __( 'Inter (same as the site)', 'majestic-tube' ),
@@ -805,6 +856,8 @@ function majestic_tube_options_map() {
 			'type'        => 'number',
 			'label'       => __( 'Logo font size (px)', 'majestic-tube' ),
 			'section' => $logo,
+
+			'inactive_when' => 'use-logo-image',
 			'input_attrs' => array(
 				'min'  => 8,
 				'max'  => 120,
@@ -817,6 +870,8 @@ function majestic_tube_options_map() {
 			'type'        => 'number',
 			'label'       => __( 'Logo max width (px)', 'majestic-tube' ),
 			'section' => $logo,
+
+			'description' => __( 'The widest the logo is allowed to draw. At 0, or left empty, the theme&rsquo;s own size is used.', 'majestic-tube' ),
 			'input_attrs' => array(
 				'min'  => 0,
 				'max'  => 2000,
@@ -829,6 +884,8 @@ function majestic_tube_options_map() {
 			'type'        => 'number',
 			'label'       => __( 'Logo max height (px)', 'majestic-tube' ),
 			'section' => $logo,
+
+			'description' => __( 'The tallest the logo is allowed to draw. At 0, or left empty, the theme&rsquo;s own size is used.', 'majestic-tube' ),
 			'input_attrs' => array(
 				'min'  => 0,
 				'max'  => 2000,
@@ -841,6 +898,8 @@ function majestic_tube_options_map() {
 			'type'        => 'number',
 			'label'       => __( 'Logo top margin (px)', 'majestic-tube' ),
 			'section' => $logo,
+
+			'description' => __( 'The space the logo leaves above itself in the header. A negative number pulls it up instead.', 'majestic-tube' ),
 			'input_attrs' => array(
 				'min'  => -100,
 				'max'  => 500,
@@ -853,6 +912,8 @@ function majestic_tube_options_map() {
 			'type'        => 'number',
 			'label'       => __( 'Logo left margin (px)', 'majestic-tube' ),
 			'section' => $logo,
+
+			'description' => __( 'The space the logo leaves to its left. A negative number pulls it left instead.', 'majestic-tube' ),
 			'input_attrs' => array(
 				'min'  => -100,
 				'max'  => 500,
@@ -900,13 +961,18 @@ function majestic_tube_options_map() {
 			'type'    => 'file',
 			'label'   => __( 'Watermark image URL', 'majestic-tube' ),
 			'section' => $watermark,
+
+			'active_when' => 'logo-watermark-video-player',
+			'description' => __( 'The address of the image, copied out of the media library. A transparent PNG sits best over moving video.', 'majestic-tube' ),
 		),
 		'logo-watermark-max-width' => array(
 			'setting'     => 'majestic_tube_logo_watermark_max_width',
 			'default'     => 200,
-			'type'        => 'number',
-			'label'       => __( 'Watermark max width (px)', 'majestic-tube' ),
+			'type'        => 'number',			'label'   => __( 'Watermark max width (px)', 'majestic-tube' ),
 			'section' => $watermark,
+
+			'active_when' => 'logo-watermark-video-player',
+			'description' => __( 'The widest the watermark is allowed to draw over the video. At 0, or left empty, the theme&rsquo;s own 200px is used.', 'majestic-tube' ),
 			'input_attrs' => array(
 				'min'  => 0,
 				'max'  => 1000,
@@ -919,6 +985,8 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Grayscale the watermark', 'majestic-tube' ),
 			'section' => $watermark,
+
+			'active_when' => 'logo-watermark-video-player',
 		),
 		'logo-position-video-player' => array(
 			'setting' => 'majestic_tube_logo_position_video_player',
@@ -926,6 +994,8 @@ function majestic_tube_options_map() {
 			'type'    => 'select',
 			'label'   => __( 'Watermark position', 'majestic-tube' ),
 			'section' => $watermark,
+
+			'active_when' => 'logo-watermark-video-player',
 			'choices' => array(
 				'top-left'     => __( 'Top left', 'majestic-tube' ),
 				'top-right'    => __( 'Top right', 'majestic-tube' ),
@@ -970,6 +1040,8 @@ function majestic_tube_options_map() {
 			'type'    => 'select',
 			'label'   => __( 'Main thumbnail quality', 'majestic-tube' ),
 			'section' => $thumbnails,
+
+			'description' => __( 'The size of the image a card loads for a video&rsquo;s main thumbnail. All three are generated when an image is uploaded, so a larger one costs bandwidth on every card that shows it.', 'majestic-tube' ),
 			'choices' => array(
 				'wpst_thumb_small'  => __( 'Basic (150px)', 'majestic-tube' ),
 				'wpst_thumb_medium' => __( 'Normal (320px)', 'majestic-tube' ),
@@ -1028,6 +1100,9 @@ function majestic_tube_options_map() {
 			'type'    => 'textarea',
 			'label'   => __( 'Copyright text', 'majestic-tube' ),
 			'section' => $chrome,
+
+			'active_when' => 'copyright-bar',
+			'description' => __( 'Leave it blank for a plain line with the copyright symbol, the current year and the site name. Old WP-Script wording is stripped out of a saved value rather than printed.', 'majestic-tube' ),
 		),
 		'display-admin-bar'        => array(
 			// Keep the original setting ID so a stored value keeps its
@@ -1080,13 +1155,14 @@ function majestic_tube_options_map() {
 			'label'       => __( 'Cookie notice text', 'majestic-tube' ),
 			'description' => __( 'Leave blank for the wording this theme ships. The links to your Terms of Use, Privacy Policy and Cookie Policy are printed under whatever you write here, so the notice always points at the pages it refers to.', 'majestic-tube' ),
 			'section'     => $chrome,
+			'active_when' => 'cookie-notice',
 		),
 		'enable-captcha'           => array(
 			'setting'     => 'majestic_tube_enable_captcha',
 			'default'     => 'off',
 			'type'        => 'onoff',
 			'label'       => __( 'Enable spam protection', 'majestic-tube' ),
-			'description' => __( 'Asks visitors to prove they are human with Cloudflare Turnstile on the sign-up, password reset and video submission forms. Both Turnstile keys below must be filled in. The room the widget needs is reserved in those forms, and on the login and comment forms, whether or not this is on, so switching protection on never moves a button or changes a form&rsquo;s height. Neither the login form nor the comment form is guarded: the theme asks for a token on sign-up, password reset and submission only.', 'majestic-tube' ),
+			'description' => __( 'Asks visitors to prove they are human with Cloudflare Turnstile on the sign-up, password reset and video submission forms, and on the comment form for a visitor who is not signed in. Both Turnstile keys below must be filled in. The room the widget needs is reserved in those forms, and on the login form, whether or not this is on, so switching protection on never moves a button or changes a form&rsquo;s height. A signed-in commenter is never challenged: the account is the check.', 'majestic-tube' ),
 			'section' => $members,
 		),
 		'turnstile-site-key'      => array(
@@ -1096,6 +1172,7 @@ function majestic_tube_options_map() {
 			'label'       => __( 'Turnstile site key', 'majestic-tube' ),
 			'description' => __( 'The Site Key shown in the Turnstile widget you created at dash.cloudflare.com.', 'majestic-tube' ),
 			'section' => $members,
+			'active_when' => 'enable-captcha',
 		),
 		'turnstile-secret-key'    => array(
 			'setting'     => 'majestic_tube_turnstile_secret_key',
@@ -1104,6 +1181,7 @@ function majestic_tube_options_map() {
 			'label'       => __( 'Turnstile secret key', 'majestic-tube' ),
 			'description' => __( 'The Secret Key from the same widget. This one is sent to Cloudflare from the server and must never appear on the page.', 'majestic-tube' ),
 			'section' => $members,
+			'active_when' => 'enable-captcha',
 		),
 		/* ------------------------------------------------------------------
 		 * Visitor video submission
@@ -1121,6 +1199,8 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Show the "Submit a Video" link', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when' => 'enable-video-submission',
 		),
 		'display-my-profile-link'  => array(
 			'setting' => 'majestic_tube_display_my_profile_link',
@@ -1128,6 +1208,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Show the "My Profile" link', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when' => 'enable-membership',
+			'description' => __( 'A menu link to the member&rsquo;s own profile. It needs member accounts, which are switched on under Site Features &rarr; Accounts &amp; Spam Protection.', 'majestic-tube' ),
 		),
 		'display-my-channel-link'  => array(
 			'setting' => 'majestic_tube_display_my_channel_link',
@@ -1135,6 +1218,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Show the "My Channel" link', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when' => 'enable-membership',
+			'description' => __( 'A menu link to the videos this member has sent in. It needs member accounts, which are switched on under Site Features &rarr; Accounts &amp; Spam Protection.', 'majestic-tube' ),
 		),
 		'video-submit-title-required' => array(
 			'setting' => 'majestic_tube_submit_title_required',
@@ -1142,6 +1228,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Title required', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when'   => 'enable-video-submission',
+			'description'   => __( 'A visitor cannot submit a video without filling this in.', 'majestic-tube' ),
 		),
 		'video-submit-description-required' => array(
 			'setting' => 'majestic_tube_submit_description_required',
@@ -1149,6 +1238,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Description required', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when'   => 'enable-video-submission',
+			'description'   => __( 'A visitor cannot submit a video without filling this in.', 'majestic-tube' ),
 		),
 		'video-submit-video-link-required' => array(
 			'setting' => 'majestic_tube_submit_video_link_required',
@@ -1156,6 +1248,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Video link required', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when'   => 'enable-video-submission',
+			'description'   => __( 'A visitor cannot submit a video without filling this in.', 'majestic-tube' ),
 		),
 		'video-submit-embed-required' => array(
 			'setting' => 'majestic_tube_submit_embed_required',
@@ -1163,6 +1258,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Embed code required', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when'   => 'enable-video-submission',
+			'description'   => __( 'A visitor cannot submit a video without filling this in.', 'majestic-tube' ),
 		),
 		'video-submit-thumbnail-link-required' => array(
 			'setting' => 'majestic_tube_submit_thumbnail_link_required',
@@ -1170,6 +1268,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Thumbnail link required', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when'   => 'enable-video-submission',
+			'description'   => __( 'A visitor cannot submit a video without filling this in.', 'majestic-tube' ),
 		),
 		'video-submit-thumbs-required' => array(
 			'setting' => 'majestic_tube_submit_thumbs_required',
@@ -1177,6 +1278,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Extra thumbnails required', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when'   => 'enable-video-submission',
+			'description'   => __( 'A visitor cannot submit a video without filling this in.', 'majestic-tube' ),
 		),
 		'video-submit-trailer-required' => array(
 			'setting' => 'majestic_tube_submit_trailer_required',
@@ -1184,6 +1288,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Preview video required', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when'   => 'enable-video-submission',
+			'description'   => __( 'A visitor cannot submit a video without filling this in.', 'majestic-tube' ),
 		),
 		'video-submit-tags-required' => array(
 			'setting' => 'majestic_tube_submit_tags_required',
@@ -1191,6 +1298,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Tags required', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when'   => 'enable-video-submission',
+			'description'   => __( 'A visitor cannot submit a video without filling this in.', 'majestic-tube' ),
 		),
 		'video-submit-actors-required' => array(
 			'setting' => 'majestic_tube_submit_actors_required',
@@ -1198,6 +1308,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Actors required', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when'   => 'enable-video-submission',
+			'description'   => __( 'A visitor cannot submit a video without filling this in.', 'majestic-tube' ),
 		),
 		'video-submit-duration-required' => array(
 			'setting' => 'majestic_tube_submit_duration_required',
@@ -1205,6 +1318,9 @@ function majestic_tube_options_map() {
 			'type'    => 'onoff',
 			'label'   => __( 'Duration required', 'majestic-tube' ),
 			'section' => $submission,
+
+			'active_when'   => 'enable-video-submission',
+			'description'   => __( 'A visitor cannot submit a video without filling this in.', 'majestic-tube' ),
 		),
 		/* ------------------------------------------------------------------
 		 * Advertising
@@ -1225,9 +1341,16 @@ function majestic_tube_options_map() {
 			'setting'     => 'majestic_tube_infeed_ad_frequency',
 			'default'     => 9,
 			'type'        => 'number',
-			'label'       => __( 'In-feed ad every N videos', 'majestic-tube' ),
+			'label'   => __( 'In-feed ad every N videos', 'majestic-tube' ),
 			'section' => $advertising,
+
+			'active_when' => 'enable-infeed-ad',
 			'description' => __( 'A card-sized content block is inserted after this many video cards. A value below 3 behaves like 3.', 'majestic-tube' ),
+			'input_attrs' => array(
+				'min'  => 3,
+				'max'  => 100,
+				'step' => 1,
+			),
 		),
 		'infeed-ad-code'           => array(
 			'setting' => 'majestic_tube_infeed_ad_code',
@@ -1268,6 +1391,8 @@ function majestic_tube_options_map() {
 			'type'        => 'onoff',
 			'label'       => __( 'Only load advertising after consent', 'majestic-tube' ),
 			'section' => $advertising,
+
+			'active_when' => array( 'enable-infeed-ad', 'enable-popunder-ad' ),
 			'description' => __( 'Hold every ad back until the visitor has agreed to cookies. This needs a consent banner that reports the visitor&rsquo;s choice back to the theme - a cookie banner plugin, or a short snippet of your own. Until consent is recorded, no ad placement prints anything at all.', 'majestic-tube' ),
 		),
 		'header-ad-desktop'        => array(
@@ -1465,6 +1590,8 @@ function majestic_tube_options_map() {
 			'type'        => 'text',
 			'label'       => __( 'Homepage search title', 'majestic-tube' ),
 			'section'     => $basic_seo,
+
+			'active_when' => 'enable-basic-seo',
 			'description' => __( 'The browser tab, and the blue title on a search result, for the front page. Leave it empty for the site title.', 'majestic-tube' ),
 		),
 		'home-seo-description'     => array(
@@ -1473,6 +1600,8 @@ function majestic_tube_options_map() {
 			'type'        => 'textarea',
 			'label'       => __( 'Homepage meta description', 'majestic-tube' ),
 			'section'     => $basic_seo,
+
+			'active_when' => 'enable-basic-seo',
 			'description' => __( 'What a search engine may show under the front page title, and the text on a Facebook or X share card. Leave it empty for the site tagline. It is kept apart from the visible homepage introduction on purpose: one is read by a visitor, the other only by a machine.', 'majestic-tube' ),
 		),
 		'adult-content-rating'     => array(
@@ -1508,6 +1637,8 @@ function majestic_tube_options_map() {
 			'type'    => 'select',
 			'label'   => __( 'Homepage title position', 'majestic-tube' ),
 			'section' => $home_seo,
+
+			'description' => __( 'Whether the visible homepage heading and its introduction print above the video grid or below it.', 'majestic-tube' ),
 			'choices' => array(
 				'top'    => __( 'Above the grid', 'majestic-tube' ),
 				'bottom' => __( 'Below the grid', 'majestic-tube' ),
@@ -1561,6 +1692,8 @@ function majestic_tube_options_map() {
 			'type'    => 'select',
 			'label'   => __( 'Category description position', 'majestic-tube' ),
 			'section' => $archive_seo,
+
+			'description' => __( 'Whether a category&rsquo;s own description prints above its video list or below it.', 'majestic-tube' ),
 			'choices' => array(
 				'top'    => __( 'Top', 'majestic-tube' ),
 				'bottom' => __( 'Bottom', 'majestic-tube' ),
@@ -1572,6 +1705,8 @@ function majestic_tube_options_map() {
 			'type'    => 'select',
 			'label'   => __( 'Tag description position', 'majestic-tube' ),
 			'section' => $archive_seo,
+
+			'description' => __( 'Whether a tag&rsquo;s own description prints above its video list or below it.', 'majestic-tube' ),
 			'choices' => array(
 				'top'    => __( 'Top', 'majestic-tube' ),
 				'bottom' => __( 'Bottom', 'majestic-tube' ),
@@ -1752,9 +1887,70 @@ function majestic_tube_option_is_on( $field_id ) {
 }
 
 /**
- * Register all options in the Customizer.
+ * The visibility rule for a control that only matters while another option is
+ * on.
  *
- * @param WP_Customize_Manager $wp_customize Manager.
+ * A switch that does nothing on its own is hidden until the option it depends
+ * on is in the state it needs - the four watermark controls with the watermark
+ * off, the two Turnstile keys with spam protection off, the ten required-field
+ * switches with submissions off - and comes back the moment it is. The
+ * dependency is declared beside the field in majestic_tube_options_map(), so a
+ * new dependent control is a line of data rather than another callback:
+ *
+ *     'active_when'   => 'show-popular-tags-slider'   // shown while that is on
+ *     'inactive_when' => 'use-native-player'          // shown while that is off
+ *
+ * Either may name a list, and the control is then shown while any one of them
+ * is in the wanted state. A field that names nothing, or names an option this
+ * map does not hold, is never hidden: a control nobody can reach is worse than
+ * a control that is doing nothing yet. For the same reason a dependency the
+ * Customizer does not itself offer - an ad key retired to a widget area, say -
+ * is read from the stored option instead of hiding its dependent behind a
+ * setting that is not on the screen.
+ *
+ * The state is read from the Customizer's own setting rather than from the
+ * stored option, so a value being edited counts, and WordPress re-syncs every
+ * control's active state from the server whenever the preview refreshes.
+ *
+ * @param array{active_when?: string|string[], inactive_when?: string|string[]} $config Field config.
+ * @return callable|null Null when the field declares no dependency.
+ */
+function majestic_tube_option_active_callback( $config ) {
+	$wanted   = isset( $config['active_when'] ) ? (array) $config['active_when'] : array();
+	$unwanted = isset( $config['inactive_when'] ) ? (array) $config['inactive_when'] : array();
+
+	if ( ! $wanted && ! $unwanted ) {
+		return null;
+	}
+
+	return static function ( $control ) use ( $wanted, $unwanted ) {
+		$map = majestic_tube_options_map();
+
+		foreach ( array( array( $wanted, true ), array( $unwanted, false ) ) as $rule ) {
+			foreach ( $rule[0] as $field ) {
+				// An option this map does not hold never hides anything.
+				if ( ! isset( $map[ $field ] ) ) {
+					return true;
+				}
+
+				$setting = $control->manager->get_setting( $map[ $field ]['setting'] );
+				$is_on   = $setting ? 'on' === $setting->value() : majestic_tube_option_is_on( $field );
+
+				if ( $is_on === $rule[1] ) {
+					return true;
+				}
+			}
+		}
+
+		return false;
+	};
+}
+
+/**
+ * Register the theme's panels, sections, settings and controls.
+ *
+ * @param WP_Customize_Manager $wp_customize Customizer instance.
+ * @return void
  */
 function majestic_tube_options_customize_register( $wp_customize ) {
 	$priority = 20;
@@ -1812,6 +2008,12 @@ function majestic_tube_options_customize_register( $wp_customize ) {
 			'description' => isset( $config['description'] ) ? $config['description'] : '',
 		);
 
+		$active_callback = majestic_tube_option_active_callback( $config );
+
+		if ( $active_callback ) {
+			$control_args['active_callback'] = $active_callback;
+		}
+
 		$input_attrs = isset( $config['input_attrs'] ) ? $config['input_attrs'] : array();
 
 		switch ( $config['type'] ) {
@@ -1839,10 +2041,7 @@ function majestic_tube_options_customize_register( $wp_customize ) {
 					new WP_Customize_Color_Control(
 						$wp_customize,
 						$config['setting'],
-						array(
-							'label'   => $config['label'],
-							'section' => $control_args['section'],
-						)
+						$control_args
 					)
 				);
 				continue 2;

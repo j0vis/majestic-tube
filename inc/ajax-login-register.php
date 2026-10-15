@@ -193,10 +193,10 @@ function majestic_tube_login_register_modal() {
 						<?php
 						/*
 						 * The login form reserves the room for a spam check without
-						 * being guarded by one: the theme only asks Turnstile for a
-						 * token on sign-up, password reset and video submission, so
-						 * no widget is mounted here and no challenge is ever shown
-						 * on this tab.
+						 * being guarded by one: the theme asks Turnstile for a token
+						 * on sign-up, password reset, video submission and a comment
+						 * from a visitor who is not signed in, so no widget is mounted
+						 * here and no challenge is ever shown on this tab.
 						 * The space is kept so that the panel keeps the same shape
 						 * as its sign-up tab, where the box does appear.
 						 */

@@ -444,7 +444,7 @@
     <nav class="toc" aria-label="User guide contents">
       <strong>Contents</strong>
       <ul>
-        <li><a href="#whats-new-254">What&rsquo;s new in 2.5.4</a></li>
+        <li><a href="#whats-new-255">What&rsquo;s new in 2.5.5</a></li>
         <li><a href="#requirements">Requirements</a></li>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#quick-start">Quick start</a></li>
@@ -467,10 +467,21 @@
     </nav>
 
     <main>
-      <section id="whats-new-254">
+      <section id="whats-new-255">
         <p class="eyebrow">Release</p>
-        <h2>What&rsquo;s New in 2.5.4</h2>
-        <p class="section-intro">The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, and files a term that begins with a number the same way on every PHP.</p>
+        <h2>What&rsquo;s New in 2.5.5</h2>
+        <p class="section-intro">The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, and shows a section only the settings that apply to it.</p>
+
+        <h3>2.5.5 &mdash; the settings show a site what it has, and a comment is checked</h3>
+        <p><strong>The related-videos list under a video follows your grid settings.</strong> The list kept its own column count &mdash; the one written for tablets &mdash; from 783px up, whatever <span class="setting">Videos per row</span> said, so a site set to five across showed five cards on the homepage and three much larger ones under every video. It follows the same rules as the homepage grid now, so it is five across on a five-across site and the cards are the size the rest of the site uses. See <a href="#customizer">Customizer settings</a>.</p>
+        <p><strong>The comment form is guarded.</strong> With Turnstile switched on, a visitor who is not signed in is asked to prove they are human before their comment is accepted, and a comment posted without a token is refused. The widget appears inside the form, above the button, where the room for it was already reserved. A signed-in commenter is never challenged &mdash; the account is the check &mdash; and neither is an import, a plugin, or a trackback, because none of them posts through that form. See <a href="#membership">Members and submissions</a>.</p>
+        <p><strong>A setting that does nothing is not shown.</strong> Thirty-nine controls across the panel now wait for the switch they belong to: the watermark&rsquo;s image, width, color treatment and corner appear with the watermark, the member links with member accounts, the eleven submission controls with video submission, the two Turnstile keys with the spam check, the three share services with sharing, and the fields only the text logo uses stand down while an image logo is in charge. Turning a feature off shortens the section instead of leaving inert controls behind, and every one of them is exactly where it was the moment you turn its switch back on. A value you had already saved is kept and used; this changes what the panel shows, not what your site does.</p>
+        <p><strong>Every section and every control says what it is for.</strong> Each section in the panel opens with a line describing what its settings do and which other section the adjacent ones live under, so a switch found in the wrong place is easier to place; sections that had no description have one, and the control that describes the accent color &mdash; and the ones beside it &mdash; now reaches the screen at all, because a color control was built from two of the four values it was handed and quietly dropped the rest.</p>
+        <p><strong>Also fixed:</strong></p>
+        <ul>
+          <li>The <strong>in-feed ad frequency</strong> field accepts a number between 3 and 100 and says what it counts. A value below 3 still behaves like 3; the field no longer invites a number that cannot mean anything.</li>
+          <li>The <strong>watermark&rsquo;s maximum width</strong> is a number field like the logo&rsquo;s, so it takes a value from a keyboard and a spinner rather than any text at all. At <code>0</code>, or left empty, the theme&rsquo;s own 200px is used &mdash; which is what the field does today, and what the panel now says.</li>
+        </ul>
 
         <h3>2.5.4 &mdash; the alphabet bar files a digit the same way on every PHP</h3>
         <p><strong>A term whose name starts with a number no longer lands in a different place depending on your server.</strong> The Actors and Categories directories bucket every term under its first character, and <code>7 Up</code> files under <code>7</code> &mdash; a key PHP keeps as the number <code>7</code> rather than as text. Sorting that map used PHP&rsquo;s own key comparison, and its answer changed between versions: the digit bucket came after A-Z on PHP 7.4 through 8.1 and before it on 8.2 and later, so the same directory could be ordered two ways on two servers. The keys are compared as strings now &mdash; the order the bar&rsquo;s own markup is written in &mdash; so the directory reads the same on every PHP the theme supports, and on the one your host moves you to. See <a href="#taxonomy">Actors, categories and tags</a>.</p>
@@ -1131,7 +1142,7 @@
           <li>Turn on <strong>Enable spam protection</strong>.</li>
           <li>Paste the site key into <strong>Turnstile site key</strong> and the secret key into <strong>Turnstile secret key</strong>. Both are required: while either one is blank the theme leaves the forms alone rather than blocking every visitor.</li>
           <li>Choose <strong>Publish</strong>.</li>
-          <li>Open your site in a private browser window, choose <strong>Sign up</strong>, and complete the challenge to confirm it works. Sign-up, password reset and video submission are the three protected forms.</li>
+          <li>Open your site in a private browser window, choose <strong>Sign up</strong>, and complete the challenge to confirm it works. Sign-up, password reset, video submission and the comment form are the four protected forms; the comment challenge only appears to a visitor who is not signed in.</li>
         </ol>
         <div class="note">
           <strong>Before going live, use Cloudflare&rsquo;s test keys.</strong> Cloudflare publishes a pair that always passes and a pair that always fails, so you can prove the wiring without creating real challenges. Paste <span class="setting">1x00000000000000000000AA</span> as the site key and <span class="setting">1x0000000000000000000000000000000AA</span> as the secret key, and the widget will succeed every time. When you are ready, swap in the keys from your own widget.
@@ -1141,10 +1152,11 @@
         <h4>How the theme uses Turnstile</h4>
         <p>Turnstile&rsquo;s script is loaded only while spam protection is switched on and both keys are filled in, so a site with the feature off makes no request to Cloudflare at all.</p>
         <ul>
-          <li>The widget&rsquo;s token is sent to Cloudflare&rsquo;s <span class="setting">siteverify</span> endpoint from the server, along with the visitor&rsquo;s IP address. A token that does not verify stops the sign-up, the password reset or the submission.</li>
+          <li>The widget&rsquo;s token is sent to Cloudflare&rsquo;s <span class="setting">siteverify</span> endpoint from the server, along with the visitor&rsquo;s IP address. A token that does not verify stops the sign-up, the password reset, the submission or a signed-out visitor&rsquo;s comment.</li>
           <li>Tokens are good once. If a visitor fails for an unrelated reason &mdash; a username already taken, say &mdash; the theme clears the challenge and hands them a fresh one instead of leaving them with a form that can never succeed.</li>
           <li>The sign-up form sits in a modal, so the widget is mounted only once that panel is actually open. A challenge mounted into a hidden panel measures itself as zero and never recovers.</li>
-          <li>Every form keeps the room the widget needs, whether protection is off, on, or still loading. The widget is 65px tall and arrives after the page has rendered, so the space is reserved up front: switching protection on never moves a submit button, and the widget landing never shifts the field beside it. The sign-up, login, password reset, comment and submission forms all reserve the same room; only sign-up, password reset and submission are guarded.</li>
+          <li><strong>Comments are guarded for signed-out visitors</strong>, which is where comment spam comes from: the token is verified before the comment is accepted, and a comment that arrives without one is not published. A signed-in member is never asked &mdash; the account is the check &mdash; and so is a comment posted by a plugin, an import or a trackback, because there is no visitor there to ask.</li>
+          <li>Every form keeps the room the widget needs, whether protection is off, on, or still loading. The widget is 65px tall and arrives after the page has rendered, so the space is reserved up front: switching protection on never moves a submit button, and the widget landing never shifts the field beside it. The sign-up, login, password reset, comment and submission forms all reserve the same room; sign-up, password reset, video submission and a signed-out comment are the guarded ones.</li>
         </ul>
 
         <h3>Turn protection off</h3>
@@ -1248,6 +1260,7 @@
         <p class="eyebrow">Appearance and settings</p>
         <h2>Customizer Settings</h2>
         <p class="section-intro">Open <span class="path">Appearance &rarr; Customize</span>. The settings are grouped into panels, and each panel holds one or more sections. Every setting is filed under the page it affects, so the homepage and the listing archives sit in one place and the single video page sits in another.</p>
+        <p class="section-intro">Each section says at the top what it covers, and a setting that only does something while another one is on stays out of the way until that one is switched on: the watermark image, width, position and color wait for the watermark itself, the two Turnstile keys wait for the spam check, and the required-field switches wait for video submission. Turn the switch they depend on back on and the control returns.</p>
 
         <div class="table-wrap">
           <table>
@@ -1270,7 +1283,7 @@
               <tr><td>Player Watermark</td><td>A logo overlaid on the player, with its size, color treatment and corner.</td></tr>
               <tr><td>Thumbnails</td><td>Thumbnail aspect ratio, image fit, image quality, and the hover rotation on video cards.</td></tr>
               <tr><td rowspan="3">Site Features</td><td>Header, Footer &amp; Search</td><td>The search bar, the number of footer columns, the copyright bar and its text, the admin bar, and the cookie notice with its wording.</td></tr>
-              <tr><td>Accounts &amp; Spam Protection</td><td>Member login and registration, the Cloudflare Turnstile spam check with its two keys, and the terms checkbox asked for on the login, registration and submission forms.</td></tr>
+              <tr><td>Accounts &amp; Spam Protection</td><td>Member login and registration, the Cloudflare Turnstile spam check with its two keys &mdash; it guards sign-up, password reset, video submission and signed-out comments &mdash; and the terms checkbox asked for on the login, registration and submission forms.</td></tr>
               <tr><td>Video Submission</td><td>The submission form, the links that lead to it, and which fields are required.</td></tr>
               <tr><td>Advertising</td><td>In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from <span class="path">Appearance &rarr; Widgets</span>.</td></tr>
               <tr><td rowspan="5">SEO &amp; Analytics</td><td>Basic SEO</td><td>The search appearance the theme supplies itself, for a site that runs no SEO plugin: the homepage search title and meta description, the archive canonical and social cards, and the two optional adult content labels. Switched off automatically while a supported SEO plugin is active. See <a href="#seo-workspace">Search appearance</a>.</td></tr>
@@ -1755,7 +1768,7 @@
               <li>Confirm membership is enabled in the Customizer.</li>
               <li>Check <span class="path">Settings → General → Membership</span>.</li>
               <li>Review any security, spam, or membership plugin restrictions.</li>
-              <li>If spam protection is on, confirm both Turnstile keys are filled in and the challenge appears.</li>
+              <li>If spam protection is on, confirm both Turnstile keys are filled in and the challenge appears on the sign-up panel and, for a signed-out visitor, under the comment box.</li>
               <li>Confirm the site&rsquo;s hostname is listed in the widget&rsquo;s allowed hostnames at Cloudflare. A hostname left out is refused, and the check can never pass.</li>
             </ul>
           </div>

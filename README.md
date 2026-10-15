@@ -27,7 +27,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#video-reports-and-moderation)
 - [Legal pages](#legal-and-policy-pages)
 - [Routine maintenance](#routine-maintenance)
-- [What's new in 2.5.4](#whats-new-in-254)
+- [What's new in 2.5.5](#whats-new-in-255)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#frequently-asked-questions)
 - [Credits, license & support](#credits-license--support)
@@ -35,9 +35,24 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 **Release**
 
-## What’s New in 2.5.4
+## What’s New in 2.5.5
 
-The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, and files a term that begins with a number the same way on every PHP.
+The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, and shows a section only the settings that apply to it.
+
+### 2.5.5 — the settings show a site what it has, and a comment is checked
+
+**The related-videos list under a video follows your grid settings.** The list kept its own column count — the one written for tablets — from 783px up, whatever **Videos per row** said, so a site set to five across showed five cards on the homepage and three much larger ones under every video. It follows the same rules as the homepage grid now, so it is five across on a five-across site and the cards are the size the rest of the site uses. See [Customizer settings](#customizer-settings).
+
+**The comment form is guarded.** With Turnstile switched on, a visitor who is not signed in is asked to prove they are human before their comment is accepted, and a comment posted without a token is refused. The widget appears inside the form, above the button, where the room for it was already reserved. A signed-in commenter is never challenged — the account is the check — and neither is an import, a plugin, or a trackback, because none of them posts through that form. See [Members and video submissions](#members-and-video-submissions).
+
+**A setting that does nothing is not shown.** Thirty-nine controls across the panel now wait for the switch they belong to: the watermark's image, width, color treatment and corner appear with the watermark, the member links with member accounts, the eleven submission controls with video submission, the two Turnstile keys with the spam check, the three share services with sharing, and the fields only the text logo uses stand down while an image logo is in charge. Turning a feature off shortens the section instead of leaving inert controls behind, and every one of them is exactly where it was the moment you turn its switch back on. A value you had already saved is kept and used; this changes what the panel shows, not what your site does.
+
+**Every section and every control says what it is for.** Each section in the panel opens with a line describing what its settings do and which other section the adjacent ones live under, so a switch found in the wrong place is easier to place; sections that had no description have one, and the control that describes the accent color — and the ones beside it — now reaches the screen at all, because a color control was built from two of the four values it was handed and quietly dropped the rest.
+
+**Also fixed:**
+
+- The **in-feed ad frequency** field accepts a number between 3 and 100 and says what it counts. A value below 3 still behaves like 3; the field no longer invites a number that cannot mean anything.
+- The **watermark's maximum width** is a number field like the logo's, so it takes a value from a keyboard and a spinner rather than any text at all. At `0`, or left empty, the theme's own 200px is used — which is what the field does today, and what the panel now says.
 
 ### 2.5.4 — the alphabet bar files a digit the same way on every PHP
 
@@ -615,7 +630,7 @@ Turnstile is Cloudflare’s free, privacy-friendly spam check. It asks less of a
 9. Turn on **Enable spam protection**.
 10. Paste the site key into **Turnstile site key** and the secret key into **Turnstile secret key**. Both are required: while either one is blank the theme leaves the forms alone rather than blocking every visitor.
 11. Choose **Publish**.
-12. Open your site in a private browser window, choose **Sign up**, and complete the challenge to confirm it works. Sign-up, password reset and video submission are the three protected forms.
+12. Open your site in a private browser window, choose **Sign up**, and complete the challenge to confirm it works. Sign-up, password reset, video submission and the comment form are the four protected forms; the comment challenge only appears to a visitor who is not signed in.
 
 > **Tip**
 >
@@ -629,10 +644,11 @@ Turnstile is Cloudflare’s free, privacy-friendly spam check. It asks less of a
 
 Turnstile’s script is loaded only while spam protection is switched on and both keys are filled in, so a site with the feature off makes no request to Cloudflare at all.
 
-- The widget’s token is sent to Cloudflare’s `siteverify` endpoint from the server, along with the visitor’s IP address. A token that does not verify stops the sign-up, the password reset or the submission.
+- The widget’s token is sent to Cloudflare’s `siteverify` endpoint from the server, along with the visitor’s IP address. A token that does not verify stops the sign-up, the password reset, the submission or a signed-out visitor’s comment.
 - Tokens are good once. If a visitor fails for an unrelated reason — a username already taken, say — the theme clears the challenge and hands them a fresh one instead of leaving them with a form that can never succeed.
 - The sign-up form sits in a modal, so the widget is mounted only once that panel is actually open. A challenge mounted into a hidden panel measures itself as zero and never recovers.
-- Every form keeps the room the widget needs, whether protection is off, on, or still loading. The widget is 65px tall and arrives after the page has rendered, so the space is reserved up front: switching protection on never moves a submit button, and the widget landing never shifts the field beside it. The sign-up, login, password reset, comment and submission forms all reserve the same room; only sign-up, password reset and submission are guarded.
+- **Comments are guarded for signed-out visitors**, which is where comment spam comes from: the token is verified before the comment is accepted, and a comment that arrives without one is not published. A signed-in member is never asked — the account is the check — and so is a comment posted by a plugin, an import or a trackback, because there is no visitor there to ask.
+- Every form keeps the room the widget needs, whether protection is off, on, or still loading. The widget is 65px tall and arrives after the page has rendered, so the space is reserved up front: switching protection on never moves a submit button, and the widget landing never shifts the field beside it. The sign-up, login, password reset, comment and submission forms all reserve the same room; sign-up, password reset, video submission and a signed-out comment are the guarded ones.
 
 #### Turn protection off
 
@@ -788,6 +804,8 @@ Beyond that:
 
 Open `Appearance → Customize`. The settings are grouped into panels, and each panel holds one or more sections. Every setting is filed under the page it affects, so the homepage and the listing archives sit in one place and the single video page sits in another.
 
+Each section says at the top what it covers, and a setting that only does something while another one is on stays out of the way until that one is switched on: the watermark image, width, position and color wait for the watermark itself, the two Turnstile keys wait for the spam check, and the required-field switches wait for video submission. Turn the switch they depend on back on and the control returns.
+
 | Panel | Section | What you can control |
 | --- | --- | --- |
 | Homepage & Listings | Homepage | How the homepage sorts its videos, how many show per page and per row, the homepage title, and the popular tags bar under the sort bar. |
@@ -801,7 +819,7 @@ Open `Appearance → Customize`. The settings are grouped into panels, and each 
 | Site Design | Player Watermark | A logo overlaid on the player, with its size, color treatment and corner. |
 | Site Design | Thumbnails | Thumbnail aspect ratio, image fit, image quality, and the hover rotation on video cards. |
 | Site Features | Header, Footer & Search | The search bar, whether the theme draws its own icons, the number of footer columns, the copyright bar and its text, the admin bar, and the cookie notice with its wording. |
-| Site Features | Accounts & Spam Protection | Member login and registration, the Cloudflare Turnstile spam check with its two keys, and the terms checkbox asked for on the login, registration and submission forms. |
+| Site Features | Accounts & Spam Protection | Member login and registration, the Cloudflare Turnstile spam check with its two keys — it guards sign-up, password reset, video submission and signed-out comments — and the terms checkbox asked for on the login, registration and submission forms. |
 | Site Features | Video Submission | The submission form, the links that lead to it, and which fields are required. |
 | Advertising | Advertising | In-feed advertising, popunder and interstitial code, and the consent gate. Every other page area is managed from `Appearance → Widgets`. |
 | Advertising | Friends & Ad Links | The row of outbound partner and ad text links printed under the header on the index page. The links themselves are a menu, under `Appearance → Menus`. |
@@ -1286,7 +1304,7 @@ Confirm the trailer URL is complete and publicly reachable. MP4 and WebM video t
 - Confirm membership is enabled in the Customizer.
 - Check `Settings → General → Membership`.
 - Review any security, spam, or membership plugin restrictions.
-- If spam protection is on, confirm both Turnstile keys are filled in and the challenge appears.
+- If spam protection is on, confirm both Turnstile keys are filled in and the challenge appears on the sign-up panel and, for a signed-out visitor, under the comment box.
 - Confirm the site’s hostname is listed in the widget’s allowed hostnames at Cloudflare. A hostname left out is refused, and the check can never pass.
 
 #### Password reset email is not received

@@ -5053,16 +5053,17 @@ object {
 }
 
 /*
- * A related grid sits in a column beside the sidebar, so it never wants the
- * full desktop column count.
+ * The related grid is left to the rules above, deliberately.
+ *
+ * It used to force the tablet count from 783px up, on the theory that a grid
+ * in the single page's column never wants the full desktop count. The effect
+ * was that a site set to five videos per row showed three much larger cards
+ * under every video while its own homepage ran five, because the override
+ * replaced the count instead of narrowing it. The section reuses .video-grid
+ * and the same video card, so it now follows videos-per-row exactly as the
+ * index grid does - the full count on a wide screen, the tablet count between
+ * 783px and 1100px, the mobile count below that.
  */
-@media (min-width: 783px) {
-	.related-videos .video-grid {
-		display: grid;
-		grid-template-columns: repeat(var(--mt-columns-tablet, 3), minmax(0, 1fr));
-		gap: var(--mt-grid-gap);
-	}
-}
 
 /* Phone ------------------------------------------------------------------- */
 

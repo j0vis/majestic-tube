@@ -20,7 +20,11 @@
  *   4. the room a spam check needs is reserved whether or not the check is on,
  *      so switching protection on cannot move a submit button. Turnstile's
  *      widget arrives after the page has rendered, which is why the space is
- *      held in advance rather than found when the iframe lands.
+ *      held in advance rather than found when the iframe lands;
+ *   5. a signed-out commenter is asked to pass the check and the token they
+ *      post is verified before the comment is taken, while a signed-in one is
+ *      not asked at all. A challenge nobody verifies is worse than none: it
+ *      tells the visitor they were checked and stops no spam.
  *
  * The functions are lifted out of inc/consent.php, inc/activation.php,
  * inc/widgets.php, inc/ads.php and inc/ajax-login-register.php and run against
@@ -58,6 +62,8 @@ $GLOBALS['sent']              = null;
 $GLOBALS['signed_on']         = null;
 $GLOBALS['created_user']      = null;
 $GLOBALS['captcha_configured'] = false;
+$GLOBALS['captcha_ok']         = false;
+$GLOBALS['captcha_seen']       = null;
 $_POST                        = array();
 
 function __( $s, $d = null ) {
@@ -217,6 +223,17 @@ function majestic_tube_captcha_is_configured() {
 }
 
 /*
+ * Verifying a token is a network round trip in the theme. Here it answers from
+ * a global and records the token it was handed, so the guard can be held to
+ * what the form actually posted rather than to the fact that it asked.
+ */
+function majestic_tube_verify_captcha( $response ) {
+	$GLOBALS['captcha_seen'] = $response;
+
+	return ! empty( $GLOBALS['captcha_ok'] );
+}
+
+/*
  * wp_send_json() ends the request, and a handler that returns normally is a
  * handler that forgot to answer. Throwing on it makes every check below prove
  * that the handler replied *and* what it replied with.
@@ -236,11 +253,37 @@ function is_email( $email ) {
 	return false !== strpos( (string) $email, '@' );
 }
 function is_wp_error( $thing ) {
-	return $thing instanceof WP_Error_Stub;
+	return $thing instanceof WP_Error;
 }
 
-/* Only needed so the two failure shapes a handler can see are distinguishable. */
-class WP_Error_Stub {
+/*
+ * The comment guard refuses a comment with a WP_Error carrying the HTTP status
+ * core reads to decide whether to show its failure page. Only the three
+ * accessors the tests need are stubbed.
+ */
+class WP_Error {
+
+	public $code;
+	public $message;
+	public $data;
+
+	public function __construct( $code = '', $message = '', $data = '' ) {
+		$this->code    = $code;
+		$this->message = $message;
+		$this->data    = $data;
+	}
+
+	public function get_error_code() {
+		return $this->code;
+	}
+
+	public function get_error_message() {
+		return $this->message;
+	}
+
+	public function get_error_data() {
+		return $this->data;
+	}
 }
 function username_exists( $login ) {
 	return false;
@@ -374,6 +417,7 @@ load_functions(
 		'majestic_tube_captcha_reserved_space',
 		'majestic_tube_captcha_widget',
 		'majestic_tube_captcha_site_key',
+		'majestic_tube_captcha_token_field',
 		'majestic_tube_login_register_modal',
 		'majestic_tube_ajax_error',
 		'majestic_tube_ajax_membership_success',
@@ -382,7 +426,13 @@ load_functions(
 	)
 );
 
-load_functions( 'inc/template-filters.php', array( 'majestic_tube_captcha_comment_room' ) );
+load_functions(
+	'inc/template-filters.php',
+	array(
+		'majestic_tube_captcha_comment_slot',
+		'majestic_tube_comment_captcha_check',
+	)
+);
 
 $passed = 0;
 $failed = 0;
@@ -810,30 +860,118 @@ check(
  */
 $comment_filters = theme_file( 'inc/template-filters.php' );
 $submit_field    = '<p class="form-submit"><input name="submit" type="submit" /></p>';
-$room_off        = majestic_tube_captcha_comment_room( $submit_field );
+
+$GLOBALS['logged_in']        = false;
+$GLOBALS['captcha_configured'] = false;
+$room_off                     = majestic_tube_captcha_comment_slot( $submit_field );
 
 check(
-	'the comment form is given the room through the filter that reaches a signed-in commenter as well',
-	false !== strpos( $comment_filters, "add_filter( 'comment_form_submit_field', 'majestic_tube_captcha_comment_room' )" ),
+	'the comment form is given its slot through the filter that reaches a signed-in commenter as well',
+	false !== strpos( $comment_filters, "add_filter( 'comment_form_submit_field', 'majestic_tube_captcha_comment_slot' )" ),
 	'the action that fires after the fields is skipped for a signed-in commenter, so a slot printed there would come and go'
 );
 check(
-	'and the markup it hands back is the room, in front of the submit field untouched',
+	'and with the check off it is the room, in front of the submit field untouched',
 	0 === strpos( trim( $room_off ), '<div class="majestic-tube-captcha" data-mt-captcha="reserved" aria-hidden="true"></div>' ) &&
 	$submit_field === substr( $room_off, -strlen( $submit_field ) ),
 	$room_off
 );
-check(
-	'with the check on too: this form is not guarded, so it never grows a challenge',
-	( function () use ( $submit_field ) {
-		$GLOBALS['captcha_configured']         = true;
-		$GLOBALS['opts']['turnstile-site-key'] = '1x00000000000000000000AA';
-		$markup                                = majestic_tube_captcha_comment_room( $submit_field );
-		$GLOBALS['captcha_configured']         = false;
-		unset( $GLOBALS['opts']['turnstile-site-key'] );
 
-		return $markup === majestic_tube_captcha_comment_room( $submit_field ) && false === strpos( $markup, 'data-sitekey' ) && false === strpos( $markup, 'cf-turnstile' );
-	} )()
+$GLOBALS['captcha_configured']         = true;
+$GLOBALS['opts']['turnstile-site-key'] = '1x00000000000000000000AA';
+$signed_out                            = majestic_tube_captcha_comment_slot( $submit_field );
+
+$GLOBALS['logged_in'] = true;
+$signed_in            = majestic_tube_captcha_comment_slot( $submit_field );
+$GLOBALS['logged_in'] = false;
+
+check(
+	'a signed-out commenter is asked, because the token is verified before the comment is taken',
+	false !== strpos( $signed_out, 'cf-turnstile' ) &&
+	false !== strpos( $signed_out, 'data-sitekey="1x00000000000000000000AA"' ) &&
+	false !== strpos( $signed_out, 'data-mt-turnstile="1"' ) &&
+	$submit_field === substr( $signed_out, -strlen( $submit_field ) ),
+	$signed_out
+);
+check(
+	'and a signed-in one is given the room instead, because the account is the check',
+	false === strpos( $signed_in, 'cf-turnstile' ) &&
+	0 === strpos( trim( $signed_in ), '<div class="majestic-tube-captcha" data-mt-captcha="reserved"' ) &&
+	false !== strpos( $signed_in, 'data-mt-captcha="reserved"' )
+);
+
+/*
+ * The answer, not just the question. The guard is run against the request a
+ * visitor's form actually makes: the comment field core refuses a comment
+ * without, and the field Turnstile posts its token into.
+ */
+$comment_data = array(
+	'comment_post_ID' => 7,
+	'comment_content' => 'Nice video.',
+);
+
+$_POST                          = array( 'comment' => 'Nice video.' );
+$GLOBALS['captcha_ok']          = false;
+$GLOBALS['captcha_seen']        = null;
+$refused_no_token               = majestic_tube_comment_captcha_check( 1, $comment_data );
+
+$_POST[ majestic_tube_captcha_token_field() ] = 'a-token';
+$GLOBALS['captcha_seen']                      = null;
+$refused_bad_token                            = majestic_tube_comment_captcha_check( 1, $comment_data );
+$bad_token_seen                               = $GLOBALS['captcha_seen'];
+
+$GLOBALS['captcha_ok'] = true;
+$GLOBALS['captcha_seen'] = null;
+$allowed               = majestic_tube_comment_captcha_check( 1, $comment_data );
+$good_token_seen       = $GLOBALS['captcha_seen'];
+
+$GLOBALS['logged_in'] = true;
+$member               = majestic_tube_comment_captcha_check( 1, $comment_data );
+$GLOBALS['logged_in'] = false;
+
+$_POST                = array();
+$server_side          = majestic_tube_comment_captcha_check( 1, $comment_data );
+
+$_POST                          = array( 'comment' => 'Nice video.' );
+$GLOBALS['captcha_configured']  = false;
+unset( $GLOBALS['opts']['turnstile-site-key'] );
+$check_off                      = majestic_tube_comment_captcha_check( 1, $comment_data );
+
+$_POST = array();
+
+check(
+	'the guard hangs on the filter WordPress acts on, and not on the one it ignores',
+	false !== strpos( $comment_filters, "add_filter( 'pre_comment_approved', 'majestic_tube_comment_captcha_check', 10, 2 )" ) &&
+	false === strpos( $comment_filters, "add_filter( 'preprocess_comment'" ),
+	'a WP_Error from preprocess_comment is read by nothing - the next thing core does is index the data as an array'
+);
+check(
+	'a comment posted without a token is refused',
+	is_wp_error( $refused_no_token ) &&
+	403 === $refused_no_token->get_error_data() &&
+	'' !== $refused_no_token->get_error_message(),
+	'a token field that can simply be left out is not a spam check'
+);
+check(
+	'the token is read from the field Turnstile posts into, and checked with it',
+	'a-token' === $bad_token_seen && 'a-token' === $good_token_seen &&
+	is_wp_error( $refused_bad_token ) && 403 === $refused_bad_token->get_error_data(),
+	'seen: ' . var_export( $bad_token_seen, true )
+);
+check(
+	'and a token that verifies lets the comment through untouched',
+	1 === $allowed,
+	var_export( $allowed, true )
+);
+check(
+	'a signed-in commenter and a comment that did not come from the form are never checked',
+	1 === $member && 1 === $server_side,
+	'member: ' . var_export( $member, true ) . ', server side: ' . var_export( $server_side, true )
+);
+check(
+	'and a site with the check off, or a key missing, blocks nobody',
+	1 === $check_off,
+	var_export( $check_off, true )
 );
 
 /*

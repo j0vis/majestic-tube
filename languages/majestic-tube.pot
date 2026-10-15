@@ -61,10 +61,19 @@ msgstr ""
 msgid "A legal page carries code, an embed or an ad block: %s."
 msgstr ""
 
+msgid "A menu link to the member&rsquo;s own profile. It needs member accounts, which are switched on under Site Features &rarr; Accounts &amp; Spam Protection."
+msgstr ""
+
+msgid "A menu link to the videos this member has sent in. It needs member accounts, which are switched on under Site Features &rarr; Accounts &amp; Spam Protection."
+msgstr ""
+
 msgid "A phrase shown on every category card, built from the tokens below. Leave it blank to use each category's own description instead."
 msgstr ""
 
 msgid "A row of outbound text links - partner sites, ad zones - printed under the header on the index page, and on no other page. The links themselves are a WordPress menu assigned under Appearance &rarr; Menus; this section decides whether the row prints and how it looks."
+msgstr ""
+
+msgid "A second logo laid over the video while it plays, with its size, color treatment and corner. It is off by default, and it is not the header logo: that one is under Logo."
 msgstr ""
 
 msgid "A short visible introduction under the homepage heading, printed once above or below the grid. It is also the fallback search description unless you supply one under Basic SEO. Existing saved text is preserved."
@@ -74,6 +83,9 @@ msgid "A single 300x250 ad with a close button, shown centered over the desktop 
 msgstr ""
 
 msgid "A text logo can use its own voice here. \"Inter\" and \"System UI\" match the rest of the site; the serif and monospace choices are fonts already installed on each visitor device and are never downloaded."
+msgstr ""
+
+msgid "A visitor cannot submit a video without filling this in."
 msgstr ""
 
 msgid "About this video"
@@ -187,7 +199,7 @@ msgstr ""
 msgid "Ask visitors to accept the terms"
 msgstr ""
 
-msgid "Asks visitors to prove they are human with Cloudflare Turnstile on the sign-up, password reset and video submission forms. Both Turnstile keys below must be filled in. The room the widget needs is reserved in those forms, and on the login and comment forms, whether or not this is on, so switching protection on never moves a button or changes a form&rsquo;s height. Neither the login form nor the comment form is guarded: the theme asks for a token on sign-up, password reset and submission only."
+msgid "Asks visitors to prove they are human with Cloudflare Turnstile on the sign-up, password reset and video submission forms, and on the comment form for a visitor who is not signed in. Both Turnstile keys below must be filled in. The room the widget needs is reserved in those forms, and on the login form, whether or not this is on, so switching protection on never moves a button or changes a form&rsquo;s height. A signed-in commenter is never challenged: the account is the check."
 msgstr ""
 
 msgid "Auto"
@@ -290,6 +302,12 @@ msgid "Code and ads shown directly below the site header. Takes Content Block wi
 msgstr ""
 
 msgid "Code and ads shown directly below the video player. Takes Content Block widgets only."
+msgstr ""
+
+msgid "Code printed on every page: analytics, a verification tag, a chat widget, whatever a third party asks a site to paste in. One field prints for mobile visitors alone."
+msgstr ""
+
+msgid "Collapses a long description to a few lines and adds a Read more / Read less button under it. The whole description stays in the page either way, so a search engine still reads all of it."
 msgstr ""
 
 msgid "Color scheme"
@@ -625,6 +643,9 @@ msgstr ""
 msgid "How an image that does not match the chosen aspect ratio is handled. Cover fills the box and crops the overflow, Contain fits the whole image and leaves bars, Fill stretches the image to the box."
 msgstr ""
 
+msgid "How the Categories and Actors pages lay their term cards out. Each term&rsquo;s own name, image and description are edited on its own screen, next to its image."
+msgstr ""
+
 msgid "How the Footer widgets area is arranged. It does not affect the Footer: code and ads area, which is always full width."
 msgstr ""
 
@@ -713,6 +734,12 @@ msgid "Leave a Reply"
 msgstr ""
 
 msgid "Leave blank for the wording this theme ships. The links to your Terms of Use, Privacy Policy and Cookie Policy are printed under whatever you write here, so the notice always points at the pages it refers to."
+msgstr ""
+
+msgid "Leave it blank for a plain line with the copyright symbol, the current year and the site name. Old WP-Script wording is stripped out of a saved value rather than printed."
+msgstr ""
+
+msgid "Leave it blank to fall back to the site title."
 msgstr ""
 
 msgid "Legacy below-player content (desktop)"
@@ -841,6 +868,9 @@ msgstr ""
 msgid "Marks up each video for Google Video search: a VideoObject block, the Open Graph video tags, and a video sitemap. These describe the video itself, which only this theme knows about - the browser title, meta description and canonical for a video page come from Basic SEO, or from your SEO plugin when one is running."
 msgstr ""
 
+msgid "Member accounts - signing in, registering, resetting a password - the terms checkbox in front of them, and the Cloudflare Turnstile check that keeps bots out. Both Turnstile keys come from one widget in the Cloudflare dashboard."
+msgstr ""
+
 msgid "Menu"
 msgstr ""
 
@@ -944,6 +974,9 @@ msgid "OK (embed)"
 msgstr ""
 
 msgid "Off"
+msgstr ""
+
+msgid "Off by default, which leaves the text logo and its icon in charge. Turn it on to use the image address below instead."
 msgstr ""
 
 msgid "Offer to resume where the visitor stopped"
@@ -1450,6 +1483,9 @@ msgstr ""
 msgid "Thanks, our team will review this video."
 msgstr ""
 
+msgid "That comment was not published: the spam check did not pass. Solve the challenge and send it again."
+msgstr ""
+
 msgid "That page cannot be moved to the trash. It may be the only copy of its document, or it may already be gone."
 msgstr ""
 
@@ -1460,6 +1496,12 @@ msgid "The Site Key shown in the Turnstile widget you created at dash.cloudflare
 msgstr ""
 
 msgid "The ad slots this theme prints itself are switched on here. The remaining page areas are managed from Appearance &rarr; Widgets."
+msgstr ""
+
+msgid "The address of the image, copied out of the media library. A transparent PNG sits best over moving video."
+msgstr ""
+
+msgid "The address of the image, copied out of the media library. Used only while Use an image logo is on."
 msgstr ""
 
 msgid "The browser tab, and the blue title on a search result, for the front page. Leave it empty for the site title."
@@ -1477,7 +1519,13 @@ msgstr ""
 msgid "The email you entered is not valid. Please try again."
 msgstr ""
 
+msgid "The form a visitor sends a video in with, the links that lead to it, and which of its fields they have to fill in before the form will send."
+msgstr ""
+
 msgid "The highlight color, and the only one you have to choose: buttons and badges are filled with it, and the theme derives a readable link, text and icon tone from it for the light skin and for the dark skin. The video player keeps its own bright version of the same color, because it stays black whatever the skin is."
+msgstr ""
+
+msgid "The image on every video card: its shape, how the image is fitted into it, which size is requested, and the rotation a visitor sees on hover."
 msgstr ""
 
 msgid "The missing legal pages have been recreated, and the footer legal links now point at them."
@@ -1489,13 +1537,46 @@ msgstr ""
 msgid "The passwords you entered do not match. Your password was not updated."
 msgstr ""
 
+msgid "The player itself: autoplay, the engine that plays the video, and the extra controls a visitor is offered in it. What a page shows around the player is under Video Page Layout, above."
+msgstr ""
+
+msgid "The quality list drawn over the player. It belongs to the enhanced player, so it is not offered while the browser&rsquo;s own player is in use; a video with a single source has nothing to list either way."
+msgstr ""
+
 msgid "The same idea for actor cards. Leave it blank to use each actor's own description instead."
+msgstr ""
+
+msgid "The same two numbers for phones and tablets, where the grid is narrower. The desktop values are under Homepage, above."
 msgstr ""
 
 msgid "The search appearance the theme can supply by itself, for a site that runs no SEO plugin: a homepage search title, the meta description, the canonical for archives, and the social card a shared link shows. All of it is switched off automatically while Yoast, Rank Math, All in One SEO, SEOPress, The SEO Framework or Slim SEO is active, because that plugin already answers these questions and two answers in one page head is worse than one."
 msgstr ""
 
+msgid "The shape drawn before the text logo, from the icon set the theme ships."
+msgstr ""
+
+msgid "The share buttons printed under the player. Each service is its own switch, so a site can offer some of them and not others."
+msgstr ""
+
+msgid "The site logo in the header: an image or a line of text, its icon, font, size and spacing, and whether a copy prints in the footer."
+msgstr ""
+
+msgid "The size of the image a card loads for a video&rsquo;s main thumbnail. All three are generated when an image is uploaded, so a larger one costs bandwidth on every card that shows it."
+msgstr ""
+
 msgid "The skin the site uses by default. \"Follow system\" follows each visitor's operating-system setting and needs no script. Visitors can still override this with the header toggle, and that choice is stored only in their own browser."
+msgstr ""
+
+msgid "The skin, the accent color every button, link and icon is derived from, and the site font. Each of them applies to the light and the dark skin both."
+msgstr ""
+
+msgid "The space the logo leaves above itself in the header. A negative number pulls it up instead."
+msgstr ""
+
+msgid "The space the logo leaves to its left. A negative number pulls it left instead."
+msgstr ""
+
+msgid "The tallest the logo is allowed to draw. At 0, or left empty, the theme&rsquo;s own size is used."
 msgstr ""
 
 msgid "The theme could not create every page and menu it ships with."
@@ -1523,6 +1604,12 @@ msgid "The view is recorded once the video has played for three seconds instead 
 msgstr ""
 
 msgid "The visible introduction and its position on the homepage. The visible homepage heading is under Homepage &amp; Listings &rarr; Homepage; the browser title and meta description for the front page are under Basic SEO."
+msgstr ""
+
+msgid "The widest the logo is allowed to draw. At 0, or left empty, the theme&rsquo;s own size is used."
+msgstr ""
+
+msgid "The widest the watermark is allowed to draw over the video. At 0, or left empty, the theme&rsquo;s own 200px is used."
 msgstr ""
 
 msgid "The words on the button. Leave it blank for &ldquo;Watch the full video&rdquo;."
@@ -1777,10 +1864,22 @@ msgstr ""
 msgid "What is wrong with this video?"
 msgstr ""
 
+msgid "What the theme prints around the videos: the search bar, the footer columns, the copyright bar, the admin bar, and the cookie notice with its wording."
+msgstr ""
+
 msgid "When off, the WordPress admin bar is hidden for everyone except administrators."
 msgstr ""
 
 msgid "Where the button sends the visitor. Leave it blank to use each video&rsquo;s own tracking link, and the button then appears only on videos that have one."
+msgstr ""
+
+msgid "Whether a category&rsquo;s own description prints above its video list or below it."
+msgstr ""
+
+msgid "Whether a tag&rsquo;s own description prints above its video list or below it."
+msgstr ""
+
+msgid "Whether the visible homepage heading and its introduction print above the video grid or below it."
 msgstr ""
 
 msgid "Which field the player uses on every video page. Both are still saved on the post either way, so switching back costs nothing. A video that does not have the field you picked falls back to the other one instead of showing an empty player."
