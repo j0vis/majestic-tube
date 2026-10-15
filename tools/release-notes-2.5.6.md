@@ -22,3 +22,8 @@ Replace the theme folder. Nothing is reset and nothing is deleted.
 The offset is a physical `right` rather than a logical inline-end, and that is deliberate: the
 creative is a third-party ad frame whose own controls sit at its own left however the page reads,
 so a logical offset would have walked this button back on top of them on a right-to-left site.
+
+---
+
+`majestic-tube.zip` &middot; 747,858 bytes
+`SHA-256 13c99d0258986617552c13e95a026d81523ff60f81086e212b3f0ae99eacfad6`
