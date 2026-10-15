@@ -1,19 +1,20 @@
-# What a change has to survive.
+# What a change has to survive once it is pushed.
 #
-# Two jobs, because they answer different questions: the suite says the theme
-# still runs on every PHP a site might be running, and the release job says the
-# archive built from a tag is the code of that tag and nothing else. Neither runs
-# on a schedule - a theme has no service to keep alive - so both are cheap enough
-# to run on every push.
-name: Tests
+# One job, because this repository is the theme alone: the smoke suite, the
+# release toolchain and the agent notes are development-only files that stay on
+# the machine that runs them, so nothing here may assume one is present. What is
+# left is what a bare checkout can answer about the theme itself - every PHP file
+# parses on every PHP a site may be running, and the two version numbers the
+# theme is recognized by agree with each other.
+#
+# The suites and the archive build are not run here. They run on the development
+# machine, and the archive is verified there against the commit it was built
+# from before it is published.
+name: Checks
 
 on:
   push:
     branches: [ main ]
-    # A tag belongs here as well as a branch, or the release job below can never
-    # run: a workflow that names only branches is not started by a tag push at
-    # all, so its `refs/tags/v` gate would be a job nothing can reach.
-    tags: [ 'v*' ]
   pull_request:
   workflow_dispatch:
 
@@ -22,7 +23,7 @@ permissions:
 
 jobs:
   suite:
-    name: Smoke suite on PHP ${{ matrix.php }}
+    name: Parse and version check on PHP ${{ matrix.php }}
     runs-on: ubuntu-latest
     strategy:
       # One PHP failing must not hide the rest: a break on 7.4 and a break on
@@ -41,61 +42,26 @@ jobs:
           php-version: ${{ matrix.php }}
           coverage: none
 
-      # A suite drives the theme files it covers, so a file it loads has to
-      # parse here. One it never loads - a template behind a path no check
-      # takes - would not, and the floor this job exists to hold is a PHP a
-      # live site may be running. Every theme file is parsed on it too.
+      # Every theme file is parsed, not just the ones a page loads: a template
+      # behind a path no test reaches would otherwise break on the floor version
+      # and be found by a site owner instead of here.
       - name: Parse every theme file on this PHP
         run: |
           status=0
-          for file in $(git ls-files '*.php' | grep -v '^tests/'); do
+          for file in $(git ls-files '*.php'); do
             php -l "$file" > /dev/null || status=1
           done
           exit "$status"
 
-      # Each suite is a standalone script that prints its own tally and exits
-      # non-zero when a check fails, so the loop keeps the first failure as the
-      # job's status instead of letting the last suite decide it.
-      - name: Run every smoke suite
+      # The theme is recognized by these two numbers and an update is announced
+      # by them, so a release that moves one and not the other has to fail here
+      # rather than on a site.
+      - name: The two declared versions agree
         run: |
-          status=0
-          for suite in tests/*-smoke.php; do
-            echo "::group::$suite"
-            php "$suite" || status=1
-            echo "::endgroup::"
-          done
-          exit "$status"
+          style="$(sed -n 's/^Version:[[:space:]]*\([^[:space:]]*\).*$/\1/p' style.css | head -1)"
+          define="$(sed -n "s/.*MAJESTIC_TUBE_VERSION',[[:space:]]*'\([^']*\)'.*/\1/p" functions.php | head -1)"
 
-  release:
-    name: Verify the archive built from this tag
-    # Only a tag is a release; a branch has nothing to verify.
-    if: startsWith( github.ref, 'refs/tags/v' )
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          # The verifier compares the archive against an export of the commit it
-          # claims to be, so the history has to be readable here.
-          fetch-depth: 0
+          echo "style.css  $style"
+          echo "functions.php  $define"
 
-      - name: Install PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.3'
-          coverage: none
-
-      # This is the release build, held to the same checks a maintainer's build
-      # is: the layout WordPress needs, the two version numbers agreeing with the
-      # tag, every PHP file parsing, the contents matching the commit's own
-      # export, and the commit's own smoke suite passing against the archive.
-      #
-      # --no-notes because the release notes carry the size and the digest of the
-      # published file. Those describe that artifact, and a rebuild on another
-      # machine is not required to be byte-identical to it; the comparison
-      # belongs to publish time, where the file is the one being uploaded.
-      - name: Build the archive from the tag and hold it to every check
-        run: |
-          version="${GITHUB_REF_NAME#v}"
-          export_dir="$(mktemp -d)"
-          git archive --format=tar "$GITHUB_SHA" | tar -x -C "$export_dir"
-          python3 tools/build-release.py "$version" "$export_dir" "majestic-tube-$version.zip" --no-notes
+          test -n "$style" && test "$style" = "$define"
