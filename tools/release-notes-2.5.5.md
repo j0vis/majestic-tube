@@ -20,7 +20,7 @@ stops offering controls for the features that are switched off.
   already was; no form moves, and nothing about the layout changes.
 - **A control that does nothing is not shown.** Thirty-nine controls now wait for the switch they
   belong to: the watermark's image, width, color treatment and corner appear with the watermark;
-  the eleven submission controls, and the link to the form, with video submission; the two member
+  the ten required-field switches and the link to the form with video submission; the two member
   links with member accounts; the two Turnstile keys with the spam check; the three share services
   with sharing; the two homepage SEO fields with the theme's own SEO; the ad frequency and the
   consent gate with the placements they belong to; and the four logo fields that only the text
