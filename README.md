@@ -27,7 +27,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#video-reports-and-moderation)
 - [Legal pages](#legal-and-policy-pages)
 - [Routine maintenance](#routine-maintenance)
-- [What's new in 2.5.3](#whats-new-in-253)
+- [What's new in 2.5.4](#whats-new-in-254)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#frequently-asked-questions)
 - [Credits, license & support](#credits-license--support)
@@ -35,9 +35,15 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 **Release**
 
-## What’s New in 2.5.3
+## What’s New in 2.5.4
 
-The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, and ships the template a translation starts from.
+The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, and files a term that begins with a number the same way on every PHP.
+
+### 2.5.4 — the alphabet bar files a digit the same way on every PHP
+
+**A term whose name starts with a number no longer lands in a different place depending on your server.** The Actors and Categories directories bucket every term under its first character, and `7 Up` files under `7` — a key PHP keeps as the number 7 rather than as text. Sorting that map used PHP's own key comparison, and its answer changed between versions: the digit bucket came after A-Z on PHP 7.4 through 8.1 and before it on 8.2 and later, so the same directory could be ordered two ways on two servers. The keys are compared as strings now — the order the bar's own markup is written in — so the directory reads the same on every PHP the theme supports, and on the one your host moves you to. See [Actors, categories and tags](#actors-categories-and-tags).
+
+**Each responsive step states its own grid.** The tablet, phone and small-phone steps set the column count and the gutter but left the grid itself to the rule at the top of the stylesheet, so what a step produced depended on which block happened to come last. Each of them declares the grid, the columns and the gutter together now. Nothing on the page changes; what changes is that a later edit cannot take the layout away from the step it was written for.
 
 ### 2.5.3 — a random listing stops re-sorting the catalog
 

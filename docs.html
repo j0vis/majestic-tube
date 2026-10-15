@@ -444,7 +444,7 @@
     <nav class="toc" aria-label="User guide contents">
       <strong>Contents</strong>
       <ul>
-        <li><a href="#whats-new-253">What&rsquo;s new in 2.5.3</a></li>
+        <li><a href="#whats-new-254">What&rsquo;s new in 2.5.4</a></li>
         <li><a href="#requirements">Requirements</a></li>
         <li><a href="#installation">Installation</a></li>
         <li><a href="#quick-start">Quick start</a></li>
@@ -467,10 +467,14 @@
     </nav>
 
     <main>
-      <section id="whats-new-253">
+      <section id="whats-new-254">
         <p class="eyebrow">Release</p>
-        <h2>What&rsquo;s New in 2.5.3</h2>
-        <p class="section-intro">The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, and ships the template a translation starts from.</p>
+        <h2>What&rsquo;s New in 2.5.4</h2>
+        <p class="section-intro">The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, and files a term that begins with a number the same way on every PHP.</p>
+
+        <h3>2.5.4 &mdash; the alphabet bar files a digit the same way on every PHP</h3>
+        <p><strong>A term whose name starts with a number no longer lands in a different place depending on your server.</strong> The Actors and Categories directories bucket every term under its first character, and <code>7 Up</code> files under <code>7</code> &mdash; a key PHP keeps as the number <code>7</code> rather than as text. Sorting that map used PHP&rsquo;s own key comparison, and its answer changed between versions: the digit bucket came after A-Z on PHP 7.4 through 8.1 and before it on 8.2 and later, so the same directory could be ordered two ways on two servers. The keys are compared as strings now &mdash; the order the bar&rsquo;s own markup is written in &mdash; so the directory reads the same on every PHP the theme supports, and on the one your host moves you to. See <a href="#taxonomy">Actors, categories and tags</a>.</p>
+        <p><strong>Each responsive step states its own grid.</strong> The tablet, phone and small-phone steps set the column count and the gutter but left the grid itself to the rule at the top of the stylesheet, so what a step produced depended on which block happened to come last. Each of them declares the grid, the columns and the gutter together now. Nothing on the page changes; what changes is that a later edit cannot take the layout away from the step it was written for.</p>
 
         <h3>2.5.3 &mdash; a random listing stops re-sorting the catalog</h3>
         <p><strong>A random listing is drawn from a cache instead of sorting your catalog.</strong> The random listing, the <strong>Video list</strong> widget set to Random, and the picture a category or actor card borrows from a video all asked MySQL for <code>ORDER BY RAND()</code>, which reads every matching row and sorts it on every request &mdash; the most expensive query the theme made, on the pages that repeat it most. Each of them now draws from a pool of video IDs kept for the archive it belongs to, shared by all three and rebuilt when you publish, edit or delete a video.</p>
