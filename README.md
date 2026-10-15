@@ -27,7 +27,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#video-reports-and-moderation)
 - [Legal pages](#legal-and-policy-pages)
 - [Routine maintenance](#routine-maintenance)
-- [What's new in 2.5.7](#whats-new-in-257)
+- [What's new in 2.5.8](#whats-new-in-258)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#frequently-asked-questions)
 - [Credits, license & support](#credits-license--support)
@@ -35,9 +35,17 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 **Release**
 
-## What’s New in 2.5.7
+## What’s New in 2.5.8
 
-The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, moves the player overlay's close box out of the corner an ad's own controls sit in, and gives the video sidebar a column wide enough for a 300x250 ad, on a desktop screen only.
+The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, moves the player overlay's close box out of the corner an ad's own controls sit in, gives the video sidebar a column wide enough for a 300x250 ad on a desktop screen only, and replaces the theme's screenshot of the layout with the front page itself.
+
+### 2.5.8 — the screenshot shows the front page the theme renders
+
+**The theme's screenshot is the front page.** It is the first thing a site owner sees in Appearance → Themes and the image a theme shop shows before anyone installs anything, and it was a diagram of the layout: gray bars where the words go, a play button drawn on every card, and the badges reduced to unlabeled marks. It is the theme's own front page now, drawn by the theme's own stylesheet and typeface — the header row with its logo, search box, menu and color-scheme toggle, the sort tabs with the one in use painted in the accent, the tag strip with its counts, three rows of five cards each carrying its picture, HD mark, length, view count and rating, and the paginator under the grid.
+
+**The pictures inside the cards are gradients, on purpose.** A theme is distributed to other people, so its screenshot may not carry anyone's footage. Each card gets a picture-shaped gradient that shows the frame, all four badges and where each one sits, which is what the card is about. The file is still a PNG at 1200x900 — the size a theme screenshot is read at.
+
+**Also in this release:** nothing on your site changes. No template, stylesheet, setting or hook is touched; this is the image the theme is listed with.
 
 ### 2.5.7 — the video sidebar is measured in ad slots
 
