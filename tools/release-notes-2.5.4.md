@@ -20,3 +20,8 @@ last.
 **Upgrading**
 
 Replace the theme folder. Nothing is reset and nothing is deleted.
+
+---
+
+`majestic-tube.zip` &middot; 738,974 bytes
+`SHA-256 36700ad12e8c1ce74960f324ac0e64bf4cf0c6d887bfd74e948fb4541a897850`
