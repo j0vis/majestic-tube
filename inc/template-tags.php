@@ -501,7 +501,7 @@ function majestic_tube_get_current_filter() {
 	$allowed = array_keys( majestic_tube_video_filters() );
 
 	// phpcs:ignore WordPress.Security.NonceVerification.Recommended -- read-only sort param.
-	$requested = isset( $_GET['filter'] ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : '';
+	$requested = ( isset( $_GET['filter'] ) && is_string( $_GET['filter'] ) ) ? sanitize_key( wp_unslash( $_GET['filter'] ) ) : '';
 
 	if ( in_array( $requested, $allowed, true ) ) {
 		return $requested;

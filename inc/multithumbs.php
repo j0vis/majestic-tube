@@ -261,7 +261,7 @@ function majestic_tube_thumbs_meta_box_callback( $post ) {
 function majestic_tube_handle_thumb_mutation( $remove ) {
 	check_ajax_referer( 'ajax-nonce', 'nonce' );
 
-	if ( ! isset( $_POST['post_id'], $_POST['thumb_url'] ) ) {
+	if ( ! isset( $_POST['post_id'], $_POST['thumb_url'] ) || is_array( $_POST['post_id'] ) || ! is_string( $_POST['thumb_url'] ) ) {
 		wp_send_json( array( 'result' => false ), 400 );
 	}
 
@@ -388,7 +388,7 @@ function majestic_tube_get_multithumbs( $post_id = 0 ) {
 		// The original switched http:// to https:// on SSL requests so hover
 		// previews do not trigger mixed-content warnings.
 		if ( $thumb && is_ssl() ) {
-			$thumb = str_replace( 'http://', 'https://', $thumb );
+			$thumb = preg_replace( '#^http://#i', 'https://', $thumb );
 		}
 
 		if ( $thumb && ! in_array( $thumb, $urls, true ) ) {

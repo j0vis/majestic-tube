@@ -29,6 +29,7 @@ $consent_form_shown = majestic_tube_video_submission_form_is_shown();
 // Handle submission only while the form - and its terms checkbox - is on the page.
 if ( $consent_form_shown && isset( $_POST['wpst-submitted'] ) ) {
 	if ( ! isset( $_POST['wpst-post_nonce_field'] ) ||
+		! is_string( $_POST['wpst-post_nonce_field'] ) ||
 		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['wpst-post_nonce_field'] ) ), 'post_nonce' ) ) {
 		$error = __( 'Security check failed. Please try again.', 'majestic-tube' );
 	} elseif ( ! majestic_tube_consent_satisfied() ) {
@@ -41,7 +42,7 @@ if ( $consent_form_shown && isset( $_POST['wpst-submitted'] ) ) {
 
 		if ( majestic_tube_captcha_is_configured() ) {
 			$field      = majestic_tube_captcha_token_field();
-			$token      = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
+			$token      = ( isset( $_POST[ $field ] ) && is_string( $_POST[ $field ] ) ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
 			$captcha_ok = majestic_tube_verify_captcha( $token );
 
 			if ( ! $captcha_ok ) {
@@ -50,16 +51,16 @@ if ( $consent_form_shown && isset( $_POST['wpst-submitted'] ) ) {
 		}
 
 		if ( $captcha_ok ) {
-			$title              = isset( $_POST['wpst-video_title'] ) ? mb_substr( sanitize_text_field( wp_unslash( $_POST['wpst-video_title'] ) ), 0, 200 ) : '';
-			$desc               = isset( $_POST['wpst-video_description'] ) ? mb_substr( sanitize_textarea_field( wp_unslash( $_POST['wpst-video_description'] ) ), 0, 5000 ) : '';
-			$video              = isset( $_POST['wpst-video_url'] ) ? esc_url_raw( wp_unslash( $_POST['wpst-video_url'] ) ) : '';
-			$embed              = isset( $_POST['wpst-embed'] ) ? majestic_tube_kses_player_markup( wp_unslash( $_POST['wpst-embed'] ) ) : '';
-			$thumb              = isset( $_POST['wpst-thumb'] ) ? esc_url_raw( wp_unslash( $_POST['wpst-thumb'] ) ) : '';
-			$extra_thumbs       = majestic_tube_parse_submitted_thumbs( isset( $_POST['wpst-thumbs'] ) ? sanitize_textarea_field( wp_unslash( $_POST['wpst-thumbs'] ) ) : '' );
-			$trailer            = isset( $_POST['wpst-trailer'] ) ? esc_url_raw( wp_unslash( $_POST['wpst-trailer'] ) ) : '';
-			$category           = isset( $_POST['wpst-category_selected'] ) ? absint( wp_unslash( $_POST['wpst-category_selected'] ) ) : 0;
-			$tags               = isset( $_POST['wpst-tags'] ) ? mb_substr( sanitize_text_field( wp_unslash( $_POST['wpst-tags'] ) ), 0, 500 ) : '';
-			$actors             = isset( $_POST['wpst-actors'] ) ? mb_substr( sanitize_text_field( wp_unslash( $_POST['wpst-actors'] ) ), 0, 500 ) : '';
+			$title              = ( isset( $_POST['wpst-video_title'] ) && is_string( $_POST['wpst-video_title'] ) ) ? mb_substr( sanitize_text_field( wp_unslash( $_POST['wpst-video_title'] ) ), 0, 200 ) : '';
+			$desc               = ( isset( $_POST['wpst-video_description'] ) && is_string( $_POST['wpst-video_description'] ) ) ? mb_substr( sanitize_textarea_field( wp_unslash( $_POST['wpst-video_description'] ) ), 0, 5000 ) : '';
+			$video              = ( isset( $_POST['wpst-video_url'] ) && is_string( $_POST['wpst-video_url'] ) ) ? esc_url_raw( wp_unslash( $_POST['wpst-video_url'] ) ) : '';
+			$embed              = ( isset( $_POST['wpst-embed'] ) && is_string( $_POST['wpst-embed'] ) ) ? majestic_tube_kses_player_markup( wp_unslash( $_POST['wpst-embed'] ) ) : '';
+			$thumb              = ( isset( $_POST['wpst-thumb'] ) && is_string( $_POST['wpst-thumb'] ) ) ? esc_url_raw( wp_unslash( $_POST['wpst-thumb'] ) ) : '';
+			$extra_thumbs       = majestic_tube_parse_submitted_thumbs( ( isset( $_POST['wpst-thumbs'] ) && is_string( $_POST['wpst-thumbs'] ) ) ? sanitize_textarea_field( wp_unslash( $_POST['wpst-thumbs'] ) ) : '' );
+			$trailer            = ( isset( $_POST['wpst-trailer'] ) && is_string( $_POST['wpst-trailer'] ) ) ? esc_url_raw( wp_unslash( $_POST['wpst-trailer'] ) ) : '';
+			$category           = ( isset( $_POST['wpst-category_selected'] ) && ! is_array( $_POST['wpst-category_selected'] ) ) ? absint( wp_unslash( $_POST['wpst-category_selected'] ) ) : 0;
+			$tags               = ( isset( $_POST['wpst-tags'] ) && is_string( $_POST['wpst-tags'] ) ) ? mb_substr( sanitize_text_field( wp_unslash( $_POST['wpst-tags'] ) ), 0, 500 ) : '';
+			$actors             = ( isset( $_POST['wpst-actors'] ) && is_string( $_POST['wpst-actors'] ) ) ? mb_substr( sanitize_text_field( wp_unslash( $_POST['wpst-actors'] ) ), 0, 500 ) : '';
 
 			if ( $category && ! term_exists( $category, 'category' ) ) {
 				$category = 0;

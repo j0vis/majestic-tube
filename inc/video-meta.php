@@ -394,6 +394,7 @@ function majestic_tube_video_meta_box_callback( $post ) {
  */
 function majestic_tube_save_video_meta( $post_id ) {
 	if ( ! isset( $_POST['majestic_tube_video_meta_nonce'] ) ||
+		! is_string( $_POST['majestic_tube_video_meta_nonce'] ) ||
 		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['majestic_tube_video_meta_nonce'] ) ), 'majestic_tube_video_meta' ) ) {
 		return;
 	}
@@ -421,11 +422,11 @@ function majestic_tube_save_video_meta( $post_id ) {
 	foreach ( majestic_tube_video_meta_fields() as $key => $type ) {
 		$field_name = 'majestic_tube_meta_' . $key;
 
-		if ( ! isset( $_POST[ $field_name ] ) ) {
+		if ( ! isset( $_POST[ $field_name ] ) || is_array( $_POST[ $field_name ] ) ) {
 			continue;
 		}
 
-		$raw = wp_unslash( $_POST[ $field_name ] );
+		$raw = (string) wp_unslash( $_POST[ $field_name ] );
 
 		/*
 		 * An iframe is not a file the player can load, so it does not belong
@@ -457,9 +458,19 @@ function majestic_tube_save_video_meta( $post_id ) {
 				$value = ( 'on' === $raw ) ? 'on' : 'off';
 				break;
 			default:
-				if ( in_array( $key, array( 'embed', 'shortcode' ), true ) ) {
+				if ( 'embed' === $key ) {
+					$value = majestic_tube_kses_player_markup( $raw );
+				} elseif ( 'shortcode' === $key ) {
+					if ( ! current_user_can( 'unfiltered_html' ) ) {
+						continue 2;
+					}
+
 					$value = majestic_tube_kses_player_markup( $raw );
 				} else {
+					if ( ! current_user_can( 'unfiltered_html' ) ) {
+						continue 2;
+					}
+
 					$value = majestic_tube_sanitize_ad_code( $raw );
 				}
 		}

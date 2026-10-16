@@ -655,48 +655,70 @@ function majestic_tube_analytics_like_rate( $post_id ) {
  * @param int $post_id Post ID.
  * @return int New count.
  */
-function majestic_tube_analytics_increment_views( $post_id ) {
+function majestic_tube_analytics_increment_meta( $post_id, $meta_key ) {
 	global $wpdb;
 
 	$post_id = absint( $post_id );
 
-	if ( ! $post_id ) {
+	if ( ! $post_id || ! in_array( $meta_key, majestic_tube_analytics_meta_keys(), true ) ) {
 		return 0;
 	}
 
+	$field = majestic_tube_analytics_field_for_meta( $meta_key );
+
 	if ( isset( $wpdb ) && is_object( $wpdb ) && method_exists( $wpdb, 'query' ) ) {
 		// phpcs:disable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching -- an atomic counter cannot be expressed through the metadata API.
-		$updated = $wpdb->query(
-			$wpdb->prepare(
+		$sql = 'post_views_count' === $meta_key
+			? $wpdb->prepare(
 				"UPDATE {$wpdb->postmeta} SET meta_value = ( CAST( meta_value AS UNSIGNED ) + 1 ) WHERE post_id = %d AND meta_key = 'post_views_count'",
 				$post_id
 			)
-		);
+			: $wpdb->prepare(
+				"UPDATE {$wpdb->postmeta} SET meta_value = ( CAST( meta_value AS UNSIGNED ) + 1 ) WHERE post_id = %d AND meta_key = %s",
+				$post_id,
+				$meta_key
+			);
+		$updated = $wpdb->query( $sql );
 		// phpcs:enable WordPress.DB.DirectDatabaseQuery.DirectQuery, WordPress.DB.DirectDatabaseQuery.NoCaching
 
 		if ( false !== $updated ) {
 			if ( ! $updated ) {
 				// No counter row yet: create it at 1.
-				add_post_meta( $post_id, 'post_views_count', 1, true );
+				add_post_meta( $post_id, $meta_key, 1, true );
 			}
 
 			clean_post_cache( $post_id );
 			majestic_tube_analytics_flush_post( $post_id );
 
-			$views = majestic_tube_analytics_field_from_db( $post_id, 'post_views_count' );
-			majestic_tube_analytics_set( $post_id, array( 'views' => $views ) );
+			$count = majestic_tube_analytics_field_from_db( $post_id, $meta_key );
+			majestic_tube_analytics_set( $post_id, array( $field => $count ) );
 
-			return $views;
+			return $count;
 		}
 	}
 
 	$data  = majestic_tube_analytics_get( $post_id );
-	$views = $data['views'] + 1;
+	$count = $data[ $field ] + 1;
 
-	update_post_meta( $post_id, 'post_views_count', $views );
-	majestic_tube_analytics_set( $post_id, array( 'views' => $views ) );
+	update_post_meta( $post_id, $meta_key, $count );
+	majestic_tube_analytics_set( $post_id, array( $field => $count ) );
 
-	return $views;
+	return $count;
+}
+
+/**
+ * Increment the view counter atomically and refresh the cache.
+ *
+ * The counter is incremented with a single UPDATE so concurrent requests
+ * cannot lose a view, which means the new value must come back from the
+ * database rather than from a cached read. The cache is then repopulated with
+ * exactly what the database reported, so the response and the next read agree.
+ *
+ * @param int $post_id Post ID.
+ * @return int New count.
+ */
+function majestic_tube_analytics_increment_views( $post_id ) {
+	return majestic_tube_analytics_increment_meta( $post_id, 'post_views_count' );
 }
 
 /**

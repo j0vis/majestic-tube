@@ -378,10 +378,18 @@ add_action( 'wp_ajax_nopriv_majestic_tube_refresh_nonces', 'majestic_tube_refres
  * @return bool True when the caller must back off.
  */
 function majestic_tube_auth_throttled( $action ) {
-	$ip  = function_exists( 'majestic_tube_get_client_ip' )
+	$ip = function_exists( 'majestic_tube_get_client_ip' )
 		? majestic_tube_get_client_ip()
-		: ( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
-	$key = 'majestic_tube_auth_' . $action . '_' . md5( $ip );
+		: ( isset( $_SERVER['REMOTE_ADDR'] ) && is_string( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
+
+	if ( '' === $ip ) {
+		return false;
+	}
+
+	$fingerprint = function_exists( 'majestic_tube_ip_fingerprint' )
+		? majestic_tube_ip_fingerprint( $ip )
+		: md5( $ip );
+	$key         = 'majestic_tube_auth_' . $action . '_' . ( '' !== $fingerprint ? $fingerprint : md5( $ip ) );
 
 	return (int) get_transient( $key ) > 10;
 }
@@ -396,11 +404,19 @@ function majestic_tube_auth_throttled( $action ) {
  * @param string $action login|register|reset.
  */
 function majestic_tube_auth_note_failure( $action ) {
-	$ip    = function_exists( 'majestic_tube_get_client_ip' )
+	$ip = function_exists( 'majestic_tube_get_client_ip' )
 		? majestic_tube_get_client_ip()
-		: ( isset( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
-	$key   = 'majestic_tube_auth_' . $action . '_' . md5( $ip );
-	$count = (int) get_transient( $key );
+		: ( isset( $_SERVER['REMOTE_ADDR'] ) && is_string( $_SERVER['REMOTE_ADDR'] ) ? sanitize_text_field( wp_unslash( $_SERVER['REMOTE_ADDR'] ) ) : '' );
+
+	if ( '' === $ip ) {
+		return;
+	}
+
+	$fingerprint = function_exists( 'majestic_tube_ip_fingerprint' )
+		? majestic_tube_ip_fingerprint( $ip )
+		: md5( $ip );
+	$key         = 'majestic_tube_auth_' . $action . '_' . ( '' !== $fingerprint ? $fingerprint : md5( $ip ) );
+	$count       = (int) get_transient( $key );
 
 	set_transient( $key, $count + 1, 15 * MINUTE_IN_SECONDS );
 }
@@ -415,8 +431,8 @@ function majestic_tube_ajax_login() {
 		majestic_tube_ajax_error( __( 'Too many attempts. Please try again later.', 'majestic-tube' ), 429 );
 	}
 
-	$login    = isset( $_POST['wpst_user_login'] ) ? sanitize_user( wp_unslash( $_POST['wpst_user_login'] ) ) : '';
-	$password = isset( $_POST['wpst_user_pass'] ) ? (string) wp_unslash( $_POST['wpst_user_pass'] ) : '';
+	$login    = ( isset( $_POST['wpst_user_login'] ) && is_string( $_POST['wpst_user_login'] ) ) ? sanitize_user( wp_unslash( $_POST['wpst_user_login'] ) ) : '';
+	$password = ( isset( $_POST['wpst_user_pass'] ) && is_string( $_POST['wpst_user_pass'] ) ) ? (string) wp_unslash( $_POST['wpst_user_pass'] ) : '';
 
 	if ( ! $login || ! $password ) {
 		majestic_tube_ajax_error( __( 'Please fill in both username and password.', 'majestic-tube' ) );
@@ -472,16 +488,16 @@ function majestic_tube_ajax_register() {
 
 	if ( majestic_tube_captcha_is_configured() ) {
 		$field = majestic_tube_captcha_token_field();
-		$token = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
+		$token = ( isset( $_POST[ $field ] ) && is_string( $_POST[ $field ] ) ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
 
 		if ( ! majestic_tube_verify_captcha( $token ) ) {
 			majestic_tube_ajax_error( __( 'Captcha verification failed, please try again.', 'majestic-tube' ) );
 		}
 	}
 
-	$login    = isset( $_POST['wpst_user_login'] ) ? sanitize_user( wp_unslash( $_POST['wpst_user_login'] ) ) : '';
-	$email    = isset( $_POST['wpst_user_email'] ) ? sanitize_email( wp_unslash( $_POST['wpst_user_email'] ) ) : '';
-	$password = isset( $_POST['wpst_user_pass'] ) ? (string) wp_unslash( $_POST['wpst_user_pass'] ) : '';
+	$login    = ( isset( $_POST['wpst_user_login'] ) && is_string( $_POST['wpst_user_login'] ) ) ? sanitize_user( wp_unslash( $_POST['wpst_user_login'] ) ) : '';
+	$email    = ( isset( $_POST['wpst_user_email'] ) && is_string( $_POST['wpst_user_email'] ) ) ? sanitize_email( wp_unslash( $_POST['wpst_user_email'] ) ) : '';
+	$password = ( isset( $_POST['wpst_user_pass'] ) && is_string( $_POST['wpst_user_pass'] ) ) ? (string) wp_unslash( $_POST['wpst_user_pass'] ) : '';
 
 	if ( ! $login || ! $email || ! $password ) {
 		majestic_tube_ajax_error( __( 'All fields are required.', 'majestic-tube' ) );
@@ -545,14 +561,14 @@ function majestic_tube_ajax_reset_password() {
 	 */
 	if ( majestic_tube_captcha_is_configured() ) {
 		$field = majestic_tube_captcha_token_field();
-		$token = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
+		$token = ( isset( $_POST[ $field ] ) && is_string( $_POST[ $field ] ) ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
 
 		if ( ! majestic_tube_verify_captcha( $token ) ) {
 			majestic_tube_ajax_error( __( 'Captcha verification failed, please try again.', 'majestic-tube' ) );
 		}
 	}
 
-	$user_or_email = isset( $_POST['wpst_user_or_email'] ) ? sanitize_text_field( wp_unslash( $_POST['wpst_user_or_email'] ) ) : '';
+	$user_or_email = ( isset( $_POST['wpst_user_or_email'] ) && is_string( $_POST['wpst_user_or_email'] ) ) ? sanitize_text_field( wp_unslash( $_POST['wpst_user_or_email'] ) ) : '';
 
 	if ( ! $user_or_email ) {
 		majestic_tube_ajax_error( __( 'Enter a username or email address.', 'majestic-tube' ) );

@@ -127,10 +127,15 @@ function majestic_tube_has_already_reported( $post_id ) {
  * @return int New report count.
  */
 function majestic_tube_add_report( $post_id, $reason = '', $message = '' ) {
-	$count = majestic_tube_get_report_count( $post_id ) + 1;
+	if ( function_exists( 'majestic_tube_analytics_increment_meta' ) && isset( $GLOBALS['wpdb'] ) && is_object( $GLOBALS['wpdb'] ) && method_exists( $GLOBALS['wpdb'], 'query' ) ) {
+		$count = majestic_tube_analytics_increment_meta( $post_id, 'reported_count' );
+	} else {
+		$count = majestic_tube_get_report_count( $post_id ) + 1;
 
-	update_post_meta( $post_id, 'reported_count', $count );
-	majestic_tube_analytics_set( $post_id, array( 'reported' => $count ) );
+		update_post_meta( $post_id, 'reported_count', $count );
+		majestic_tube_analytics_set( $post_id, array( 'reported' => $count ) );
+	}
+
 	majestic_tube_flush_report_cache();
 
 	majestic_tube_record_ip_history( $post_id, 'reported_ips' );
@@ -308,8 +313,8 @@ function majestic_tube_report_video() {
 		__( 'Invalid video.', 'majestic-tube' ),
 		__( 'Invalid video.', 'majestic-tube' )
 	);
-	$reason  = isset( $_POST['reason'] ) ? sanitize_key( wp_unslash( $_POST['reason'] ) ) : '';
-	$message = isset( $_POST['message'] ) ? mb_substr( sanitize_textarea_field( wp_unslash( $_POST['message'] ) ), 0, 2000 ) : '';
+	$reason  = ( isset( $_POST['reason'] ) && is_string( $_POST['reason'] ) ) ? sanitize_key( wp_unslash( $_POST['reason'] ) ) : '';
+	$message = ( isset( $_POST['message'] ) && is_string( $_POST['message'] ) ) ? mb_substr( sanitize_textarea_field( wp_unslash( $_POST['message'] ) ), 0, 2000 ) : '';
 
 	if ( ! majestic_tube_option_is_on( 'enable-video-report' ) ) {
 		wp_send_json_error( array( 'message' => __( 'Reporting is disabled.', 'majestic-tube' ) ), 403 );
@@ -428,13 +433,14 @@ function majestic_tube_reports_menu_bubble() {
  * @return void
  */
 function majestic_tube_handle_clear_reports() {
-	if ( ! isset( $_GET['post'] ) ) {
+	if ( ! isset( $_GET['post'] ) || is_array( $_GET['post'] ) ) {
 		return;
 	}
 
 	$post_id = absint( wp_unslash( $_GET['post'] ) );
 
 	if ( ! $post_id || ! isset( $_GET['_wpnonce'] ) ||
+		! is_string( $_GET['_wpnonce'] ) ||
 		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_GET['_wpnonce'] ) ), 'majestic_tube_clear_reports_' . $post_id ) ) {
 		wp_die(
 			esc_html__( 'Security check failed.', 'majestic-tube' ),

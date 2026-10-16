@@ -151,7 +151,7 @@ function majestic_tube_comment_captcha_check( $approved, $commentdata ) {
 	}
 
 	$field = majestic_tube_captcha_token_field();
-	$token = isset( $_POST[ $field ] ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
+	$token = ( isset( $_POST[ $field ] ) && is_string( $_POST[ $field ] ) ) ? sanitize_text_field( wp_unslash( $_POST[ $field ] ) ) : '';
 
 	if ( majestic_tube_verify_captcha( $token ) ) {
 		return $approved;

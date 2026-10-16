@@ -588,7 +588,13 @@ function majestic_tube_video_seo_build_schema( $video ) {
  * @return void
  */
 function majestic_tube_video_seo_output_json_ld() {
-	$video = majestic_tube_video_seo_get_video( get_queried_object_id() );
+	$post_id = (int) get_queried_object_id();
+
+	if ( ! $post_id || ( function_exists( 'post_password_required' ) && post_password_required( $post_id ) ) ) {
+		return;
+	}
+
+	$video = majestic_tube_video_seo_get_video( $post_id );
 
 	if ( ! $video ) {
 		return;
@@ -629,7 +635,13 @@ function majestic_tube_video_seo_output_json_ld() {
  * @return string
  */
 function majestic_tube_video_seo_head_tags() {
-	$video = majestic_tube_video_seo_get_video( get_queried_object_id() );
+	$post_id = (int) get_queried_object_id();
+
+	if ( ! $post_id || ( function_exists( 'post_password_required' ) && post_password_required( $post_id ) ) ) {
+		return '';
+	}
+
+	$video = majestic_tube_video_seo_get_video( $post_id );
 
 	if ( ! $video ) {
 		return '';
@@ -955,6 +967,7 @@ function majestic_tube_video_seo_sitemap_part_xml( $part, $chunk ) {
 		array(
 			'post_type'           => majestic_tube_video_seo_post_types(),
 			'post_status'         => 'publish',
+			'has_password'        => false,
 			'posts_per_page'      => $chunk,
 			'paged'               => max( 1, $part ),
 			// Ordered by ID rather than date: post dates move during bulk
@@ -982,6 +995,12 @@ function majestic_tube_video_seo_sitemap_part_xml( $part, $chunk ) {
 	$out .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:video="http://www.google.com/schemas/sitemap-video/1.1">' . "\n";
 
 	foreach ( $query->posts as $post_id ) {
+		$post = get_post( $post_id );
+
+		if ( $post && ! empty( $post->post_password ) ) {
+			continue;
+		}
+
 		$video = majestic_tube_video_seo_get_video( $post_id );
 
 		if ( ! $video ) {

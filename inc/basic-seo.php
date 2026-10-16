@@ -192,20 +192,22 @@ function majestic_tube_seo_description_text() {
 	} elseif ( is_singular() ) {
 		$post_id = (int) get_queried_object_id();
 
-		$text = trim( (string) get_post_field( 'post_excerpt', $post_id ) );
+		if ( ! function_exists( 'post_password_required' ) || ! post_password_required( $post_id ) ) {
+			$text = trim( (string) get_post_field( 'post_excerpt', $post_id ) );
 
-		if ( '' === $text ) {
-			$text = (string) get_post_field( 'post_content', $post_id );
-		}
+			if ( '' === $text ) {
+				$text = (string) get_post_field( 'post_content', $post_id );
+			}
 
-		/*
-		 * A video post often carries no body text and no excerpt at all. The
-		 * video module already assembles a sentence from the title and its
-		 * categories for that case, and it is the same sentence the VideoObject
-		 * is given, so the two cannot disagree.
-		 */
-		if ( '' === trim( wp_strip_all_tags( (string) $text ) ) && function_exists( 'majestic_tube_video_seo_description' ) ) {
-			$text = majestic_tube_video_seo_description( $post_id );
+			/*
+			 * A video post often carries no body text and no excerpt at all. The
+			 * video module already assembles a sentence from the title and its
+			 * categories for that case, and it is the same sentence the VideoObject
+			 * is given, so the two cannot disagree.
+			 */
+			if ( '' === trim( wp_strip_all_tags( (string) $text ) ) && function_exists( 'majestic_tube_video_seo_description' ) ) {
+				$text = majestic_tube_video_seo_description( $post_id );
+			}
 		}
 	} elseif ( is_category() || is_tag() || is_tax() ) {
 		$text = term_description();
@@ -349,10 +351,14 @@ function majestic_tube_seo_canonical_url() {
  */
 function majestic_tube_seo_social_image() {
 	if ( is_singular() && function_exists( 'majestic_tube_get_poster_url' ) ) {
-		$url = (string) majestic_tube_get_poster_url( (int) get_queried_object_id() );
+		$post_id = (int) get_queried_object_id();
 
-		if ( '' !== $url ) {
-			return $url;
+		if ( ! function_exists( 'post_password_required' ) || ! post_password_required( $post_id ) ) {
+			$url = (string) majestic_tube_get_poster_url( $post_id );
+
+			if ( '' !== $url ) {
+				return $url;
+			}
 		}
 	}
 

@@ -212,6 +212,7 @@ function majestic_tube_term_image_save( $term_id ) {
 	}
 
 	if ( ! isset( $_POST['majestic_tube_term_image_nonce'] ) ||
+		! is_string( $_POST['majestic_tube_term_image_nonce'] ) ||
 		! wp_verify_nonce( sanitize_text_field( wp_unslash( $_POST['majestic_tube_term_image_nonce'] ) ), 'majestic_tube_term_image' ) ) {
 		return;
 	}
@@ -233,7 +234,7 @@ function majestic_tube_term_image_save( $term_id ) {
 	}
 
 	$meta_key = $taxonomies[ $term->taxonomy ];
-	$image_id = isset( $_POST['majestic_tube_term_image_id'] ) ? absint( wp_unslash( $_POST['majestic_tube_term_image_id'] ) ) : 0;
+	$image_id = ( isset( $_POST['majestic_tube_term_image_id'] ) && ! is_array( $_POST['majestic_tube_term_image_id'] ) ) ? absint( wp_unslash( $_POST['majestic_tube_term_image_id'] ) ) : 0;
 
 	if ( $image_id ) {
 		if ( ! wp_attachment_is_image( $image_id ) ) {

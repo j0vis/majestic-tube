@@ -541,7 +541,7 @@ function majestic_tube_preload_poster() {
 
 	$post_id = (int) get_queried_object_id();
 
-	if ( ! $post_id ) {
+	if ( ! $post_id || ( function_exists( 'post_password_required' ) && post_password_required( $post_id ) ) ) {
 		return;
 	}
 

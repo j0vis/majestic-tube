@@ -40,14 +40,14 @@ function majestic_tube_verify_ajax_nonce() {
  * @return int
  */
 function majestic_tube_require_ajax_post_id( $missing_message, $invalid_message, $status = 400 ) {
-	if ( ! isset( $_POST['post_id'] ) ) {
+	if ( ! isset( $_POST['post_id'] ) || is_array( $_POST['post_id'] ) ) {
 		wp_send_json_error( array( 'message' => $missing_message ), $status );
 	}
 
 	$post_id = absint( wp_unslash( $_POST['post_id'] ) );
 	$post    = $post_id ? get_post( $post_id ) : null;
 
-	if ( ! $post || ! is_post_publicly_viewable( $post ) ) {
+	if ( ! $post || ! is_post_publicly_viewable( $post ) || ( function_exists( 'post_password_required' ) && post_password_required( $post ) ) ) {
 		wp_send_json_error( array( 'message' => $invalid_message ), $status );
 	}
 
@@ -183,13 +183,27 @@ function majestic_tube_post_like() {
 	majestic_tube_record_ip_history( $post_id, 'voted_IP' );
 
 	if ( 'like' === $post_like ) {
-		++$likes;
+		if ( function_exists( 'majestic_tube_analytics_increment_meta' ) && isset( $GLOBALS['wpdb'] ) && is_object( $GLOBALS['wpdb'] ) && method_exists( $GLOBALS['wpdb'], 'query' ) ) {
+			// Seed imported baseline before atomic increment if native rows do not exist yet.
+			add_post_meta( $post_id, 'likes_count', $likes, true );
+			add_post_meta( $post_id, 'dislikes_count', $dislikes, true );
+			$likes = majestic_tube_analytics_increment_meta( $post_id, 'likes_count' );
+		} else {
+			++$likes;
+			update_post_meta( $post_id, 'likes_count', $likes );
+			update_post_meta( $post_id, 'dislikes_count', $dislikes );
+		}
 	} else {
-		++$dislikes;
+		if ( function_exists( 'majestic_tube_analytics_increment_meta' ) && isset( $GLOBALS['wpdb'] ) && is_object( $GLOBALS['wpdb'] ) && method_exists( $GLOBALS['wpdb'], 'query' ) ) {
+			add_post_meta( $post_id, 'likes_count', $likes, true );
+			add_post_meta( $post_id, 'dislikes_count', $dislikes, true );
+			$dislikes = majestic_tube_analytics_increment_meta( $post_id, 'dislikes_count' );
+		} else {
+			++$dislikes;
+			update_post_meta( $post_id, 'likes_count', $likes );
+			update_post_meta( $post_id, 'dislikes_count', $dislikes );
+		}
 	}
-
-	update_post_meta( $post_id, 'likes_count', $likes );
-	update_post_meta( $post_id, 'dislikes_count', $dislikes );
 
 	// The first vote on the site promotes the popular listing from ranking by
 	// views to ranking by likes, so the cached answer to "does this site have
