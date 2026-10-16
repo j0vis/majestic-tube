@@ -27,7 +27,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#video-reports-and-moderation)
 - [Legal pages](#legal-and-policy-pages)
 - [Routine maintenance](#routine-maintenance)
-- [What's new in 2.5.9](#whats-new-in-259)
+- [What's new in 2.5.10](#whats-new-in-2510)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#frequently-asked-questions)
 - [Credits, license & support](#credits-license--support)
@@ -35,9 +35,15 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 **Release**
 
-## What’s New in 2.5.9
+## What’s New in 2.5.10
 
-The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, moves the player overlay's close box out of the corner an ad's own controls sit in, gives the video sidebar a column wide enough for a 300x250 ad on a desktop screen only, replaces the theme's screenshot of the layout with the front page itself, and centers a 300x250 ad in the box that holds it.
+The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, moves the player overlay's close box out of the corner an ad's own controls sit in, gives the video sidebar a column wide enough for a 300x250 ad on a desktop screen only, replaces the theme's screenshot of the layout with the front page itself, centers a 300x250 ad in the box that holds it, and sizes the video sidebar's box to the ad it holds.
+
+### 2.5.10 — the sidebar's box is the size of the ad it holds
+
+**The video sidebar's box is sized to the 300x250 ad it exists for.** The column runs from 338px — a 300px creative plus the box's own 18px padding and 1px border — up to 360px, and the box was stretched to whatever the column measured. On a wide screen that left up to 22px of panel the creative could not fill, 11px at each side of the ad, so the box read as wider than its ad rather than as a slot the ad sits in. The box is the creative plus its own padding and border now and sits in the middle of the column, which puts that surplus on the page background instead of around a smaller ad. At a 1280px window it measures 338px wide with 11px of column on each side of it, and the creative is still served at 300x250. See [Menus, widgets, and content](#menus-widgets-and-content-areas).
+
+**Also in this release:** the box is centered across its column, not both ways. The sidebar keeps the layout's own start alignment and stays at the top of the column beside the player, rather than floating to the middle of a column a long description can make very tall. Below the 960px breakpoint the column becomes a row and the box is full width, so nothing changes on a phone or a tablet, and no setting changes and nothing has to be re-uploaded.
 
 ### 2.5.9 — the 300x250 ad sits in the middle of its box
 
