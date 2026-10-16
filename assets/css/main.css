@@ -4756,6 +4756,19 @@ body.custom-background {
 	background: var(--mt-surface);
 	border: 1px solid var(--mt-border);
 	border-radius: var(--mt-radius);
+	/*
+	 * The box is centered across its column rather than stretched to it. That
+	 * column runs from 338px - the creative plus what the box takes off it - up
+	 * to 360px, so a stretched box carries up to 22px of panel the ad does not
+	 * fill, as 11px at each side of it. Centered, the box is the creative plus
+	 * its own padding and border and the surplus sits outside it instead.
+	 *
+	 * Across, not both ways. The sidebar keeps the layout's own
+	 * `align-items: start` and stays at the top of the column beside the player
+	 * rather than dropping to the middle of a column a long description can make
+	 * very tall.
+	 */
+	justify-self: center;
 }
 
 .video-sidebar .widget-title {
