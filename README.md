@@ -27,7 +27,7 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 - [Reports and moderation](#video-reports-and-moderation)
 - [Legal pages](#legal-and-policy-pages)
 - [Routine maintenance](#routine-maintenance)
-- [What's new in 2.5.10](#whats-new-in-2510)
+- [What's new in 2.6.0](#whats-new-in-260)
 - [Troubleshooting](#troubleshooting)
 - [FAQ](#frequently-asked-questions)
 - [Credits, license & support](#credits-license--support)
@@ -35,191 +35,23 @@ Everything you need to install, configure, populate, and manage a Majestic Tube 
 
 **Release**
 
-## What’s New in 2.5.10
+## What’s New in 2.6.0
 
-The guide last introduced 2.2.0. Everything published since is below, newest first: what changed, and what an update asks of you. In short, the theme draws its own icons, describes its videos to Google Video, hands search appearance to an SEO plugin, prints a row for the sites you link to, keeps advertising off the pages that ask a visitor to accept something, hands a retired browser-tab icon over to WordPress, keeps a locked video locked, stops one unlinkable tag from taking a page down with it, draws a random listing from a cache, ships the template a translation starts from, files a term that begins with a number the same way on every PHP, keeps a related-videos list to the grid the rest of the site is set to, asks a signed-out commenter to prove they are human, shows a section only the settings that apply to it, moves the player overlay's close box out of the corner an ad's own controls sit in, gives the video sidebar a column wide enough for a 300x250 ad on a desktop screen only, replaces the theme's screenshot of the layout with the front page itself, centers a 300x250 ad in the box that holds it, and sizes the video sidebar's box to the ad it holds.
+2.6.0 is the general release, and the first of a fresh line: it replaces every earlier download, so these are the notes for the theme rather than the top of a history. Install this one and nothing before it is needed.
 
-### 2.5.10 — the sidebar's box is the size of the ad it holds
+### 2.6.0 — counters that cannot lose a vote, and videos that stay locked
 
-**The video sidebar's box is sized to the 300x250 ad it exists for.** The column runs from 338px — a 300px creative plus the box's own 18px padding and 1px border — up to 360px, and the box was stretched to whatever the column measured. On a wide screen that left up to 22px of panel the creative could not fill, 11px at each side of the ad, so the box read as wider than its ad rather than as a slot the ad sits in. The box is the creative plus its own padding and border now and sits in the middle of the column, which puts that surplus on the page background instead of around a smaller ad. At a 1280px window it measures 338px wide with 11px of column on each side of it, and the creative is still served at 300x250. See [Menus, widgets, and content](#menus-widgets-and-content-areas).
+**A fresh start.** The version line restarts here. Replace the theme folder and your content, settings, menus and media library stay exactly as they are; nothing is reset, migrated or re-uploaded.
 
-**Also in this release:** the box is centered across its column, not both ways. The sidebar keeps the layout's own start alignment and stays at the top of the column beside the player, rather than floating to the middle of a column a long description can make very tall. Below the 960px breakpoint the column becomes a row and the box is full width, so nothing changes on a phone or a tablet, and no setting changes and nothing has to be re-uploaded.
+**The profile editor no longer answers after the page has begun printing.** Saving a profile from the front end ran its POST handler behind `get_header()`, so the redirect and the auth cookie were set when PHP already had output in flight. The handler runs before the header now, and a password change reissues the auth cookie, so a member who changes their password stays signed in instead of being sent back to the login form. The website field can be cleared once it holds a value, and a display name just typed on the form is accepted by the WordPress profile screen too.
 
-### 2.5.9 — the 300x250 ad sits in the middle of its box
+**A password-protected video is protected on every surface.** The theme's own `VideoObject` markup, the description and social tags `Basic SEO` prints, the poster preload, and the `post-views` / `post-like` / `get-post-data` endpoints all stand down for a locked post, so none of them answers with the file, the description, or the numbers behind the password. See [Player and media behavior](#player-and-media-behavior).
 
-**A fixed-size creative is centered in the box that holds it.** Both of these boxes exist for a 300x250 ad, the one in the video sidebar and the one in the player overlay, and neither of them is always exactly 300px wide. The sidebar column runs from 338px to 360px and is 360px on a wide screen, so a 300px creative sat at the start edge of the box with 19px of padding and border on one side of it and 41px on the other — which reads as an ad that missed its slot rather than as a box that is wider than its ad. The creative is centered now, in the sidebar and in the overlay alike. Centering is the fix rather than pinning the column to its own minimum, because the air a wide screen gives that column is deliberate. The same rule takes the text baseline out from under the creative: as an inline image it added the font's descender below itself, about 7px of height that no ad asked for.
+**Counters are incremented atomically.** Likes, dislikes and reports now travel through a single SQL `UPDATE` in the counter layer instead of a read-then-write round trip, so two votes arriving together no longer overwrite each other and one of them is not lost. See [Reports and moderation](#video-reports-and-moderation).
 
-**The video sidebar's column floor counts the whole box.** It was 336px — 300px of clear width plus the box's own 18px padding on each side — and it left out the box's 1px border, so a 300x250 creative was two pixels short of the size it was sold at. The floor is 338px, which is 300px plus the 38px the box takes off it, and it still holds from the widest screen down to the 960px breakpoint, where the column becomes a row. See [Menus, widgets, and content](#menus-widgets-and-content-areas).
+**Request parameters are trimmed before they are trusted.** Array-typed input is refused on the vote, report, login, registration, password-reset, submission, rotation-thumbnail, term-image, report-clear, query-filter, comment-captcha, analytics and video-meta paths, and the membership throttle is keyed with the same IP fingerprint the rest of the theme uses.
 
-**Also in this release:** the centering is a column rather than a row, because these two slots take administrator markup as well as an ad tag and a row would set two paragraphs side by side instead of one under the other. No setting changes and nothing has to be re-uploaded.
-
-### 2.5.8 — the screenshot shows the front page the theme renders
-
-**The theme's screenshot is the front page.** It is the first thing a site owner sees in Appearance → Themes and the image a theme shop shows before anyone installs anything, and it was a diagram of the layout: gray bars where the words go, a play button drawn on every card, and the badges reduced to unlabeled marks. It is the theme's own front page now, drawn by the theme's own stylesheet and typeface — the header row with its logo, search box, menu and color-scheme toggle, the sort tabs with the one in use painted in the accent, the tag strip with its counts, three rows of five cards each carrying its picture, HD mark, length, view count and rating, and the paginator under the grid.
-
-**The pictures inside the cards are gradients, on purpose.** A theme is distributed to other people, so its screenshot may not carry anyone's footage. Each card gets a picture-shaped gradient that shows the frame, all four badges and where each one sits, which is what the card is about. The file is still a PNG at 1200x900 — the size a theme screenshot is read at.
-
-**Also in this release:** nothing on your site changes. No template, stylesheet, setting or hook is touched; this is the image the theme is listed with.
-
-### 2.5.7 — the video sidebar is measured in ad slots
-
-**The video sidebar is wide enough for a 300x250 ad.** The column was capped at 280px, so a 300x250 creative was squeezed into the space that was left — 242px in a 280px column, which clips the creative and reports a frame size the ad network was never told about. The column now leaves 300px of clear width beside the box's own padding, which is where its 336px minimum comes from, so a 300x250 ad is served at the size it was sold at. See [Menus, widgets, and content](#menus-widgets-and-content-areas).
-
-**The sidebar is a desktop area.** On a mobile device it is not printed at all — no box, no widget rendered, and no ad requested. Hiding it with CSS would have been the smaller change and the wrong one: a hidden iframe still loads and still counts an impression for an ad nobody can see. The mobile slots are the header, the strip below the player and the footer, and they are unchanged.
-
-**Also in this release:** the widget area and the setting that switches it on both say that the sidebar is a desktop one now, so the panel does not promise a phone what it will not deliver.
-
-### 2.5.6 — the player overlay's close box moves out of the ad's way
-
-**The close box on the player overlay is in the top right corner.** It sat in the top left — the start edge of the slot — and that is the corner an ad network draws its own controls in: an Exoclick creative puts its info link there, and the close button covered it, so the visitor could not open the ad's own information and the control read as part of the creative. The button is pinned to the right edge now, and its plate follows it, so the hairline and the rounded corner still face into the creative instead of hanging off the player's clipped corner. The slot keeps its full 300x250 and the button still sits over the creative rather than taking a row from it, so nothing about the overlay's size or position changes. On a right-to-left site the button stays in that same corner, because the creative is a third-party frame whose own controls sit at its left however your page reads. See [Menus, widgets, and content](#menus-widgets-and-content-areas).
-
-### 2.5.5 — the settings show a site what it has, and a comment is checked
-
-**The related-videos list under a video follows your grid settings.** The list kept its own column count — the one written for tablets — from 783px up, whatever **Videos per row** said, so a site set to five across showed five cards on the homepage and three much larger ones under every video. It follows the same rules as the homepage grid now, so it is five across on a five-across site and the cards are the size the rest of the site uses. See [Customizer settings](#customizer-settings).
-
-**The comment form is guarded.** With Turnstile switched on, a visitor who is not signed in is asked to prove they are human before their comment is accepted, and a comment posted without a token is refused. The widget appears inside the form, above the button, where the room for it was already reserved. A signed-in commenter is never challenged — the account is the check — and neither is an import, a plugin, or a trackback, because none of them posts through that form. See [Members and video submissions](#members-and-video-submissions).
-
-**A setting that does nothing is not shown.** Thirty-nine controls across the panel now wait for the switch they belong to: the watermark's image, width, color treatment and corner appear with the watermark, the member links with member accounts, the eleven submission controls with video submission, the two Turnstile keys with the spam check, the three share services with sharing, and the fields only the text logo uses stand down while an image logo is in charge. Turning a feature off shortens the section instead of leaving inert controls behind, and every one of them is exactly where it was the moment you turn its switch back on. A value you had already saved is kept and used; this changes what the panel shows, not what your site does.
-
-**Every section and every control says what it is for.** Each section in the panel opens with a line describing what its settings do and which other section the adjacent ones live under, so a switch found in the wrong place is easier to place; sections that had no description have one, and the control that describes the accent color — and the ones beside it — now reaches the screen at all, because a color control was built from two of the four values it was handed and quietly dropped the rest.
-
-**Also fixed:**
-
-- The **in-feed ad frequency** field accepts a number between 3 and 100 and says what it counts. A value below 3 still behaves like 3; the field no longer invites a number that cannot mean anything.
-- The **watermark's maximum width** is a number field like the logo's, so it takes a value from a keyboard and a spinner rather than any text at all. At `0`, or left empty, the theme's own 200px is used — which is what the field does today, and what the panel now says.
-
-### 2.5.4 — the alphabet bar files a digit the same way on every PHP
-
-**A term whose name starts with a number no longer lands in a different place depending on your server.** The Actors and Categories directories bucket every term under its first character, and `7 Up` files under `7` — a key PHP keeps as the number 7 rather than as text. Sorting that map used PHP's own key comparison, and its answer changed between versions: the digit bucket came after A-Z on PHP 7.4 through 8.1 and before it on 8.2 and later, so the same directory could be ordered two ways on two servers. The keys are compared as strings now — the order the bar's own markup is written in — so the directory reads the same on every PHP the theme supports, and on the one your host moves you to. See [Actors, categories and tags](#actors-categories-and-tags).
-
-**Each responsive step states its own grid.** The tablet, phone and small-phone steps set the column count and the gutter but left the grid itself to the rule at the top of the stylesheet, so what a step produced depended on which block happened to come last. Each of them declares the grid, the columns and the gutter together now. Nothing on the page changes; what changes is that a later edit cannot take the layout away from the step it was written for.
-
-### 2.5.3 — a random listing stops re-sorting the catalog
-
-**A random listing is drawn from a cache instead of sorting your catalog.** The random listing, the [Video list widget](#video-list-widget) set to Random, and the picture a category or actor card borrows from a video all asked MySQL for `ORDER BY RAND()`, which reads every matching row and sorts it on every request — the most expensive query the theme made, on the pages that repeat it most. Each of them now draws from a pool of video IDs kept for the archive it belongs to, shared by all three and rebuilt when you publish, edit or delete a video.
-
-**An upload is resized once.** Every thumbnail size was registered twice — the original theme’s `wpst_thumb_*` names sat beside the theme’s own at identical dimensions — so WordPress wrote seven metadata entries for five files and encoded three of them a second time. The older names are answered from the attachment’s own metadata now, which is where WordPress looks a size up and which can only point at a file that was really generated, so everything that asks for one by name still finds it: the **Main thumbnail quality** setting, WP-Script plugins, and a child theme. Nothing in your media library has to be re-uploaded or regenerated. See [Thumbnail rotation and trailers](#thumbnail-rotation-and-trailers).
-
-**The theme ships a translation template.** `languages/majestic-tube.pot` lists every string the theme asks to have translated, in the format a translation tool reads, with the contexts and plural forms the harder strings carry. Copy it to your locale, translate the copy, compile it and place the `.mo` beside it — three steps, described in that folder’s own notes. It is generated from the theme’s own source rather than edited by hand, so it keeps describing the version you have installed.
-
-**Also fixed:**
-
-- A **part of the video sitemap is built once and kept** until a video changes. It ran a `COUNT(*)` whose answer it never read, and rendered the whole chunk again on every request, so a crawl of a large catalog repeated that work page after page. A site with a persistent object cache answers a crawl from memory now; a site without one sees no change at all.
-- A **share row with no address to share is not printed.** Each network’s link carries the video’s own permalink, so a video whose permalink cannot be built — trashed, still a draft, or a post type that never publishes — produced a row of buttons that shared whichever page the reader happened to be on.
-- A **related-videos list no longer breaks on a taxonomy that answers with an error.** The term is left out of the query and the rest of the list prints.
-- The **term image picker’s strings** travel as one inline value rather than a localized script object, which drops a script WordPress loaded on every admin page for the sake of one screen.
-
-**One thing worth knowing about random listings:** a random listing is a sample, not a shuffle of the catalog. The pool holds 500 IDs by default and is taken at a random offset into the archive, so a page is drawn from part of the catalog rather than from all of it, and the same video can appear on two pages running. The `majestic_tube_random_pool_size` filter raises it for a site that wants a wider sample, at the cost of a larger query whenever the pool is rebuilt.
-
-### 2.5.2 — a locked video stays locked, and one broken term no longer takes the page
-
-This release is about the content a video site did not write itself: a visitor's submission, an imported feed, a title copied from somewhere else. Several of the fixes below only show up on a page nobody looks at twice, which is what made them worth finding.
-
-- A **password-protected video** was protected in name only. The template printed the player — and, for a self-hosted file, the direct file addresses — above the content, so a locked video handed its file to anyone who followed the link. It now shows WordPress's own password form and reads none of the player data first. See [Player and media behavior](#player-and-media-behavior).
-- A video's **title can no longer break the page's structured data**. The VideoObject block is JSON inside a `<script>` element, and a title carrying `</script>` ended that element, so everything after it was read as page markup by every visitor. The block is encoded so no title, description or tag can end it, and an embedded player's address is checked to be http or https before it is used. See [Video structured data](#video-structured-data).
-- A **category, tag or actor whose link cannot be built no longer stops the page.** The list under a video asks WordPress for each term's link, and that answer can be an error rather than an address — which was printed as if it were the address, ending the whole request for every reader of that video. A term with no link is left out now, and the rest of the list prints.
-- The **counters only answer for videos a visitor can see.** The endpoints behind views, likes, dislikes and reports took any post ID they were handed, including a draft, a pending submission and a private video. See [Video reports and moderation](#video-reports-and-moderation).
-- The **password reset form is guarded** the way the sign-up form is: with the Turnstile keys filled in, a reset request is checked before it is answered. The reply no longer says whether an account exists, and a lookup that finds nothing counts toward the throttle.
-- The **rotation thumbnails box works.** Its **Add** and **Remove** buttons did nothing at all — the box handed out the endpoint, the nonce and the post ID, and no script read them. Both buttons do what they say now, and the list is written when a button is pressed rather than on publish. See [Thumbnail rotation and trailers](#thumbnail-rotation-and-trailers).
-- The **date under a video title is a date again**, instead of the markup around it printed as text.
-- The **term image picker** writes its preview safely — an image address with a quote in it could close the attribute it was written into — and copes with an image that has no thumbnail size. See [Actors, categories and tags](#actors-categories-and-tags).
-- An **RSS item's featured image no longer errors** when the item is built without a post in the loop, and a saved **color scheme survives the update** if it was chosen before the site's default was recorded beside it.
-
-### 2.5.1 — the browser-tab icon is handed over
-
-If you had set the theme’s own **Browser tab icon** before it was retired, it is moved into WordPress’s **Site Icon** (`Appearance → Customize → Site Identity → Site Icon`) on the first admin page load after the update, because that is where the browser-tab icon lives now. An image the media library already holds is reused by reference; one hosted somewhere else is fetched once through WordPress’s own importer and kept in the library. Nothing is deleted — the stored setting stays in the database, so an older release that downgrades still reads it.
-
-- A **Site Icon** you set yourself is never overwritten. The icon you chose is not the theme’s to replace, so the retired setting stands down rather than competing with it.
-- When the address cannot be moved — it no longer answers, or it points at a file the media library refuses to keep as an image — the dashboard names the address and links the screen where the icon belongs, instead of the tab icon quietly disappearing. The warning is dismissible, and comes back only if the address changes.
-- The move runs on an admin request from a user who could set a Site Icon by hand, and never while a visitor is loading a page: it writes an option and it may fetch a file, and neither belongs on the front end.
-
-### 2.5.0 — a site that describes itself, and no advertising where a question is asked
-
-**The theme describes the site again, unless you run an SEO plugin.** `SEO & Analytics → Basic SEO` is on by default and prints a meta description, a canonical on archive pages — including page 2, which canonicalises to itself rather than to page 1 — and the Open Graph and Twitter cards a shared link needs, with the image taken from the video’s own picture, then a term image, then your logo, then the Site Icon. It switches itself off completely the moment Yoast, Rank Math, All in One SEO, SEOPress, The SEO Framework or Slim SEO is active, so a site that already runs one keeps exactly the search appearance it had. The **Adult content rating tag** and the **RTA label** are off by default and keep working with a plugin, because no SEO plugin emits them. See [Search appearance](#search-appearance).
-
-**A page that asks a visitor to accept something carries no advertising.** A legal page — the 2257 document, the DMCA page, the privacy policy, and any page whose slug or title reads as one of those — prints none of the **Code and ads** areas, no footer widget columns, and no advertising from any placement, the popunder included. The submission page is treated the same way while the form is on it, and the login and registration panel and the cookie notice never contain a widget area.
-
-**Forms, consent, and submissions.** The login, registration and submission forms carry a required **terms checkbox**, on by default, naming and linking the documents your site actually publishes; the handler asks again on the server, so a form submitted without it is refused. A **cookie notice** along the bottom of the page is off by default, uses your own wording, keeps its dismissal in the visitor’s browser and records nothing on your server. The submission form gained **extra thumbnails** — a list of URLs, one per line, rotated as the pointer rests on a card — and an optional **preview video**, with switches that make either one a required field.
-
-**Color, icons, and the first image.** The **Accent color** now derives the tones one value cannot serve: the fill keeps your color and picks white or the theme’s near-black ink for the text on it by measuring contrast, links, text and icons are deepened for the light skin until they clear 5:1 and brightened for the dark skin until they clear 7:1, and the player takes a bright version because its chrome stays black over video. Nothing derived is stored. A child theme can add or replace a shape — see [Icons](#icons). The first card image of a listing, or the player poster on a video page, is loaded eagerly, marked high priority and preloaded from the head, because that image is the one the browser scores as the largest contentful paint; every later image stays lazy. Core’s emoji script and stylesheet no longer load on the front end, and the footer legal row is centered on the same axis as the copyright line and wraps instead of scrolling sideways.
-
-**Fixed.** The moderation screen no longer takes the page down with it when its ten-minute cache names a video that has since been deleted or trashed. A counter row written with no value — an interrupted import, a hand-edited row — no longer raises `Undefined array key 0` on PHP 8. The like endpoint stops asking for a missing `post_id` twice, and two exception messages escaped an integer post id instead of the message around it.
-
-### 2.4.2 — icons drawn by the theme
-
-The theme now ships its own icon set of 43 shapes in its stylesheet: no icon font, no plugin, no extra request. Each one is a masked SVG that paints in whatever color surrounds it, so a single shape works in the light skin, the dark skin, on accent-colored buttons and on muted metadata. They appear on the search button, the mobile menu toggle, the sort tabs, the video card and video page metadata, the like, dislike, share and report buttons, the category, actor and tag labels, the tag list, pagination and the back-to-top button.
-
-A thumbnail badge is no longer a bare number: an eye marks the view count, a clock the length and a star the rating, in the sidebar widget and the category directories too, and a card with no picture shows a frame above its caption rather than an empty rectangle that looked like a thumbnail still loading. The player controls carry the same shapes — sliders on the quality selector, a dial on the speed control, the expand mark on theater mode, and a play and a close on the resume pill — and the quality and speed menus tick the current choice with the tick reserved on every row, so the options stay in a column instead of the one you just picked shifting sideways.
-
-Icons are on by default. `Customize → Site Features → Header, Footer & Search → Show icons throughout the site` turns them off everywhere at once and returns every surface to words alone, which is the right choice for a site that has been styling the old `fa fa-*` classes through a child theme. Nothing is written to the database and no setting moves, an icon name the theme does not ship returns nothing rather than an empty box, and the full set is documented under [Icons](#icons).
-
-The release also repaired a defect worth naming: the icon generator had silently removed 260 lines from the stylesheet, including the skin toggle and the base typography and header rules. The file still parsed and the braces still balanced, so nothing reported it.
-
-### 2.4.1 — a row for the sites you link to
-
-A new **Friends & Ad Links** menu location prints as its own row directly under the header, set apart from the widget area so it never reads as site navigation. Every link in it is force-tagged `rel="sponsored nofollow noopener noreferrer"`, plus `target="_blank"` if you want it, so exchanged or paid links cannot leak follow equity — and only that menu is affected, because navigation menus, post links and footer links keep the attributes you set on them. Five row styles are built in (plain, stars, rockets, glam and neon), and `Customize → Advertising → Friends & Ad Links` holds the switches. The row prints nothing until you assign a menu to it, so an existing site looks exactly the same until it uses it.
-
-### 2.4.0 — videos described to Google Video
-
-Every video page now carries a schema.org `VideoObject` block built from the runtime, the file or embed the player is actually using, and the actors taxonomy, plus the `og:video` tags and `twitter:player` where an embeddable player exists. A video sitemap is served at `/video-sitemap.xml`, advertised in `robots.txt` and split across numbered files so a large catalog stays inside the per-file limits; submit it in Search Console as its own sitemap, because the XML sitemap index does not cover it. `Videos → All Videos` gained a **Video SEO** column that shows `OK`, `OK (embed)`, or the fields a video is missing, and a video missing a duration, a thumbnail or a source is skipped rather than submitted half-finished. The switches are described under [Video Structured Data](#video-structured-data); both default to on, and neither touches the title, description or canonical your SEO plugin prints.
-
-One limit is worth knowing before you count on it: a video played from another domain’s player can still rank as a web page, but Google cannot count it as part of your site’s own video library, so it will not appear in Google Video results. Serving the file yourself, or embedding a player from your own domain, is the only way to qualify. `wp majestic-tube audit` reports how much of a catalog is affected.
-
-### 2.3.0 — search appearance is your SEO plugin’s job
-
-This release took the theme out of search appearance, on the reasoning that two sources of truth for one page title is worse than one. It removed the dashboard **SEO** workspace and its five tabs, the theme-printed titles, meta descriptions, robots directives and canonicals, the Open Graph and Twitter cards with the Facebook app ID and the player card, the JSON-LD `VideoObject` and the `BreadcrumbList` graph, the per-term SEO title and description fields with their list column and bulk editor, and the programmatic collections with their `/browse/` crawl spine and the theme’s XML sitemap provider.
-
-`Customize → SEO & Analytics` still holds **Homepage SEO** (heading position, visible introduction), **Archive Page SEO** (category and actor card text, description placement) and **Custom Code** (analytics code, extra scripts, mobile scripts). Share links and the visible breadcrumb trail are unchanged.
-
-**Updating from the 2.2 line**, install an SEO plugin for titles, descriptions, social cards and structured data. Nothing those screens stored is read any more, although it stays in the database. The theme came back to two of those jobs on its own terms, because no general-purpose plugin can do them: [Video structured data](#video-structured-data) in 2.4.0, and the theme’s own description of the site in 2.5.0.
-
-### 2.2.1 – 2.2.26 — the 2.2 patch line
-
-Twenty-six patch releases followed 2.2.0. Grouped by what they touch:
-
-- **The alphabet bar and the term directories.** Every letter A–Z and 0–9 is printed on every directory whether or not anything sits behind it — a letter with terms is a link, a letter without is dimmed and inert, digits sort last — because a directory that lists its terms with no visible sort control is the worst outcome, and an empty lookup produced exactly that. Choosing a letter lists every term under it on one page, the letter map is read straight from the term tables so a `hide_empty` combination cannot defeat it, and the tags page lists every tag rather than twenty of them.
-- **Term cards and archives.** Category and actor cards take a phrase from the Customizer with `{description}`, `{count}` and `{videos}` tokens, the term description fills a band that used to leave the card looking unfinished, and the video count no longer borrows the thumbnail-badge class. Category, tag and author archives render the same grid as every other listing, which they did not before.
-- **Widget areas and labels.** Every content area now says “code and ads”, the one area that takes any widget says “Footer widgets”, and three Customizer labels that described something other than the control they belonged to were corrected. Labels only — no saved value moved.
-- **The player.** A 300x250 overlay sits centered over the player with a close button that can be seen on a black video, the homepage description can sit above or below the title, and a site-wide choice decides which of a post’s two video fields the player prefers, with the social and schema tags following the same choice. The membership menu links honor their show/hide switches, and `categories-per-row` emits its own column count instead of inheriting the video listing’s.
-- **Members and submissions.** The profile editor answers honestly when WordPress refuses a password or email change, first name, last name and bio can be cleared once they hold a value, the eight-character password floor is enforced on the server rather than in a `minlength` attribute, and password reset goes through WordPress’s own flow again so a membership plugin’s filters and mail customizations apply. A full-page cache no longer freezes the front-end nonces: a stale one answers 403, and the script fetches a live nonce and replays the request once. Subscriber submissions keep their tags and actors, and unsubscribing removes the navigation menu items it used to leave behind.
-- **Privacy.** Vote, view and report de-duplication no longer keeps raw IP addresses in post meta. They are keyed fingerprints that expire, a daily sweep clears rows nothing writes to again, and the 24-hour windows are unchanged.
-- **The legal pages.** The 2257 starter page no longer asserts that its operator holds the primary producer’s record-keeping duty, which most installs of this theme are not in a position to hold: it describes the secondary producer role and says outright that it does not decide which obligations apply. The site name is expanded from `Settings → General` where it is shown rather than stored as a bracketed field, so it reaches pages older installs already have. A deleted legal page can be recreated from the welcome screen, duplicate copies are shown there so the extra one can be trashed, and all five are linked on the main menu.
-- **The listings.** Popular ranks by likes once the site has a vote and by views until then, instead of sorting on a rate value only a vote writes. The most-used tags print as a strip under the sort bar, scrolling on its own so it works without JavaScript, with the arrow buttons revealed only once the tags are measured as overflowing.
-- **Search appearance, briefly the theme’s own.** 2.2.20 to 2.2.26 built a search-appearance workspace of the theme’s own: facet pages generated from the catalog behind an index gate, per-term SEO titles and descriptions, switchable generated pages with editable wording, and a `/browse/` crawl spine with their sitemaps. 2.3.0 removed all of it, so what those releases added is history rather than a feature: on 2.5.1 that job belongs to your SEO plugin, and none of those settings is read.
-- **Fixed along the way.** The sitemap provider implemented method names WordPress does not call, so every sitemap request died with a fatal error; the tag bar’s sort order was an `orderby` array `get_terms()` cannot take, which was a `TypeError` on every page that printed the bar; a cleared page-template assignment left **Submit a Video** rendering a title with no form; the header search bar sat hard against the logo with the space it was meant to fill left empty; the logo badge was dropped, a logo icon that duplicated the plain play triangle was retired in favor of Film, and Film and Video were given shapes of their own instead of sharing one character; and the stats refresh stopped answering 0% for an imported post whose rating a vote had not written.
-
-### 2.2.0 — the release this guide opened with
-
-It regrouped the Customizer, replaced the spam check with Cloudflare Turnstile, and made imported videos display correctly.
-
-#### A Customizer you can navigate
-
-The settings used to sit in nine flat sections with a catch-all bucket that mixed homepage settings with video-page settings. They are now grouped into panels, and every setting is filed under the page it actually affects. The two panels you will visit most are kept apart: **Homepage & Listings** and **Video Page**. The full map is in [Customizer Settings](#customizer-settings).
-
-Nothing is lost in the move, and no setting is reset: the values stay exactly where they were stored. Only the labels and the layout around them changed.
-
-#### Cloudflare Turnstile replaces reCAPTCHA
-
-Spam protection on sign-up and video submission is now handled by Cloudflare Turnstile, and reCAPTCHA has been removed. Turnstile is free at any traffic level and asks less of a visitor. Setup takes a few minutes and is covered in [Members and Video Submissions](#members-and-video-submissions).
-
-#### Imported videos display correctly
-
-Two problems showed up on videos brought in by an importer, and both are fixed:
-
-- **Ratings appeared as 0%.** Imported posts store their rating as a pair of values, which the theme was not reading, so every imported video showed no rating. The theme now reads them, and the first visitor vote builds on the imported score instead of replacing it with 100%.
-- **Hover previews showed one broken image.** Extra preview images are stored as a single comma-separated value, while the theme read them as one URL per stored value. A comma is a legal URL character, so the whole string survived as one unusable address. Both storage shapes are now handled, including removing a single preview from the editor.
-
-The **18 U.S.C. § 2257** page is also repaired automatically if it goes missing from the footer menu, so a deleted or renamed legal link comes back on its own. The page is named the way the statute is written, and an update renames the page and its footer link in place — same page, same address, same content. Later releases go further and let you recreate any deleted legal page from the welcome screen.
-
-> **Upgrading from an earlier release**
->
-> Replace the theme folder. Your settings carry over, and nothing is deleted: a value written by an earlier release stays in the database even where nothing reads it any more.
->
-> - **Search appearance** has been an SEO plugin’s job since 2.3.0. Install one, or — if you run none — leave **Basic SEO** on, which is its default. Per-term SEO titles and descriptions, the generated collections and the `/browse/` pages from the 2.2.x line are not read any more.
-> - **A browser-tab icon you set in the theme** is moved into WordPress’s **Site Icon** for you on the first admin page load after the update. If the address cannot be fetched, the dashboard names it so you can upload that file once.
-> - **If you are updating from 2.1.7 or earlier**, remember the spam check is now Cloudflare Turnstile: create a widget and paste its two keys into `Appearance → Customize → Site Features → Accounts & Spam Protection`. The old reCAPTCHA keys are no longer used.
-
-**Before you begin**
+**Also fixed:** saving the shortcode and the per-video ad fields needs `unfiltered_html`, the rotation-thumbnail HTTPS upgrade matches a leading `http://` rather than any occurrence, the legal-page title lookup is bounded against a sane ceiling instead of scanning the whole post table, and the expired-notice counter no longer trips over a value that arrives as an array.
 
 ## Requirements
 
